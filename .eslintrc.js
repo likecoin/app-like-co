@@ -5,12 +5,12 @@ module.exports = {
     node: true
   },
   extends: [
+    'airbnb-base',
     '@nuxtjs/eslint-config-typescript',
     'plugin:nuxt/recommended',
     'prettier'
   ],
-  plugins: [
-  ],
-  // add your custom rules here
-  rules: {}
+  rules: {
+    "import/extensions": "off",
+  },
 }
