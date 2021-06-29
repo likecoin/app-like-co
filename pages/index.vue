@@ -1,9 +1,19 @@
 <template>
-  <Tutorial/>
+  <div>
+    <input v-model=searchISCNText >
+    <nuxt-link :to="{ name: 'new' }">Register iscn</nuxt-link>
+  </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Vue from 'vue';
 
-export default Vue.extend({})
+export default Vue.extend({
+  data() {
+    return {
+      searchISCNText: '',
+    };
+  },
+})
 </script>
