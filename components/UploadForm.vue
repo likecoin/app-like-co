@@ -19,22 +19,25 @@
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
+import { digestFileSHA256 } from '~/utils/misc';
 
 export default Vue.extend({
   name: 'UploadForm',
   data(): {
       ipfsURL: string;
       ipfsHash: string;
-      fileData: string | ArrayBuffer | null,
+      fileData: string,
+      fileSHA256: string;
     } {
     return {
       ipfsURL: '',
       ipfsHash: '',
-      fileData: null,
+      fileData: '',
+      fileSHA256: '',
     };
   },
   methods: {
-    onFileUpload(event: Event) {
+    async onFileUpload(event: Event) {
       if (!event.target) return;
       const { files } = event.target as HTMLInputElement;
       if (files && files[0]) {
@@ -45,6 +48,7 @@ export default Vue.extend({
 
         };
         reader.readAsDataURL(files[0]);
+        this.fileSHA256 = await digestFileSHA256(files[0]);
       }
     },
     onEnterURL() {
@@ -62,6 +66,7 @@ export default Vue.extend({
       this.$emit('submit', {
         ipfsHash: this.ipfsHash,
         fileData: this.fileData,
+        fileSHA256: this.fileSHA256,
       });
     },
   }
