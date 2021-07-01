@@ -1,10 +1,10 @@
-import {  Registry } from "@cosmjs/proto-signing";
+import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import {
   defaultRegistryTypes,
   assertIsBroadcastTxSuccess,
   SigningStargateClient,
 } from "@cosmjs/stargate";
-import { DEFAULT_GAS_PRICE, DEFAULT_GAS_PRICE_NUMBER } from "~/constant";
+import { DEFAULT_GAS_PRICE_NUMBER } from "~/constant";
 import { MsgCreateIscnRecord } from "~/constant/codec/iscn/tx";
 import config from "~/constant/network";
 
@@ -12,6 +12,14 @@ const registry = new Registry([
   ...defaultRegistryTypes,
   ["/likechain.iscn.MsgCreateIscnRecord", MsgCreateIscnRecord], // Replace with your own type URL and Msg class
 ]);
+
+function estimateISCNTxGas() {
+  const DEFAULT_GAS = 1000000; // TODO: estimate according to size
+  return {
+    amount: [{ amount: (DEFAULT_GAS_PRICE_NUMBER * DEFAULT_GAS).toFixed(), denom: 'nanolike' }],
+    gas: DEFAULT_GAS.toFixed(),
+  };
+}
 
 function formatISCNPayload(payload, version = 1) {
   const {
@@ -48,29 +56,28 @@ function formatISCNPayload(payload, version = 1) {
       }
     }
   }
-  const keywords = tagsString;
-  const usageInfo = license;
+  const contentMetadata = {
+    "@context": "http://schema.org/",
+    "@type": "CreativeWorks",
+    title,
+    description,
+    version,
+    url,
+    keywords: tagsString,
+    usageInfo: license,
+  };
   return {
     recordNotes: '',
     contentFingerprints,
     stakeholders,
-    contentMetadata: {
-      "@context": "http://schema.org/",
-      "@type": "CreativeWorks",
-      title,
-      description,
-      version,
-      url,
-      keywords,
-      usageInfo
-    }
-  }
+    contentMetadata: Buffer.from(JSON.stringify(contentMetadata), 'utf8'),
+  };
 }
 
-export async function signISCNTx(tx, signer, address) {
+export async function signISCNTx(tx, signer: OfflineSigner, address: string) {
   const record = formatISCNPayload(tx);
   const client = await SigningStargateClient.connectWithSigner(
-    config.apiURL,
+    config.rpcURL,
     signer,
     { registry }
   );
@@ -82,14 +89,21 @@ export async function signISCNTx(tx, signer, address) {
       record,
     },
   };
-  const fee = {
-    amount: [ DEFAULT_GAS_PRICE ],
-    gas: DEFAULT_GAS_PRICE_NUMBER,
-  };
-  const memo = "Use your power wisely";
+  const fee = await estimateISCNTxGas();
+  const memo = 'app.like.co';
   const response = await client.signAndBroadcast(address, [message], fee, memo);
   assertIsBroadcastTxSuccess(response);
   return response;
+}
+
+export function parseISCNTxInfo(tx) {
+  const { txHash, timestamp } = tx;
+  const iscnId = tx.logs[0].events[0].attributes[0].value; // TODO: check index exists
+  return {
+    txHash,
+    iscnId,
+    timestamp,
+  }
 }
 
 export default signISCNTx;

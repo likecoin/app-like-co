@@ -13,6 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "^0.25.5",
     "@cosmjs/stargate": "^0.25.5",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/pwa": "^3.3.5",

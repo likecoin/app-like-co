@@ -40,10 +40,10 @@ const mainConfig = {
 };
 
 const testnetConfig = {
-  id: 'likechain-testnet-taipei-1', // DEPRECATE, only used for Lunie extension, NOT CHAIN ID
+  id: 'iscn-dev-chain-2',
   name: 'LikeCoin Taipei test chain',
-  apiURL: 'https://node.taipei.like.co',
-  rpcURL: 'ws://node.taipei.like.co:26657',
+  apiURL: 'https://node.iscn-dev-2.like.co',
+  rpcURL: 'https://node.iscn-dev-2.like.co/rpc/',
   stakingWalletURL: 'http://likecoin-chain-taipei.netlify.app/',
 };
 
