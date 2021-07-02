@@ -1,5 +1,13 @@
 <template>
   <div>
+    <img :src="fileData">
+    <ul>
+      <li>{{ fileSHA256 }}</li>
+      <li>{{ ipfsHash }}</li>
+      <li>{{ iscnId }}</li>
+      <li>{{ iscnHash }}</li>
+      <li>{{ iscnTimestamp }}</li>
+    </ul>
   </div>
 </template>
 
@@ -8,7 +16,34 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'IscnRegisterForm',
+  name: 'IscnUploadedInfo',
+  props: {
+    fileData: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    fileSHA256: {
+      type: String,
+      required: true,
+    },
+    ipfsHash: {
+      type: String,
+      required: true,
+    },
+    iscnId: {
+      type: String,
+      required: true,
+    },
+    iscnHash: {
+      type: String,
+      required: true,
+    },
+    iscnTimestamp: {
+      type: String,
+      required: true,
+    },
+  },
 })
 
 </script>

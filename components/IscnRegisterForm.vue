@@ -28,7 +28,7 @@
         >
         <label :for="`author_${index}_url`">Author URL</label>
       </fieldset>
-      <button @click.prevent="onClickAddAuthor">Add Author</button>
+      <a href="#" @click.prevent="onClickAddAuthor">Add Author</a>
       <fieldset>
         <input
           id="tagsString"
@@ -60,7 +60,7 @@ import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { Author } from '~/types/author';
 
-import { signISCNTx } from '~/utils/cosmos';
+import { signISCNTx, parseISCNTxInfo } from '~/utils/cosmos/iscn';
 
 export default Vue.extend({
   name: 'IscnRegisterForm',
@@ -119,7 +119,10 @@ export default Vue.extend({
     onClickAddAuthor() {
       this.authors.push({ name: '', url: '' });
     },
-    async onSubmit() {
+    onSubmit() {
+      this.submitToISCN();
+    },
+    async submitToISCN() {
       const payload = {
         title: this.title,
         description: this.description,
@@ -131,10 +134,10 @@ export default Vue.extend({
         authorNames: this.authorNames,
         authorUrls: this.authorUrls,
       };
-      console.log(payload);
       const tx = await signISCNTx(payload, this.signer, this.address);
       console.log(tx);
-    },
+      this.$emit('txBroadcasted', parseISCNTxInfo(tx));
+    }
   }
 })
 

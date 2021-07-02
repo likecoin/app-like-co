@@ -44,7 +44,7 @@ export default Vue.extend({
         const reader = new FileReader();
         reader.onload = (e) => {
           if (!e.target) return;
-          this.fileData = e.target.result;
+          this.fileData = e.target.result as string;
 
         };
         reader.readAsDataURL(files[0]);

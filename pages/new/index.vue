@@ -8,12 +8,16 @@
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
       :file-data="fileData"
+      :file-s-h-a256="fileSHA256"
+      @txBroadcasted="onISCNTxInfo"
     />
     <iscn-uploaded-info
       v-else-if="state === 'done'"
       :ipfs-hash="ipfsHash"
-      :iscn-hash="iscnHash"
       :file-data="fileData"
+      :iscn-id="iscnId"
+      :iscn-hash="iscnTxHash"
+      :iscn-timestamp="iscnTimestamp"
     />
   </div>
 </template>
@@ -26,21 +30,34 @@ export default Vue.extend({
   data(): {
       state: string;
       ipfsHash: string;
-      iscnHash: string;
-      fileData: string | ArrayBuffer | null;
+      fileSHA256: string;
+      fileData: string;
+      iscnId: string;
+      iscnTxHash: string;
+      iscnTimestamp: string;
   } {
     return {
       state: 'init',
       ipfsHash: '',
-      iscnHash: '',
-      fileData: null,
+      fileSHA256: '',
+      fileData: '',
+      iscnId: '',
+      iscnTxHash: '',
+      iscnTimestamp: '',
     };
   },
   methods: {
-    onSubmitUpload({ ipfsHash, fileData }: { ipfsHash: string, fileData: string | ArrayBuffer | null }) {
+    onSubmitUpload({ ipfsHash, fileData, fileSHA256 }: { ipfsHash: string, fileData: string, fileSHA256: string }) {
       this.ipfsHash = ipfsHash;
       this.fileData = fileData;
+      this.fileSHA256 = fileSHA256;
       this.state = 'iscn';
+    },
+    onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
+      this.iscnTxHash = txHash;
+      this.iscnId = iscnId;
+      this.iscnTimestamp = timestamp;
+      this.state = 'done';
     },
   },
 })

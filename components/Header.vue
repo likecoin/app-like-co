@@ -28,9 +28,9 @@ export default Vue.extend({
   methods: {
     ...mapActions('keplr', ['initKeplr']),
     ...mapActions('signer', ['updateSignerInfo']),
-    onClickLoginKeplr() {
-      this.initKeplr();
-      this.updateSignerInfo({
+    async onClickLoginKeplr() {
+      await this.initKeplr();
+      await this.updateSignerInfo({
         signer: this.keplrSigner,
         address: this.keplrWallet,
       });
