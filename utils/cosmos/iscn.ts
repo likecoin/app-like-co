@@ -38,21 +38,21 @@ function formatISCNPayload(payload, version = 1) {
   const contentFingerprints = [];
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`);
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`);
-  const stakeholders = []; // TODO: parse this
+  const stakeholders = [];
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName = authorNames[i];
       const authorUrl = authorUrls[i];
       const isNonEmpty = authorUrl || authorName;
       if (isNonEmpty) {
-        stakeholders.push({
+        stakeholders.push(Buffer.from(JSON.stringify({
           entity: {
             id: authorUrl || undefined,
             name: authorName,
           },
           rewardProportion: 1,
           contributionType: 'http://schema.org/author',
-        })
+        }), 'utf8'))
       }
     }
   }
@@ -98,7 +98,9 @@ export async function signISCNTx(tx, signer: OfflineSigner, address: string) {
 
 export function parseISCNTxInfo(tx) {
   const { txHash, timestamp } = tx;
-  const iscnId = tx.logs[0].events[0].attributes[0].value; // TODO: check index exists
+  let { logs } = tx;
+  if (!tx.logs && tx.rawLog) logs = JSON.parse(tx.rawLog)
+  const iscnId = logs[0].events[0].attributes[0].value; // TODO: check index exists
   return {
     txHash,
     iscnId,
