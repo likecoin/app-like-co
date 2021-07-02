@@ -1,30 +1,37 @@
 <template>
-  <div>
-    <upload-form
-      v-if="state === 'init'"
-      @submit="onSubmitUpload"
-    />
-    <iscn-register-form
-      v-else-if="state === 'iscn'"
-      :ipfs-hash="ipfsHash"
-      :file-data="fileData"
-      :file-s-h-a256="fileSHA256"
-      @txBroadcasted="onISCNTxInfo"
-    />
-    <iscn-uploaded-info
-      v-else-if="state === 'done'"
-      :ipfs-hash="ipfsHash"
-      :file-data="fileData"
-      :iscn-id="iscnId"
-      :iscn-hash="iscnTxHash"
-      :iscn-timestamp="iscnTimestamp"
-    />
+  <div class="container mx-auto">
+    <div v-if="!currentAddress">
+      <h3>Please connect to your wallet first</h3>
+    </div>
+    <template v-else>
+      <upload-form
+        v-if="state === 'init'"
+        @submit="onSubmitUpload"
+      />
+      <iscn-register-form
+        v-else-if="state === 'iscn'"
+        :ipfs-hash="ipfsHash"
+        :file-data="fileData"
+        :file-s-h-a256="fileSHA256"
+        @txBroadcasted="onISCNTxInfo"
+      />
+      <iscn-uploaded-info
+        v-else-if="state === 'done'"
+        :ipfs-hash="ipfsHash"
+        :file-data="fileData"
+        :iscn-id="iscnId"
+        :iscn-hash="iscnTxHash"
+        :iscn-timestamp="iscnTimestamp"
+      />
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { mapGetters } from 'vuex';
 
 export default Vue.extend({
   data(): {
@@ -45,6 +52,9 @@ export default Vue.extend({
       iscnTxHash: '',
       iscnTimestamp: '',
     };
+  },
+  computed: {
+    ...mapGetters('signer', { currentAddress: 'getAddress' }),
   },
   methods: {
     onSubmitUpload({ ipfsHash, fileData, fileSHA256 }: { ipfsHash: string, fileData: string, fileSHA256: string }) {

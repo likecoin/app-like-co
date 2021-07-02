@@ -12,6 +12,7 @@
         type="file"
         @change="onFileUpload"
       >
+      <button type=submit>Upload</button>
     </form>
   </div>
 </template>
@@ -55,6 +56,7 @@ export default Vue.extend({
       if (!(this.ipfsURL.startsWith('ipfs://') || this.ipfsURL.startsWith('https://ipfs.io'))) {
         try {
           const parsed = new URL(this.ipfsURL)
+          // TODO: parse IPFS url
         } catch (e) {
 
         }
