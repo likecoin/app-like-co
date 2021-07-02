@@ -13,6 +13,10 @@ export default {
     ]
   },
 
+  env: {
+    IS_TESTNET: process.env.IS_TESTNET,
+    CI: process.env.CI,
+  },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
   ],

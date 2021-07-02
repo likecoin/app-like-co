@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "IS_TESTNET=TRUE nuxt",
     "build": "nuxt build",
     "generate": "nuxt generate",
     "start": "nuxt start",
