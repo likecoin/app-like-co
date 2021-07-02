@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img :src="fileData">
+    <img class="max-w-md" :src="fileData">
     <a :href="`https://ipfs.io/${ipfsHash}`">{{ ipfsHash }}</a>
     <form @submit.prevent="onSubmit">
       <fieldset>

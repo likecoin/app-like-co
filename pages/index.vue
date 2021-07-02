@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container mx-auto">
     <input v-model=searchISCNText >
     <nuxt-link :to="{ name: 'new' }">Register iscn</nuxt-link>
   </div>

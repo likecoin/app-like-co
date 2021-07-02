@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <img :src="fileData">
+  <div class="mx-auto">
+    <img class="max-w-md" :src="fileData">
     <form @submit.prevent="onSubmit">
       <input
         v-model="ipfsURL"

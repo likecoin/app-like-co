@@ -1,11 +1,15 @@
 <!-- Please remove this file from your project -->
 <template>
-  <div class="nav">
-    <div class="right-header">
+  <nav class="mx-auto flex">
+    <div>
+    </div>
+    <div class="flex-grow items-center justify-between">
+    </div>
+    <div class="mx-8 my-2">
       <a v-if="currentAddress">{{ currentAddress }}</a>
       <button v-else @click="onClickLoginKeplr">Keplr</button>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script la ng="ts">
@@ -38,12 +42,3 @@ export default Vue.extend({
   },
 })
 </script>
-
-<style scoped>
-
-.nav {
-  top:0;
-  min-height: 20px;
-}
-
-</style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img :src="fileData">
+    <img class="max-w-md" :src="fileData">
     <ul>
       <li>{{ fileSHA256 }}</li>
       <li>{{ ipfsHash }}</li>
