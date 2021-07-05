@@ -20,7 +20,7 @@ import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 export default Vue.extend({
-  name: 'Header',
+  name: 'AppHeader',
 
   computed: {
     ...mapGetters('keplr', {

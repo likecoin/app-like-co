@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-100 h-screen">
     <header>
-      <Header />
+      <AppHeader />
     </header>
     <Nuxt />
   </div>
@@ -9,7 +9,7 @@
 
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
+import Vue from 'vue'
 
 export default Vue.extend({})
 </script>
