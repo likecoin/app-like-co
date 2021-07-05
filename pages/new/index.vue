@@ -19,6 +19,7 @@
         v-else-if="state === 'done'"
         :ipfs-hash="ipfsHash"
         :file-data="fileData"
+        :file-s-h-a256="fileSHA256"
         :iscn-id="iscnId"
         :iscn-hash="iscnTxHash"
         :iscn-timestamp="iscnTimestamp"

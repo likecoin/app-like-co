@@ -1,5 +1,6 @@
 import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import {
+  BroadcastTxSuccess,
   defaultRegistryTypes,
   assertIsBroadcastTxSuccess,
   SigningStargateClient,
@@ -7,6 +8,7 @@ import {
 import { DEFAULT_GAS_PRICE_NUMBER } from "~/constant";
 import { MsgCreateIscnRecord } from "~/constant/codec/iscn/tx";
 import config from "~/constant/network";
+import { ISCNSignPayload } from './iscn.type'
 
 const registry = new Registry([
   ...defaultRegistryTypes,
@@ -21,7 +23,7 @@ function estimateISCNTxGas() {
   };
 }
 
-function formatISCNPayload(payload, version = 1) {
+function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
   const {
     title,
     description,
@@ -30,7 +32,7 @@ function formatISCNPayload(payload, version = 1) {
     license,
     ipfsHash,
     fileSHA256,
-    type,
+    // type,
     authorNames,
     authorUrls,
   } = payload;
@@ -74,7 +76,7 @@ function formatISCNPayload(payload, version = 1) {
   };
 }
 
-export async function signISCNTx(tx, signer: OfflineSigner, address: string) {
+export async function signISCNTx(tx: ISCNSignPayload, signer: OfflineSigner, address: string) {
   const record = formatISCNPayload(tx);
   const client = await SigningStargateClient.connectWithSigner(
     config.rpcURL,
@@ -96,15 +98,16 @@ export async function signISCNTx(tx, signer: OfflineSigner, address: string) {
   return response;
 }
 
-export function parseISCNTxInfo(tx) {
-  const { txHash, timestamp } = tx;
-  let { logs } = tx;
-  if (!tx.logs && tx.rawLog) logs = JSON.parse(tx.rawLog)
-  const iscnId = logs[0].events[0].attributes[0].value; // TODO: check index exists
+export function parseISCNTxInfo(tx: BroadcastTxSuccess) {
+  const { transactionHash } = tx;
+  let iscnId;
+  if (tx.rawLog) {
+    const logs = JSON.parse(tx.rawLog)
+    iscnId = logs[0].events[0].attributes[0].value; // TODO: check index exists
+  }
   return {
-    txHash,
+    txHash: transactionHash,
     iscnId,
-    timestamp,
   }
 }
 

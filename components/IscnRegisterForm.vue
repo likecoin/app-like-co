@@ -135,7 +135,6 @@ export default Vue.extend({
         authorUrls: this.authorUrls,
       };
       const tx = await signISCNTx(payload, this.signer, this.address);
-      console.log(tx);
       this.$emit('txBroadcasted', parseISCNTxInfo(tx));
     }
   }
