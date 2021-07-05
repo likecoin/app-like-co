@@ -1,7 +1,14 @@
 <template>
-  <div class="container mx-auto">
-    <input v-model=searchISCNText >
-    <nuxt-link :to="{ name: 'new' }">Register iscn</nuxt-link>
+  <div class="container flex flex-col items-center mx-auto">
+    <div class="my-4">
+      <form>
+        <input v-model="searchISCNText" placeholder="Find ISCN by ID">
+        <button class="mx-2">Search</button>
+      </form>
+    </div>
+    <div class="my-4">
+      <nuxt-link :to="{ name: 'new' }">Register iscn</nuxt-link>
+    </div>
   </div>
 </template>
 

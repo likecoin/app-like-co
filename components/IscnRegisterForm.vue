@@ -2,53 +2,63 @@
   <div>
     <img class="max-w-md" :src="fileData">
     <a :href="`https://ipfs.io/${ipfsHash}`">{{ ipfsHash }}</a>
-    <form @submit.prevent="onSubmit">
+    <form class="space-y-4" @submit.prevent="onSubmit">
       <fieldset>
+        <label for="title">title</label>
         <input
           id="title"
           v-model="title"
+          placeholder="title"
           required
         >
-        <label for="title">title</label>
+        <br />
+        <label for="description">description</label>
         <input
           id="description"
           v-model="description"
+          placeholder="description"
         >
-        <label for="description">description</label>
       </fieldset>
       <fieldset v-for="(author,index) in authors" :key="index">
+        <label :for="`author_${index}_id`">Author Name</label>
         <input
           :id="`author_${index}_name`"
           v-model="author.name"
+          placeholder="Author Name"
         >
-        <label :for="`author_${index}_id`">Author Name</label>
+        <br />
+        <label :for="`author_${index}_url`">Author URL</label>
         <input
           :id="`author_${index}_url`"
           v-model="author.url"
+          :placeholder="`Author_${index} URL`"
         >
-        <label :for="`author_${index}_url`">Author URL</label>
       </fieldset>
-      <a href="#" @click.prevent="onClickAddAuthor">Add Author</a>
+      <a class="bg-green-400 p-2 rounded-lg" href="#" @click.prevent="onClickAddAuthor">Add Author</a>
       <fieldset>
+        <label for="tagsString">tagsString</label>
         <input
           id="tagsString"
           v-model="tagsString"
+          placeholder="tags (seperate by ,)"
         >
-        <label for="tagsString">tagsString</label>
       </fieldset>
       <fieldset>
+        <label for="url">url</label>
         <input
           id="url"
           v-model="url"
+          placeholder="Content URL"
         >
-        <label for="url">url</label>
+        <br />
+        <label for="license">license</label>
         <input
           id="license"
           v-model="license"
+          placeholder="License URL"
         >
-        <label for="url">license</label>
       </fieldset>
-      <button type=submit>submit</button>
+      <button type=submit class="bg-green-400 p-2 rounded-lg">submit</button>
     </form>
   </div>
 </template>

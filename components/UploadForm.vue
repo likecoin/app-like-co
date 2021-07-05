@@ -3,7 +3,9 @@
     <img class="max-w-md" :src="fileData">
     <form @submit.prevent="onSubmit">
       <input
+        v-if="!fileData"
         v-model="ipfsURL"
+        placeholder="Use existing IPFS content"
         @change="onEnterURL"
       >
       <input
@@ -12,7 +14,7 @@
         type="file"
         @change="onFileUpload"
       >
-      <button type=submit>Upload</button>
+      <button class="block" type=submit>Upload</button>
     </form>
   </div>
 </template>
