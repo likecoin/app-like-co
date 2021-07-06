@@ -13,7 +13,7 @@
   </nav>
 </template>
 
-<script la ng="ts">
+<script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue'
 // eslint-disable-next-line import/no-extraneous-dependencies
