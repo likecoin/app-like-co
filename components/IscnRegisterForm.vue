@@ -70,7 +70,8 @@ import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { Author } from '~/types/author';
 
-import { signISCNTx, parseISCNTxInfo } from '~/utils/cosmos/iscn';
+import { signISCNTx } from '~/utils/cosmos/iscn/sign';
+import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 
 export default Vue.extend({
   name: 'IscnRegisterForm',
@@ -145,7 +146,7 @@ export default Vue.extend({
         authorUrls: this.authorUrls,
       };
       const tx = await signISCNTx(payload, this.signer, this.address);
-      this.$emit('txBroadcasted', parseISCNTxInfo(tx));
+      this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
     }
   }
 })
