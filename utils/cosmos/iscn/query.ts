@@ -16,10 +16,18 @@ async function initQueryClient() {
   );
 }
 
-export async function queryRecordsByTx(txId: string) {
+export async function queryRecordsByTx(txId: string, isISCNTxOnly = true) {
   if (!stargateClient) stargateClient = await StargateClient.connect(config.rpcURL);
   const res = await stargateClient.getTx(txId);
-  if (res) return parseISCNTxInfoFromIndexedTx(res);
+  console.log(res);
+  if (res) {
+    const parsed = parseISCNTxInfoFromIndexedTx(res);
+    if (isISCNTxOnly) {
+      parsed.tx.body.messages = parsed.tx.body.messages.filter(m => m.typeUrl.includes('/likechain.iscn'));
+      if (!parsed.tx.body.messages.length) return null;
+    }
+    return parsed;
+  }
   return null;
 }
 

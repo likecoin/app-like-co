@@ -48,29 +48,42 @@ export function parseISCNTxInfoFromIndexedTx(tx: IndexedTx) {
       const msg = MsgCreateIscnRecord.decode(m.value);
       if (msg.record) {
         msg.record = parseISCNRecordFields(msg.record);
-        return msg.record;
       }
-      return msg;
+      return {
+        ...m,
+        value: msg,
+      };
     }
     if (m.typeUrl === '/likechain.iscn.MsgUpdateIscnRecord') {
       const msg = MsgUpdateIscnRecord.decode(m.value);
       if (msg.record) {
         msg.record = parseISCNRecordFields(msg.record);
-        return msg.record;
       }
-      return msg;
+      return {
+        ...m,
+        value: msg,
+      };
     }
     if (m.typeUrl === '/likechain.iscn.MsgChangeIscnRecordOwnership') {
       const msg = MsgChangeIscnRecordOwnership.decode(m.value);
-      return msg;
+      return {
+        ...m,
+        value: msg,
+      };
     }
     return m
   });
+
   return {
     ...tx,
-    tx: decodedTx,
-    messages,
-  }
+    tx : {
+      ...decodedTx,
+      body: {
+        ...decodedTx.body,
+        messages,
+      },
+    },
+  };
 }
 
 export function parseISCNTxRecordFromQuery(records: QueryResponseRecord[]) {
