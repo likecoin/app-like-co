@@ -85,28 +85,3 @@ export async function queryRecordsByOwner(owner: string, fromSequence?: number) 
   }
   return null;
 }
-
-export async function queryISCNByAll(keyword: string) {
-  const [txRes, idRes, fingerprintRes, ownerRes] = await Promise.all([
-    queryRecordsByTx(keyword).catch(() => {}),
-    queryRecordsById(keyword).catch(() => {}),
-    queryRecordsByFingerprint(keyword).catch(() => {}),
-    queryRecordsByOwner(keyword).catch(() => {}),
-  ]);
-  let txRecords: parsedISCNRecord[] = [];
-  if (txRes) {
-    txRecords = (await Promise.all(txRes.map(async (t) => {
-      if (typeof t ==='string') {
-        const res = await queryRecordsById(t);
-        return res?.records[0]
-      }
-      return t;
-    }))).filter(t => t) as parsedISCNRecord[];
-  }
-  const result: parsedISCNRecord[] = ([] as parsedISCNRecord[])
-    .concat(txRecords)
-    .concat(idRes ? idRes.records : [])
-    .concat(fingerprintRes ? fingerprintRes.records : [])
-    .concat(ownerRes ? ownerRes.records : []);
-  return result;
-}

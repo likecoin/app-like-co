@@ -16,8 +16,10 @@
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { mapActions } from 'vuex'
 
-import { queryISCNByAll } from '~/utils/cosmos/iscn/query';
+import { parsedISCNRecord } from '~/utils/cosmos/iscn'
 
 export default Vue.extend({
   data() {
@@ -27,17 +29,19 @@ export default Vue.extend({
     };
   },
   methods: {
+    ...mapActions('iscn', ['queryISCNByKeyword']),
     async onSearchISCN() {
       this.isNotFound = false;
       const { searchISCNText } = this;
-      const res = await queryISCNByAll(searchISCNText);
-      console.log(res);
+      const res: parsedISCNRecord[] = await this.queryISCNByKeyword(searchISCNText);
       if (!res.length) {
         this.isNotFound = true;
       } else if (res.length > 1) {
-        // this.$router.push({ name: 'view', params: { iscnRecord: res }});
+        const iscnIds = res.map((r) => r.id);
+        this.$router.push({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }});
       } else {
-        // this.$router.push({ name: 'search', params: { iscnRecords: res }});
+        const iscnId = res[0].id;
+        this.$router.push({ name: 'view-iscnId', params: { iscnId }});
       }
     }
   },
