@@ -2,6 +2,9 @@
   "name": "app-like-co",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "dev": "IS_TESTNET=TRUE nuxt",
     "build": "nuxt build",
