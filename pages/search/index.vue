@@ -1,22 +1,9 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
-    <div v-for="record in records" :key="record.id">
-      <div v-if="!record">
+      <div v-if="!records">
         Loading
       </div>
-      <div v-else>
-        <ul>
-          <nuxt-link :to="{ name: 'view-iscnId', params: { iscnId: record.id }}">{{ record.id }}</nuxt-link>
-          <li>contentFingerprints: {{ record.data.contentFingerprints }}</li>
-        </ul>
-        <ul>
-          <li>Type: {{ record.data.contentMetadata['@type'] }}</li>
-          <li>Title: {{ record.data.contentMetadata.title }}</li>
-          <li>Description: {{ record.data.contentMetadata.description }}</li>
-          <li>url: {{ record.data.contentMetadata.url }}</li>
-          <li>keywords: {{ record.data.contentMetadata.keywords }}</li>
-        </ul>
-      </div>
+      <search-results v-else :records="records"/>
     </div>
   </div>
 </template>
@@ -26,10 +13,12 @@
 import Vue from 'vue';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mapActions, mapGetters } from 'vuex';
+import SearchResults from '~/components/SearchResults.vue';
 
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
 export default Vue.extend({
+  components: { SearchResults },
   computed: {
     ...mapGetters('iscn', ['getISCNById']),
     iscnIds(): string[] {

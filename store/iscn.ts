@@ -47,6 +47,14 @@ export default class ISCN extends VuexModule {
   }
 
   @Action
+  async queryISCNByAddress(address: string): Promise<parsedISCNRecord[]> {
+    const ownerRes = await queryRecordsByOwner(address).catch(() => {})
+    const result: parsedISCNRecord[] = ownerRes ? ownerRes.records : [];
+    this.context.commit('setRecords', result)
+    return result;
+  }
+
+  @Action
   async queryISCNByKeyword(keyword: string): Promise<parsedISCNRecord[]> {
     const [txRes, idRes, fingerprintRes, ownerRes] = await Promise.all([
       queryRecordsByTx(keyword).catch(() => {}),
