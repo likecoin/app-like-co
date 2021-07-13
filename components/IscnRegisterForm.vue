@@ -2,6 +2,7 @@
   <div>
     <img class="max-w-md" :src="fileData">
     <a :href="`https://ipfs.io/${ipfsHash}`">{{ ipfsHash }}</a>
+    {{ type }}
     <form class="space-y-4" @submit.prevent="onSubmit">
       <fieldset>
         <label for="title">title</label>
@@ -68,6 +69,7 @@
 import Vue from 'vue';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mapGetters } from 'vuex';
+
 import { Author } from '~/types/author';
 
 import { signISCNTx } from '~/utils/cosmos/iscn/sign';
@@ -76,8 +78,23 @@ import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 export default Vue.extend({
   name: 'IscnRegisterForm',
   props: {
+    isImage: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    exifInfo: {
+      type: Object,
+      required: false,
+      default: () => null,
+    },
+    fileBlob: {
+      type: Blob,
+      required: false,
+      default: null,
+    },
     fileData: {
-      type: [String, ArrayBuffer],
+      type: String,
       required: false,
       default: null,
     },
@@ -125,6 +142,14 @@ export default Vue.extend({
     authorUrls() {
       return this.authors.map(a => a.url);
     },
+    isPhoto() {
+      return this.exifInfo && this.exifInfo.ExifImageWidth;
+    },
+    type() {
+      if (this.isPhoto) return 'Photo';
+      if (this.isImage) return 'Image';
+      return 'CreativeWorks';
+    },
   },
   methods: {
     onClickAddAuthor() {
@@ -135,6 +160,7 @@ export default Vue.extend({
     },
     async submitToISCN() {
       const payload = {
+        type: this.type,
         title: this.title,
         description: this.description,
         tagsString: this.tagsString,

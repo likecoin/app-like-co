@@ -9,6 +9,9 @@
       :ipfs-hash="ipfsHash"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"
+      :file-blob="fileBlob"
+      :is-image="isImage"
+      :exif-info="exifInfo"
       @txBroadcasted="onISCNTxInfo"
     />
     <iscn-uploaded-info
@@ -39,6 +42,9 @@ export default Vue.extend({
       iscnId: string;
       iscnTxHash: string;
       iscnTimestamp: string;
+      isImage: boolean;
+      fileBlob: Blob | null;
+      exifInfo: any;
   } {
     return {
       state: 'init',
@@ -48,16 +54,36 @@ export default Vue.extend({
       iscnId: '',
       iscnTxHash: '',
       iscnTimestamp: '',
+      isImage: false,
+      fileBlob: null,
+      exifInfo: null,
     };
   },
   computed: {
     ...mapGetters('signer', { currentAddress: 'getAddress' }),
   },
   methods: {
-    onSubmitUpload({ ipfsHash, fileData, fileSHA256 }: { ipfsHash: string, fileData: string, fileSHA256: string }) {
+    onSubmitUpload({
+      ipfsHash,
+      fileData,
+      fileSHA256,
+      isImage,
+      fileBlob,
+      exifInfo,
+    }: {
+      ipfsHash: string,
+      fileData: string,
+      fileSHA256: string,
+      isImage: boolean;
+      fileBlob: Blob | null;
+      exifInfo: any;
+    }) {
       this.ipfsHash = ipfsHash;
       this.fileData = fileData;
       this.fileSHA256 = fileSHA256;
+      this.isImage = isImage;
+      this.fileBlob = fileBlob;
+      this.exifInfo = exifInfo;
       this.state = 'iscn';
     },
     onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
