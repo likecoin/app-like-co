@@ -31,7 +31,7 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
     license,
     ipfsHash,
     fileSHA256,
-    // type,
+    type,
     authorNames,
     authorUrls,
   } = payload;
@@ -59,7 +59,7 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
   }
   const contentMetadata = {
     "@context": "http://schema.org/",
-    "@type": "CreativeWorks",
+    "@type": type,
     title,
     description,
     version,
