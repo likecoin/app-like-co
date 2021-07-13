@@ -1,14 +1,9 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
-    <div v-if="!currentAddress">
-      <h3>Please connect to your wallet first</h3>
+    <div v-if="!records">
+      Loading
     </div>
-    <template v-else>
-      <div v-if="!records">
-        Loading
-      </div>
-      <search-results v-else :records="records"/>
-    </template>
+    <search-results v-else :records="records"/>
   </div>
 </template>
 
@@ -23,6 +18,7 @@ import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
 export default Vue.extend({
   components: { SearchResults },
+  layout: 'wallet',
   data(): {
     records: parsedISCNRecord[],
   } {
