@@ -24,7 +24,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
 import exifr from 'exifr';
-import { digestFileSHA256, readImageType } from '~/utils/misc';
+import Hash from 'ipfs-only-hash';
+import { fileToArrayBuffer, digestFileSHA256, readImageType } from '~/utils/misc';
 
 export default Vue.extend({
   name: 'UploadForm',
@@ -59,16 +60,21 @@ export default Vue.extend({
 
         };
         reader.readAsDataURL(files[0]);
-        const [fileSHA256, imageType] = await Promise.all([
-          digestFileSHA256(files[0]),
-          readImageType(files[0]),
-        ])
-        this.fileSHA256 = fileSHA256;
-        this.isImage = !!imageType;
-        if (this.isImage) {
-          this.exifInfo = await exifr.parse(files[0])
-        } else {
-          this.exifInfo = null;
+        const fileBytes = await fileToArrayBuffer(files[0]) as ArrayBuffer;
+        if (fileBytes) {
+          const [fileSHA256, imageType, ipfsHash] = await Promise.all([
+            digestFileSHA256(fileBytes),
+            readImageType(fileBytes),
+            Hash.of(Buffer.from(fileBytes))
+          ])
+          this.ipfsHash = ipfsHash;
+          this.fileSHA256 = fileSHA256;
+          this.isImage = !!imageType;
+          if (this.isImage) {
+            this.exifInfo = await exifr.parse(files[0])
+          } else {
+            this.exifInfo = null;
+          }
         }
       }
     },
