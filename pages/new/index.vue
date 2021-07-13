@@ -1,30 +1,25 @@
 <template>
   <div class="container mx-auto">
-    <div v-if="!currentAddress">
-      <h3>Please connect to your wallet first</h3>
-    </div>
-    <template v-else>
-      <upload-form
-        v-if="state === 'init'"
-        @submit="onSubmitUpload"
-      />
-      <iscn-register-form
-        v-else-if="state === 'iscn'"
-        :ipfs-hash="ipfsHash"
-        :file-data="fileData"
-        :file-s-h-a256="fileSHA256"
-        @txBroadcasted="onISCNTxInfo"
-      />
-      <iscn-uploaded-info
-        v-else-if="state === 'done'"
-        :ipfs-hash="ipfsHash"
-        :file-data="fileData"
-        :file-s-h-a256="fileSHA256"
-        :iscn-id="iscnId"
-        :iscn-hash="iscnTxHash"
-        :iscn-timestamp="iscnTimestamp"
-      />
-    </template>
+    <upload-form
+      v-if="state === 'init'"
+      @submit="onSubmitUpload"
+    />
+    <iscn-register-form
+      v-else-if="state === 'iscn'"
+      :ipfs-hash="ipfsHash"
+      :file-data="fileData"
+      :file-s-h-a256="fileSHA256"
+      @txBroadcasted="onISCNTxInfo"
+    />
+    <iscn-uploaded-info
+      v-else-if="state === 'done'"
+      :ipfs-hash="ipfsHash"
+      :file-data="fileData"
+      :file-s-h-a256="fileSHA256"
+      :iscn-id="iscnId"
+      :iscn-hash="iscnTxHash"
+      :iscn-timestamp="iscnTimestamp"
+    />
   </div>
 </template>
 
@@ -35,6 +30,7 @@ import Vue from 'vue';
 import { mapGetters } from 'vuex';
 
 export default Vue.extend({
+  layout: 'wallet',
   data(): {
       state: string;
       ipfsHash: string;
