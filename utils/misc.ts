@@ -13,16 +13,14 @@ export function fileToArrayBuffer(file: Blob): Promise<string | ArrayBuffer | nu
   });
 }
 
-export async function digestFileSHA256(file: Blob) {
-  const buffer = await fileToArrayBuffer(file);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer as ArrayBuffer);
+export async function digestFileSHA256(buffer: ArrayBuffer) {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 }
 
-export async function readImageType(file: Blob) {
-  const buffer = await fileToArrayBuffer(file);
-  if (buffer) return imageType(Buffer.from(buffer as ArrayBuffer));
+export function readImageType(buffer: ArrayBuffer) {
+  if (buffer) return imageType(Buffer.from(buffer));
   return null;
 }
