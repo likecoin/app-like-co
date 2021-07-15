@@ -59,7 +59,9 @@
           placeholder="License URL"
         >
       </fieldset>
-      <button type=submit class="bg-green-400 p-2 rounded-lg">submit</button>
+      <button type=submit class="bg-green-400 p-2 rounded-lg" :disabled="!!uploadStatus" >
+        {{ uploadStatus || 'Submit' }}
+      </button>
     </form>
   </div>
 </template>
@@ -74,6 +76,7 @@ import { Author } from '~/types/author';
 
 import { signISCNTx } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
+import IPFSClient from '~/utils/ipfs';
 
 export default Vue.extend({
   name: 'IscnRegisterForm',
@@ -102,6 +105,11 @@ export default Vue.extend({
       type: String,
       required: true,
     },
+    isIPFSLink: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     ipfsHash: {
       type: String,
       required: true,
@@ -116,6 +124,8 @@ export default Vue.extend({
       license: string;
       authorName: string;
       authorUrl: string;
+      uploadStatus: string;
+      actualIpfsHash: string;
   } {
     return {
       authors: [],
@@ -126,6 +136,8 @@ export default Vue.extend({
       license: '',
       authorName: '',
       authorUrl: '',
+      uploadStatus: '',
+      uploadIpfsHash: this.ipfsHash,
     };
   },
   computed: {
@@ -151,14 +163,25 @@ export default Vue.extend({
       return 'CreativeWorks';
     },
   },
+  mounted() {
+    this.uploadStatus = '';
+  },
   methods: {
     onClickAddAuthor() {
       this.authors.push({ name: '', url: '' });
     },
-    onSubmit() {
-      this.submitToISCN();
+    async onSubmit() {
+      if (!this.isIPFSLink) await this.submitToIPFS();
+      await this.submitToISCN();
+    },
+    async submitToIPFS() {
+      if (!this.fileBlob) return
+      this.uploadStatus = "Uploading";
+      const res = await IPFSClient.add(this.fileBlob);
+      if (res.path) this.uploadIpfsHash = res.path;
     },
     async submitToISCN() {
+      this.uploadStatus = "Waiting for signature";
       const payload = {
         type: this.type,
         title: this.title,
@@ -166,12 +189,13 @@ export default Vue.extend({
         tagsString: this.tagsString,
         url: this.url,
         license: this.license,
-        ipfsHash: this.ipfsHash,
+        ipfsHash: this.uploadIpfsHash || this.ipfsHash,
         fileSHA256: this.fileSHA256,
         authorNames: this.authorNames,
         authorUrls: this.authorUrls,
       };
       const tx = await signISCNTx(payload, this.signer, this.address);
+      this.uploadStatus = "Success";
       this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
     }
   }

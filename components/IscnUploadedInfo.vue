@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img class="max-w-md" :src="fileData">
+    <img v-if="imgSrc" class="max-w-md" :src="imgSrc">
     <ul>
       <li>{{ fileSHA256 }}</li>
       <li>{{ ipfsHash }}</li>
@@ -15,9 +15,16 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
 
+import { getIPFSURLFromHash } from '~/utils/ipfs';
+
 export default Vue.extend({
   name: 'IscnUploadedInfo',
   props: {
+    isImage: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     fileData: {
       type: String,
       required: false,
@@ -42,6 +49,11 @@ export default Vue.extend({
     iscnTimestamp: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    imgSrc() {
+      return this.isImage && (getIPFSURLFromHash(this.ipfsHash) || this.fileData);
     },
   },
 })

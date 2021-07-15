@@ -4,6 +4,7 @@
       Loading
     </div>
     <div v-else>
+      <img v-if="imgSrc" class="max-w-md" :src="imgSrc">
       <ul>
         <li>iscnId: {{ iscnId }}</li>
         <li>recordNotes: {{ record.recordNotes }}</li>
@@ -36,6 +37,8 @@ import Vue from 'vue';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mapActions, mapGetters } from 'vuex'
 
+import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
+
 export default Vue.extend({
   computed: {
     ...mapGetters('iscn', ['getISCNById']),
@@ -47,6 +50,12 @@ export default Vue.extend({
     },
     metadata() {
       return this.record && (this.record as any).contentMetadata;
+    },
+    type() {
+      return this.metadata && this.metadata['@type'];
+    },
+    imgSrc() {
+      return (this.type === 'Image' || this.type === 'Photo') && getIPFSUrlFromISCN(this.getISCNById(this.iscnId));
     },
   },
   async mounted() {
