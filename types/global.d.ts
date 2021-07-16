@@ -9,4 +9,3 @@ declare global {
     }
 }
 
-declare module 'ipfs-only-hash';
