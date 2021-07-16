@@ -18,8 +18,8 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
-const signerModule = namespace('~/store/signer')
-const keplrModule = namespace('~/store/keplr')
+const signerModule = namespace('signer')
+const keplrModule = namespace('keplr')
 
 @Component
 export default class AppHeader extends Vue{

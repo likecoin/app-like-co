@@ -77,7 +77,7 @@ import { signISCNTx } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 import IPFSClient from '~/utils/ipfs';
 
-const signerModule = namespace('~/store/signer')
+const signerModule = namespace('signer')
 
 @Component
 export default class IscnRegisterForm extends Vue{
