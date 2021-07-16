@@ -14,36 +14,31 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapActions } from 'vuex'
-
+import { Vue, Component } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 import { parsedISCNRecord } from '~/utils/cosmos/iscn'
 
-export default Vue.extend({
-  data() {
-    return {
-      searchISCNText: '',
-      isNotFound: false,
-    };
-  },
-  methods: {
-    ...mapActions('iscn', ['queryISCNByKeyword']),
-    async onSearchISCN() {
-      this.isNotFound = false;
-      const { searchISCNText } = this;
-      const res: parsedISCNRecord[] = await this.queryISCNByKeyword(searchISCNText);
-      if (!res.length) {
-        this.isNotFound = true;
-      } else if (res.length > 1) {
-        const iscnIds = res.map((r) => r.id);
-        this.$router.push({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }});
-      } else {
-        const iscnId = res[0].id;
-        this.$router.push({ name: 'view-iscnId', params: { iscnId }});
-      }
+const iscnModule = namespace('~/store/iscn')
+
+@Component
+export default class IndexPage extends Vue {
+  @iscnModule.Action queryISCNByKeyword!: (arg0: string) => parsedISCNRecord[]|PromiseLike<parsedISCNRecord[]>
+  searchISCNText = '';
+  isNotFound =  false;
+
+  async onSearchISCN() {
+    this.isNotFound = false;
+    const { searchISCNText } = this;
+    const res: parsedISCNRecord[] = await this.queryISCNByKeyword(searchISCNText);
+    if (!res.length) {
+      this.isNotFound = true;
+    } else if (res.length > 1) {
+      const iscnIds = res.map((r) => r.id);
+      this.$router.push({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }});
+    } else {
+      const iscnId = res[0].id;
+      this.$router.push({ name: 'view-iscnId', params: { iscnId }});
     }
-  },
-})
+  }
+}
 </script>
