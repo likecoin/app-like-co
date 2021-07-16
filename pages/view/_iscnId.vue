@@ -38,7 +38,7 @@ import { namespace } from 'vuex-class'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-const iscnModule = namespace('~/store/iscn')
+const iscnModule = namespace('iscn')
 
 @Component
 export default class ViewIscnIdPage extends Vue {

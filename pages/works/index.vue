@@ -15,8 +15,8 @@ import SearchResults from '~/components/SearchResults.vue';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
 
-const signerModule = namespace('~/store/signer')
-const iscnModule = namespace('~/store/iscn')
+const signerModule = namespace('signer')
+const iscnModule = namespace('iscn')
 
 @Component({
   layout: 'wallet',

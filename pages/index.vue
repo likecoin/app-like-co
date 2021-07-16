@@ -18,7 +18,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { parsedISCNRecord } from '~/utils/cosmos/iscn'
 
-const iscnModule = namespace('~/store/iscn')
+const iscnModule = namespace('iscn')
 
 @Component
 export default class IndexPage extends Vue {

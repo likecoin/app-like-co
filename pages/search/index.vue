@@ -14,7 +14,7 @@ import { namespace } from 'vuex-class'
 import SearchResults from '~/components/SearchResults.vue';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-const iscnModule = namespace('~/store/iscn')
+const iscnModule = namespace('iscn')
 
 @Component({
   components: { SearchResults },
