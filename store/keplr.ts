@@ -40,7 +40,7 @@ export default class Keplr extends VuexModule {
   }
 
   @Action
-  async initKeplr() {
+  async initKeplr(): Promise<boolean> {
     if (this.isInited) return true;
     if (!window.keplr) {
       let tries = 0;

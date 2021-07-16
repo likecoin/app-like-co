@@ -14,32 +14,27 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue'
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapActions, mapGetters } from 'vuex'
+import { OfflineSigner } from '@cosmjs/proto-signing'
+import { Vue, Component } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
-export default Vue.extend({
-  name: 'AppHeader',
+const signerModule = namespace('~/store/signer')
+const keplrModule = namespace('~/store/keplr')
 
-  computed: {
-    ...mapGetters('keplr', {
-      keplrWallet: 'getWalletAddress',
-      keplrSigner: 'getSigner',
-    }),
-    ...mapGetters('signer', { currentAddress: 'getAddress' }),
-  },
+@Component
+export default class AppHeader extends Vue{
+  @signerModule.Getter('getAddress') currentAddress!: string
+  @signerModule.Action updateSignerInfo!: (arg0: { signer: OfflineSigner|null; address: string }) => void
+  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
+  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
+  @keplrModule.Action initKeplr!: () => Promise<boolean>
 
-  methods: {
-    ...mapActions('keplr', ['initKeplr']),
-    ...mapActions('signer', ['updateSignerInfo']),
-    async onClickLoginKeplr() {
-      await this.initKeplr()
-      await this.updateSignerInfo({
-        signer: this.keplrSigner,
-        address: this.keplrWallet,
-      })
-    },
-  },
-})
+  async onClickLoginKeplr() {
+    await this.initKeplr()
+    await this.updateSignerInfo({
+      signer: this.keplrSigner,
+      address: this.keplrWallet,
+    })
+  }
+}
 </script>

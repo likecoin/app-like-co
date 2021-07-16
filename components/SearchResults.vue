@@ -23,17 +23,13 @@
 
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Vue, { PropType } from 'vue';
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-export default Vue.extend({
-  props: {
-    records: {
-      type: Array as PropType<Array<parsedISCNRecord>>,
-      required: true,
-    },
-  },
-})
+@Component
+export default class SearchResults extends Vue {
+  @Prop(Array) readonly records!: parsedISCNRecord[]
+}
 </script>
 
