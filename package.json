@@ -25,7 +25,10 @@
     "image-type": "^4.1.0",
     "ipfs-http-client": "^50.1.2",
     "ipfs-only-hash": "^4.0.0",
-    "nuxt": "^2.15.7"
+    "nuxt": "^2.15.7",
+    "vue-class-component": "^7.2.6",
+    "vue-property-decorator": "^9.1.2",
+    "vuex-class": "^0.3.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.14.7",
