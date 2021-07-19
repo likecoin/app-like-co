@@ -1,4 +1,4 @@
-import { IS_TESTNET } from '.';
+import { IS_TESTNET, COSMOS_DENOM } from '.';
 
 const mainConfig = {
   id: 'likecoin-chain-sheungwan',
@@ -14,7 +14,7 @@ const mainConfig = {
   coinLookup: [
     {
       viewDenom: 'LIKE',
-      chainDenom: 'nanolike',
+      chainDenom: COSMOS_DENOM,
       chainToViewConversionFactor: '0.000000001',
       icon: 'currencies/like.png',
       coinGeckoId: 'likecoin',
