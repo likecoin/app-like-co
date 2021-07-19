@@ -67,6 +67,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
@@ -76,6 +77,8 @@ import { Author } from '~/types/author';
 import { signISCNTx } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 import IPFSClient from '~/utils/ipfs';
+import { getAccountBalance } from '~/utils/cosmos';
+import { ISCN_MIN_BALANCE } from '~/constant';
 
 const signerModule = namespace('signer')
 
@@ -146,6 +149,10 @@ export default class IscnRegisterForm extends Vue{
   }
 
   async submitToISCN(): Promise<void> {
+    const balance = await getAccountBalance(this.address);
+    if (new BigNumber(balance).lt(ISCN_MIN_BALANCE)) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
     if (!this.signer) throw new Error('MISSING_SIGNER');
     this.uploadStatus = "Waiting for signature";
     const payload = {

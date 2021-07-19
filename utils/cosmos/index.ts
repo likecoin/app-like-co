@@ -1,7 +1,48 @@
-import network from '~/constant/network';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { QueryClient, setupBankExtension, BankExtension, Coin } from "@cosmjs/stargate";
+import BigNumber from 'bignumber.js';
+
+import { setupISCNExtension, ISCNExtension } from "./iscn/ISCNQueryExtension";
+import config from '~/constant/network';
+import { COSMOS_DENOM } from '~/constant';
+
+let queryClient: QueryClient & ISCNExtension & BankExtension;
+
+async function initQueryClient() {
+  const tendermintClient = await Tendermint34Client.connect(config.rpcURL);
+  queryClient = QueryClient.withExtensions(
+    tendermintClient,
+    setupISCNExtension,
+    setupBankExtension,
+  );
+  return queryClient;
+}
+
+export async function getQueryClient() {
+  if (!queryClient) await initQueryClient();
+  return queryClient;
+}
+
+function LIKEToNanolike(value: string|number): string {
+  return (new BigNumber(value)).multipliedBy(1e9).toFixed();
+}
+
+export function LIKEToAmount(value: string|number): Coin {
+  return { denom: COSMOS_DENOM, amount: LIKEToNanolike(value) };
+}
+
+export function amountToLIKE(likecoin: Coin) {
+  if (!likecoin) return -1;
+  if (likecoin.denom === COSMOS_DENOM) {
+    return (new BigNumber(likecoin.amount)).dividedBy(1e9).toFixed();
+  }
+  console.error(`${likecoin.denom} is not supported denom`);
+  return -1;
+}
 
 export function configToKeplrCoin(denom: string) {
-  const c = network.coinLookup.find(coin => coin.viewDenom === denom);
+  const c = config.coinLookup.find(coin => coin.viewDenom === denom);
   if (!c) return {};
   return {
     coinDenom: c.viewDenom,
@@ -13,4 +54,6 @@ export function configToKeplrCoin(denom: string) {
   };
 }
 
-export default configToKeplrCoin
+export async function getAccountBalance(address: string) {
+  return amountToLIKE(await queryClient.bank.balance(address, COSMOS_DENOM));
+}
