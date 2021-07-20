@@ -29,7 +29,8 @@
     "types": [
       "@nuxt/types",
       "@nuxtjs/axios",
-      "@types/node"
+      "@types/node",
+      "types/*.d.ts"
     ]
   },
   "exclude": [

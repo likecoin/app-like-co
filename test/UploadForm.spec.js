@@ -1,3 +1,4 @@
+import './stub';
 import { mount } from '@vue/test-utils'
 import UploadForm from '@/components/UploadForm.vue'
 

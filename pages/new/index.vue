@@ -16,6 +16,7 @@
     />
     <iscn-uploaded-info
       v-else-if="state === 'done'"
+      :is-image="isImage"
       :ipfs-hash="ipfsHash"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"

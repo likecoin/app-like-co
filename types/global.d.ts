@@ -2,10 +2,10 @@
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export {};
-
 declare global {
     interface Window {
-        keplr:any;
+        keplr: any;
         getOfflineSigner(id: string): OfflineSigner;
     }
 }
+
