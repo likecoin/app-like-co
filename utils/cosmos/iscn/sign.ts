@@ -1,6 +1,5 @@
 import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import {
-  BroadcastTxSuccess,
   defaultRegistryTypes,
   assertIsBroadcastTxSuccess,
   SigningStargateClient,
@@ -96,19 +95,6 @@ export async function signISCNTx(tx: ISCNSignPayload, signer: OfflineSigner, add
   const response = await client.signAndBroadcast(address, [message], fee, memo);
   assertIsBroadcastTxSuccess(response);
   return response;
-}
-
-export function parseISCNTxInfo(tx: BroadcastTxSuccess) {
-  const { transactionHash } = tx;
-  let iscnId;
-  if (tx.rawLog) {
-    const logs = JSON.parse(tx.rawLog)
-    iscnId = logs[0].events[0].attributes[0].value; // TODO: check index exists
-  }
-  return {
-    txHash: transactionHash,
-    iscnId,
-  }
 }
 
 export default signISCNTx;
