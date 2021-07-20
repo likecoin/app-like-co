@@ -1,6 +1,7 @@
 <template>
   <div class="mx-auto">
-    <img class="max-w-md" :src="fileData">
+    <img v-if="isImage" class="max-w-md" :src="fileData">
+    <div v-if="exifInfo">{{ exifInfo }}</div>
     <form @submit.prevent="onSubmit">
       <input
         v-if="!fileData"
@@ -22,21 +23,28 @@
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vue from 'vue';
-import { digestFileSHA256 } from '~/utils/misc';
+import exifr from 'exifr';
+import { digestFileSHA256, readImageType } from '~/utils/misc';
 
 export default Vue.extend({
   name: 'UploadForm',
   data(): {
+      isImage: boolean;
       ipfsURL: string;
       ipfsHash: string;
       fileData: string,
       fileSHA256: string;
+      fileBlob: Blob | null;
+      exifInfo: any;
     } {
     return {
+      isImage: false,
       ipfsURL: '',
       ipfsHash: '',
       fileData: '',
       fileSHA256: '',
+      fileBlob: null,
+      exifInfo: null,
     };
   },
   methods: {
@@ -51,7 +59,17 @@ export default Vue.extend({
 
         };
         reader.readAsDataURL(files[0]);
-        this.fileSHA256 = await digestFileSHA256(files[0]);
+        const [fileSHA256, imageType] = await Promise.all([
+          digestFileSHA256(files[0]),
+          readImageType(files[0]),
+        ])
+        this.fileSHA256 = fileSHA256;
+        this.isImage = !!imageType;
+        if (this.isImage) {
+          this.exifInfo = await exifr.parse(files[0])
+        } else {
+          this.exifInfo = null;
+        }
       }
     },
     onEnterURL() {
@@ -71,6 +89,9 @@ export default Vue.extend({
         ipfsHash: this.ipfsHash,
         fileData: this.fileData,
         fileSHA256: this.fileSHA256,
+        fileBlob: this.fileBlob,
+        isImage: this.isImage,
+        exifInfo: this.exifInfo,
       });
     },
   }

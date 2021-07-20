@@ -6,7 +6,7 @@ export interface ISCNSignPayload {
   license: string;
   ipfsHash: string;
   fileSHA256: string;
-  // type: string;
+  type: string;
   authorNames: string;
   authorUrls: string;
 }
