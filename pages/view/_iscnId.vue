@@ -32,32 +32,38 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapActions, mapGetters } from 'vuex'
+import { Vue, Component } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
+import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-export default Vue.extend({
-  computed: {
-    ...mapGetters('iscn', ['getISCNById']),
-    iscnId() {
-      return this.$route.params.iscnId;
-    },
-    record() {
-      return this.getISCNById(this.iscnId)?.data;
-    },
-    metadata() {
-      return this.record && (this.record as any).contentMetadata;
-    },
-    type() {
-      return this.metadata && this.metadata['@type'];
-    },
-    imgSrc() {
-      return (this.type === 'Image' || this.type === 'Photo') && getIPFSUrlFromISCN(this.getISCNById(this.iscnId));
-    },
-  },
+const iscnModule = namespace('iscn')
+
+@Component
+export default class ViewIscnIdPage extends Vue {
+  @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
+  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<parsedISCNRecord[]>
+  get iscnId() {
+    return this.$route.params.iscnId;
+  }
+
+  get record() {
+    return this.getISCNById(this.iscnId)?.data;
+  }
+
+  get metadata() {
+    return this.record && (this.record as any).contentMetadata;
+  }
+
+  get type() {
+    return this.metadata && this.metadata['@type'];
+  }
+
+  get imgSrc() {
+    return (this.type === 'Image' || this.type === 'Photo') && getIPFSUrlFromISCN(this.getISCNById(this.iscnId));
+  }
+
   async mounted() {
     if (!this.getISCNById(this.iscnId)) {
       await this.fetchISCNById(this.iscnId);
@@ -65,9 +71,6 @@ export default Vue.extend({
      if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
      }
-  },
-  methods: {
-    ...mapActions('iscn', ['fetchISCNById']),
   }
-})
+}
 </script>

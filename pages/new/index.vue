@@ -28,72 +28,58 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapGetters } from 'vuex';
+import { Vue, Component } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
-export default Vue.extend({
+const signerModule = namespace('signer')
+
+@Component({
   layout: 'wallet',
-  data(): {
-      state: string;
-      ipfsHash: string;
-      fileSHA256: string;
-      fileData: string;
-      iscnId: string;
-      iscnTxHash: string;
-      iscnTimestamp: string;
-      isImage: boolean;
-      fileBlob: Blob | null;
-      exifInfo: any;
-  } {
-    return {
-      state: 'init',
-      ipfsHash: '',
-      fileSHA256: '',
-      fileData: '',
-      iscnId: '',
-      iscnTxHash: '',
-      iscnTimestamp: '',
-      isImage: false,
-      fileBlob: null,
-      exifInfo: null,
-    };
-  },
-  computed: {
-    ...mapGetters('signer', { currentAddress: 'getAddress' }),
-  },
-  methods: {
-    onSubmitUpload({
-      ipfsHash,
-      fileData,
-      fileSHA256,
-      isImage,
-      fileBlob,
-      exifInfo,
-    }: {
-      ipfsHash: string,
-      fileData: string,
-      fileSHA256: string,
-      isImage: boolean;
-      fileBlob: Blob | null;
-      exifInfo: any;
-    }) {
-      this.ipfsHash = ipfsHash;
-      this.fileData = fileData;
-      this.fileSHA256 = fileSHA256;
-      this.isImage = isImage;
-      this.fileBlob = fileBlob;
-      this.exifInfo = exifInfo;
-      this.state = 'iscn';
-    },
-    onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
-      this.iscnTxHash = txHash;
-      this.iscnId = iscnId;
-      this.iscnTimestamp = timestamp;
-      this.state = 'done';
-    },
-  },
 })
+export default class NewIndexPage extends Vue {
+  state = 'init';
+  ipfsHash = '';
+  fileSHA256 = '';
+  fileData = '';
+  iscnId = '';
+  iscnTxHash = '';
+  iscnTimestamp = '';
+  isImage = false;
+  fileBlob: Blob | null = null;
+  exifInfo: any = null;
+
+  @signerModule.Getter('getAddress') currentAddress!: string
+
+  onSubmitUpload({
+    ipfsHash,
+    fileData,
+    fileSHA256,
+    isImage,
+    fileBlob,
+    exifInfo,
+  }: {
+    ipfsHash: string,
+    fileData: string,
+    fileSHA256: string,
+    isImage: boolean;
+    fileBlob: Blob | null;
+    exifInfo: any;
+  }) {
+    this.ipfsHash = ipfsHash;
+    this.fileData = fileData;
+    this.fileSHA256 = fileSHA256;
+    this.isImage = isImage;
+    this.fileBlob = fileBlob;
+    this.exifInfo = exifInfo;
+    this.state = 'iscn';
+  }
+
+  onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
+    this.iscnTxHash = txHash;
+    this.iscnId = iscnId;
+    this.iscnTimestamp = timestamp;
+    this.state = 'done';
+  }
+}
 
 </script>

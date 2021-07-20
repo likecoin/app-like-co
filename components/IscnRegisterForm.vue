@@ -67,138 +67,110 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapGetters } from 'vuex';
+import BigNumber from 'bignumber.js';
+import { OfflineSigner } from '@cosmjs/proto-signing'
+import { Vue, Component, Prop } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author';
 
 import { signISCNTx } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 import IPFSClient from '~/utils/ipfs';
+import { getAccountBalance } from '~/utils/cosmos';
+import { ISCN_MIN_BALANCE } from '~/constant';
 
-export default Vue.extend({
-  name: 'IscnRegisterForm',
-  props: {
-    isImage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    exifInfo: {
-      type: Object,
-      required: false,
-      default: () => null,
-    },
-    fileBlob: {
-      type: Blob,
-      required: false,
-      default: null,
-    },
-    fileData: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    fileSHA256: {
-      type: String,
-      required: true,
-    },
-    isIPFSLink: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    ipfsHash: {
-      type: String,
-      required: true,
-    },
-  },
-  data(): {
-      authors: Author[];
-      title: string;
-      description: string;
-      tagsString: string;
-      url: string;
-      license: string;
-      authorName: string;
-      authorUrl: string;
-      uploadStatus: string;
-      actualIpfsHash: string;
-  } {
-    return {
-      authors: [],
-      title: '',
-      description: '',
-      tagsString: '',
-      url: '',
-      license: '',
-      authorName: '',
-      authorUrl: '',
-      uploadStatus: '',
-      uploadIpfsHash: this.ipfsHash,
-    };
-  },
-  computed: {
-    ...mapGetters('signer', {
-      address: 'getAddress',
-      signer: 'getSigner',
-    }),
-    tags(): string[] {
-      return (this.tagsString as string).split(',');
-    },
-    authorNames() {
-      return this.authors.map(a => a.name);
-    },
-    authorUrls() {
-      return this.authors.map(a => a.url);
-    },
-    isPhoto() {
-      return this.exifInfo && this.exifInfo.ExifImageWidth;
-    },
-    type() {
-      if (this.isPhoto) return 'Photo';
-      if (this.isImage) return 'Image';
-      return 'CreativeWorks';
-    },
-  },
+const signerModule = namespace('signer')
+
+@Component
+export default class IscnRegisterForm extends Vue{
+  @Prop({ default: false }) readonly isImage!: boolean
+  @Prop({ default: null }) readonly exifInfo: any|null|undefined
+  @Prop({ default: null }) readonly fileBlob: Blob|null|undefined
+  @Prop({ default: null }) readonly fileData: string|null|undefined
+  @Prop(String) readonly fileSHA256!: string
+  @Prop({ default: false }) readonly isIPFSLink!: boolean
+  @Prop(String) readonly ipfsHash!: string
+
+  authors: Author[] = [];
+  title: string = '';
+  description: string = '';
+  tagsString: string = '';
+  url: string = '';
+  license: string = '';
+  authorName: string = '';
+  authorUrl: string = '';
+  uploadStatus: string = '';
+  uploadIpfsHash: string = this.ipfsHash;
+
+  @signerModule.Getter('getAddress') address!: string
+  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+
+  get tags(): string[] {
+    return (this.tagsString as string).split(',');
+  }
+
+  get authorNames() {
+    return this.authors.map(a => a.name);
+  }
+
+  get authorUrls() {
+    return this.authors.map(a => a.url);
+  }
+
+  get isPhoto() {
+    return this.exifInfo && this.exifInfo.ExifImageWidth;
+  }
+
+  get type() {
+    if (this.isPhoto) return 'Photo';
+    if (this.isImage) return 'Image';
+    return 'CreativeWorks';
+  }
+
   mounted() {
     this.uploadStatus = '';
-  },
-  methods: {
-    onClickAddAuthor() {
-      this.authors.push({ name: '', url: '' });
-    },
-    async onSubmit() {
-      if (!this.isIPFSLink) await this.submitToIPFS();
-      await this.submitToISCN();
-    },
-    async submitToIPFS() {
-      if (!this.fileBlob) return
-      this.uploadStatus = "Uploading";
-      const res = await IPFSClient.add(this.fileBlob);
-      if (res.path) this.uploadIpfsHash = res.path;
-    },
-    async submitToISCN() {
-      this.uploadStatus = "Waiting for signature";
-      const payload = {
-        type: this.type,
-        title: this.title,
-        description: this.description,
-        tagsString: this.tagsString,
-        url: this.url,
-        license: this.license,
-        ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-        fileSHA256: this.fileSHA256,
-        authorNames: this.authorNames,
-        authorUrls: this.authorUrls,
-      };
-      const tx = await signISCNTx(payload, this.signer, this.address);
-      this.uploadStatus = "Success";
-      this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
-    }
   }
-})
+
+  onClickAddAuthor() {
+    this.authors.push({ name: '', url: '' });
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.isIPFSLink) await this.submitToIPFS();
+    await this.submitToISCN();
+  }
+
+  async submitToIPFS(): Promise<void> {
+    if (!this.fileBlob) return
+    this.uploadStatus = "Uploading";
+    const res = await IPFSClient.add(this.fileBlob);
+    if (res.path) this.uploadIpfsHash = res.path;
+  }
+
+  async submitToISCN(): Promise<void> {
+    const balance = await getAccountBalance(this.address);
+    if (new BigNumber(balance).lt(ISCN_MIN_BALANCE)) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    if (!this.signer) throw new Error('MISSING_SIGNER');
+    this.uploadStatus = "Waiting for signature";
+    const payload = {
+      type: this.type,
+      title: this.title,
+      description: this.description,
+      tagsString: this.tagsString,
+      url: this.url,
+      license: this.license,
+      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
+      fileSHA256: this.fileSHA256,
+      authorNames: this.authorNames,
+      authorUrls: this.authorUrls,
+    };
+    const tx = await signISCNTx(payload, this.signer, this.address);
+    this.uploadStatus = "Success";
+    this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
+  }
+}
 
 </script>

@@ -8,44 +8,41 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapActions, mapGetters } from 'vuex';
-import SearchResults from '~/components/SearchResults.vue';
+import { Vue, Component, Watch } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
+import SearchResults from '~/components/SearchResults.vue';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-export default Vue.extend({
-  components: { SearchResults },
+
+const signerModule = namespace('signer')
+const iscnModule = namespace('iscn')
+
+@Component({
   layout: 'wallet',
-  data(): {
-    records: parsedISCNRecord[],
-  } {
-    return {
-      records: [],
-    };
-  },
-  computed: {
-    ...mapGetters('signer', { currentAddress: 'getAddress' }),
-  },
-  watch: {
-    currentAddress() {
-      this.refreshWorks();
-    }
-  },
+  components: { SearchResults },
+})
+export default class WorksIndexPageextends extends Vue {
+  records: parsedISCNRecord[] = [];
+
+  @signerModule.Getter('getAddress') currentAddress!: string
+  @iscnModule.Action queryISCNByAddress!: (arg0: string) => parsedISCNRecord[]|PromiseLike<parsedISCNRecord[]>
+
+  @Watch('currentAddress')
+  onCurrentAddressChanged() {
+    this.refreshWorks();
+  }
+
   mounted() {
     this.refreshWorks();
-  },
-  methods: {
-    ...mapActions('iscn', ['queryISCNByAddress']),
-    async refreshWorks() {
-      if (!this.currentAddress) {
-        this.records = [];
-        return;
-      }
-      this.records = await this.queryISCNByAddress(this.currentAddress);
+  }
+
+  async refreshWorks() {
+    if (!this.currentAddress) {
+      this.records = [];
+      return;
     }
-  },
-})
+    this.records = await this.queryISCNByAddress(this.currentAddress);
+  }
+}
 </script>

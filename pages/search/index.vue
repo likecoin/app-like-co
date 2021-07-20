@@ -1,39 +1,41 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
-      <div v-if="!records">
-        Loading
-      </div>
-      <search-results v-else :records="records"/>
+    <div v-if="!records">
+      Loading
     </div>
+    <search-results v-else :records="records"/>
   </div>
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Vue from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mapActions, mapGetters } from 'vuex';
-import SearchResults from '~/components/SearchResults.vue';
+import { Vue, Component } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
+import SearchResults from '~/components/SearchResults.vue';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
-export default Vue.extend({
+const iscnModule = namespace('iscn')
+
+@Component({
   components: { SearchResults },
-  computed: {
-    ...mapGetters('iscn', ['getISCNById']),
-    iscnIds(): string[] {
-      try {
-        const ids = JSON.parse(this.$route.params.iscnIds);
-        return ids;
-      } catch (err) {
-        console.error(err);
-      }
-      return [];
-    },
-    records() {
-      return (this.iscnIds as string []).map(id => this.getISCNById(id));
-    },
-  },
+})
+export default class SearchIndexPage extends Vue {
+  @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
+  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<parsedISCNRecord[]>
+  get iscnIds(): string[] {
+    try {
+      const ids = JSON.parse(this.$route.params.iscnIds);
+      return ids;
+    } catch (err) {
+      console.error(err);
+    }
+    return [];
+  }
+
+  get records() {
+    return (this.iscnIds as string []).map(id => this.getISCNById(id));
+  }
+
   async mounted() {
     const iscnIds: string[] = this.iscnIds as string[] ;
     if (!iscnIds.length) {
@@ -47,9 +49,6 @@ export default Vue.extend({
       }
     })
     await Promise.all(promises);
-  },
-  methods: {
-    ...mapActions('iscn', ['fetchISCNById']),
   }
-})
+}
 </script>
