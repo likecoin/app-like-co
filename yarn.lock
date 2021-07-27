@@ -1295,6 +1295,11 @@
     methods "^1.1.2"
     path-to-regexp "^6.1.0"
 
+"@likecoin/iscn-message-types@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-message-types/-/iscn-message-types-0.0.1.tgz#190a7d4920e2e80a38c05cba96ec14bf4f99d8bc"
+  integrity sha512-tNAgwQ/kynXu5k2upFiytOBDrNoixa0SvW/OxaJx91+PQYaGodAL+BQZbZs6VamT2q3JqO0SEZplNqgfxwxTfw==
+
 "@multiformats/base-x@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@multiformats/base-x/-/base-x-4.0.1.tgz#95ff0fa58711789d53aefb2590a8b7a4e715d121"

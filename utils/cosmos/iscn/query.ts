@@ -1,7 +1,7 @@
 import { StargateClient } from "@cosmjs/stargate";
+import { MsgCreateIscnRecord } from "@likecoin/iscn-message-types/dist/iscn/tx";
 import config from "~/constant/network";
 import { parseISCNTxInfoFromIndexedTx, parseISCNTxRecordFromQuery, parsedISCNRecord } from '.';
-import { MsgCreateIscnRecord } from "~/constant/codec/iscn/tx";
 import { getQueryClient } from "..";
 
 let stargateClient: StargateClient;

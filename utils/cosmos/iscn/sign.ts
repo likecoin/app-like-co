@@ -4,8 +4,8 @@ import {
   assertIsBroadcastTxSuccess,
   SigningStargateClient,
 } from "@cosmjs/stargate";
+import { MsgCreateIscnRecord } from "@likecoin/iscn-message-types/dist/iscn/tx";
 import { DEFAULT_GAS_PRICE_NUMBER } from "~/constant";
-import { MsgCreateIscnRecord } from "~/constant/codec/iscn/tx";
 import config from "~/constant/network";
 import { ISCNSignPayload } from './iscn.type'
 

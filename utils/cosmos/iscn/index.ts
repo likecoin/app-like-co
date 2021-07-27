@@ -3,8 +3,8 @@ import {
   IndexedTx,
 } from '@cosmjs/stargate';
 import { decodeTxRaw } from '@cosmjs/proto-signing';
-import { IscnRecord, MsgCreateIscnRecord } from "~/constant/codec/iscn/tx";
-import { QueryResponseRecord } from "~/constant/codec/iscn/query";
+import { IscnRecord, MsgCreateIscnRecord } from "@likecoin/iscn-message-types/dist/iscn/tx";
+import { QueryResponseRecord } from "@likecoin/iscn-message-types/dist/iscn/query";
 
 export interface parsedISCNData {
   stakeholders: any[];
