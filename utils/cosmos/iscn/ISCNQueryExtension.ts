@@ -10,7 +10,7 @@ import {
   QueryGetCidResponse,
   QueryHasCidResponse,
   QueryGetCidSizeResponse,
-} from "~/constant/codec/iscn/query";
+} from "@likecoin/iscn-message-types/dist/iscn/query";
 
 export interface ISCNExtension {
   readonly iscn: {
