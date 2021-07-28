@@ -9,6 +9,7 @@
         <li>iscnId: {{ iscnId }}</li>
         <li>recordNotes: {{ record.recordNotes }}</li>
         <li>contentFingerprints: {{ record.contentFingerprints }}</li>
+        <li>owner: {{ owner }}</li>
       </ul>
       <ul>
         <li>Type: {{ metadata['@type'] }}</li>
@@ -42,8 +43,15 @@ const iscnModule = namespace('iscn')
 
 @Component
 export default class ViewIscnIdPage extends Vue {
+  owner = '';
+
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
-  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<parsedISCNRecord[]>
+  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
+    records: parsedISCNRecord[];
+    owner: string;
+    latestVersion: Long.Long;
+  } | null>
+
   get iscnId() {
     return this.$route.params.iscnId;
   }
@@ -65,8 +73,9 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
-    if (!this.getISCNById(this.iscnId)) {
-      await this.fetchISCNById(this.iscnId);
+    if (!this.getISCNById(this.iscnId) || !this.owner) {
+      const res = await this.fetchISCNById(this.iscnId);
+      if (res) this.owner = res.owner;
     }
      if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
