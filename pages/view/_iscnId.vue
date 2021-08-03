@@ -4,13 +4,17 @@
       Loading
     </div>
     <div v-else>
-      <img v-if="imgSrc" class="max-w-md" :src="imgSrc">
+      <img v-if="imgSrc" ref="iscnImg" class="max-w-md" :src="imgSrc">
       <ul>
         <li>iscnId: {{ iscnId }}</li>
         <li>recordNotes: {{ record.recordNotes }}</li>
         <li>contentFingerprints: {{ record.contentFingerprints }}</li>
         <li>owner: {{ owner }}</li>
       </ul>
+      <div v-if="exifInfo">
+        <h3>Exif:</h3>
+        <div>{{ exifInfo }}</div>
+      </div>
       <ul>
         <li>Type: {{ metadata['@type'] }}</li>
         <li>Title: {{ metadata.title }}</li>
@@ -33,8 +37,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import exifr from 'exifr'
 
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
@@ -44,6 +49,7 @@ const iscnModule = namespace('iscn')
 @Component
 export default class ViewIscnIdPage extends Vue {
   owner = '';
+  exifInfo = null;
 
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
@@ -80,6 +86,14 @@ export default class ViewIscnIdPage extends Vue {
      if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
      }
+  }
+
+  @Watch('imgSrc')
+  onImgSrcChanged() {
+    this.$nuxt.$nextTick(async () => {
+      const imgElement = this.$refs.iscnImg;
+      if (imgElement) this.exifInfo = await exifr.parse(imgElement as HTMLImageElement);
+    });
   }
 }
 </script>
