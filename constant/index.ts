@@ -13,3 +13,7 @@ export const IPFS_ENDPOINT = 'https://ipfs.infura.io:5001/api/v0';
 export const IPFS_VIEW_GATEWAY_URL = 'https://cloudflare-ipfs.com/ipfs';
 
 export const ISCN_MIN_BALANCE = 0.01;
+
+export const ISCN_GAS_FEE = 200000;
+
+export const ISCN_REGISTRY_NAME = 'likecoin-chain';

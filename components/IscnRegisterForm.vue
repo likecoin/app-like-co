@@ -74,7 +74,7 @@ import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author';
 
-import { signISCNTx } from '~/utils/cosmos/iscn/sign';
+import { signISCNTx, estimateISCNTxGas } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 import IPFSClient from '~/utils/ipfs';
 import { getAccountBalance } from '~/utils/cosmos';
@@ -149,12 +149,7 @@ export default class IscnRegisterForm extends Vue{
   }
 
   async submitToISCN(): Promise<void> {
-    const balance = await getAccountBalance(this.address);
-    if (new BigNumber(balance).lt(ISCN_MIN_BALANCE)) {
-      throw new Error('INSUFFICIENT_BALANCE');
-    }
-    if (!this.signer) throw new Error('MISSING_SIGNER');
-    this.uploadStatus = "Waiting for signature";
+    this.uploadStatus = "Loading";
     const payload = {
       type: this.type,
       title: this.title,
@@ -167,6 +162,16 @@ export default class IscnRegisterForm extends Vue{
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
     };
+    const [balance, gasNeeded] = await Promise.all([
+      getAccountBalance(this.address),
+      estimateISCNTxGas(payload),
+    ]);
+    const gasAmount = gasNeeded?.amount[0].amount || ISCN_MIN_BALANCE;
+    if (new BigNumber(balance).lt(gasAmount)) {
+      throw new Error('INSUFFICIENT_BALANCE');
+    }
+    if (!this.signer) throw new Error('MISSING_SIGNER');
+    this.uploadStatus = "Waiting for signature";
     const tx = await signISCNTx(payload, this.signer, this.address);
     this.uploadStatus = "Success";
     this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
