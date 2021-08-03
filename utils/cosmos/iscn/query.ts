@@ -74,3 +74,12 @@ export async function queryRecordsByOwner(owner: string, fromSequence?: number) 
   }
   return null;
 }
+
+export async function queryFeePerByte() {
+  const queryClient = await getQueryClient();
+  const res = await queryClient.iscn.params();
+  if (res && res.params && res.params.feePerByte) {
+    return res.params.feePerByte;
+  }
+  return 0;
+}
