@@ -17,7 +17,14 @@ const registry = new Registry([
   ['/likechain.iscn.MsgCreateIscnRecord', MsgCreateIscnRecord], // Replace with your own type URL and Msg class
 ]);
 
-export async function estimateISCNTxGas(tx: ISCNSignPayload, {
+export function estimateISCNTxGas() {
+  return {
+    amount: [{ amount: (DEFAULT_GAS_PRICE_NUMBER * ISCN_GAS_FEE).toFixed(), denom: 'nanolike' }],
+    gas: ISCN_GAS_FEE.toFixed(),
+  };
+}
+
+export async function estimateISCNTxFee(tx: ISCNSignPayload, {
   version = 1,
 } = {}) {
   const record = formatISCNPayload(tx);
@@ -64,13 +71,8 @@ export async function estimateISCNTxGas(tx: ISCNSignPayload, {
       '/': 'bahuaierav3bfvm4ytx7gvn4yqeu4piiocuvtvdpyyb5f6moxniwemae4tjyq'
     };
   }
-  let gas = Buffer.from(jsonStringify(obj), 'utf-8').length * feePerByteAmount;
-  gas += ISCN_GAS_FEE;
-
-  return {
-    amount: [{ amount: (DEFAULT_GAS_PRICE_NUMBER * gas).toFixed(), denom: 'nanolike' }],
-    gas: gas.toFixed(),
-  };
+  const feeAmount = Buffer.from(jsonStringify(obj), 'utf-8').length * feePerByteAmount;
+  return feeAmount;
 }
 
 function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
@@ -141,11 +143,8 @@ export async function signISCNTx(tx: ISCNSignPayload, signer: OfflineSigner, add
       record,
     },
   };
+  const fee = estimateISCNTxGas();
   const memo = 'app.like.co';
-  const fee = {
-    amount: [{ amount: (DEFAULT_GAS_PRICE_NUMBER * ISCN_GAS_FEE).toFixed(), denom: 'nanolike' }],
-    gas: ISCN_GAS_FEE.toFixed(),
-  };
   const response = await client.signAndBroadcast(address, [message], fee, memo);
   assertIsBroadcastTxSuccess(response);
   return response;
