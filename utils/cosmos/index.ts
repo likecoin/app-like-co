@@ -55,5 +55,6 @@ export function configToKeplrCoin(denom: string) {
 }
 
 export async function getAccountBalance(address: string) {
-  return amountToLIKE(await queryClient.bank.balance(address, COSMOS_DENOM));
+  const client = await getQueryClient();
+  return amountToLIKE(await client.bank.balance(address, COSMOS_DENOM));
 }
