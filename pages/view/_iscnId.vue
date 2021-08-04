@@ -41,14 +41,17 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import exifr from 'exifr'
 
+import { isCosmosTransactionHash } from '~/utils/cosmos';
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
+import { ISCN_PREFIX } from '~/constant';
 
 const iscnModule = namespace('iscn')
 
 @Component
 export default class ViewIscnIdPage extends Vue {
   owner = '';
+  iscnId = '';
   exifInfo = null;
 
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
@@ -58,9 +61,7 @@ export default class ViewIscnIdPage extends Vue {
     latestVersion: Long.Long;
   } | null>
 
-  get iscnId() {
-    return this.$route.params.iscnId;
-  }
+  @iscnModule.Action fetchISCNByTx!: (arg0: string) => Promise<{ records: parsedISCNRecord[]; }>
 
   get record() {
     return this.getISCNById(this.iscnId)?.data;
@@ -78,7 +79,28 @@ export default class ViewIscnIdPage extends Vue {
     return (this.type === 'Image' || this.type === 'Photo') && getIPFSUrlFromISCN(this.getISCNById(this.iscnId));
   }
 
+  created() {
+    const { iscnId } = this.$route.params;
+    if (iscnId.startsWith(ISCN_PREFIX)) {
+      this.iscnId = iscnId;
+    }
+  }
+
   async mounted() {
+    if (!this.iscnId) {
+      const param = this.$route.params.iscnId;
+      if (!isCosmosTransactionHash(param)) {
+        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' });
+        return;
+      }
+      const res = await this.fetchISCNByTx(param);
+      if (!res) {
+        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' });
+        return;
+      }
+      this.iscnId = res.records[0].id;
+      this.$router.replace({ params: { iscnId: this.iscnId }});
+    }
     if (!this.getISCNById(this.iscnId) || !this.owner) {
       const res = await this.fetchISCNById(this.iscnId);
       if (res) this.owner = res.owner;

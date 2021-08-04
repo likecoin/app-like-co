@@ -39,6 +39,25 @@ export default class ISCN extends VuexModule {
   }
 
   @Action
+  async fetchISCNByTx(iscnId: string): Promise<{
+    records: parsedISCNRecord[];
+} | null> {
+    const txRes = await queryRecordsByTx(iscnId).catch(() => null);
+    let txRecords: parsedISCNRecord[] = [];
+    if (txRes) {
+      txRecords = (await Promise.all(txRes.map(async (t) => {
+        if (typeof t ==='string') {
+          const res = await queryRecordsById(t);
+          return res?.records[0]
+        }
+        return t;
+      }))).filter(t => t) as parsedISCNRecord[];
+    }
+    this.context.commit('setRecords', txRecords);
+    return { records: txRecords };
+  }
+
+  @Action
   async fetchISCNById(iscnId: string): Promise<{
     records: parsedISCNRecord[];
     owner: string;

@@ -58,3 +58,7 @@ export async function getAccountBalance(address: string) {
   const client = await getQueryClient();
   return amountToLIKE(await client.bank.balance(address, COSMOS_DENOM));
 }
+
+export function isCosmosTransactionHash(input: string) {
+  return /^[0-9a-f]{64}$/i.test(input);
+}
