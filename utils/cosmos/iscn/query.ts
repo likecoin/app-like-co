@@ -1,5 +1,7 @@
-import { StargateClient } from "@cosmjs/stargate";
+import { Coin, StargateClient } from "@cosmjs/stargate";
 import { MsgCreateIscnRecord } from "@likecoin/iscn-message-types/dist/iscn/tx";
+import BigNumber from 'bignumber.js';
+
 import config from "~/constant/network";
 import { parseISCNTxInfoFromIndexedTx, parseISCNTxRecordFromQuery, parsedISCNRecord } from '.';
 import { getQueryClient } from "..";
@@ -79,7 +81,14 @@ export async function queryFeePerByte() {
   const queryClient = await getQueryClient();
   const res = await queryClient.iscn.params();
   if (res && res.params && res.params.feePerByte) {
-    return res.params.feePerByte;
+    const {
+      denom,
+      amount,
+    } = res.params.feePerByte;
+    return {
+      denom,
+      amount: new BigNumber(amount).shiftedBy(-18).toFixed(),
+    } as Coin;
   }
   return 0;
 }
