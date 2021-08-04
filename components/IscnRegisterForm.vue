@@ -74,11 +74,10 @@ import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author';
 
-import { signISCNTx, estimateISCNTxGas } from '~/utils/cosmos/iscn/sign';
+import { signISCNTx, estimateISCNTxGas, estimateISCNTxFee } from '~/utils/cosmos/iscn/sign';
 import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
 import IPFSClient from '~/utils/ipfs';
 import { getAccountBalance } from '~/utils/cosmos';
-import { ISCN_MIN_BALANCE } from '~/constant';
 
 const signerModule = namespace('signer')
 
@@ -162,15 +161,13 @@ export default class IscnRegisterForm extends Vue{
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
     };
-    const [balance, nanolikeNeeded] = await Promise.all([
+    const [balance, iscnFeeNanolike] = await Promise.all([
       getAccountBalance(this.address),
-      estimateISCNTxGas(payload),
+      estimateISCNTxFee(payload),
     ]);
-    let gasAmount = ISCN_MIN_BALANCE.toString();
-    if (nanolikeNeeded?.amount[0].amount) {
-      gasAmount = new BigNumber(nanolikeNeeded.amount[0].amount).shiftedBy(-9).toFixed();
-    }
-    if (new BigNumber(balance).lt(gasAmount)) {
+    const gasFee = estimateISCNTxGas();
+    const totalFee = new BigNumber(iscnFeeNanolike).plus(gasFee.amount[0].amount).shiftedBy(-9);
+    if (new BigNumber(balance).lt(totalFee)) {
       throw new Error('INSUFFICIENT_BALANCE');
     }
     if (!this.signer) throw new Error('MISSING_SIGNER');
