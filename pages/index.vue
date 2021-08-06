@@ -2,13 +2,16 @@
   <div class="container flex flex-col items-center mx-auto">
     <div class="my-4">
       <form @submit.prevent="onSearchISCN">
-        <input v-model="searchISCNText" placeholder="Find ISCN by ID">
-        <button class="mx-2">Search</button>
-        <div v-if="isNotFound">No ISCN record found</div>
+        <input
+          v-model="searchISCNText"
+          :placeholder="$t('HomePage.search.placeholder')"
+        >
+        <button class="mx-2">{{ $t('HomePage.search.button') }}</button>
+        <div v-if="isNotFound">{{ $t('HomePage.search.results.empty') }}</div>
       </form>
     </div>
     <div class="my-4">
-      <nuxt-link :to="{ name: 'new' }">Register iscn</nuxt-link>
+      <nuxt-link :to="{ name: 'new' }">{{ $t('HomePage.register.button') }}</nuxt-link>
     </div>
   </div>
 </template>

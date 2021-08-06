@@ -1,35 +1,35 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
     <div v-if="!record">
-      Loading
+      {{ $t('general.loading') }}
     </div>
     <div v-else>
       <img v-if="imgSrc" ref="iscnImg" class="max-w-md" :src="imgSrc">
       <ul>
-        <li>iscnId: {{ iscnId }}</li>
-        <li>recordNotes: {{ record.recordNotes }}</li>
-        <li>contentFingerprints: {{ record.contentFingerprints }}</li>
-        <li>owner: {{ owner }}</li>
+        <li>{{ $t('iscn.meta.id') }} {{ iscnId }}</li>
+        <li>{{ $t('iscn.meta.notes') }} {{ record.recordNotes }}</li>
+        <li>{{ $t('iscn.meta.content.fingerprints') }} {{ record.contentFingerprints }}</li>
+        <li>{{ $t('iscn.meta.owner') }} {{ owner }}</li>
       </ul>
       <div v-if="exifInfo">
-        <h3>Exif:</h3>
-        <div>{{ exifInfo }}</div>
+        <h3>{{ $t('iscn.meta.exif') }}</h3>
+        <div><pre>{{ exifInfo }}</pre></div>
       </div>
       <ul>
-        <li>Type: {{ metadata['@type'] }}</li>
-        <li>Title: {{ metadata.title }}</li>
-        <li>Description: {{ metadata.description }}</li>
-        <li>version: {{ metadata.version }}</li>
-        <li>url: {{ metadata.url }}</li>
-        <li>keywords: {{ metadata.keywords }}</li>
-        <li>usageInfo: {{ metadata.usageInfo }}</li>
+        <li>{{ $t('iscn.meta.type') }} {{ metadata['@type'] }}</li>
+        <li>{{ $t('iscn.meta.title') }} {{ metadata.title }}</li>
+        <li>{{ $t('iscn.meta.description') }} {{ metadata.description }}</li>
+        <li>{{ $t('iscn.meta.version') }} {{ metadata.version }}</li>
+        <li>{{ $t('iscn.meta.url') }} {{ metadata.url }}</li>
+        <li>{{ $t('iscn.meta.keywords') }} {{ metadata.keywords }}</li>
+        <li>{{ $t('iscn.meta.usage.info') }} {{ metadata.usageInfo }}</li>
       </ul>
       <div>
-        Stakeholders:
+        <div>{{ $t('iscn.meta.stakeholders') }}</div>
         <div v-for="s in record.stakeholders" :key=s.entity.id>
-          <div>id: {{ s.entity.id }}</div>
-          <div>Name: {{ s.entity.name }}</div>
-          <div>contributionType: {{ s.contributionType }}</div>
+          <div>{{ $t('iscn.meta.stakeholders.id') }} {{ s.entity.id }}</div>
+          <div>{{ $t('iscn.meta.stakeholders.name') }} {{ s.entity.name }}</div>
+          <div>{{ $t('iscn.meta.stakeholders.contribution.type') }} {{ s.contributionType }}</div>
         </div>
       </div>
     </div>

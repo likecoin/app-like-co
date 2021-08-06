@@ -1,7 +1,7 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
     <div v-if="!records">
-      Loading
+      {{ $t('general.loading') }}
     </div>
     <search-results v-else :records="records"/>
   </div>
