@@ -62,8 +62,6 @@ export async function estimateISCNTxFee(tx: ISCNSignPayload, {
     recordVersion: version,
     recordNotes,
     contentFingerprints,
-    stakeholders,
-    contentMetadata,
     recordParentIPLD: {},
   };
   if (version > 1) {
@@ -71,7 +69,10 @@ export async function estimateISCNTxFee(tx: ISCNSignPayload, {
       '/': 'bahuaierav3bfvm4ytx7gvn4yqeu4piiocuvtvdpyyb5f6moxniwemae4tjyq'
     };
   }
-  const feeAmount = Buffer.from(jsonStringify(obj), 'utf-8').length * feePerByteAmount;
+  const byteSize = Buffer.from(jsonStringify(obj), 'utf-8').length
+    + stakeholders.reduce((acc, s) => acc + s.length, 0)
+    + contentMetadata.length
+  const feeAmount = byteSize * feePerByteAmount;
   return feeAmount;
 }
 
