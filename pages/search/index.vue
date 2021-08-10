@@ -1,7 +1,7 @@
 <template>
   <div class="container flex flex-col items-center mx-auto">
     <div v-if="!records">
-      Loading
+      {{ $t('general.loading') }}
     </div>
     <search-results v-else :records="records"/>
   </div>
@@ -11,14 +11,11 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
-import SearchResults from '~/components/SearchResults.vue';
 import { parsedISCNRecord } from '~/utils/cosmos/iscn';
 
 const iscnModule = namespace('iscn')
 
-@Component({
-  components: { SearchResults },
-})
+@Component
 export default class SearchIndexPage extends Vue {
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<parsedISCNRecord[]>

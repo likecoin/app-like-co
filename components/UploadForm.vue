@@ -1,12 +1,12 @@
 <template>
   <div class="mx-auto">
     <img v-if="isImage" class="max-w-md" :src="fileData" />
-    <div v-if="exifInfo">{{ exifInfo }}</div>
+    <div v-if="exifInfo"><pre>{{ exifInfo }}</pre></div>
     <form @submit.prevent="onSubmit">
       <input
         v-if="!fileData"
         v-model="ipfsURL"
-        placeholder="Use existing IPFS content"
+        :placeholder="$t('UploadForm.url.placeholder')"
         @change="onEnterURL"
       />
       <input
@@ -16,7 +16,7 @@
         @change="onFileUpload"
       />
       <button class="block" type="submit">
-        {{ 'Upload' }}
+        {{ $t('UploadForm.button') }}
       </button>
     </form>
   </div>
