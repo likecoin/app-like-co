@@ -5,62 +5,62 @@
     {{ type }}
     <form class="space-y-4" @submit.prevent="onSubmit">
       <fieldset>
-        <label for="title">title</label>
+        <label for="title">{{ $t('iscn.meta.title') }}</label>
         <input
           id="title"
           v-model="title"
-          placeholder="title"
+          :placeholder="$t('iscn.meta.title.placeholder')"
           required
         >
         <br />
-        <label for="description">description</label>
+        <label for="description">{{ $t('iscn.meta.description') }}</label>
         <input
           id="description"
           v-model="description"
-          placeholder="description"
+          :placeholder="$t('iscn.meta.description.placeholder')"
         >
       </fieldset>
       <fieldset v-for="(author,index) in authors" :key="index">
-        <label :for="`author_${index}_id`">Author Name</label>
+        <label :for="`author_${index}_id`">{{ $t('iscn.meta.creator.name') }}</label>
         <input
           :id="`author_${index}_name`"
           v-model="author.name"
-          placeholder="Author Name"
+          :placeholder="$t('iscn.meta.creator.name.placeholder')"
         >
         <br />
-        <label :for="`author_${index}_url`">Author URL</label>
+        <label :for="`author_${index}_url`">{{ $t('iscn.meta.creator.url') }}</label>
         <input
           :id="`author_${index}_url`"
           v-model="author.url"
-          :placeholder="`Author_${index} URL`"
+          :placeholder="$t('iscn.meta.creator.url.placeholder')"
         >
       </fieldset>
-      <a class="bg-green-400 p-2 rounded-lg" href="#" @click.prevent="onClickAddAuthor">Add Author</a>
+      <a class="p-2 bg-green-400 rounded-lg" href="#" @click.prevent="onClickAddAuthor">Add Author</a>
       <fieldset>
-        <label for="tagsString">tagsString</label>
+        <label for="tagsString">{{ $t('iscn.meta.keywords') }}</label>
         <input
           id="tagsString"
           v-model="tagsString"
-          placeholder="tags (seperate by ,)"
+          :placeholder="$t('iscn.meta.keywords.placeholder')"
         >
       </fieldset>
       <fieldset>
-        <label for="url">url</label>
+        <label for="url">{{ $t('iscn.meta.url') }}</label>
         <input
           id="url"
           v-model="url"
-          placeholder="Content URL"
+          :placeholder="$t('iscn.meta.url.placeholder')"
         >
         <br />
-        <label for="license">license</label>
+        <label for="license">{{ $t('iscn.meta.license') }}</label>
         <input
           id="license"
           v-model="license"
-          placeholder="License URL"
+          :placeholder="$t('iscn.meta.license.placeholder')"
         >
       </fieldset>
-      <button type=submit class="bg-green-400 p-2 rounded-lg" :disabled="!!uploadStatus" >
-        {{ uploadStatus || 'Submit' }}
+      <button type=submit class="p-2 bg-green-400 rounded-lg" :disabled="!!uploadStatus" >
+        {{ uploadStatus || $t('HomePage.submit.button') }}
       </button>
     </form>
   </div>
