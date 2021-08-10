@@ -1,0 +1,87 @@
+<template>
+  <div :class="containerClasses">
+    <div v-if="label" :class="labelWrapperClasses">
+      {{ label }}
+    </div>
+    <div v-if="$slots.default" :class="contentWrapperClasses">
+      <slot />
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator'
+
+@Component
+export default class FormField extends Vue {
+  // Label text of FormField
+  @Prop(String) readonly label!: string | undefined
+
+  // The direction of label & contents.
+  @Prop({ default: 'column' }) readonly direction!: string | undefined
+
+  // Type of content.
+  @Prop(String) readonly contentType: string | undefined
+
+  static direction = {
+    row: 'row',
+    column: 'column',
+  }
+
+  static contentTypes = {
+    normal: 'normal',
+    strong: 'strong',
+    custom: 'custom',
+  }
+
+  get containerClasses(): any {
+    return [
+      'flex',
+      this.direction === FormField.direction.row
+        ? 'flex-row items-baseline'
+        : 'flex-col items-start pb-[16px]',
+    ]
+  }
+
+  get labelWrapperClasses(): any {
+    return [
+      'min-w-[72px]',
+      'flex-shrink-0',
+      this.direction === FormField.direction.row
+        ? 'pr-[8px]'
+        : 'mb-[4px]',
+      'text-[12px]',
+      'font-semibold',
+      'text-medium-gray',
+    ]
+  }
+
+  get contentWrapperClasses(): any {
+    return [
+      this.direction === FormField.direction.row
+        ? 'flex-grow'
+        : 'w-full',
+      'break-words',
+      'text-dark-gray',
+      ...this.contentClasses,
+    ]
+  }
+
+  get contentClasses(): any {
+    switch (this.contentType) {
+      case FormField.contentTypes.normal:
+        return [
+          'font-normal',
+          this.direction === FormField.direction.row
+            ? 'text-[14px] leading-[20px]'
+            : 'text-[16px] leading-[22px]',
+        ]
+      case FormField.contentTypes.strong:
+        return ['font-semibold']
+
+      default:
+        return []
+    }
+  }
+}
+</script>
