@@ -1,7 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Story } from '@storybook/vue'
-import ArrowDown from './icons/ArrowDown.vue'
-import IconPlaceholder from './icons/IconPlaceholder.vue'
 
 export default {
   title: 'Button',
@@ -11,7 +9,7 @@ export default {
         name: 'string',
         required: false,
       },
-      defaultValue: '',
+      defaultValue: 'Title',
       description: 'text of button',
       table: {
         type: {
@@ -85,8 +83,27 @@ export default {
         type: 'boolean',
       },
     },
+    circle: {
+      type: {
+        name: 'boolean',
+        required: false,
+      },
+      defaultValue: false,
+      description: 'Make button round',
+      table: {
+        type: {
+          summary: 'boolean',
+        },
+        defaultValue: {
+          summary: false,
+        },
+      },
+      control: {
+        type: 'boolean',
+      },
+    },
   },
-  decorators: [() => ({ template: '<div class="w-[200px]"><story/></div>' })],
+  decorators: [() => ({ template: `<div class="flex justify-start"><story/></div>` })],
 }
 
 const PrependTemplate = `
@@ -96,70 +113,44 @@ const PrependTemplate = `
 
 const AppendTemplate = `
   <template #append>
-    <ArrowDown/>
-  </template>`
-
-const CustomTemplate = `
-  <template #default>
-     e=mc<sup>2</sup>
+    <IconArrowDown/>
   </template>`
 
 const Template: Story = (
   args: any,
   {
-    argTypes: {
-      prependSlot: _prependSlot,
-      appendSlot: _appendSlot,
-      customSlot: _customSlot,
-      ...argTypes
-    },
+    argTypes,
+    parameters,
   }: any,
 ) => ({
-  components: {
-    IconPlaceholder,
-    ArrowDown,
-  },
   props: Object.keys(argTypes),
   template: `
     <Button v-bind="$props">
-      ${args.prependSlot ? PrependTemplate : ''}
-      ${args.customSlot ? CustomTemplate : args.text}
-      ${args.appendSlot ? AppendTemplate : ''}
+      ${parameters.prependSlot ? PrependTemplate : ''}
+      ${parameters.customSlot && !args.circle ? 'e=mc<sup>2</sup>' : ''}
+      ${parameters.customSlot && args.circle ? '<IconPlaceholder/>' : ''}
+      ${parameters.appendSlot ? AppendTemplate : ''}
     </Button>
   `,
 })
 
 export const Default = Template.bind({})
-Default.args = {
-  text: 'Title',
-}
 
-export const Customize = Template.bind({})
-Customize.args = {
-  customSlot: true,
-}
+export const Customized = Template.bind({})
+Customized.parameters = { customSlot: true }
 
 export const Prepend = Template.bind({})
-Prepend.args = {
-  ...Default.args,
-  prependSlot: true,
-}
-
-export const Both = Template.bind({})
-Both.args = {
-  ...Default.args,
-  prependSlot: true,
-  appendSlot: true,
-}
+Prepend.parameters = { prependSlot: true }
 
 export const Append = Template.bind({})
-Append.args = {
-  ...Default.args,
+Append.parameters = { appendSlot: true }
+
+export const Both = Template.bind({})
+Both.parameters = {
+  prependSlot: true,
   appendSlot: true,
 }
 
 export const Circle = Template.bind({})
-Circle.args = {
-  circle: true,
-  prependSlot: true,
-}
+Circle.args = { circle: true }
+Circle.parameters = { customSlot: true }
