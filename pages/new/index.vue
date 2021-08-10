@@ -7,6 +7,7 @@
     <iscn-register-form
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"
       :file-blob="fileBlob"
@@ -18,6 +19,7 @@
       v-else-if="state === 'done'"
       :is-image="isImage"
       :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"
       :iscn-id="iscnId"
@@ -39,6 +41,7 @@ const signerModule = namespace('signer')
 export default class NewIndexPage extends Vue {
   state = 'init';
   ipfsHash = '';
+  arweaveId = '';
   fileSHA256 = '';
   fileData = '';
   iscnId = '';
@@ -52,6 +55,7 @@ export default class NewIndexPage extends Vue {
 
   onSubmitUpload({
     ipfsHash,
+    arweaveId,
     fileData,
     fileSHA256,
     isImage,
@@ -59,6 +63,7 @@ export default class NewIndexPage extends Vue {
     exifInfo,
   }: {
     ipfsHash: string,
+    arweaveId: string,
     fileData: string,
     fileSHA256: string,
     isImage: boolean;
@@ -66,6 +71,7 @@ export default class NewIndexPage extends Vue {
     exifInfo: any;
   }) {
     this.ipfsHash = ipfsHash;
+    this.arweaveId = arweaveId;
     this.fileData = fileData;
     this.fileSHA256 = fileSHA256;
     this.isImage = isImage;

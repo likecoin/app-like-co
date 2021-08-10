@@ -71,6 +71,10 @@ export default {
     vuex: false,
   },
 
+  serverMiddleware: [
+    { path: '/api', handler: '~/server/index.ts' },
+  ],
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
   },

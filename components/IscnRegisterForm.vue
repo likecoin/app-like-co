@@ -1,8 +1,12 @@
 <template>
   <div>
     <img class="max-w-md" :src="fileData">
-    <a :href="`https://ipfs.io/ipfs/${ipfsHash}`">{{ ipfsHash }}</a>
-    {{ type }}
+    <ul>
+      <li>{{ fileSHA256 }}</li>
+      <li>{{ ipfsUrl }}</li>
+      <li>{{ arweaveUrl }}</li>
+      <li>{{ type }}</li>
+    </ul>
     <form class="space-y-4" @submit.prevent="onSubmit">
       <fieldset>
         <label for="title">{{ $t('iscn.meta.title') }}</label>
@@ -90,6 +94,7 @@ export default class IscnRegisterForm extends Vue{
   @Prop(String) readonly fileSHA256!: string
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
+  @Prop(String) readonly arweaveId!: string
 
   authors: Author[] = [];
   title: string = '';
@@ -127,6 +132,14 @@ export default class IscnRegisterForm extends Vue{
     return 'CreativeWorks';
   }
 
+  get ipfsUrl() {
+    return `ipfs://${this.ipfsHash}`;
+  }
+
+  get arweaveUrl() {
+    return `arweave://${this.arweaveId}`;
+  }
+
   mounted() {
     this.uploadStatus = '';
   }
@@ -136,7 +149,7 @@ export default class IscnRegisterForm extends Vue{
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.isIPFSLink) await this.submitToIPFS();
+    if (!this.arweaveId) await this.submitToIPFS();
     await this.submitToISCN();
   }
 
@@ -157,6 +170,7 @@ export default class IscnRegisterForm extends Vue{
       url: this.url,
       license: this.license,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
+      arweaveId: this.arweaveId,
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
