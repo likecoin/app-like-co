@@ -6,7 +6,7 @@
       </div>
       <div v-else>
         <ul>
-          <nuxt-link :to="{ name: 'view-iscnId', params: { iscnId: record.id }}">{{ record.id }}</nuxt-link>
+          <nuxt-link :to="localeLocation({ name: 'view-iscnId', params: { iscnId: record.id }})">{{ record.id }}</nuxt-link>
           <li>{{ $t('iscn.meta.content.fingerprints') }} {{ record.data.contentFingerprints }}</li>
         </ul>
         <ul>

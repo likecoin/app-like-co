@@ -11,7 +11,7 @@
       </form>
     </div>
     <div class="my-4">
-      <nuxt-link :to="{ name: 'new' }">{{ $t('HomePage.register.button') }}</nuxt-link>
+      <nuxt-link :to="localeLocation({ name: 'new' })">{{ $t('HomePage.register.button') }}</nuxt-link>
     </div>
   </div>
 </template>
