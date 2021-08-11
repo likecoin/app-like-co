@@ -1,8 +1,9 @@
 <template>
-  <nuxt-link
+  <NuxtLink
     v-if="to"
     :to="to"
     :class="rootClasses"
+    v-on="$listeners"
   >
     <Label
       :class="labelClass"
@@ -25,10 +26,11 @@
         <slot name="append" />
       </template>
     </Label>
-  </nuxt-link>
+  </NuxtLink>
   <a
     v-else
     :class="rootClasses"
+    v-on="$listeners"
   >
     <Label
       :class="labelClass"
