@@ -183,11 +183,13 @@ export default class Button extends Vue {
     const isCircle = !!this.circle
     return [
       isCircle ? 'justify-center' : 'justify-between',
-      'transition',
-      'duration-200',
+      'text-center',
+      'whitespace-nowrap',
       'hover:bg-white',
       'hover:bg-opacity-30',
       'active:bg-opacity-20',
+      'transition',
+      'duration-200',
       this.activeClassesForPreset,
       {
         'px-[16px]': !isCircle,
