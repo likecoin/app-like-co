@@ -68,6 +68,7 @@ export default {
     ],
     defaultLocale: 'en',
     langDir: '~/locales/',
+    vuex: false,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
