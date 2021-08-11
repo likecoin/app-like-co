@@ -29,19 +29,22 @@ export async function getArIdFromHashes(ipfsHash: string) {
   return res[0] || null;
 }
 
-export async function submitToArweave(data: Buffer, ipfsHash: string) {
+export async function submitToArweave(data: { mimetype: string; buffer: Buffer; }, ipfsHash: string) {
   const anchorId = (await arweave.api.get('/tx_anchor')).data
-  const transaction = await arweave.createTransaction({ data, last_tx: anchorId }, jwk)
+  const { mimetype, buffer } = data;
+  const transaction = await arweave.createTransaction({ data: buffer, last_tx: anchorId }, jwk)
   transaction.addTag(IPFS_KEY, ipfsHash)
   transaction.addTag(IPFS_CONSTRAINT_KEY, IPFS_CONSTRAINT)
+  transaction.addTag('Content-Type', mimetype)
 
   await arweave.transactions.sign(transaction, jwk)
   await arweave.transactions.post(transaction)
   return transaction.id;
 }
 
-export async function getAreweaveIdFromFile(data: Buffer) {
-  const ipfsHash = await hash.of(data)
+export async function getAreweaveIdFromFile(data: { mimetype: string; buffer: Buffer; }) {
+  const { buffer } = data
+  const ipfsHash = await hash.of(buffer)
   const id = await getArIdFromHashes(ipfsHash)
   if (id) return {
     arweaveId: id,

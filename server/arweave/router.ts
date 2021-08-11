@@ -10,7 +10,7 @@ router.post('/', multer().single('file'), async (req, res, next) => {
       res.sendStatus(400);
       return
     }
-    const { arweaveId, ipfsHash } = await getAreweaveIdFromFile(req.file.buffer);
+    const { arweaveId, ipfsHash } = await getAreweaveIdFromFile(req.file);
     res.json({ arweaveId, ipfsHash });
   } catch (error) {
     next(error);
