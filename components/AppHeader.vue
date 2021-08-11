@@ -4,11 +4,11 @@
     <div class="flex p-6 mx-auto bg-gray-200 divide-x-2 divide-white rounded-lg">
       <nuxt-link
         class="px-2 text-center"
-        :to="{ name: 'index' }"
+        :to="localeLocation({ name: 'index' })"
       >{{ $t('AppHeader.tabBar.button.depub') }}</nuxt-link>
       <nuxt-link
         class="px-2 text-center"
-        :to="{ name: 'works-index' }"
+        :to="localeLocation({ name: 'works' })"
       >{{ $t('AppHeader.tabBar.button.publishing') }}</nuxt-link>
       <a
         class="px-2 text-center"

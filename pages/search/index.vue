@@ -36,7 +36,7 @@ export default class SearchIndexPage extends Vue {
   async mounted() {
     const iscnIds: string[] = this.iscnIds as string[] ;
     if (!iscnIds.length) {
-      this.$router.push({ name: 'index' });
+      this.$router.push(this.localeLocation({ name: 'index' })!);
       return;
     }
     const promises: Promise<parsedISCNRecord[]>[] = [];
