@@ -37,10 +37,10 @@ export default class IndexPage extends Vue {
       this.isNotFound = true;
     } else if (res.length > 1) {
       const iscnIds = res.map((r) => r.id);
-      this.$router.push({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }});
+      this.$router.push(this.localeLocation({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }})!);
     } else {
       const iscnId = res[0].id;
-      this.$router.push({ name: 'view-iscnId', params: { iscnId }});
+      this.$router.push(this.localeLocation({ name: 'view-iscnId', params: { iscnId }})!);
     }
   }
 }
