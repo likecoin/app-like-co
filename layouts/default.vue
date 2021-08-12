@@ -1,8 +1,6 @@
 <template>
   <div class="bg-gray-100 h-screen">
-    <header>
-      <AppHeader />
-    </header>
+    <AppHeader />
     <Nuxt />
   </div>
 </template>
