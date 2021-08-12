@@ -1,8 +1,6 @@
 <template>
   <div class="bg-gray-100 h-screen">
-    <header>
-      <AppHeader />
-    </header>
+    <AppHeader />
     <div v-if="!currentAddress">
       <h3>Please connect to your wallet first</h3>
     </div>
