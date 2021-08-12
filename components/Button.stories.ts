@@ -59,6 +59,7 @@ export default {
       options: [
         'large',
         'small',
+        'mini',
       ],
       control: {
         type: 'radio',

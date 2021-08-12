@@ -32,6 +32,20 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+export enum Preset {
+  primary = 'primary',
+  secondary = 'secondary',
+  tertiary = 'tertiary',
+  plain = 'plain',
+  outline = 'outline',
+}
+
+export enum Size {
+  large = 'large',
+  small = 'small',
+  mini = 'mini',
+}
+
 @Component
 export default class Button extends Vue {
   // Preset of the button
@@ -76,30 +90,38 @@ export default class Button extends Vue {
     return 'button'
   }
 
+  get isCircle(): Boolean {
+    return !!this.circle
+  }
+
+  get isMini(): Boolean {
+    return this.size === 'mini'
+  }
+
   get rootClassesForPreset(): any {
     switch (this.preset) {
-      case 'primary':
+      case Preset.primary:
         return [
           'bg-like-green',
           'text-like-cyan-light',
         ]
 
-      case 'secondary':
+      case Preset.secondary:
         return [
           'bg-like-cyan-light',
           'text-like-green',
         ]
 
-      case 'tertiary':
+      case Preset.tertiary:
         return [
           'bg-shade-gray',
           this.circle ? 'text-like-green' : 'text-dark-gray',
         ]
 
-      case 'plain':
+      case Preset.plain:
         return ['bg-transparent']
 
-      case 'outline':
+      case Preset.outline:
         return [
           'bg-transparent',
           this.isDisabled ? null : 'border-medium-gray border-2',
@@ -115,11 +137,20 @@ export default class Button extends Vue {
 
   get classForSize(): any {
     switch (this.size) {
-      case 'large':
-        return this.circle ? 'h-64px w-[64px]' : 'h-44px'
+      case Size.large:
+        return this.circle
+          ? 'h-64px w-[64px] rounded-[50%]'
+          : 'h-44px rounded-[10px]'
 
-      case 'small':
-        return this.circle ? 'h-48px w-[48px]' : 'h-40px'
+      case Size.small:
+        return this.circle
+          ? 'h-48px w-[48px] rounded-[50%]'
+          : 'h-40px rounded-[10px]'
+
+      case Size.mini:
+        return this.circle 
+          ? ''
+          : 'h-30px w-min rounded-[16px]'
 
       default:
         return null
@@ -135,12 +166,11 @@ export default class Button extends Vue {
       'box-border',
       'overflow-hidden',
       'cursor-pointer',
-      isCircle ? 'rounded-[50%]' : 'rounded-[10px]',
       {
         'items-center': isCircle,
         'justify-center': isCircle,
         'cursor-not-allowed bg-shade-gray text-medium-gray':
-              this.isDisabled,
+          this.isDisabled,
       },
     ]
   }
@@ -160,6 +190,7 @@ export default class Button extends Vue {
 
   get labelClass(): any {
     const isCircle = !!this.circle
+    const isMini = this.size === 'mini'
     return [
       isCircle ? 'justify-center' : 'justify-between',
       'text-center',
@@ -171,24 +202,19 @@ export default class Button extends Vue {
       'duration-200',
       this.activeClassesForPreset,
       {
-        'px-[16px]': !isCircle,
-        'py-[10px]': !isCircle,
-        'w-full': !isCircle,
+        'px-[20px]': isMini,
+        'py-[6px]': isMini,
+        'text-[12px]': isMini,
+        'font-semibold':isMini,
+      },
+      {
+        'px-[16px]': !isCircle && !isMini,
+        'py-[10px]': !isCircle && !isMini,
+        'w-full': !isCircle && !isMini,
         'pointer-events-none': this.isDisabled,
-        [this.classForSize]: isCircle,
+        [this.classForSize]: isCircle || isMini,
       },
     ]
-  }
-
-  get prependWrapperClasses(): any {
-    return this.circle ? null : [
-      'flex-shrink',
-      'mr-[12px]',
-    ]
-  }
-
-  get appendWrapperClasses(): any {
-    return this.appendClass
   }
 
   get shouldShowPrepend() {
