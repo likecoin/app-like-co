@@ -1,27 +1,80 @@
 <!-- Please remove this file from your project -->
 <template>
-  <nav class="flex content-center py-8">
-    <div class="flex p-6 mx-auto bg-gray-200 divide-x-2 divide-white rounded-lg">
-      <nuxt-link
-        class="px-2 text-center"
-        :to="localeLocation({ name: 'index' })"
-      >{{ $t('AppHeader.tabBar.button.depub') }}</nuxt-link>
-      <nuxt-link
-        class="px-2 text-center"
-        :to="localeLocation({ name: 'works' })"
-      >{{ $t('AppHeader.tabBar.button.publishing') }}</nuxt-link>
-      <a
-        class="px-2 text-center"
-        target="_blank"
-        rel="noopener"
-        href="https://stake.like.co"
-      >{{ $t('AppHeader.tabBar.button.stake') }}</a>
+  <header class="mb-[112px]">
+    <div
+      :class="[
+        'fixed',
+        'top-0',
+        'inset-x-0',
+        'py-[24px]',
+      ]"
+    >
+      <nav
+        :class="[
+          'flex',
+          'flex-1',
+          'items-center',
+          'justify-center',
+        ]"
+      >
+        <div
+          :class="[
+            'flex-grow',
+            'mx-[24px]',
+          ]"
+        />
+        <div
+          :class="[
+            'flex',
+            'flex-shrink',
+            'justify-center',
+            'items-center',
+            'p-[4px]',
+            'mx-auto',
+            'bg-shade-gray',
+            'rounded-[14px]',
+          ]"
+        >
+          <MenuButton
+            :text="$t('AppHeader.tabBar.button.depub')"
+            :to="localeLocation({ name: 'index' })"
+          />
+          <MenuButtonDivider />
+          <MenuButton
+            :text="$t('AppHeader.tabBar.button.publishing')"
+            :to="localeLocation({ name: 'works' })"
+          />
+          <MenuButtonDivider />
+          <MenuButton
+            :text="$t('AppHeader.tabBar.button.stake')"
+            target="_blank"
+            rel="noopener"
+            href="https://stake.like.co"
+          >
+            <template #append>
+              <IconOpenInNew class="w-[12px]" />
+            </template>
+          </MenuButton>
+        </div>
+
+        <div
+          :class="[
+            'flex',
+            'flex-1',
+            'justify-end',
+            'flex-grow',
+            'mx-[24px]',
+          ]"
+        >
+          <Button
+            preset="secondary"
+            :text="currentAddress || $t('AppHeader.login.button')"
+            @click="onClickLoginKeplr"
+          />
+        </div>
+      </nav>
     </div>
-    <div class="absolute right-0 p-2 mx-2 my-4 bg-green-300 rounded-lg">
-      <a v-if="currentAddress">{{ currentAddress }}</a>
-      <button v-else @click="onClickLoginKeplr">{{ $t('AppHeader.login.button') }}</button>
-    </div>
-  </nav>
+  </header>
 </template>
 
 <script lang="ts">
@@ -33,7 +86,7 @@ const signerModule = namespace('signer')
 const keplrModule = namespace('keplr')
 
 @Component
-export default class AppHeader extends Vue{
+export default class AppHeader extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
   @signerModule.Action updateSignerInfo!: (arg0: { signer: OfflineSigner|null; address: string }) => void
   @keplrModule.Getter('getWalletAddress') keplrWallet!: string
