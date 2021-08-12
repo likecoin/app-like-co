@@ -1,8 +1,21 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { getAreweaveIdFromFile } from '.';
+import { estimatePrice, getAreweaveIdFromFile } from '.';
 
 const router = Router();
+
+router.post('/estimate', multer().single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      res.sendStatus(400);
+      return
+    }
+    const price = await estimatePrice(req.file);
+    res.json(price);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post('/', multer().single('file'), async (req, res, next) => {
   try {

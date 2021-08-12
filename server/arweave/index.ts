@@ -1,4 +1,5 @@
 import Arweave from 'arweave/node';
+import BigNumber from 'bignumber.js';
 
 const hash = require('ipfs-only-hash');
 
@@ -10,6 +11,10 @@ const IPFS_CONSTRAINT = 'v0.1'
 const jwk = require('../config/arweave-key.json')
 
 const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
+
+function winstonToAR(winston: string) {
+  return new BigNumber(winston).shiftedBy(-12).toFixed();
+}
 
 export async function getArIdFromHashes(ipfsHash: string) {
   const res = await arweave.arql(
@@ -27,6 +32,20 @@ export async function getArIdFromHashes(ipfsHash: string) {
     }
   })
   return res[0] || null;
+}
+
+export async function estimatePrice(data: { mimetype: string; buffer: Buffer; }) {
+  const { buffer } = data;
+  const ipfsHash = await hash.of(buffer)
+  const id = await getArIdFromHashes(ipfsHash)
+  if (id) return {
+    AR: 0,
+  }
+  const transaction = await arweave.createTransaction({ data: buffer }, jwk)
+  const { reward } = transaction;
+  return {
+    AR: winstonToAR(reward),
+  }
 }
 
 export async function submitToArweave(data: { mimetype: string; buffer: Buffer; }, ipfsHash: string) {
