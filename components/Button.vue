@@ -98,11 +98,11 @@ export default class Button extends Vue {
     return 'button'
   }
 
-  get isCircle(): Boolean {
+  get isCircle(): any {
     return !!this.circle
   }
 
-  get isMini(): Boolean {
+  get isMini(): any {
     return this.size === 'mini'
   }
 

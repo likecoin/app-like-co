@@ -16,15 +16,15 @@
       <TextField
         :size="40"
         :class="[
-            'my-[4px]',
-            'flex-grow',
+          'my-[4px]',
+          'flex-grow',
         ]"
         :placeholder="placeholder"
       />
       <span 
         :class="[
-            'ml-[12px]',
-            'cursor-pointer',
+          'ml-[12px]',
+          'cursor-pointer',
          ]" 
         @click="deleteField(i)"
         ><IconClose />
@@ -41,7 +41,7 @@
       @click="addFields"
     >
       <template #prepend>
-        <IconAdd-mini />
+        <IconAddMini />
       </template>
     </Button>
   </div>
