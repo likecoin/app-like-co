@@ -1,5 +1,6 @@
 import Arweave from 'arweave/node';
 import BigNumber from 'bignumber.js';
+import { uploadToIPFS } from '../ipfs';
 
 const hash = require('ipfs-only-hash');
 
@@ -69,7 +70,10 @@ export async function getAreweaveIdFromFile(data: { mimetype: string; buffer: Bu
     arweaveId: id,
     ipfsHash,
   }
-  const res = await submitToArweave(data, ipfsHash);
+  const [res] = await Promise.all([
+    submitToArweave(data, ipfsHash),
+    uploadToIPFS(data.buffer),
+  ])
   return {
     arweaveId: res,
     ipfsHash,
