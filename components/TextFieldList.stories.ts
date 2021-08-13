@@ -2,7 +2,7 @@
 import { Story } from '@storybook/vue'
 
 export default {
-  title: 'InsertFields',
+  title: 'TextFieldList',
   argTypes: {
     text: {
       type: {
@@ -60,15 +60,15 @@ const PrependTemplate = `
 const Template: Story = (_args: any, { argTypes, parameters }: any) => ({
   props: Object.keys(argTypes),
   template: `
-    <InsertField v-bind="$props">
+    <TextFieldList v-bind="$props">
       ${parameters.prepend ? PrependTemplate : ''}
-    </InsertField>
+    </TextFieldList>
     `,
 })
 
 export const Default = Template.bind({})
-Default.args = { text: 'text', placeholder: 'say someting' }
+Default.args = { text: 'Add', textPreset:'h6', labelTag:'div', placeholder: 'say something' }
 
 export const Prepend = Template.bind({})
-Prepend.args = { text: 'Wallet Address', placeholder: 'Wallet address..' }
+Prepend.args = { text: 'Wallet Address', textPreset:'h6', labelTag:'div', placeholder: 'Wallet address..' }
 Prepend.parameters = { prepend: true }

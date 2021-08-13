@@ -12,14 +12,14 @@ const ReadOnlyTemplate: Story = (_args: any, { argTypes }: any) => ({
     `,
 })
 
-const EditableTagTemplate: Story = (_args: any, { _argTypes }: any) => ({
+const EditableTagListTemplate: Story = (_args: any, { _argTypes }: any) => ({
   template: `
-    <EditableTag />
+    <EditableTagList />
     `,
 })
 
 export const Default = ReadOnlyTemplate.bind({})
 Default.args = { text: 'Tag' }
 
-export const EditableTag = EditableTagTemplate.bind({})
+export const EditableTagList = EditableTagListTemplate.bind({})
 

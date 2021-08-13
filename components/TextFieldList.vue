@@ -33,6 +33,8 @@
     <Button
       class="mx-auto my-[4px]"
       preset="secondary"
+      :text-preset="textPreset" 
+      :label-tag="labelTag" 
       :text="text"
       size="mini"
       prepend-class="mr-[4px]"
@@ -49,9 +51,11 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
-export default class InsertField extends Vue {
+export default class TextFieldList extends Vue {
   @Prop(String) readonly text!: String
   @Prop(String) readonly placeholder!: String
+  @Prop(String) readonly textPreset!: String
+  @Prop(String) readonly labelTag!: String
 
   fields: any = [{ key: 0 }]
 

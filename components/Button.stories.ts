@@ -103,6 +103,47 @@ export default {
         type: 'boolean',
       },
     },
+    textPreset:{
+      type: {
+        name: 'string',
+        required: false,
+      },
+      defaultValue: 'p5',
+      description: 'Preset of the label that affects the label style',
+      options: [
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'h7',
+        'p5',
+        'p6',
+      ],
+      control: {
+        type: 'radio',
+      },
+    },
+    labelTag: {
+      type: {
+        name: 'string',
+        required: false,
+      },
+      defaultValue: 'div',
+      description: 'TML tag of the label',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'div',
+        },
+      },
+      control: {
+        type: 'text',
+      },
+    },
   },
   decorators: [() => ({ template: `<div class="flex justify-start"><story/></div>` })],
 }

@@ -93,7 +93,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 
 @Component
-export default class EditableTag extends Vue {
+export default class EditableTagList extends Vue {
 
   chips: Array<String> = []
   currentInput: String = ''

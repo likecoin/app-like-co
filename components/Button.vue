@@ -11,6 +11,8 @@
       :content-class="contentClass"
       :prepend-class="prependClass"
       :append-class="appendClass"
+      :preset="textPreset"
+      :tag="labelTag"
     >
       <template
         v-if="shouldShowPrepend"
@@ -83,6 +85,12 @@ export default class Button extends Vue {
 
   // Equivalent to `to` of `<NuxtLink/>`
   @Prop({ default: null }) readonly to: object | null | undefined
+
+  // Preset of the label that affects the label style `
+  @Prop(String) readonly textPreset!: string | undefined
+
+  // HTML tag of the label `
+  @Prop(String) readonly labelTag!: string | undefined
 
   get tag() {
     if (this.to) return 'NuxtLink'
@@ -164,9 +172,9 @@ export default class Button extends Vue {
       'flex',
       'box-border',
       'overflow-hidden',
+      'items-center',
       'cursor-pointer',
       {
-        'items-center': this.isCircle,
         'justify-center': this.isCircle,
         'cursor-not-allowed bg-shade-gray text-medium-gray':
           this.isDisabled,
@@ -201,7 +209,6 @@ export default class Button extends Vue {
       {
         'px-[20px]': this.isMini,
         'py-[6px]': this.isMini,
-        'text-[12px]': this.isMini,
         'font-semibold':this.isMini,
       },
       {

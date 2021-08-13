@@ -57,8 +57,8 @@ const TagsTamplate = `
     <Tag text="Tag" />
   `
 
-const EditableTagTamplate = `
-    <EditableTag />
+const EditableTagListTamplate = `
+    <EditableTagList />
   `
 
 const Template: Story = (args: any, { argTypes, parameters }: any) => ({
@@ -88,8 +88,8 @@ const Template: Story = (args: any, { argTypes, parameters }: any) => ({
           : ''
       }
       ${
-        args.contentType === 'custom' && parameters.customEditableTag
-          ? EditableTagTamplate
+        args.contentType === 'custom' && parameters.customEditableTagList
+          ? EditableTagListTamplate
           : ''
       }
     </FormField>
@@ -139,9 +139,9 @@ Tags.args = {
   contentType: 'custom',
 }
 
-export const EditableTag = Template.bind({})
-EditableTag.parameters = { customEditableTag: true }
-EditableTag.args = {
+export const EditableTagList = Template.bind({})
+EditableTagList.parameters = { customEditableTagList: true }
+EditableTagList.args = {
   label: 'Tags',
   contentType: 'custom',
 }
