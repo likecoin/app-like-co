@@ -13,6 +13,7 @@ module.exports = {
       'dark-gray': '#4A4A4A',
       'medium-gray': '#9B9B9B',
       'shade-gray': '#EBEBEB',
+      'light-gray': '#F7F7F7',
     },
     height: {
       '40px': '40px',
