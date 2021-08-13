@@ -23,6 +23,103 @@ export default {
         type: 'text',
       },
     },
+    tag: {
+      type: {
+        name: 'string',
+        required: false,
+      },
+      defaultValue: 'div',
+      description: 'Tag of the label',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'div',
+        },
+      },
+      control: {
+        type: 'text',
+      },
+    },
+    preset: {
+      type: {
+        name: 'string',
+        required: false,
+      },
+      options: [
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'h7',
+        'p5',
+        'p6',
+      ],
+      defaultValue: 'p5',
+      description: 'Preset of the label that affects the label style',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'p5',
+        },
+      },
+      control: {
+        type: 'radio',
+      },
+    },
+    align: {
+      type: {
+        name: 'string',
+        required: false,
+      },
+      options: [
+        'left',
+        'center',
+        'right',
+      ],
+      defaultValue: 'Title',
+      description: 'Horizontal alignment of children',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'left',
+        },
+      },
+      control: {
+        type: 'radio',
+      },
+    },
+    valign: {
+      type: {
+        name: 'string',
+        required: false,
+      },
+      options: [
+        'top',
+        'middle',
+        'bottom',
+      ],
+      defaultValue: 'Title',
+      description: 'Vertical alignment of children',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'middle',
+        },
+      },
+      control: {
+        type: 'radio',
+      },
+    },
   },
   decorators: [() => ({ template: `<div class="flex justify-start"><story/></div>` })],
 }
