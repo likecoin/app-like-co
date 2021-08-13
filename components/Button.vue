@@ -158,7 +158,6 @@ export default class Button extends Vue {
   }
 
   get rootClasses(): any {
-    const isCircle = !!this.circle
     return [
       ...this.rootClassesForPreset,
       this.classForSize,
@@ -167,8 +166,8 @@ export default class Button extends Vue {
       'overflow-hidden',
       'cursor-pointer',
       {
-        'items-center': isCircle,
-        'justify-center': isCircle,
+        'items-center': this.isCircle,
+        'justify-center': this.isCircle,
         'cursor-not-allowed bg-shade-gray text-medium-gray':
           this.isDisabled,
       },
@@ -189,10 +188,8 @@ export default class Button extends Vue {
   }
 
   get labelClass(): any {
-    const isCircle = !!this.circle
-    const isMini = this.size === 'mini'
     return [
-      isCircle ? 'justify-center' : 'justify-between',
+      this.isCircle ? 'justify-center' : 'justify-between',
       'text-center',
       'whitespace-nowrap',
       'hover:bg-white',
@@ -202,17 +199,17 @@ export default class Button extends Vue {
       'duration-200',
       this.activeClassesForPreset,
       {
-        'px-[20px]': isMini,
-        'py-[6px]': isMini,
-        'text-[12px]': isMini,
-        'font-semibold':isMini,
+        'px-[20px]': this.isMini,
+        'py-[6px]': this.isMini,
+        'text-[12px]': this.isMini,
+        'font-semibold':this.isMini,
       },
       {
-        'px-[16px]': !isCircle && !isMini,
-        'py-[10px]': !isCircle && !isMini,
-        'w-full': !isCircle && !isMini,
+        'px-[16px]': !this.isCircle && !this.isMini,
+        'py-[10px]': !this.isCircle && !this.isMini,
+        'w-full': !this.isCircle && !this.isMini,
         'pointer-events-none': this.isDisabled,
-        [this.classForSize]: isCircle || isMini,
+        [this.classForSize]: this.isCircle || this.isMini,
       },
     ]
   }

@@ -51,14 +51,14 @@ const TextFieldTamplate = `
     <TextField :size="40" placeholder="https://" />
   `
 
-const ReadOnlyTagsTamplate = `
-    <Tag-readonly text="Tag" />
-    <Tag-readonly text="Tag" />
-    <Tag-readonly text="Tag" />
+const TagsTamplate = `
+    <Tag text="Tag" />
+    <Tag text="Tag" />
+    <Tag text="Tag" />
   `
 
-const TagListTamplate = `
-    <Tag-input />
+const EditableTagTamplate = `
+    <EditableTag />
   `
 
 const Template: Story = (args: any, { argTypes, parameters }: any) => ({
@@ -84,12 +84,12 @@ const Template: Story = (args: any, { argTypes, parameters }: any) => ({
       }
       ${
         args.contentType === 'custom' && parameters.customTags
-          ? ReadOnlyTagsTamplate
+          ? TagsTamplate
           : ''
       }
       ${
-        args.contentType === 'custom' && parameters.customTagList
-          ? TagListTamplate
+        args.contentType === 'custom' && parameters.customEditableTag
+          ? EditableTagTamplate
           : ''
       }
     </FormField>
@@ -139,9 +139,9 @@ Tags.args = {
   contentType: 'custom',
 }
 
-export const TagList = Template.bind({})
-TagList.parameters = { customTagList: true }
-TagList.args = {
+export const EditableTag = Template.bind({})
+EditableTag.parameters = { customEditableTag: true }
+EditableTag.args = {
   label: 'Tags',
   contentType: 'custom',
 }

@@ -93,8 +93,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 
 @Component
-export default class InputChips extends Vue {
-  // Text of the button
+export default class EditableTag extends Vue {
 
   chips: Array<String> = []
   currentInput: String = ''

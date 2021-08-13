@@ -8,18 +8,18 @@ export default {
 const ReadOnlyTemplate: Story = (_args: any, { argTypes }: any) => ({
   props: Object.keys(argTypes),
   template: `
-    <Tag-readonly v-bind="$props" />
+    <Tag v-bind="$props" />
     `,
 })
 
-const InputTemplate: Story = (_args: any, { _argTypes }: any) => ({
+const EditableTagTemplate: Story = (_args: any, { _argTypes }: any) => ({
   template: `
-    <Tag-input />
+    <EditableTag />
     `,
 })
 
-export const ReadOnly = ReadOnlyTemplate.bind({})
-ReadOnly.args = { text: 'Tag' }
+export const Default = ReadOnlyTemplate.bind({})
+Default.args = { text: 'Tag' }
 
-export const Input = InputTemplate.bind({})
+export const EditableTag = EditableTagTemplate.bind({})
 

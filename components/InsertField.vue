@@ -36,7 +36,7 @@
       :text="text"
       size="mini"
       prepend-class="mr-[4px]"
-      @click="AddFields"
+      @click="addFields"
     >
       <template #prepend>
         <IconAdd-mini />
@@ -55,7 +55,7 @@ export default class InsertField extends Vue {
 
   fields: any = [{ key: 0 }]
 
-  AddFields() {
+  addFields() {
     this.fields.push({
       key: Date.now(),
     })
