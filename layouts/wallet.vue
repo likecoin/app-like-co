@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 h-screen">
+  <RootLayout>
     <AppHeader />
     <div v-if="!currentAddress">
       <h3>Please connect to your wallet first</h3>
@@ -7,7 +7,7 @@
     <template v-else>
       <Nuxt />
     </template>
-  </div>
+  </RootLayout>
 </template>
 
 <script lang="ts">

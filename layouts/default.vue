@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-gray-100 h-screen">
+  <RootLayout>
     <AppHeader />
     <Nuxt />
-  </div>
+  </RootLayout>
 </template>
 
 <script lang="ts">
