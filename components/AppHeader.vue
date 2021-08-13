@@ -1,12 +1,13 @@
 <!-- Please remove this file from your project -->
 <template>
-  <header class="mb-[112px]">
+  <header class="mb-[100px]">
     <div
       :class="[
         'fixed',
         'top-0',
         'inset-x-0',
         'py-[24px]',
+        'backdrop-blur',
       ]"
     >
       <nav
