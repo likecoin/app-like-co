@@ -11,18 +11,20 @@ module.exports = {
     'prettier',
   ],
   rules: {
-    'import/extensions': 'off',
+    "@typescript-eslint/no-shadow": ["error"],
     'array-bracket-newline': [
       'warn',
-       { minItems: 2 },
-      ],
+      { minItems: 2 },
+    ],
     'array-element-newline': [
-      'warn', 
+      'warn',
       'always',
     ],
     'comma-dangle': [
-      'warn', 
+      'warn',
       'always-multiline',
     ],
+    'import/extensions': 'off',
+    "no-shadow": "off",
   },
 }
