@@ -86,10 +86,10 @@ export default class Button extends Vue {
   // Equivalent to `to` of `<NuxtLink/>`
   @Prop({ default: null }) readonly to: object | null | undefined
 
-  // Preset of the label that affects the label style `
+  // Preset of the label that affects the label style
   @Prop(String) readonly textPreset!: string | undefined
 
-  // HTML tag of the label `
+  // HTML tag of the label
   @Prop(String) readonly labelTag!: string | undefined
 
   get tag() {

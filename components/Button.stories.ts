@@ -131,7 +131,7 @@ export default {
         required: false,
       },
       defaultValue: 'div',
-      description: 'TML tag of the label',
+      description: 'HTML tag of the label',
       table: {
         type: {
           summary: 'string',
