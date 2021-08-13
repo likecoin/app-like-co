@@ -1,8 +1,8 @@
 <template>
-  <NuxtLink
-    v-if="to"
-    :to="to"
+  <component
+    :is="tag"
     :class="rootClasses"
+    :to="to || null"
     v-on="$listeners"
   >
     <Label
@@ -26,34 +26,7 @@
         <slot name="append" />
       </template>
     </Label>
-  </NuxtLink>
-  <a
-    v-else
-    :class="rootClasses"
-    v-on="$listeners"
-  >
-    <Label
-      :class="labelClass"
-      :text="text"
-      :content-class="contentClass"
-      :prepend-class="prependClass"
-      :append-class="appendClass"
-    >
-      <template
-        v-if="shouldShowPrepend"
-        #prepend
-      >
-        <slot name="prepend" />
-      </template>
-      <slot />
-      <template
-        v-if="shouldShowAppend"
-        #append
-      >
-        <slot name="append" />
-      </template>
-    </Label>
-  </a>
+  </component>
 </template>
 
 <script lang="ts">
@@ -96,6 +69,12 @@ export default class Button extends Vue {
 
   // Equivalent to `to` of `<NuxtLink/>`
   @Prop({ default: null }) readonly to: object | null | undefined
+
+  get tag() {
+    if (this.to) return 'NuxtLink'
+    if (this.$attrs.href) return 'a'
+    return 'button'
+  }
 
   get rootClassesForPreset(): any {
     switch (this.preset) {
