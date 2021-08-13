@@ -1,6 +1,12 @@
 <template>
   <div class="flex flex-col">
-    <input :class="rootClasses" :placeholder="placeholder" />
+    <input
+      v-bind="$attrs"
+      :class="rootClasses"
+      :value="value"
+      :placeholder="placeholder"
+      @input="$emit('input', $event.target.value)"
+    />
     <span :class="errorMsgClasses">{{ errorMessage }}</span>
   </div>
 </template>
@@ -10,6 +16,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
 export default class TextField extends Vue {
+  @Prop(String) readonly value!: string | undefined
   @Prop(String) readonly placeholder!: string | undefined
   @Prop({ default: 44 }) readonly size!: number
   @Prop(String) readonly errorMessage!: string | undefined
