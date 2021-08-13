@@ -8,6 +8,7 @@
   "HomePage.search.button": "Search",
   "HomePage.search.placeholder": "Find ISCN by ID",
   "HomePage.search.results.empty": "No ISCN record found",
+  "HomePage.search.title": "Search ISCN",
   "HomePage.submit.button": "Submit",
   "iscn.meta.content.fingerprints": "Fingerprints",
   "iscn.meta.creator.name.placeholder": "Creator Name",
