@@ -52,9 +52,13 @@ const TextFieldTamplate = `
   `
 
 const TagsTamplate = `
-    <Tag text="tag name"/>
-    <Tag text="tag name"/>
-    <Tag text="tag name"/>
+    <Tag text="Tag" />
+    <Tag text="Tag" />
+    <Tag text="Tag" />
+  `
+
+const EditableTagListTamplate = `
+    <EditableTagList />
   `
 
 const Template: Story = (args: any, { argTypes, parameters }: any) => ({
@@ -81,6 +85,11 @@ const Template: Story = (args: any, { argTypes, parameters }: any) => ({
       ${
         args.contentType === 'custom' && parameters.customTags
           ? TagsTamplate
+          : ''
+      }
+      ${
+        args.contentType === 'custom' && parameters.customEditableTagList
+          ? EditableTagListTamplate
           : ''
       }
     </FormField>
@@ -126,6 +135,13 @@ InputField.args = {
 export const Tags = Template.bind({})
 Tags.parameters = { customTags: true }
 Tags.args = {
+  label: 'Tags',
+  contentType: 'custom',
+}
+
+export const EditableTagList = Template.bind({})
+EditableTagList.parameters = { customEditableTagList: true }
+EditableTagList.args = {
   label: 'Tags',
   contentType: 'custom',
 }
