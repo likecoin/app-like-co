@@ -137,7 +137,7 @@ export default class IscnRegisterForm extends Vue{
   }
 
   get arweaveUrl() {
-    return `arweave://${this.arweaveId}`;
+    return `ar://${this.arweaveId}`;
   }
 
   mounted() {

@@ -94,7 +94,7 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
   const contentFingerprints = [];
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`);
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`);
-  if (arweaveId) contentFingerprints.push(`arweave://${arweaveId}`);
+  if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
   const stakeholders = [];
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
