@@ -24,6 +24,7 @@
   "iscn.meta.license.placeholder": "License URL",
   "iscn.meta.license": "License",
   "iscn.meta.notes": "Record Notes",
+  "iscn.meta.matafata.title": "ISCN MataData",
   "iscn.meta.owner": "Owner",
   "iscn.meta.stakeholders.contribution.type": "Contribution Type",
   "iscn.meta.stakeholders.id": "Stakeholder ID",

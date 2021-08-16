@@ -23,6 +23,11 @@ export default class FormField extends Vue {
   // Type of content.
   @Prop(String) readonly contentType: string | undefined
 
+  @Prop([
+    String,
+    Array,
+  ]) readonly labelClasses: string | [] | undefined
+
   static direction = {
     row: 'row',
     column: 'column',
@@ -45,7 +50,6 @@ export default class FormField extends Vue {
 
   get labelWrapperClasses(): any {
     return [
-      'min-w-[72px]',
       'flex-shrink-0',
       this.direction === FormField.direction.row
         ? 'pr-[8px]'
@@ -53,6 +57,7 @@ export default class FormField extends Vue {
       'text-[12px]',
       'font-semibold',
       'text-medium-gray',
+      this.labelClasses,
     ]
   }
 

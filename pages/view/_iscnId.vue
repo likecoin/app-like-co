@@ -1,37 +1,92 @@
 <template>
-  <div class="container flex flex-col items-center mx-auto">
-    <div v-if="!record">
-      {{ $t('general.loading') }}
+  <div v-if="!record">
+    {{ $t('general.loading') }}
+  </div>
+  <div
+    v-else
+    :class="[
+      'container',
+      'flex',
+      'flex-row',
+      'flex-nowrap',
+      'items-start',
+      'w-min',
+      'mx-auto',
+      'mt-[16px]',
+      'mb-[30px]',
+    ]"
+  >
+    <div class="mr-[32px]">
+      <img v-if="imgSrc" ref="iscnImg" class="hidden" :src="imgSrc" />
+      <MataDataCard class="w-full" :img-src="imgSrc" :data="exifInfo" />
     </div>
-    <div v-else>
-      <img v-if="imgSrc" ref="iscnImg" class="max-w-md" :src="imgSrc">
-      <ul>
-        <li>{{ $t('iscn.meta.id') }} {{ iscnId }}</li>
-        <li>{{ $t('iscn.meta.notes') }} {{ record.recordNotes }}</li>
-        <li>{{ $t('iscn.meta.content.fingerprints') }} {{ record.contentFingerprints }}</li>
-        <li>{{ $t('iscn.meta.owner') }} {{ owner }}</li>
-      </ul>
-      <div v-if="exifInfo">
-        <h3>{{ $t('iscn.meta.exif') }}</h3>
-        <div><pre>{{ exifInfo }}</pre></div>
-      </div>
-      <ul>
-        <li>{{ $t('iscn.meta.type') }} {{ metadata['@type'] }}</li>
-        <li>{{ $t('iscn.meta.title') }} {{ metadata.title }}</li>
-        <li>{{ $t('iscn.meta.description') }} {{ metadata.description }}</li>
-        <li>{{ $t('iscn.meta.version') }} {{ metadata.version }}</li>
-        <li>{{ $t('iscn.meta.url') }} {{ metadata.url }}</li>
-        <li>{{ $t('iscn.meta.keywords') }} {{ metadata.keywords }}</li>
-        <li>{{ $t('iscn.meta.usage.info') }} {{ metadata.usageInfo }}</li>
-      </ul>
-      <div>
-        <div>{{ $t('iscn.meta.stakeholders') }}</div>
-        <div v-for="s in record.stakeholders" :key=s.entity.id>
-          <div>{{ $t('iscn.meta.stakeholders.id') }} {{ s.entity.id }}</div>
-          <div>{{ $t('iscn.meta.stakeholders.name') }} {{ s.entity.name }}</div>
-          <div>{{ $t('iscn.meta.stakeholders.contribution.type') }} {{ s.contributionType }}</div>
-        </div>
-      </div>
+    <div>
+      <InfoCard
+        :label-text="metadata['@type']"
+        :time-stamp="record.recordTimestamp"
+      >
+        <template #icon>
+          <IconImage />
+        </template>
+        <form-field
+          :label="$t('iscn.meta.title')"
+          content-type="strong"
+          class="mb-[12px]"
+        >
+          {{ metadata.title }}
+        </form-field>
+        <form-field :label="$t('iscn.meta.description')" class="mb-[12px]">
+          {{ metadata.description }}
+        </form-field>
+        <form-field :label="$t('iscn.meta.id')" class="mb-[12px]">
+          {{ iscnId }}
+        </form-field>
+        <form-field
+          :label="$t('iscn.meta.content.fingerprints')"
+          class="mb-[12px]"
+        >
+          <Link to="/">
+            {{
+              record.contentFingerprints.length > 1
+                ? record.contentFingerprints[1].slice(7)
+                : record.contentFingerprints[0].slice(7)
+            }}
+            <IconNorthEast class="ml-[4px]" />
+          </Link>
+        </form-field>
+        <form-field label="Tags" class="mb-[12px]">
+          <Tag text="Pill Title" />
+          <Tag text="Pill Title" />
+        </form-field>
+      </InfoCard>
+      <InfoCard :label-text="$t('iscn.meta.matafata.title')">
+        <template #icon>
+          <IconMataData />
+        </template>
+        <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+          <div class="font-normal text-[16px] leading-[22px]">
+            {{ owner }}
+          </div>
+          <div class="font-semibold">
+            {{ record.stakeholders[0].entity.name }}
+          </div>
+        </FormField>
+        <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+          {{ metadata.version }}
+        </FormField>
+        <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
+          <Link to="/">
+            {{ metadata.url }}
+            <IconNorthEast class="ml-[4px]" />
+          </Link>
+        </FormField>
+        <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
+          <Link to="/">
+            {{ metadata.usageInfo }}
+            <IconNorthEast class="ml-[4px]" />
+          </Link>
+        </FormField>
+      </InfoCard>
     </div>
   </div>
 </template>
@@ -41,81 +96,87 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import exifr from 'exifr'
 
-import { isCosmosTransactionHash } from '~/utils/cosmos';
-import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view';
-import { parsedISCNRecord } from '~/utils/cosmos/iscn';
-import { ISCN_PREFIX } from '~/constant';
+import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view'
+import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { ISCN_PREFIX } from '~/constant'
 
 const iscnModule = namespace('iscn')
 
 @Component
 export default class ViewIscnIdPage extends Vue {
-  owner = '';
-  iscnId = '';
-  exifInfo = null;
+  owner = ''
+  iscnId = ''
+  exifInfo = {}
 
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
-    records: parsedISCNRecord[];
-    owner: string;
-    latestVersion: Long.Long;
+    records: parsedISCNRecord[]
+    owner: string
+    latestVersion: Long.Long
   } | null>
 
-  @iscnModule.Action fetchISCNByTx!: (arg0: string) => Promise<{ records: parsedISCNRecord[]; }>
+  @iscnModule.Action fetchISCNByTx!: (
+    arg0: string
+  ) => Promise<{ records: parsedISCNRecord[] }>
 
   get record() {
-    return this.getISCNById(this.iscnId)?.data;
+    return this.getISCNById(this.iscnId)?.data
   }
 
   get metadata() {
-    return this.record && (this.record as any).contentMetadata;
+    return this.record && (this.record as any).contentMetadata
   }
 
   get type() {
-    return this.metadata && this.metadata['@type'];
+    return this.metadata && this.metadata['@type']
   }
 
   get imgSrc() {
-    return (this.type === 'Image' || this.type === 'Photo') && getIPFSUrlFromISCN(this.getISCNById(this.iscnId));
+    return (
+      (this.type === 'Image' || this.type === 'Photo') &&
+      getIPFSUrlFromISCN(this.getISCNById(this.iscnId))
+    )
   }
 
   created() {
-    const { iscnId } = this.$route.params;
+    const { iscnId } = this.$route.params
     if (iscnId.startsWith(ISCN_PREFIX)) {
-      this.iscnId = iscnId;
+      this.iscnId = iscnId
     }
   }
 
   async mounted() {
     if (!this.iscnId) {
-      const param = this.$route.params.iscnId;
+      const param = this.$route.params.iscnId
       if (!isCosmosTransactionHash(param)) {
-        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' });
-        return;
+        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' })
+        return
       }
-      const res = await this.fetchISCNByTx(param);
+      const res = await this.fetchISCNByTx(param)
       if (!res) {
-        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' });
-        return;
+        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' })
+        return
       }
-      this.iscnId = res.records[0].id;
-      this.$router.replace({ params: { iscnId: this.iscnId }});
+      this.iscnId = res.records[0].id
+      this.$router.replace({ params: { iscnId: this.iscnId } })
     }
     if (!this.getISCNById(this.iscnId) || !this.owner) {
-      const res = await this.fetchISCNById(this.iscnId);
-      if (res) this.owner = res.owner;
+      const res = await this.fetchISCNById(this.iscnId)
+      if (res) this.owner = res.owner
     }
-     if (!this.getISCNById(this.iscnId)) {
+    if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
-     }
+    }
   }
 
   @Watch('imgSrc')
   onImgSrcChanged() {
     this.$nuxt.$nextTick(async () => {
-      const imgElement = this.$refs.iscnImg;
-      if (imgElement) this.exifInfo = await exifr.parse(imgElement as HTMLImageElement);
-    });
+      const imgElement = this.$refs.iscnImg
+      if (imgElement)
+        this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
+    })
   }
 }
 </script>
