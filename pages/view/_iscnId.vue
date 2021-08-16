@@ -45,11 +45,7 @@
           class="mb-[12px]"
         >
           <Link to="/">
-            {{
-              record.contentFingerprints.length > 1
-                ? record.contentFingerprints[1].slice(7)
-                : record.contentFingerprints[0].slice(7)
-            }}
+            {{ contentFingerprintLink }}
             <IconNorthEast class="ml-[4px]" />
           </Link>
         </FormField>
@@ -60,7 +56,7 @@
       </InfoCard>
       <InfoCard :label-text="$t('iscn.meta.matafata.title')">
         <template #icon>
-          <IconMataData />
+          <IconMetadata />
         </template>
         <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
           <div class="font-normal text-[16px] leading-[22px]">
@@ -101,6 +97,11 @@ import { ISCN_PREFIX } from '~/constant'
 
 const iscnModule = namespace('iscn')
 
+export enum ErrorMessage {
+  statusCode400 = 'not iscn id or tx hash',
+  statusCode404 = 'iscn id not found',
+}
+
 @Component
 export default class ViewIscnIdPage extends Vue {
   owner = ''
@@ -136,6 +137,12 @@ export default class ViewIscnIdPage extends Vue {
     )
   }
 
+  get contentFingerprintLink() {
+    return this.record.contentFingerprints.length > 1
+      ? this.record.contentFingerprints[1].slice(7)
+      : this.record.contentFingerprints[0].slice(7)
+  }
+
   created() {
     const { iscnId } = this.$route.params
     if (iscnId.startsWith(ISCN_PREFIX)) {
@@ -147,12 +154,18 @@ export default class ViewIscnIdPage extends Vue {
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
       if (!isCosmosTransactionHash(param)) {
-        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' })
+        this.$nuxt.error({
+          statusCode: 400,
+          message: ErrorMessage.statusCode400,
+        })
         return
       }
       const res = await this.fetchISCNByTx(param)
       if (!res) {
-        this.$nuxt.error({ statusCode: 400, message: 'not iscn id or tx hash' })
+        this.$nuxt.error({
+          statusCode: 400,
+          message: ErrorMessage.statusCode400,
+        })
         return
       }
       this.iscnId = res.records[0].id
@@ -163,9 +176,8 @@ export default class ViewIscnIdPage extends Vue {
       if (res) this.owner = res.owner
     }
     if (!this.getISCNById(this.iscnId)) {
-      this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
+      this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
     }
   }
 }
 </script>
-

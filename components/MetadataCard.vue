@@ -1,35 +1,36 @@
 <template>
   <div class="bg-white max-w-[280px] py-[32px] px-[24px] rounded-[24px]">
-    <div class="w-min">
-      <Label
-        :text="$t('iscn.meta.card.title')"
-        tag="div"
-        preset="p5"
-        valign="middle"
-        content-class="font-semibold whitespace-nowrap text-like-green"
-        prepend-class="text-like-green"
-      >
-        <template #prepend>
-          <IconInfo />
-        </template>
-      </Label>
+    <Label
+      class="w-min"
+      :text="$t('iscn.meta.card.title')"
+      tag="div"
+      preset="p5"
+      valign="middle"
+      content-class="font-semibold whitespace-nowrap text-like-green"
+      prepend-class="text-like-green"
+    >
+      <template #prepend>
+        <IconInfo />
+      </template>
+    </Label>
+    <div v-if="imgSrc">
+      <img
+        ref="iscnImg"
+        class="block w-full mt-[24px] rounded-[8px]"
+        :src="imgSrc"
+      />
+      <FormField class="mt-[8px]" :label="$t('iscn.meta.card.preview')" />
     </div>
-    <div v-if="imgSrc" class="mt-[24px]">
-      <div class="rounded-[8px] overflow-hidden">
-        <img ref="iscnImg" class="w-full" :src="imgSrc" />
-      </div>
-      <FormField v-if="imgSrc" class="mt-[8px]" label="File Preview" />
-    </div>
-    <div v-for="(item, name) in exifInfo" :key="item.key">
-      <FormField
-        class="mb-[8px]"
-        :label="name"
-        direction="row"
-        label-classes="min-w-[98px]"
-      >
-        {{ item }}
-      </FormField>
-    </div>
+    <FormField
+      v-for="(item, name) in exifInfo"
+      :key="item.key"
+      class="mb-[8px]"
+      :label="name"
+      direction="row"
+      label-classes="min-w-[98px]"
+    >
+      {{ item }}
+    </FormField>
   </div>
 </template>
 
@@ -44,21 +45,19 @@ export default class MetadataCard extends Vue {
   @Prop(Object) readonly data: Object | undefined
   exifInfo = {}
 
-  async getExifInfo() {
+  async extractEXIFInfo() {
     const imgElement = this.$refs.iscnImg
     if (imgElement)
       this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
   }
 
   mounted() {
-    this.getExifInfo()
+    this.extractEXIFInfo()
   }
 
   @Watch('imgSrc')
   onImgSrcChanged() {
-    this.$nuxt.$nextTick(() => {
-      this.getExifInfo()
-    })
+    this.$nuxt.$nextTick(this.extractEXIFInfo)
   }
 }
 </script>
