@@ -133,11 +133,11 @@ export default class IscnRegisterForm extends Vue{
   }
 
   get ipfsUrl() {
-    return `ipfs://${this.ipfsHash}`;
+    return this.ipfsHash ? `ipfs://${this.ipfsHash}` : '';
   }
 
   get arweaveUrl() {
-    return `ar://${this.arweaveId}`;
+    return this.arweaveId ? `ar://${this.arweaveId}` : '';
   }
 
   mounted() {
