@@ -17,8 +17,7 @@
     ]"
   >
     <div class="mr-[32px]">
-      <img v-if="imgSrc" ref="iscnImg" class="hidden" :src="imgSrc" />
-      <MataDataCard class="w-full" :img-src="imgSrc" :data="exifInfo" />
+      <MetadataCard :img-src="imgSrc" />
     </div>
     <div>
       <InfoCard
@@ -28,20 +27,20 @@
         <template #icon>
           <IconImage />
         </template>
-        <form-field
+        <FormField
           :label="$t('iscn.meta.title')"
           content-type="strong"
           class="mb-[12px]"
         >
           {{ metadata.title }}
-        </form-field>
-        <form-field :label="$t('iscn.meta.description')" class="mb-[12px]">
+        </FormField>
+        <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
           {{ metadata.description }}
-        </form-field>
-        <form-field :label="$t('iscn.meta.id')" class="mb-[12px]">
+        </FormField>
+        <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
           {{ iscnId }}
-        </form-field>
-        <form-field
+        </FormField>
+        <FormField
           :label="$t('iscn.meta.content.fingerprints')"
           class="mb-[12px]"
         >
@@ -53,11 +52,11 @@
             }}
             <IconNorthEast class="ml-[4px]" />
           </Link>
-        </form-field>
-        <form-field label="Tags" class="mb-[12px]">
+        </FormField>
+        <FormField label="Tags" class="mb-[12px]">
           <Tag text="Pill Title" />
           <Tag text="Pill Title" />
-        </form-field>
+        </FormField>
       </InfoCard>
       <InfoCard :label-text="$t('iscn.meta.matafata.title')">
         <template #icon>
@@ -92,9 +91,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import exifr from 'exifr'
 
 import { isCosmosTransactionHash } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view'
@@ -107,7 +105,6 @@ const iscnModule = namespace('iscn')
 export default class ViewIscnIdPage extends Vue {
   owner = ''
   iscnId = ''
-  exifInfo = {}
 
   @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
@@ -169,14 +166,6 @@ export default class ViewIscnIdPage extends Vue {
       this.$nuxt.error({ statusCode: 404, message: 'iscn id not found' })
     }
   }
-
-  @Watch('imgSrc')
-  onImgSrcChanged() {
-    this.$nuxt.$nextTick(async () => {
-      const imgElement = this.$refs.iscnImg
-      if (imgElement)
-        this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
-    })
-  }
 }
 </script>
+

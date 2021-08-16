@@ -10,6 +10,7 @@
   "HomePage.search.results.empty": "No ISCN record found",
   "HomePage.search.title": "Search ISCN",
   "HomePage.submit.button": "Submit",
+  "iscn.meta.card.title": "File Info",
   "iscn.meta.content.fingerprints": "Fingerprints",
   "iscn.meta.creator.name.placeholder": "Creator Name",
   "iscn.meta.creator.name": "Creator Name",
