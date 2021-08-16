@@ -50,7 +50,10 @@ export default {
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    browserBaseURL: '/api',
+    retry: { retries: 1 }
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

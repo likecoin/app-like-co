@@ -1,6 +1,7 @@
 import { IPFS } from 'ipfs-core-types';
 import { create } from 'ipfs-http-client';
-import config from '../config/config';
+
+const config = require('../config/config');
 
 const getInstance = (() => {
   let instance: IPFS | null = null;
