@@ -97,16 +97,20 @@ export default class UploadForm extends Vue{
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
     this.uploadStatus = 'Uploading';
-    const { arweaveId } = await this.$axios.$post(
-      API_POST_ARWEAVE,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+    try {
+      const { arweaveId } = await this.$axios.$post(
+        API_POST_ARWEAVE,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
         },
-      },
-    );
-    this.arweaveId = arweaveId;
+      );
+      this.arweaveId = arweaveId;
+    } catch (err) {
+      console.error(err);
+    }
     this.$emit('submit', {
       arweaveId: this.arweaveId,
       ipfsHash: this.ipfsHash,

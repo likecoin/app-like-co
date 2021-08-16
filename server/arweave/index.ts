@@ -1,5 +1,4 @@
 import Arweave from 'arweave/node';
-import BigNumber from 'bignumber.js';
 import { uploadToIPFS } from '../ipfs';
 
 const hash = require('ipfs-only-hash');
@@ -12,10 +11,6 @@ const IPFS_CONSTRAINT = 'v0.1'
 const jwk = require('../config/arweave-key.json')
 
 const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
-
-function winstonToAR(winston: string) {
-  return new BigNumber(winston).shiftedBy(-12).toFixed();
-}
 
 export async function getArIdFromHashes(ipfsHash: string) {
   const res = await arweave.arql(
@@ -45,7 +40,7 @@ export async function estimatePrice(data: { mimetype: string; buffer: Buffer; })
   const transaction = await arweave.createTransaction({ data: buffer }, jwk)
   const { reward } = transaction;
   return {
-    AR: winstonToAR(reward),
+    AR: arweave.ar.winstonToAr(reward),
   }
 }
 
@@ -56,6 +51,10 @@ export async function submitToArweave(data: { mimetype: string; buffer: Buffer; 
   transaction.addTag(IPFS_KEY, ipfsHash)
   transaction.addTag(IPFS_CONSTRAINT_KEY, IPFS_CONSTRAINT)
   transaction.addTag('Content-Type', mimetype)
+  const { reward } = transaction;
+
+  const balance = await arweave.wallets.getBalance(await arweave.wallets.jwkToAddress(jwk));
+  if (arweave.ar.isLessThan(balance, reward)) return '';
 
   await arweave.transactions.sign(transaction, jwk)
   await arweave.transactions.post(transaction)
