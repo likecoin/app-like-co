@@ -13,14 +13,14 @@
         <IconInfo />
       </template>
     </Label>
-    <div v-if="imgSrc">
+    <template v-if="imgSrc">
       <img
         ref="iscnImg"
         class="block w-full mt-[24px] rounded-[8px]"
         :src="imgSrc"
       />
       <FormField class="mt-[8px]" :label="$t('iscn.meta.card.preview')" />
-    </div>
+    </template>
     <FormField
       v-for="(item, name) in exifInfo"
       :key="item.key"
@@ -47,8 +47,9 @@ export default class MetadataCard extends Vue {
 
   async extractEXIFInfo() {
     const imgElement = this.$refs.iscnImg
-    if (imgElement)
+    if (imgElement) {
       this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
+    }
   }
 
   mounted() {
