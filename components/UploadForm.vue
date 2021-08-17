@@ -1,7 +1,12 @@
 <template>
   <div class="mx-auto">
     <img v-if="isImage" class="max-w-md" :src="fileData" />
-    <div v-if="exifInfo"><pre>{{ exifInfo }}</pre></div>
+    <Button
+      v-if="exifInfo"
+      :text="$t('UploadForm.view.file.button')"
+      preset="outline"
+      @click="isOpenFileInfoDialog = true"
+    />
     <form @submit.prevent="onSubmit">
       <input
         v-if="!fileData"
@@ -19,6 +24,14 @@
         {{ $t('UploadForm.button') }}
       </button>
     </form>
+
+    <Dialog
+      v-model="isOpenFileInfoDialog"
+      :has-padding="false"
+      preset="custom"
+    >
+      <MetadataCard :data="exifInfo" />
+    </Dialog>
   </div>
 </template>
 
@@ -42,6 +55,8 @@ export default class UploadForm extends Vue{
   fileSHA256: string = '';
   fileBlob: Blob | null = null;
   exifInfo: any = null;
+
+  isOpenFileInfoDialog = false
 
   async onFileUpload(event: Event) {
     if (!event.target) return

@@ -28,8 +28,7 @@
           'cursor-pointer',
         ]"
         @click="deleteChip(i)"
-        ><IconClose
-      /></span>
+      ><IconCloseMini/></span>
     </div>
     <button
       v-if="!shouldShowInput"

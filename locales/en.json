@@ -40,5 +40,6 @@
   "iscn.meta.usage.info": "Usage Info",
   "iscn.meta.version": "Version",
   "UploadForm.button": "Upload",
-  "UploadForm.url.placeholder": "Use existing IPFS content"
+  "UploadForm.url.placeholder": "Use existing IPFS content",
+  "UploadForm.view.file.button": "View File Info"
 }

@@ -21,20 +21,19 @@
         ]"
         :placeholder="placeholder"
       />
-      <span 
+      <span
         :class="[
           'ml-[12px]',
           'cursor-pointer',
-         ]" 
+        ]"
         @click="deleteField(i)"
-        ><IconClose />
-      </span>
+      ><IconCloseMini /></span>
     </div>
     <Button
       class="mx-auto my-[4px]"
       preset="secondary"
-      :text-preset="textPreset" 
-      :label-tag="labelTag" 
+      :text-preset="textPreset"
+      :label-tag="labelTag"
       :text="text"
       size="mini"
       prepend-class="mr-[4px]"
