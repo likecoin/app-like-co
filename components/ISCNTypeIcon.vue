@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <IconImage v-if="recordType === 'Image'" />
-    <IconText v-if="recordType === 'Text'" />
-    <IconVideo v-if="recordType === 'Video'" />
-    <IconCreativeContent v-if="recordType === 'CreativeContent'" />
-  </div>
+  <IconImage v-if="recordType === 'Image'" />
+  <IconText v-else-if="recordType === 'Text'" />
+  <IconVideo v-else-if="recordType === 'Video'" />
+  <IconCreativeContent v-else />
 </template>
 
 <script lang="ts">
