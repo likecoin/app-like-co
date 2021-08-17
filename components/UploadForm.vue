@@ -44,7 +44,7 @@
       </div>
       <!-- guide text -->
       <Label
-        :text="$t('UploadForm.content.selectFile')"
+        :text="$t('UploadForm.guide.selectFile')"
         class="text-medium-gray my-[12px]"
       />
       <!-- upload field__upload -->
@@ -64,7 +64,7 @@
         >
           <IconUpload />
           <Label
-            :text="$t('UploadForm.content.dropFile')"
+            :text="$t('UploadForm.guide.dropFile')"
             class="my-[16px] text-dark-gray"
           />
           <Button
@@ -96,7 +96,11 @@
               :text="$t('UploadForm.view.file.button')"
               preset="outline"
               @click="isOpenFileInfoDialog = true"
-            />
+            >
+            <template #prepend>
+              <IconInfo />
+            </template>
+            </Button>
           </div>
         </div>
         <!-- Publish btn -->
@@ -197,7 +201,11 @@ export default class UploadForm extends Vue {
       reader.readAsDataURL(files[0])
       const fileBytes = (await fileToArrayBuffer(files[0])) as ArrayBuffer
       if (fileBytes) {
-        const [fileSHA256, imageType, ipfsHash] = await Promise.all([
+        const [
+          fileSHA256,
+          imageType,
+          ipfsHash,
+        ] = await Promise.all([
           digestFileSHA256(fileBytes),
           readImageType(fileBytes),
           Hash.of(Buffer.from(fileBytes)),
@@ -214,7 +222,6 @@ export default class UploadForm extends Vue {
         }
       }
     }
-    console.log(this.exifInfo)
   }
 
   onEnterURL() {

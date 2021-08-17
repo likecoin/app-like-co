@@ -1,9 +1,6 @@
 <template>
   <div class="container mx-auto">
-    <upload-form
-      v-if="state === 'init'"
-      @submit="onSubmitUpload"
-    />
+    <upload-form v-if="state === 'init'" @submit="onSubmitUpload" />
     <iscn-register-form
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
@@ -37,16 +34,16 @@ const signerModule = namespace('signer')
   layout: 'wallet',
 })
 export default class NewIndexPage extends Vue {
-  state = 'init';
-  ipfsHash = '';
-  fileSHA256 = '';
-  fileData = '';
-  iscnId = '';
-  iscnTxHash = '';
-  iscnTimestamp = '';
-  isImage = false;
-  fileBlob: Blob | null = null;
-  exifInfo: any = null;
+  state = 'init'
+  ipfsHash = ''
+  fileSHA256 = ''
+  fileData = ''
+  iscnId = ''
+  iscnTxHash = ''
+  iscnTimestamp = ''
+  isImage = false
+  fileBlob: Blob | null = null
+  exifInfo: any = null
 
   @signerModule.Getter('getAddress') currentAddress!: string
 
@@ -58,28 +55,35 @@ export default class NewIndexPage extends Vue {
     fileBlob,
     exifInfo,
   }: {
-    ipfsHash: string,
-    fileData: string,
-    fileSHA256: string,
-    isImage: boolean;
-    fileBlob: Blob | null;
-    exifInfo: any;
+    ipfsHash: string
+    fileData: string
+    fileSHA256: string
+    isImage: boolean
+    fileBlob: Blob | null
+    exifInfo: any
   }) {
-    this.ipfsHash = ipfsHash;
-    this.fileData = fileData;
-    this.fileSHA256 = fileSHA256;
-    this.isImage = isImage;
-    this.fileBlob = fileBlob;
-    this.exifInfo = exifInfo;
-    this.state = 'iscn';
+    this.ipfsHash = ipfsHash
+    this.fileData = fileData
+    this.fileSHA256 = fileSHA256
+    this.isImage = isImage
+    this.fileBlob = fileBlob
+    this.exifInfo = exifInfo
+    this.state = 'iscn'
   }
 
-  onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
-    this.iscnTxHash = txHash;
-    this.iscnId = iscnId;
-    this.iscnTimestamp = timestamp;
-    this.state = 'done';
+  onISCNTxInfo({
+    txHash,
+    iscnId,
+    timestamp,
+  }: {
+    txHash: string
+    iscnId: string
+    timestamp: string
+  }) {
+    this.iscnTxHash = txHash
+    this.iscnId = iscnId
+    this.iscnTimestamp = timestamp
+    this.state = 'done'
   }
 }
-
 </script>

@@ -28,6 +28,11 @@ export default class FormField extends Vue {
     Array,
   ]) readonly labelClasses: string | [] | undefined
 
+    @Prop([
+    String,
+    Array,
+  ]) readonly contentClasses: string | [] | undefined
+
   static direction = {
     row: 'row',
     column: 'column',
@@ -68,11 +73,12 @@ export default class FormField extends Vue {
         : 'w-full',
       'break-words',
       'text-dark-gray',
-      ...this.contentClasses,
+      ...this.contentrootClasses,
+      this.contentClasses,
     ]
   }
 
-  get contentClasses(): any {
+  get contentrootClasses(): any {
     switch (this.contentType) {
       case FormField.contentTypes.normal:
         return [
