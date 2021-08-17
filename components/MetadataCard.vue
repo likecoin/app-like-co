@@ -42,8 +42,13 @@ import exifr from 'exifr'
 @Component
 export default class MetadataCard extends Vue {
   @Prop(String) readonly imgSrc: String | undefined
-  @Prop(Object) readonly data: Object | undefined
-  exifInfo = {}
+  @Prop(Object) readonly data!: Object
+
+  exifInfo: Object = {}
+
+  created() {
+    if (this.data) this.exifInfo = this.data
+  }
 
   async extractEXIFInfo() {
     const imgElement = this.$refs.iscnImg
@@ -59,6 +64,11 @@ export default class MetadataCard extends Vue {
   @Watch('imgSrc')
   onImgSrcChanged() {
     this.$nuxt.$nextTick(this.extractEXIFInfo)
+  }
+
+  @Watch('data')
+  onDataChange() {
+    if (this.data) this.exifInfo = this.data
   }
 }
 </script>
