@@ -38,7 +38,7 @@
           <IconClose />
         </Button>
         <Card
-          :class="shadow-popup"
+          class="shadow-popup"
           :has-padding="hasPadding"
         >
           <template v-if="isBasic">
