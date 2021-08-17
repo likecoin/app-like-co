@@ -13,6 +13,7 @@
       :append-class="appendClass"
       :preset="textPreset"
       :tag="labelTag"
+      :align="align"
     >
       <template
         v-if="shouldShowPrepend"
@@ -127,11 +128,10 @@ export default class Button extends Vue {
         ]
 
       case Preset.plain:
-        return ['bg-transparent']
+        return []
 
       case Preset.outline:
         return [
-          'bg-transparent',
           this.isDisabled ? null : 'border-medium-gray border-2',
           this.circle ? 'text-like-green' : 'text-dark-gray',
           'active:border-opacity-0',
@@ -156,7 +156,7 @@ export default class Button extends Vue {
           : 'h-40px rounded-[10px]'
 
       case Size.mini:
-        return this.circle 
+        return this.circle
           ? ''
           : 'h-30px w-min rounded-[16px]'
 
@@ -219,6 +219,10 @@ export default class Button extends Vue {
         [this.classForSize]: this.isCircle || this.isMini,
       },
     ]
+  }
+
+  get align() {
+    return this.circle ? 'center' : ''
   }
 
   get shouldShowPrepend() {

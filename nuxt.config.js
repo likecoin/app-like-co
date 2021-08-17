@@ -47,6 +47,9 @@ export default {
 
     // https://i18n.nuxtjs.org
     '@nuxtjs/i18n',
+
+    // https://portal-vue.linusb.org/guide/installation.html#nuxt-module
+    'portal-vue/nuxt',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
