@@ -47,7 +47,7 @@
       ]"
       @click="showInput"
     >
-      <IconAdd-mini />
+      <IconAddMini />
     </button>
     <div class="relative">
       <input
