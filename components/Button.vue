@@ -135,7 +135,7 @@ export default class Button extends Vue {
           this.isDisabled ? 'bg-transparent border-shade-gray border-2 text-shade-gray' : 'border-medium-gray border-2',
           this.circle ? 'text-like-green' : 'text-dark-gray',
           {
-            'active:border-opacity-0 hover:border-opacity-0': !this.isDisabled
+            'active:border-opacity-0 hover:border-opacity-0': !this.isDisabled,
           },
         ]
 
