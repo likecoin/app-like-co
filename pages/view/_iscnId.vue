@@ -16,7 +16,7 @@
       'mb-[30px]',
     ]"
   >
-    <div  class="mr-[32px]">
+    <div class="mr-[32px]">
       <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
     </div>
     <div>
