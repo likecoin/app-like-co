@@ -177,7 +177,7 @@
             :label="$t('iscn.meta.keywords')"
             content-classes="flex flex-row flex-wrap"
           >
-            <EditableTagList />
+            <EditableTagList v-model="tags" />
           </FormField>
           <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.creator.url')" class="mb-[12px]">
@@ -333,7 +333,7 @@ export default class IscnRegisterForm extends Vue {
   authors: Author[] = []
   title: string = ''
   description: string = ''
-  tagsString: string = ''
+  tags: string[] = []
   url: string = ''
   license: string = ''
   authorName: string = ''
@@ -347,8 +347,8 @@ export default class IscnRegisterForm extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
-  get tags(): string[] {
-    return (this.tagsString as string).split(',')
+  get tagsString(): string {
+    return this.tags.join(',')
   }
 
   get authorNames() {
