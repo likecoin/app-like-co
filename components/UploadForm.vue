@@ -103,11 +103,13 @@
           </div>
           <!-- Publish btn -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
+            <!-- Hide for now
             <Label
               v-if="isImage"
               text="Est.Fee:~123.123 Like"
               class="mx-[24px]"
             />
+            -->
             <Button
               type="submit"
               :preset="submitBtnClasses"
