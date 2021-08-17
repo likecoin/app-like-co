@@ -1,44 +1,138 @@
 <template>
-  <div class="mx-auto">
-    <img v-if="isImage" class="max-w-md" :src="fileData" />
+  <div class="flex flex-col mx-auto mt-[40px] w-min ">
     <Button
-      v-if="exifInfo"
-      :text="$t('UploadForm.view.file.button')"
-      preset="outline"
-      @click="isOpenFileInfoDialog = true"
-    />
-    <form @submit.prevent="onSubmit">
-      <input
-        v-if="!fileData"
-        v-model="ipfsURL"
-        :placeholder="$t('UploadForm.url.placeholder')"
-        @change="onEnterURL"
-      />
-      <input
-        ref="imageFile"
-        accept="image/*"
-        type="file"
-        @change="onFileUpload"
-      />
-      <button class="block" type="submit">
-        {{ $t('UploadForm.button') }}
-      </button>
-    </form>
-
-    <Dialog
-      v-model="isOpenFileInfoDialog"
-      :has-padding="false"
-      preset="custom"
+      :to="localeLocation({ name: 'index' })"
+      preset="plain"
+      tag="div"
+      :text="$t('UploadForm.button.back')"
+      class="text-dark-gray"
     >
-      <MetadataCard :data="exifInfo" />
-    </Dialog>
+      <template #prepend>
+        <IconArrowLeft />
+      </template>
+    </Button>
+    <Card
+      :has-padding="false"
+      set-padding-classes="p-[32px]"
+    >
+      <!-- header -->
+      <div class="flex flex-row items-start justify-between">
+        <Label
+          class="w-min"
+          :text="$t('UploadForm.title.registerISCN')"
+          tag="div"
+          preset="p5"
+          valign="middle"
+          content-class="font-semibold whitespace-nowrap text-like-green"
+          prepend-class="text-like-green"
+        >
+          <template #prepend>
+            <IconRegister />
+          </template>
+        </Label>
+        <div class="flex flex-col items-end">
+          <div class="flex flex-row flex-nowrap w-min mb-[8px]">
+            <IconStepDot
+              v-for="item in 4"
+              :key="item.key"
+              color="#EBEBEB"
+              class="ml-[16px]"
+            />
+          </div>
+          <Label preset="p6" :text="stepText" class="text-medium-gray" />
+        </div>
+      </div>
+      <!-- guide text -->
+      <Label
+        :text="$t('UploadForm.content.selectFile')"
+        class="text-medium-gray my-[12px]"
+      />
+      <!-- upload field__upload -->
+      <form @submit.prevent="onSubmit">
+        <form
+          v-if="!isImage"
+          :class="formClasses"
+          @drop.prevent="onFileUpload"
+          @dragover.prevent="
+            (e) => {
+              e.currentTarget.classList.add('bg-shade-gray')
+            }"
+          @dragleave.prevent="
+            (e) => {
+              e.currentTarget.classList.remove('bg-shade-gray')
+            }"
+        >
+          <IconUpload />
+          <Label
+            :text="$t('UploadForm.content.dropFile')"
+            class="my-[16px] text-dark-gray"
+          />
+          <Button
+            type="button"
+            preset="tertiary"
+            @click="$refs.imageFile.click()"
+            >{{ $t('UploadForm.button.selectFile') }}
+          </Button>
+          <input
+            ref="imageFile"
+            class="hidden"
+            accept="image/*"
+            type="file"
+            @change="onFileUpload"
+          />
+        </form>
+        <!-- upload field__Submit  -->
+        <div v-else :class="[...formClasses]">
+          <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+          <div class="flex flex-col items-stretch justify-start">
+            <Label text="File name" class="font-semibold text-dark-gray" />
+            <Label
+              text="File size"
+              class="font-normal text-medium-gray my-[8px]"
+            />
+            <Button
+              v-if="exifInfo"
+              type="button"
+              :text="$t('UploadForm.view.file.button')"
+              preset="outline"
+              @click="isOpenFileInfoDialog = true"
+            />
+          </div>
+        </div>
+        <!-- Publish btn -->
+        <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
+          <Label
+            v-if="isImage"
+            text="Est.Fee:~123.123 Like"
+            class="mx-[24px]"
+          />
+          <Button
+            type="submit"
+            :preset="submitBtnClasses"
+            :is-disabled="!isImage"
+            >{{ $t('UploadForm.button') }}
+            <template #append>
+              <IconArrowRight />
+            </template>
+          </Button>
+        </div>
+      </form>
+      <!-- Dialog -->
+      <Dialog
+        v-model="isOpenFileInfoDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <MetadataCard :img-src="fileData" :data="exifInfo" />
+      </Dialog>
+    </Card>
   </div>
 </template>
 
 <script lang="ts">
 import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator'
 
 import {
   fileToArrayBuffer,
@@ -47,20 +141,53 @@ import {
 } from '~/utils/misc'
 
 @Component
-export default class UploadForm extends Vue{
-  isImage: boolean = false;
-  ipfsURL: string = '';
-  ipfsHash: string = '';
-  fileData: string = '';
-  fileSHA256: string = '';
-  fileBlob: Blob | null = null;
-  exifInfo: any = null;
+export default class UploadForm extends Vue {
+  isImage: boolean = false
+  ipfsURL: string = ''
+  ipfsHash: string = ''
+  fileData: string = ''
+  fileSHA256: string = ''
+  fileBlob: Blob | null = null
+  exifInfo: any = null
 
   isOpenFileInfoDialog = false
 
+  get formClasses() {
+    return [
+      'flex',
+      'w-[584px]',
+      'h-[196px]',
+      {
+        'flex-row justify-start': this.isImage,
+        'flex-col justify-center': !this.isImage,
+      },
+      'items-center',
+      'p-[32px]',
+      'mb-[12px]',
+      'border-[2px]',
+      'border-dashed',
+      'border-shade-gray',
+      'rounded-[12px]',
+      'text-medium-gray',
+    ]
+  }
+
+  get submitBtnClasses() {
+    return this.isImage ? 'secondary' : 'outline'
+  }
+
+  get stepText() {
+    return this.isImage ? 'Step 2/4' : 'Step 1/4'
+  }
+
   async onFileUpload(event: Event) {
-    if (!event.target) return
-    const { files } = event.target as HTMLInputElement
+    let files = null
+    if (event.dataTransfer) {
+      ;({ files } = event.dataTransfer)
+    } else if (event.target) {
+      ;({ files } = event.target as HTMLInputElement)
+    }
+
     if (files && files[0]) {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -87,6 +214,7 @@ export default class UploadForm extends Vue{
         }
       }
     }
+    console.log(this.exifInfo)
   }
 
   onEnterURL() {
