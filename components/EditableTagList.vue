@@ -1,8 +1,8 @@
 <template>
   <div :class="['flex', 'flex-row', 'flex-wrap', 'items-center']">
     <div
-      v-for="(chip, i) of chips"
-      :key="chip"
+      v-for="(tag, i) of tags"
+      :key="tag"
       :class="[
         'flex',
         'flex-row',
@@ -18,9 +18,9 @@
         'rounded-[16px]',
       ]"
       @mouseover="shouldShowClose = i"
-      @mouseleave="shouldShowClose = null"
+      @mouseleave="shouldShowClose = -1"
     >
-      {{ chip }}
+      {{ tag }}
       <span
         v-if="shouldShowClose === i"
         :class="[
@@ -47,7 +47,7 @@
       ]"
       @click="showInput"
     >
-      <IconAdd-mini />
+      <IconAddMini />
     </button>
     <div class="relative">
       <input
@@ -89,41 +89,63 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Model, Watch } from 'vue-property-decorator'
 
 @Component
 export default class EditableTagList extends Vue {
+  @Model('change', { type: Array, default: () => [] }) value!: Array<string>
 
-  chips: Array<String> = []
-  currentInput: String = ''
-  shouldShowInput: Boolean = false
-  shouldShowClose: any = null
+  tags: Array<string> = []
+  currentInput: string = ''
+  shouldShowInput: boolean = false
+  shouldShowClose: number = -1
 
   $refs!: {
     input: HTMLInputElement
   }
 
+  created() {
+    this.tags = this.value
+  }
+
+  @Watch('value')
+  onValueChange() {
+    this.tags = this.value
+  }
+
   showInput() {
     this.shouldShowInput = true
-    Vue.nextTick(() => this.$refs.input.focus())
+    this.$nuxt.$nextTick(() => this.$refs.input.focus())
   }
 
   blurInput() {
-    this.currentInput.length ? this.saveChip() : (this.shouldShowInput = false)
+    if (this.currentInput.length) {
+      this.saveChip()
+    } else {
+      this.shouldShowInput = false
+    }
   }
 
   saveChip() {
-    const { chips, currentInput } = this
-    chips.push(currentInput)
+    this.tags.push(this.currentInput)
+    this.emitChange()
     this.currentInput = ''
   }
 
   deleteChip(index: number) {
-    this.chips.splice(index, 1)
+    this.tags.splice(index, 1)
+    this.emitChange()
   }
 
   backspaceDelete() {
-    this.currentInput === '' && this.chips.splice(this.chips.length - 1)
+    if (this.currentInput === '') {
+      this.tags.splice(this.tags.length - 1)
+      this.emitChange()
+    }
+  }
+
+  emitChange() {
+    this.$emit('change', this.tags)
   }
 }
 </script>
