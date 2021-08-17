@@ -3,9 +3,7 @@
     <template v-if="!records">
       {{ $t('general.loading') }}
     </template>
-    <template v-else>
-      <search-results :records="records" />
-    </template>
+    <search-results v-else :records="records" />
   </div>
 </template>
 
