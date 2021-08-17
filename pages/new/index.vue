@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto">
-    <upload-form v-if="state === 'init'" @submit="onSubmitUpload" />
-    <iscn-register-form
+    <UploadForm v-if="state === 'init'" @submit="onSubmitUpload" />
+    <IscnRegisterForm
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
       :file-data="fileData"
@@ -11,7 +11,7 @@
       :exif-info="exifInfo"
       @txBroadcasted="onISCNTxInfo"
     />
-    <iscn-uploaded-info
+    <IscnUploadedInfo
       v-else-if="state === 'done'"
       :is-image="isImage"
       :ipfs-hash="ipfsHash"
