@@ -188,7 +188,7 @@
           </FormField>
           <FormField :label="$t('iscn.meta.license')" class="mb-[12px]">
             <TextField
-              v-model="placeholder"
+              v-model="license"
               :placeholder="$t('iscn.meta.license.placeholder')"
             />
           </FormField>
