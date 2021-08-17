@@ -1,124 +1,24 @@
 <template>
-  <div>
-    <div class="flex flex-col mx-auto mt-[40px] w-min max-w-[648px]">
-      <Button
-        :to="localeLocation({ name: 'index' })"
-        preset="plain"
-        tag="div"
-        :text="$t('UploadForm.button.back')"
-        class="text-dark-gray"
-      >
-        <template #prepend>
-          <IconArrowLeft />
-        </template>
-      </Button>
-      <!-- ////// Review Card /////// -->
-      <Card :has-padding="false" set-padding-classes="p-[32px]">
-        <!-- header -->
-        <div class="flex flex-row items-start justify-between">
-          <Label
-            class="w-min"
-            :text="$t('UploadForm.title.registerISCN')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconRegister />
-            </template>
-          </Label>
-          <div class="flex flex-col items-end">
-            <div class="flex flex-row flex-nowrap w-min mb-[8px]">
-              <IconStepDot
-                v-for="item in 4"
-                :key="item.key"
-                color="#EBEBEB"
-                class="ml-[16px]"
-              />
-            </div>
-            <Label preset="p6" text="Step 3/4" class="text-medium-gray" />
-          </div>
-        </div>
-        <!-- guide text -->
+  <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px]">
+    <!-- Back btn -->
+    <Button
+      :to="localeLocation({ name: 'index' })"
+      preset="plain"
+      tag="div"
+      :text="$t('UploadForm.button.back')"
+      class="text-dark-gray"
+    >
+      <template #prepend>
+        <IconArrowLeft />
+      </template>
+    </Button>
+    <!-- ////// Review Card /////// -->
+    <Card :has-padding="false" set-padding-classes="p-[32px]">
+      <!-- header -->
+      <div class="flex flex-row items-start justify-between">
         <Label
-          :text="$t('IscnRegisterForm.guide.title')"
-          class="text-medium-gray my-[12px]"
-        />
-        <!-- review metadata -->
-        <div
-          class="
-            flex
-            w-[584px]
-            h-[196px]
-            flex-row
-            justify-start
-            items-center
-            p-[32px]
-            mb-[12px]
-            border-[2px] border-dashed border-shade-gray
-            rounded-[12px]
-            text-medium-gray
-          "
-        >
-          <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
-          <div class="flex flex-col justify-start">
-            <Label
-              class="w-min mb-[16px]"
-              :text="$t('IscnRegisterForm.title.done')"
-              tag="div"
-              preset="p5"
-              valign="middle"
-              content-class="font-semibold whitespace-nowrap text-like-green"
-              prepend-class="text-like-green"
-            >
-              <template #prepend>
-                <IconDone />
-              </template>
-            </Label>
-            <Button
-              type="button"
-              :text="$t('UploadForm.view.file.button')"
-              preset="outline"
-              @click="isOpenFileInfoDialog = true"
-            >
-              <template #prepend>
-                <IconInfo />
-              </template>
-            </Button>
-          </div>
-        </div>
-        <!-- fingerPrint -->
-        <FormField
-          :label="$t('iscn.meta.content.fingerprints')"
-          class="mb-[12px]"
-        >
-          <Link :href="`https://ipfs.io/ipfs/${ipfsHash}`">
-            {{ ipfsHash }}
-            <IconNorthEast class="ml-[4px]" />
-          </Link>
-        </FormField>
-        <!-- Dialog -->
-        <Dialog
-          v-model="isOpenFileInfoDialog"
-          :has-padding="false"
-          preset="custom"
-        >
-          <MetadataCard :img-src="fileData" :data="exifInfo" />
-        </Dialog>
-      </Card>
-
-      <!-- ////// Input Card /////// -->
-      <Card
-        class="flex flex-col mt-[16px]"
-        :has-padding="false"
-        set-padding-classes="p-[32px]"
-      >
-        <!-- header -->
-        <Label
-          class="w-min mb-[16px]"
-          :text="type"
+          class="w-min"
+          :text="$t('UploadForm.title.registerISCN')"
           tag="div"
           preset="p5"
           valign="middle"
@@ -126,113 +26,278 @@
           prepend-class="text-like-green"
         >
           <template #prepend>
-            <ISCNTypeIcon :type="type" />
+            <IconRegister />
           </template>
         </Label>
-        <!-- form fieldset -->
-        <div>
-          <form @submit.prevent="onSubmit">
-            <FormField :label="$t('iscn.meta.title')" class="my-[12px]">
-              <TextField
-                v-model="title"
-                :placeholder="$t('iscn.meta.title.placeholder')"
-              />
-            </FormField>
-            <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
-              <TextField
-                v-model="description"
-                :placeholder="$t('iscn.meta.description.placeholder')"
-              />
-            </FormField>
-            <FormField
-              :label="$t('iscn.meta.creator.name')"
-              content-classes="flex flex-row flex-wrap"
+        <div class="flex flex-col items-end">
+          <div class="flex flex-row flex-nowrap w-min mb-[8px]">
+            <IconStepDot
+              v-for="item in 4"
+              :key="item.key"
+              color="#EBEBEB"
+              class="ml-[16px]"
+            />
+          </div>
+          <Label preset="p6" text="Step 3/4" class="text-medium-gray" />
+        </div>
+      </div>
+      <!-- guide text -->
+      <Label
+        :text="$t('IscnRegisterForm.guide.title')"
+        class="text-medium-gray my-[12px]"
+      />
+      <!-- review metadata -->
+      <div
+        class="
+          flex
+          w-[584px]
+          h-[196px]
+          flex-row
+          justify-start
+          items-center
+          p-[32px]
+          mb-[12px]
+          border-[2px] border-dashed border-shade-gray
+          rounded-[12px]
+          text-medium-gray
+        "
+      >
+        <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+        <div class="flex flex-col justify-start">
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('IscnRegisterForm.title.done')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
+          >
+            <template #prepend>
+              <IconDone />
+            </template>
+          </Label>
+          <Button
+            type="button"
+            :text="$t('UploadForm.view.file.button')"
+            preset="outline"
+            @click="isOpenFileInfoDialog = true"
+          >
+            <template #prepend>
+              <IconInfo />
+            </template>
+          </Button>
+        </div>
+      </div>
+      <!-- fingerPrint -->
+      <FormField
+        :label="$t('iscn.meta.content.fingerprints')"
+        class="mb-[12px]"
+      >
+        <Link :href="`https://ipfs.io/ipfs/${ipfsHash}`">
+          {{ ipfsHash }}
+          <IconNorthEast class="ml-[4px]" />
+        </Link>
+      </FormField>
+      <!-- Dialog -->
+      <Dialog
+        v-model="isOpenFileInfoDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <MetadataCard :img-src="fileData" :data="exifInfo" />
+      </Dialog>
+    </Card>
+    <!-- ////// Input Card /////// -->
+    <Card
+      class="flex flex-col mt-[16px]"
+      :has-padding="false"
+      set-padding-classes="p-[32px]"
+    >
+      <!-- header -->
+      <Label
+        class="w-min mb-[16px]"
+        :text="type"
+        tag="div"
+        preset="p5"
+        valign="middle"
+        content-class="font-semibold whitespace-nowrap text-like-green"
+        prepend-class="text-like-green"
+      >
+        <template #prepend>
+          <ISCNTypeIcon :type="type" />
+        </template>
+      </Label>
+      <!-- form fieldset -->
+      <div>
+        <form @submit.prevent="onSubmit">
+          <FormField :label="$t('iscn.meta.title')" class="my-[12px]">
+            <TextField
+              v-model="title"
+              :placeholder="$t('iscn.meta.title.placeholder')"
+            />
+          </FormField>
+          <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
+            <TextField
+              v-model="description"
+              :placeholder="$t('iscn.meta.description.placeholder')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('iscn.meta.creator.name')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <span
+              v-for="(author, index) in authors"
+              :key="index"
+              class="mr-[8px] mb-[4px]"
             >
-              <span
-                v-for="(author, index) in authors"
-                :key="index"
-                class="mr-[8px] mb-[4px]"
-              >
-                <Button
-                  size="mini"
-                  preset="secondary"
-                  tag="div"
-                  text-preset="h6"
-                  type="button"
-                  :text="$t('iscn.meta.creator.name.placeholder')"
-                />
-              </span>
               <Button
-                class="mb-[4px]"
                 size="mini"
                 preset="secondary"
-                content-class="py-[4px]"
-                @click.prevent="onClickAddAuthor"
-              >
-                <IconAddMini />
-              </Button>
-            </FormField>
-            <IconDiverMini class="my-[12px]" />
-            <FormField
-              :label="$t('iscn.meta.keywords')"
-              content-classes="flex flex-row flex-wrap"
+                tag="div"
+                text-preset="h6"
+                type="button"
+                :text="author.name"
+              />
+            </span>
+            <Button
+              type="button"
+              class="mb-[4px]"
+              size="mini"
+              preset="secondary"
+              content-class="py-[4px]"
+              @click="isOpenAddAuthor = true"
             >
-              <EditableTagList />
-            </FormField>
-            <IconDiverMini class="my-[12px]" />
-            <FormField :label="$t('iscn.meta.creator.url')" class="mb-[12px]">
-              <TextField
-                v-model="url"
-                :placeholder="$t('iscn.meta.creator.url.placeholder')"
-              />
-            </FormField>
-            <FormField :label="$t('iscn.meta.license')" class="mb-[12px]">
-              <TextField
-                v-model="placeholder"
-                :placeholder="$t('iscn.meta.license.placeholder')"
-              />
-            </FormField>
-            <IconDiverMini class="my-[12px]" />
-            <FormField :label="$t('iscn.meta.register')" class="mb-[12px]">
-              <div class="font-normal text-[16px] leading-[22px]">
-                {{ $t('iscn.meta.register.placeholder') }}
-              </div>
-              <div class="font-semibold">
-                {{ $t('iscn.meta.register.placeholder') }}
-              </div>
-            </FormField>
-            <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
-              {{ $t('iscn.meta.version.placeholder') }}
-            </FormField>
-            <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
-              <Label
-                v-if="isImage"
-                text="Est.Fee:~123.123 Like"
-                class="mx-[24px]"
-              />
-              <Button
-                type="submit"
-                preset="secondary"
-                :is-disabled="!!uploadStatus"
-              >
-                {{ uploadStatus || $t('iscn.meta.register') }}
-                <template #append>
-                  <IconArrowRight />
-                </template>
-              </Button>
+              <IconAddMini />
+            </Button>
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <FormField
+            :label="$t('iscn.meta.keywords')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <EditableTagList />
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <FormField :label="$t('iscn.meta.creator.url')" class="mb-[12px]">
+            <TextField
+              v-model="url"
+              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+            />
+          </FormField>
+          <FormField :label="$t('iscn.meta.license')" class="mb-[12px]">
+            <TextField
+              v-model="placeholder"
+              :placeholder="$t('iscn.meta.license.placeholder')"
+            />
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <FormField :label="$t('iscn.meta.register')" class="mb-[12px]">
+            <div class="font-normal text-[16px] leading-[22px]">
+              {{ $t('iscn.meta.register.placeholder') }}
             </div>
-          </form>
-        </div>
-        <!-- Dialog -->
-        <Dialog
-          v-model="isOpenFileInfoDialog"
-          :has-padding="false"
-          preset="custom"
-        >
-          <MetadataCard :img-src="fileData" :data="exifInfo" />
-        </Dialog>
-      </Card>
-    </div>
+            <div class="font-semibold">
+              {{ $t('iscn.meta.register.placeholder') }}
+            </div>
+          </FormField>
+          <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+            {{ $t('iscn.meta.version.placeholder') }}
+          </FormField>
+          <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
+            <Label
+              v-if="isImage"
+              text="Est.Fee:~123.123 Like"
+              class="mx-[24px]"
+            />
+            <Button
+              type="submit"
+              preset="secondary"
+              :is-disabled="!!uploadStatus"
+            >
+              {{ uploadStatus || $t('iscn.meta.register') }}
+              <template #append>
+                <IconArrowRight />
+              </template>
+            </Button>
+          </div>
+        </form>
+      </div>
+      <!-- Dialog -->
+      <Dialog v-model="isOpenAddAuthor" :has-padding="false" preset="custom">
+        <Card class="flex flex-col w-[616px]">
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('UploadForm.title.editAuthor')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
+          >
+            <template #prepend>
+              <IconAdd />
+            </template>
+          </Label>
+          <!-- name -->
+          <FormField :label="$t('iscn.meta.creator.name')" class="my-[12px]">
+            <TextField
+              :placeholder="$t('iscn.meta.creator.name.placeholder')"
+            />
+          </FormField>
+          <IconDiverMini />
+          <!-- wallet address -->
+          <FormField :label="$t('iscn.meta.creator.wallet.title')">
+            <TextFieldList
+              :text="$t('iscn.meta.creator.wallet')"
+              text-preset="h6"
+              label-tag="div"
+              placeholder="Wallet Address"
+            >
+              <template #prepend>
+                <Button
+                  preset="tertiary"
+                  size="small"
+                  prepend-class="mr-[6px]"
+                  append-class="ml-0"
+                >
+                  <template #prepend>
+                    <IconPlaceholder />
+                  </template>
+                  <template #append>
+                    <IconArrowDown />
+                  </template>
+                </Button>
+              </template>
+            </TextFieldList>
+          </FormField>
+          <!-- url -->
+          <FormField :label="$t('iscn.meta.creator.url')">
+            <TextFieldList
+              text-preset="h6"
+              label-tag="div"
+              :text="$t('iscn.meta.creator.url')"
+              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+            />
+          </FormField>
+          <!-- submit btn -->
+          <div class="flex flex-row self-end">
+            <Button
+              type="button"
+              class="mx-[8px]"
+              size="small"
+              preset="secondary"
+              content-class="font-semibold"
+              :text="$t('UploadForm.button.comfirm')"
+              @click.prevent="onClickAddAuthor"
+            />
+            <Button type="button" size="small" preset="tertiary">
+              <IconDelete />
+            </Button>
+          </div>
+        </Card>
+      </Dialog>
+    </Card>
   </div>
 </template>
 
@@ -277,6 +342,7 @@ export default class IscnRegisterForm extends Vue {
   uploadIpfsHash: string = this.ipfsHash
 
   isOpenFileInfoDialog = false
+  isOpenAddAuthor = false
 
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
