@@ -2,6 +2,7 @@
   <div>
     <nuxt-link
       v-if="to"
+      :to="to"
       :class="[
         'flex',
         'flex-row',

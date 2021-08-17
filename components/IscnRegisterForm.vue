@@ -201,6 +201,9 @@
                 {{ $t('iscn.meta.register.placeholder') }}
               </div>
             </FormField>
+            <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+              {{ $t('iscn.meta.version.placeholder') }}
+            </FormField>
             <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
               <Label
                 v-if="isImage"

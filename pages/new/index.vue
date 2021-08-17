@@ -19,6 +19,7 @@
       :file-s-h-a256="fileSHA256"
       :iscn-id="iscnId"
       :iscn-hash="iscnTxHash"
+      :exif-info="exifInfo"
       :iscn-timestamp="iscnTimestamp"
     />
   </div>
