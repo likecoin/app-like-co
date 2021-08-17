@@ -42,6 +42,7 @@
   "iscn.meta.url": "URL",
   "iscn.meta.usage.info": "Usage Info",
   "iscn.meta.version": "Version",
+  "iscn.meta.version.placeholder": "Version",
   "UploadForm.button": "Publish to IPFS",
   "UploadForm.button.back": "Back",
   "UploadForm.button.selectFile": "Select a file",
@@ -51,5 +52,7 @@
   "UploadForm.url.placeholder": "Use existing IPFS content",
   "UploadForm.view.file.button": "View File Info",
   "IscnRegisterForm.title.done": "Published to IPFS",
-  "IscnRegisterForm.guide.title": "Review and edit metadata"
+  "IscnRegisterForm.guide.title": "Review and edit metadata",
+  "IscnUploaded.title": "ISCN Registed",
+  "IscnUploaded.guide.title": "Completed! Here is your ISCN"
 }
