@@ -17,15 +17,12 @@
     ]"
   >
     <div class="mr-[32px]">
-      <MetadataCard :img-src="imgSrc" />
+      <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
     </div>
     <div>
-      <InfoCard
-        :label-text="metadata['@type']"
-        :time-stamp="record.recordTimestamp"
-      >
+      <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
         <template #icon>
-          <IconImage />
+          <ISCNTypeIcon :type="type" />
         </template>
         <FormField
           :label="$t('iscn.meta.title')"
