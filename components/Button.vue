@@ -132,14 +132,15 @@ export default class Button extends Vue {
 
       case Preset.outline:
         return [
-          this.isDisabled ? null : 'border-medium-gray border-2',
+          this.isDisabled ? 'bg-transparent border-shade-gray border-2 text-shade-gray' : 'border-medium-gray border-2',
           this.circle ? 'text-like-green' : 'text-dark-gray',
-          'active:border-opacity-0',
-          'hover:border-opacity-0',
+          {
+            'active:border-opacity-0 hover:border-opacity-0': !this.isDisabled
+          },
         ]
 
       default:
-        return null
+        return ''
     }
   }
 
@@ -176,8 +177,8 @@ export default class Button extends Vue {
       'cursor-pointer',
       {
         'justify-center': this.isCircle,
-        'cursor-not-allowed bg-shade-gray text-medium-gray':
-          this.isDisabled,
+        'cursor-not-allowed bg-shade-gray text-medium-gray': 
+        this.isDisabled,
       },
     ]
   }
