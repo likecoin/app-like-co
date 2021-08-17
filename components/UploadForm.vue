@@ -183,7 +183,7 @@ export default class UploadForm extends Vue {
     return this.isImage ? 'Step 2/4' : 'Step 1/4'
   }
 
-  async onFileUpload(event: Event) {
+  async onFileUpload(event: DragEvent) {
     let files = null
     if (event.dataTransfer) {
       ;({ files } = event.dataTransfer)
