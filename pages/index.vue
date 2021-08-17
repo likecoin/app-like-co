@@ -8,13 +8,11 @@
       'p-[16px]',
     ]"
   >
-    <form
+    <Card
+      tag="form"
       :class="[
         'w-full',
         'max-w-[600px]',
-        'p-[32px]',
-        'bg-white',
-        'rounded-[24px]',
       ]"
       @submit.prevent="onSearch"
     >
@@ -48,7 +46,7 @@
           </Button>
         </template>
       </Label>
-    </form>
+    </Card>
 
     <Button
       class="mt-[32px]"

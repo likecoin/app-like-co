@@ -182,8 +182,8 @@ export default class Label extends Vue {
     return [
       'flex',
       'items-center',
-      'justify-center',
       'flex-grow',
+      this.alignClass,
       this.contentClass,
     ]
   }
