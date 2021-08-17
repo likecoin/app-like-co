@@ -1,19 +1,19 @@
 <template>
-  <div class="container flex flex-col items-center mx-auto">
-    <div v-if="!records">
+  <div class="mx-auto pt-[16px]">
+    <template v-if="!records">
       {{ $t('general.loading') }}
-    </div>
-    <search-results v-else :records="records"/>
+    </template>
+    <template v-else>
+      <search-results :records="records" />
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
-import SearchResults from '~/components/SearchResults.vue';
-import { parsedISCNRecord } from '~/utils/cosmos/iscn';
-
+import SearchResults from '~/components/SearchResults.vue'
+import { parsedISCNRecord } from '~/utils/cosmos/iscn'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -23,26 +23,28 @@ const iscnModule = namespace('iscn')
   components: { SearchResults },
 })
 export default class WorksIndexPageextends extends Vue {
-  records: parsedISCNRecord[] = [];
+  records: parsedISCNRecord[] = []
 
   @signerModule.Getter('getAddress') currentAddress!: string
-  @iscnModule.Action queryISCNByAddress!: (arg0: string) => parsedISCNRecord[]|PromiseLike<parsedISCNRecord[]>
+  @iscnModule.Action queryISCNByAddress!: (
+    arg0: string
+  ) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>
 
   @Watch('currentAddress')
   onCurrentAddressChanged() {
-    this.refreshWorks();
+    this.refreshWorks()
   }
 
   mounted() {
-    this.refreshWorks();
+    this.refreshWorks()
   }
 
   async refreshWorks() {
     if (!this.currentAddress) {
-      this.records = [];
-      return;
+      this.records = []
+      return
     }
-    this.records = await this.queryISCNByAddress(this.currentAddress);
+    this.records = await this.queryISCNByAddress(this.currentAddress)
   }
 }
 </script>

@@ -16,16 +16,32 @@
       'mb-[30px]',
     ]"
   >
-    <div class="mr-[32px]">
-      <MetadataCard :img-src="imgSrc" />
+    <div  class="mr-[32px]">
+      <div
+        class="
+          flex
+          w-[280px]
+          h-[560px]
+          justify-center
+          items-center
+          mb-[16px]
+          rounded-[24px]
+          bg-shade-gray
+          text-white
+        "
+      >
+        ISCN Card
+      </div>
+      <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
     </div>
     <div>
-      <InfoCard
-        :label-text="metadata['@type']"
-        :time-stamp="record.recordTimestamp"
-      >
+      <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
         <template #icon>
-          <IconImage />
+          <IconImage v-if="type === 'Photo'" />
+          <IconImage v-if="type === 'Image'" />
+          <IconText v-if="type === 'Text'" />
+          <IconText v-if="type === 'Article'" />
+          <IconVideo v-if="type === 'Video'" />
         </template>
         <FormField
           :label="$t('iscn.meta.title')"
