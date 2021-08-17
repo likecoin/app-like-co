@@ -6,8 +6,7 @@
       </template>
       <nuxt-link
         v-else
-        :to="
-          localeLocation({
+        :to="localeLocation({
             name: 'view-iscnId',
             params: { iscnId: record.id },
           })"
