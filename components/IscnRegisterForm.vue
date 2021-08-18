@@ -188,6 +188,7 @@
               :placeholder="$t('iscn.meta.license.placeholder')"
             />
           </FormField>
+          <!--
           <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.register')" class="mb-[12px]">
             <div class="font-normal text-[16px] leading-[22px]">
@@ -200,6 +201,7 @@
           <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
             {{ $t('iscn.meta.version.placeholder') }}
           </FormField>
+          -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <!-- Hide for now
             <Label
