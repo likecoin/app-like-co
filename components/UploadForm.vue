@@ -29,14 +29,7 @@
             </template>
           </Label>
           <div class="flex flex-col items-end">
-            <div class="flex flex-row flex-nowrap w-min mb-[8px]">
-              <IconStepDot
-                v-for="item in 4"
-                :key="item.key"
-                color="#EBEBEB"
-                class="ml-[16px]"
-              />
-            </div>
+            <Stepper :step="stepNum" />
             <Label preset="p6" :text="stepText" class="text-medium-gray" />
           </div>
         </div>
@@ -183,6 +176,10 @@ export default class UploadForm extends Vue {
 
   get stepText() {
     return this.isImage ? 'Step 2/4' : 'Step 1/4'
+  }
+
+  get stepNum() {
+    return this.isImage ? 2 : 1
   }
 
   async onFileUpload(event: DragEvent) {
