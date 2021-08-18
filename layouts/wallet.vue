@@ -1,9 +1,17 @@
 <template>
   <RootLayout>
     <AppHeader />
-    <div v-if="!currentAddress">
-      <h3>Please connect to your wallet first</h3>
-    </div>
+    <Page
+      v-if="!currentAddress"
+      class="flex justify-center items-center"
+    >
+      <Card>
+        <Label
+          :text="$t('error.not.connect.wallet')"
+          align="center"
+        />
+      </Card>
+    </Page>
     <template v-else>
       <Nuxt />
     </template>

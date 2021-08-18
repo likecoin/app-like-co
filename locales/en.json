@@ -3,6 +3,7 @@
   "AppHeader.tabBar.button.depub": "#DePub",
   "AppHeader.tabBar.button.publishing": "Your Publishing",
   "AppHeader.tabBar.button.stake": "Delegate and Vote",
+  "error.not.connect.wallet": "Please connect to your wallet first",
   "general.loading": "Loading",
   "HomePage.register.button": "Register ISCN",
   "HomePage.search.button": "Search",
