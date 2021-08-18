@@ -78,10 +78,10 @@
         </template>
       </Label>
       <FormField :label="$t('iscn.meta.name')" class="mb-[12px]">
-        Name Placeholder
+        {{ title }}
       </FormField>
       <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
-        Description Placeholder
+        {{ description }}
       </FormField>
       <IconDiverMini class="mb-[12px]" />
       <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
@@ -95,13 +95,17 @@
       </FormField>
     </Card>
   </div>
-
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 
 import { getIPFSURLFromHash } from '~/utils/ipfs'
+import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+
+const signerModule = namespace('signer')
+const iscnModule = namespace('iscn')
 
 @Component
 export default class IscnUploadedInfo extends Vue {
@@ -113,6 +117,15 @@ export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
   @Prop(String) readonly iscnTimestamp!: string
+
+  @signerModule.Getter('getAddress') currentAddress!: string
+  @iscnModule.Action queryISCNByAddress!: (
+    arg0: string
+  ) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>
+
+  records: parsedISCNRecord[] | null = null
+  title = ''
+  description = ''
 
   get imgSrc() {
     return this.isImage && (getIPFSURLFromHash(this.ipfsHash) || this.fileData)
@@ -126,6 +139,14 @@ export default class IscnUploadedInfo extends Vue {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
     return 'CreativeContent'
+  }
+
+  async mounted() {
+    this.records = await this.queryISCNByAddress(this.currentAddress)
+    const { title, description } =
+      this.records[this.records.length - 1].data.contentMetadata
+    this.title = title
+    this.description = description
   }
 }
 </script>

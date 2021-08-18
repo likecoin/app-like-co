@@ -8,7 +8,7 @@
     </Card>
   </Page>
   <Page v-else>
-    <search-results :records="records" />
+    <SearchResults :records="records" />
   </Page>
 </template>
 

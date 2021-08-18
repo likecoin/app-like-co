@@ -43,10 +43,13 @@
           <FormField :label="$t('iscn.meta.name')">
             {{ record.data.contentMetadata.name }}
           </FormField>
-          <FormField label="">
-            <Tag text="Pill Title" />
-            <Tag text="Pill Title" />
-          </FormField>
+          <Tag
+            v-for="item in record.data.contentMetadata.keywords &&
+            record.data.contentMetadata.keywords.split(',')"
+            :key="item.key"
+            :text="item"
+            class="mr-[8px] mb-[4px]"
+          />
         </div>
       </NuxtLink>
     </div>

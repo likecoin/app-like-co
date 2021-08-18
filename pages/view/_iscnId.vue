@@ -51,7 +51,7 @@
               <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
-          <FormField label="Tags" class="mb-[12px]">
+          <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
             <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
           </FormField>
         </InfoCard>

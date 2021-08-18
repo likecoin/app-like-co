@@ -15,6 +15,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
 export default class Stepper extends Vue {
-  @Prop(String) readonly step: string | undefined
+  @Prop(Number) readonly step: number | undefined
 }
 </script>
