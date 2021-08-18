@@ -40,8 +40,8 @@
               <ISCNTypeIcon :type="record.data.contentMetadata['@type']" />
             </template>
           </Label>
-          <FormField :label="$t('iscn.meta.title')">
-            {{ record.data.contentMetadata.title }}
+          <FormField :label="$t('iscn.meta.name')">
+            {{ record.data.contentMetadata.name }}
           </FormField>
           <FormField label="">
             <Tag text="Pill Title" />

@@ -78,7 +78,7 @@ export async function estimateISCNTxFee(tx: ISCNSignPayload, {
 
 function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
   const {
-    title,
+    name,
     description,
     tagsString,
     url,
@@ -114,7 +114,7 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
   const contentMetadata = {
     '@context': 'http://schema.org/',
     '@type': type,
-    title,
+    name,
     description,
     version,
     url,
