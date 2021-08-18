@@ -1,5 +1,5 @@
 export interface ISCNSignPayload {
-  title: string;
+  name: string;
   description: string;
   tagsString: string;
   url: string;
