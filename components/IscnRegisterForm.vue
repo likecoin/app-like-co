@@ -160,6 +160,7 @@
                 text-preset="h6"
                 type="button"
                 :text="author.name"
+                @click="editAuthor(index)"
               />
             </span>
             <Button
@@ -168,7 +169,7 @@
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
-              @click="isOpenAddAuthor = true"
+              @click="isOpenAuthorDialog = true"
             >
               <IconAddMini />
             </Button>
@@ -228,7 +229,11 @@
         </form>
       </div>
       <!-- Dialog -->
-      <Dialog v-model="isOpenAddAuthor" :has-padding="false" preset="custom">
+      <Dialog
+        v-model="isOpenAuthorDialog"
+        :has-padding="false"
+        preset="custom"
+      >
         <Card class="flex flex-col w-[616px]">
           <Label
             class="w-min mb-[16px]"
@@ -269,14 +274,20 @@
           <div class="flex flex-row self-end">
             <Button
               type="button"
-              class="mx-[8px]"
               size="small"
               preset="secondary"
               content-class="font-semibold"
               :text="$t('UploadForm.button.comfirm')"
-              @click.prevent="onClickAddAuthor"
+              @click.prevent="confirmAuthorChange"
             />
-            <Button type="button" size="small" preset="tertiary">
+            <Button
+              v-if="activeEditingAuthorIndex >= 0"
+              class="ml-[8px]"
+              type="button"
+              size="small"
+              preset="tertiary"
+              @click="deleteAuthor"
+            >
               <IconDelete />
             </Button>
           </div>
@@ -328,7 +339,8 @@ export default class IscnRegisterForm extends Vue {
   uploadIpfsHash: string = this.ipfsHash
 
   isOpenFileInfoDialog = false
-  isOpenAddAuthor = false
+  isOpenAuthorDialog = false
+  activeEditingAuthorIndex = -1
 
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
@@ -359,12 +371,40 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = ''
   }
 
-  onClickAddAuthor() {
-    this.authors.push({ name: this.authorName, wallet: this.authorWalletAddress, url: this.authorUrl })
-    this.isOpenAddAuthor = false
-    this.authorName= ''
-    this.authorUrl= ''
+  editAuthor(index: number) {
+    const { name, wallet, url } = this.authors[index]
+    this.authorName = name
+    this.authorWalletAddress = wallet
+    this.authorUrl = url
+    this.activeEditingAuthorIndex = index
+    this.isOpenAuthorDialog = true
+  }
+
+  dismissAuthorDialog() {
+    this.isOpenAuthorDialog = false
+    this.activeEditingAuthorIndex = -1
+    this.authorName = ''
+    this.authorUrl = ''
     this.authorWalletAddress = ''
+  }
+
+  deleteAuthor() {
+    this.authors.splice(this.activeEditingAuthorIndex, 1)
+    this.dismissAuthorDialog()
+  }
+
+  confirmAuthorChange() {
+    const newAuthor = {
+      name: this.authorName,
+      wallet: this.authorWalletAddress,
+      url: this.authorUrl,
+    }
+    if (this.activeEditingAuthorIndex >= 0) {
+      this.authors.splice(this.activeEditingAuthorIndex, 1, newAuthor)
+    } else {
+      this.authors.push(newAuthor)
+    }
+    this.dismissAuthorDialog()
   }
 
   async onSubmit(): Promise<void> {
