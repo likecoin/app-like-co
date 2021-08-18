@@ -1,10 +1,15 @@
 <template>
-  <div class="mx-auto pt-[16px]">
-    <template v-if="!records">
-      {{ $t('general.loading') }}
-    </template>
-    <search-results v-else :records="records" />
-  </div>
+  <Page
+    v-if="!records || !records.length"
+    class="justify-center"
+  >
+    <Card>
+      <Label :text="$t(!records ? 'general.loading' : 'WorksPage.empty.label')" />
+    </Card>
+  </Page>
+  <Page v-else>
+    <search-results :records="records" />
+  </Page>
 </template>
 
 <script lang="ts">
@@ -21,7 +26,7 @@ const iscnModule = namespace('iscn')
   components: { SearchResults },
 })
 export default class WorksIndexPageextends extends Vue {
-  records: parsedISCNRecord[] = []
+  records: parsedISCNRecord[] | null = null
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (

@@ -3,7 +3,7 @@
     <AppHeader />
     <Page
       v-if="!currentAddress"
-      class="flex justify-center items-center"
+      class="justify-center"
     >
       <Card>
         <Label
