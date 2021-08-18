@@ -126,6 +126,7 @@ export default class EditableTagList extends Vue {
   }
 
   saveChip() {
+    if (this.tags.includes(this.currentInput)) return
     this.tags.push(this.currentInput)
     this.emitChange()
     this.currentInput = ''
