@@ -270,7 +270,7 @@
               size="small"
               preset="secondary"
               content-class="font-semibold"
-              :text="$t('UploadForm.button.comfirm')"
+              :text="$t('UploadForm.button.confirm')"
               @click.prevent="confirmAuthorChange"
             />
             <Button

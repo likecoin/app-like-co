@@ -48,7 +48,7 @@
   "iscn.meta.version.placeholder": "Version",
   "UploadForm.button": "Publish to IPFS",
   "UploadForm.button.back": "Back",
-  "UploadForm.button.comfirm": "Comfirm",
+  "UploadForm.button.confirm": "Confirm",
   "UploadForm.button.selectFile": "Select a file",
   "UploadForm.guide.selectFile": "Select your file and publish to IPFS",
   "UploadForm.guide.dropFile": "Drop your file here, or",
