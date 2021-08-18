@@ -47,8 +47,7 @@
           </Link>
         </FormField>
         <FormField label="Tags" class="mb-[12px]">
-          <Tag text="Pill Title" />
-          <Tag text="Pill Title" />
+          <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
         </FormField>
       </InfoCard>
       <InfoCard :label-text="$t('iscn.meta.matafata.title')">
@@ -138,6 +137,10 @@ export default class ViewIscnIdPage extends Vue {
     return this.record.contentFingerprints.length > 1
       ? this.record.contentFingerprints[1].slice(7)
       : this.record.contentFingerprints[0].slice(7)
+  }
+
+  get keywordsArray(){
+    return this.metadata.keywords.split(',');
   }
 
   created() {
