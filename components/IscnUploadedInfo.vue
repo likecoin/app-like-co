@@ -77,8 +77,8 @@
           <ISCNTypeIcon :type="type" />
         </template>
       </Label>
-      <FormField :label="$t('iscn.meta.title')" class="mb-[12px]">
-        Title Placeholder
+      <FormField :label="$t('iscn.meta.name')" class="mb-[12px]">
+        Name Placeholder
       </FormField>
       <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
         Description Placeholder

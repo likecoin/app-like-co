@@ -124,10 +124,10 @@
       <!-- form fieldset -->
       <div>
         <form @submit.prevent="onSubmit">
-          <FormField :label="$t('iscn.meta.title')" class="my-[12px]">
+          <FormField :label="$t('iscn.meta.name')" class="my-[12px]">
             <TextField
-              v-model="title"
-              :placeholder="$t('iscn.meta.title.placeholder')"
+              v-model="name"
+              :placeholder="$t('iscn.meta.name.placeholder')"
             />
           </FormField>
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
@@ -322,7 +322,7 @@ export default class IscnRegisterForm extends Vue {
   @Prop(String) readonly ipfsHash!: string
 
   authors: Author[] = []
-  title: string = ''
+  name: string = ''
   description: string = ''
   tags: string[] = []
   url: string = ''
@@ -418,7 +418,7 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = 'Loading'
     const payload = {
       type: this.type,
-      title: this.title,
+      name: this.name,
       description: this.description,
       tagsString: this.tagsString,
       url: this.url,

@@ -30,11 +30,11 @@
             <ISCNTypeIcon :type="type" />
           </template>
           <FormField
-            :label="$t('iscn.meta.title')"
+            :label="$t('iscn.meta.name')"
             content-type="strong"
             class="mb-[12px]"
           >
-            {{ metadata.title }}
+            {{ metadata.name }}
           </FormField>
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
             {{ metadata.description }}
@@ -55,7 +55,7 @@
             <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
           </FormField>
         </InfoCard>
-        <InfoCard :label-text="$t('iscn.meta.matafata.title')">
+        <InfoCard :label-text="$t('iscn.meta.matadata.name')">
           <template #icon>
             <IconMetadata />
           </template>
