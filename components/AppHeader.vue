@@ -69,9 +69,14 @@
         >
           <Button
             preset="secondary"
-            :text="currentAddress || $t('AppHeader.login.button')"
+            :text="$t('AppHeader.login.button')"
+            :title="currentAddress || $t('AppHeader.login.button')"
             @click="onClickLoginKeplr"
-          />
+          >
+            <template v-if="currentAddress">
+              <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
+            </template>
+          </Button>
         </div>
       </nav>
     </div>
