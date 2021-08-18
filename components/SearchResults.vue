@@ -4,12 +4,12 @@
       <template v-if="!record">
         {{ $t('general.loading') }}
       </template>
-      <nuxt-link
+      <NuxtLink
         v-else
         :to="localeLocation({
-            name: 'view-iscnId',
-            params: { iscnId: record.id },
-          })"
+          name: 'view-iscnId',
+          params: { iscnId: record.id },
+        })"
       >
         <div class="container w-min mx-[12px] mb-[48px]">
           <div
@@ -48,7 +48,7 @@
             <Tag text="Pill Title" />
           </FormField>
         </div>
-      </nuxt-link>
+      </NuxtLink>
     </div>
   </div>
 </template>

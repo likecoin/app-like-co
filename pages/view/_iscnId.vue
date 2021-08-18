@@ -1,85 +1,91 @@
 <template>
-  <div v-if="!record">
-    {{ $t('general.loading') }}
-  </div>
-  <div
-    v-else
-    :class="[
-      'container',
-      'flex',
-      'flex-row',
-      'flex-nowrap',
-      'items-start',
-      'w-min',
-      'mx-auto',
-      'mt-[16px]',
-      'mb-[30px]',
-    ]"
+  <Page
+    v-if="!record"
+    class="justify-center"
   >
-    <div class="mr-[32px]">
-      <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
+    <Card>
+      <Label :text="$t('general.loading')" />
+    </Card>
+  </Page>
+  <Page v-else>
+    <div
+      :class="[
+        'container',
+        'flex',
+        'flex-row',
+        'flex-nowrap',
+        'items-start',
+        'w-min',
+        'mx-auto',
+        'mt-[16px]',
+        'mb-[30px]',
+      ]"
+    >
+      <div class="mr-[32px]">
+        <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
+      </div>
+      <div>
+        <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
+          <template #icon>
+            <ISCNTypeIcon :type="type" />
+          </template>
+          <FormField
+            :label="$t('iscn.meta.title')"
+            content-type="strong"
+            class="mb-[12px]"
+          >
+            {{ metadata.title }}
+          </FormField>
+          <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
+            {{ metadata.description }}
+          </FormField>
+          <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
+            {{ iscnId }}
+          </FormField>
+          <FormField
+            :label="$t('iscn.meta.content.fingerprints')"
+            class="mb-[12px]"
+          >
+            <Link to="/">
+              {{ contentFingerprintLink }}
+              <IconNorthEast class="ml-[4px]" />
+            </Link>
+          </FormField>
+          <FormField label="Tags" class="mb-[12px]">
+            <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
+          </FormField>
+        </InfoCard>
+        <InfoCard :label-text="$t('iscn.meta.matafata.title')">
+          <template #icon>
+            <IconMetadata />
+          </template>
+          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+            <div class="font-normal text-[16px] leading-[22px]">
+              {{ owner }}
+            </div>
+            <div class="font-semibold">
+              {{ record.stakeholders[0].entity.name }}
+            </div>
+          </FormField>
+          <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+            {{ metadata.version }}
+          </FormField>
+          <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
+            <Link to="/">
+              {{ metadata.url }}
+              <IconNorthEast class="ml-[4px]" />
+            </Link>
+          </FormField>
+          <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
+            <Link to="/">
+              {{ metadata.usageInfo }}
+              <IconNorthEast class="ml-[4px]" />
+            </Link>
+          </FormField>
+        </InfoCard>
+      </div>
     </div>
-    <div>
-      <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
-        <template #icon>
-          <ISCNTypeIcon :type="type" />
-        </template>
-        <FormField
-          :label="$t('iscn.meta.title')"
-          content-type="strong"
-          class="mb-[12px]"
-        >
-          {{ metadata.title }}
-        </FormField>
-        <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
-          {{ metadata.description }}
-        </FormField>
-        <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
-          {{ iscnId }}
-        </FormField>
-        <FormField
-          :label="$t('iscn.meta.content.fingerprints')"
-          class="mb-[12px]"
-        >
-          <Link to="/">
-            {{ contentFingerprintLink }}
-            <IconNorthEast class="ml-[4px]" />
-          </Link>
-        </FormField>
-        <FormField label="Tags" class="mb-[12px]">
-          <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
-        </FormField>
-      </InfoCard>
-      <InfoCard :label-text="$t('iscn.meta.matafata.title')">
-        <template #icon>
-          <IconMetadata />
-        </template>
-        <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
-          <div class="font-normal text-[16px] leading-[22px]">
-            {{ owner }}
-          </div>
-          <div class="font-semibold">
-            {{ record.stakeholders[0].entity.name }}
-          </div>
-        </FormField>
-        <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
-          {{ metadata.version }}
-        </FormField>
-        <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
-          <Link to="/">
-            {{ metadata.url }}
-            <IconNorthEast class="ml-[4px]" />
-          </Link>
-        </FormField>
-        <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
-          <Link to="/">
-            {{ metadata.usageInfo }}
-            <IconNorthEast class="ml-[4px]" />
-          </Link>
-        </FormField>
-      </InfoCard>
-    </div>
-  </div>
+  </Page>
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto">
+  <Page>
     <UploadForm v-if="state === 'init'" @submit="onSubmitUpload" />
     <IscnRegisterForm
       v-else-if="state === 'iscn'"
@@ -22,7 +22,7 @@
       :exif-info="exifInfo"
       :iscn-timestamp="iscnTimestamp"
     />
-  </div>
+  </Page>
 </template>
 
 <script lang="ts">
