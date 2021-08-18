@@ -49,11 +49,12 @@
     >
       <IconAddMini />
     </button>
-    <div class="relative">
+    <form class="relative" @submit.prevent="saveChip">
       <input
         v-if="shouldShowInput"
         ref="input"
         v-model="currentInput"
+        type="text"
         :class="[
           'absolute',
           'py-[6px]',
@@ -64,7 +65,6 @@
           'bg-transparent',
           'outline-none',
         ]"
-        @keypress.enter="saveChip"
         @keydown.delete="backspaceDelete"
         @blur="blurInput"
       />
@@ -84,7 +84,7 @@
       >
         {{ currentInput }}
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
