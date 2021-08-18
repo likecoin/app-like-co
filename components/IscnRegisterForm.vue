@@ -130,7 +130,7 @@
       </Label>
       <!-- form fieldset -->
       <div>
-        <form @submit.prevent="onSubmit">
+        <form @submit.prevent="onSubmit" @keypress="(e) => e.key != 'Enter'" >
           <FormField :label="$t('iscn.meta.title')" class="my-[12px]">
             <TextField
               v-model="title"
@@ -147,6 +147,7 @@
             :label="$t('iscn.meta.creator.name')"
             content-classes="flex flex-row flex-wrap"
           >
+          <!-- add author -->
             <span
               v-for="(author, index) in authors"
               :key="index"
@@ -172,6 +173,7 @@
               <IconAddMini />
             </Button>
           </FormField>
+          <!-- add tags -->
           <IconDiverMini class="my-[12px]" />
           <FormField
             :label="$t('iscn.meta.keywords')"
@@ -244,41 +246,22 @@
           <!-- name -->
           <FormField :label="$t('iscn.meta.creator.name')" class="my-[12px]">
             <TextField
+              v-model="authorName"
               :placeholder="$t('iscn.meta.creator.name.placeholder')"
             />
           </FormField>
-          <IconDiverMini />
+          <IconDiverMini class="my-[12px]" />
           <!-- wallet address -->
           <FormField :label="$t('iscn.meta.creator.wallet.title')">
-            <TextFieldList
-              :text="$t('iscn.meta.creator.wallet')"
-              text-preset="h6"
-              label-tag="div"
-              placeholder="Wallet Address"
-            >
-              <template #prepend>
-                <Button
-                  preset="tertiary"
-                  size="small"
-                  prepend-class="mr-[6px]"
-                  append-class="ml-0"
-                >
-                  <template #prepend>
-                    <IconPlaceholder />
-                  </template>
-                  <template #append>
-                    <IconArrowDown />
-                  </template>
-                </Button>
-              </template>
-            </TextFieldList>
+            <TextField
+              v-model="authorWalletAddress"
+              :placeholder="$t('iscn.meta.creator.wallet')"
+            />
           </FormField>
           <!-- url -->
           <FormField :label="$t('iscn.meta.creator.url')">
-            <TextFieldList
-              text-preset="h6"
-              label-tag="div"
-              :text="$t('iscn.meta.creator.url')"
+            <TextField
+              v-model="authorUrl"
               :placeholder="$t('iscn.meta.creator.url.placeholder')"
             />
           </FormField>
@@ -340,6 +323,7 @@ export default class IscnRegisterForm extends Vue {
   license: string = ''
   authorName: string = ''
   authorUrl: string = ''
+  authorWalletAddress: string = ''
   uploadStatus: string = ''
   uploadIpfsHash: string = this.ipfsHash
 
@@ -376,7 +360,11 @@ export default class IscnRegisterForm extends Vue {
   }
 
   onClickAddAuthor() {
-    this.authors.push({ name: '', url: '' })
+    this.authors.push({ name: this.authorName, wallet: this.authorWalletAddress, url: this.authorUrl })
+    this.isOpenAddAuthor = false
+    this.authorName= ''
+    this.authorUrl= ''
+    this.authorWalletAddress = ''
   }
 
   async onSubmit(): Promise<void> {
@@ -404,6 +392,7 @@ export default class IscnRegisterForm extends Vue {
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
+      authorWalletAddress: this.authorWalletAddress,
     }
     const [
       balance,

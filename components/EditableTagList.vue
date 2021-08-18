@@ -54,6 +54,7 @@
         v-if="shouldShowInput"
         ref="input"
         v-model="currentInput"
+        type="text"
         :class="[
           'absolute',
           'py-[6px]',
