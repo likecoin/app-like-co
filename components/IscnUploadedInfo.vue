@@ -28,14 +28,7 @@
           </template>
         </Label>
         <div class="flex flex-col items-end">
-          <div class="flex flex-row flex-nowrap w-min mb-[8px]">
-            <IconStepDot
-              v-for="item in 4"
-              :key="item.key"
-              color="#EBEBEB"
-              class="ml-[16px]"
-            />
-          </div>
+          <Stepper :step=4 />
           <Label preset="p6" text="Step 4/4" class="text-medium-gray" />
         </div>
       </div>
