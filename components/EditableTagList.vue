@@ -65,7 +65,6 @@
           'bg-transparent',
           'outline-none',
         ]"
-        @keydown.delete="backspaceDelete"
         @blur="blurInput"
       />
       <div
@@ -135,13 +134,6 @@ export default class EditableTagList extends Vue {
   deleteChip(index: number) {
     this.tags.splice(index, 1)
     this.emitChange()
-  }
-
-  backspaceDelete() {
-    if (this.currentInput === '') {
-      this.tags.splice(this.tags.length - 1)
-      this.emitChange()
-    }
   }
 
   emitChange() {
