@@ -149,7 +149,7 @@ export default class ViewIscnIdPage extends Vue {
       : this.record.contentFingerprints[0].slice(7)
   }
 
-  get keywords(): Array<String> {
+  get keywords(): Array<string> {
     return this.metadata.keywords ? this.metadata.keywords.split(',') : []
   }
 
