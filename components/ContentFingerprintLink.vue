@@ -21,19 +21,16 @@ export default class ContentFingerprintLink extends Vue {
   }
 
   get href() {
-    if (this.item) {
-      switch (this.prefix) {
-        case ContentFirgerprints.arweave:
-          return `https://arweave.net/${this.item.slice(5)}`
+    switch (this.prefix) {
+      case ContentFirgerprints.arweave:
+        return `https://arweave.net/${this.item.slice(5)}`
 
-        case ContentFirgerprints.ipfs:
-          return `https://cloudflare-ipfs.com/ipfs/${this.item.slice(7)}`
+      case ContentFirgerprints.ipfs:
+        return `https://cloudflare-ipfs.com/ipfs/${this.item.slice(7)}`
 
-        default:
-          return this.item
-      }
+      default:
+        return this.item
     }
-    return null
   }
 }
 </script>

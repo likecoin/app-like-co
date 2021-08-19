@@ -5,7 +5,7 @@
     :to="to || null"
     :href="href || null"
     :target="href ? '_blank' : null"
-    :rel="ref"
+    :rel="rel"
   >
     <slot />
     <IconNorthEast v-if="href" class="ml-[4px]" />
@@ -26,7 +26,7 @@ export default class Link extends Vue {
     return 'a'
   }
 
-  get ref() {
+  get rel() {
     if (this.href) return 'noopener noreferrer'
     return null
   }
