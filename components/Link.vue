@@ -3,8 +3,12 @@
     :is="tag"
     :class="rootClasses"
     :to="to || null"
-  > 
+    :href="href || null"
+    :target="href ? '_blank' : null"
+    :rel="rel"
+  >
     <slot />
+    <IconNorthEast v-if="href" class="ml-[4px]" />
   </component>
 </template>
 
@@ -19,8 +23,12 @@ export default class Link extends Vue {
 
   get tag() {
     if (this.to) return 'NuxtLink'
-    if (this.$attrs.href) return 'a'
     return 'a'
+  }
+
+  get rel() {
+    if (this.href) return 'noopener noreferrer'
+    return null
   }
 
   get rootClasses() {

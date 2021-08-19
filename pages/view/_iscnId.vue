@@ -39,6 +39,10 @@
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
             {{ metadata.description }}
           </FormField>
+          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+            {{ owner }}
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
             {{ iscnId }}
           </FormField>
@@ -46,40 +50,50 @@
             :label="$t('iscn.meta.content.fingerprints')"
             class="mb-[12px]"
           >
-            <Link to="/">
-              {{ contentFingerprintLink }}
-              <IconNorthEast class="ml-[4px]" />
-            </Link>
+            <ContentFingerprintLink
+              v-for="item in record.contentFingerprints"
+              :key="item.key"
+              :item="item"
+            />
           </FormField>
+          <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
-            <Tag v-for="item in keywords" :key="item.key" :text="item" class="mr-[8px]" />
+            <Tag
+              v-for="item in keywords"
+              :key="item.key"
+              :text="item"
+              class="mr-[8px]"
+            />
           </FormField>
         </InfoCard>
         <InfoCard :label-text="$t('iscn.meta.metadata.title')">
           <template #icon>
             <IconMetadata />
           </template>
-          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+          <FormField
+            v-for="(item, index) in metadata.authorNames"
+            :key="item.key"
+            :label="$t('iscn.meta.author.name')"
+            class="mb-[12px]"
+          >
             <div class="font-normal text-[16px] leading-[22px]">
-              {{ owner }}
+              {{ metadata.authorWallets[index] }}
             </div>
             <div class="font-semibold">
-              {{ record.stakeholders[0].entity.name }}
+              {{ metadata.authorNames[index] }}
             </div>
           </FormField>
           <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
             {{ metadata.version }}
           </FormField>
           <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
-            <Link to="/">
+            <Link :href="metadata.url">
               {{ metadata.url }}
-              <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
-            <Link to="/">
+            <Link :href="metadata.usageInfo">
               {{ metadata.usageInfo }}
-              <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
         </InfoCard>
@@ -139,14 +153,8 @@ export default class ViewIscnIdPage extends Vue {
     )
   }
 
-  get name(){
+  get name() {
     return this.metadata.name || this.metadata.title
-  }
-
-  get contentFingerprintLink() {
-    return this.record.contentFingerprints.length > 1
-      ? this.record.contentFingerprints[1].slice(7)
-      : this.record.contentFingerprints[0].slice(7)
   }
 
   get keywords(): Array<string> {
