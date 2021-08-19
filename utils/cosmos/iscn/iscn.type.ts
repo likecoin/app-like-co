@@ -9,4 +9,5 @@ export interface ISCNSignPayload {
   type: string;
   authorNames: string[];
   authorUrls: string[];
+  authorWallets:string[];
 }

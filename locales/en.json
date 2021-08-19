@@ -11,6 +11,7 @@
   "HomePage.search.results.empty": "No ISCN record found",
   "HomePage.search.title": "Search ISCN",
   "HomePage.submit.button": "Submit",
+  "iscn.meta.author.name": "Author",
   "iscn.meta.card.preview": "File Preview",
   "iscn.meta.card.title": "File Info",
   "iscn.meta.content.fingerprints": "Content Fingerprints",

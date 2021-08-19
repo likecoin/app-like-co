@@ -17,8 +17,10 @@
       />
       <div
         :class="[
-          'relative',
-          'min-w-[304px]'
+          'fixed',
+          'top-[50vh]',
+          'translate-y-[-50%]',
+          'min-w-[304px]',
         ]"
       >
         <Button
@@ -51,7 +53,7 @@
             />
             <div class="mt-[24px]">
               <template v-if="text">{{ text }}</template>
-              <slot v-else/>
+              <slot v-else />
             </div>
           </template>
           <slot v-else />
