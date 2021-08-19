@@ -348,6 +348,10 @@ export default class IscnRegisterForm extends Vue {
     return this.authors.map((a) => a.url)
   }
 
+  get authorWalletAddresses() {
+    return this.authors.map((a) => a.wallet)
+  }
+
   get isPhoto() {
     return this.exifInfo && this.exifInfo.ExifImageWidth
   }
@@ -427,7 +431,7 @@ export default class IscnRegisterForm extends Vue {
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
-      authorWalletAddress: this.authorWalletAddress,
+      authorWallets: this.authorWalletAddresses,
     }
     const [
       balance,

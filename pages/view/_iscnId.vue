@@ -39,6 +39,10 @@
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
             {{ metadata.description }}
           </FormField>
+          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+            {{ owner }}
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
             {{ iscnId }}
           </FormField>
@@ -52,6 +56,7 @@
               :item="item"
             />
           </FormField>
+          <IconDiverMini class="my-[12px]" />
           <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
             <Tag
               v-for="item in keywords"
@@ -65,12 +70,17 @@
           <template #icon>
             <IconMetadata />
           </template>
-          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+          <FormField
+            v-for="(item, index) in metadata.authorNames"
+            :key="item.key"
+            :label="$t('iscn.meta.author.name')"
+            class="mb-[12px]"
+          >
             <div class="font-normal text-[16px] leading-[22px]">
-              {{ owner }}
+              {{ metadata.authorWallets[index] }}
             </div>
             <div class="font-semibold">
-              {{ record.stakeholders[0].entity.name }}
+              {{ metadata.authorNames[index] }}
             </div>
           </FormField>
           <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
