@@ -34,7 +34,7 @@
             content-type="strong"
             class="mb-[12px]"
           >
-            {{ metadata.name }}
+            {{ metadata.name || metadata.title }}
           </FormField>
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
             {{ metadata.description }}
@@ -55,7 +55,7 @@
             <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
           </FormField>
         </InfoCard>
-        <InfoCard :label-text="$t('iscn.meta.matadata.name')">
+        <InfoCard :label-text="$t('iscn.meta.metadata.title')">
           <template #icon>
             <IconMetadata />
           </template>

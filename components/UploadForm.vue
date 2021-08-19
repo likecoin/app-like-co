@@ -199,8 +199,8 @@ export default class UploadForm extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
-      this.fileName= files[0].name
-      this.fileSize= files[0].size
+      this.fileName = files[0].name
+      this.fileSize = files[0].size
       reader.onload = (e) => {
         if (!e.target) return
         this.fileData = e.target.result as string
