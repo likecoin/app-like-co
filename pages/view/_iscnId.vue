@@ -34,7 +34,7 @@
             content-type="strong"
             class="mb-[12px]"
           >
-            {{ metadata.name }}
+            {{ name }}
           </FormField>
           <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
             {{ metadata.description }}
@@ -51,11 +51,11 @@
               <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
-          <FormField label="Tags" class="mb-[12px]">
-            <Tag v-for="item in keywordsArray" :key="item.key" :text="item" class="mr-[8px]" />
+          <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
+            <Tag v-for="item in keywords" :key="item.key" :text="item" class="mr-[8px]" />
           </FormField>
         </InfoCard>
-        <InfoCard :label-text="$t('iscn.meta.matadata.name')">
+        <InfoCard :label-text="$t('iscn.meta.metadata.title')">
           <template #icon>
             <IconMetadata />
           </template>
@@ -139,14 +139,18 @@ export default class ViewIscnIdPage extends Vue {
     )
   }
 
+  get name(){
+    return this.metadata.name || this.metadata.title
+  }
+
   get contentFingerprintLink() {
     return this.record.contentFingerprints.length > 1
       ? this.record.contentFingerprints[1].slice(7)
       : this.record.contentFingerprints[0].slice(7)
   }
 
-  get keywordsArray(){
-    return this.metadata.keywords.split(',');
+  get keywords(): Array<string> {
+    return this.metadata.keywords ? this.metadata.keywords.split(',') : []
   }
 
   created() {
