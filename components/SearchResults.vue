@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-4">
+  <div class="grid grid-cols-4 gap-x-[24px] gap-y-[48px]">
     <div v-for="record in records" :key="record.id">
       <template v-if="!record">
         {{ $t('general.loading') }}

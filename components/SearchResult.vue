@@ -1,5 +1,5 @@
 <template>
-  <div class="w-min mx-[12px] mb-[48px]">
+  <div class="w-min">
     <div
       class="
         flex
@@ -17,7 +17,7 @@
     </div>
     <Label
       class="w-min mb-[16px]"
-      :text="record.data.contentMetadata['@type']"
+      :text="metadata['@type']"
       tag="div"
       preset="p5"
       valign="middle"
@@ -25,17 +25,14 @@
       prepend-class="text-like-green"
     >
       <template #prepend>
-        <ISCNTypeIcon :type="record.data.contentMetadata['@type']" />
+        <ISCNTypeIcon :type="metadata['@type']" />
       </template>
     </Label>
     <FormField :label="$t('iscn.meta.name')">
-      {{
-        record.data.contentMetadata.name || record.data.contentMetadata.title
-      }}
+      {{ name }}
     </FormField>
     <Tag
-      v-for="item in record.data.contentMetadata.keywords &&
-      record.data.contentMetadata.keywords.split(',')"
+      v-for="item in keywords"
       :key="item.key"
       :text="item"
       class="mr-[8px] mb-[4px]"
@@ -49,7 +46,19 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
 export default class SearchResults extends Vue {
-  @Prop(Object) readonly record!: {}
+  @Prop() readonly record!: any
+
+  get metadata() {
+    return this.record.data.contentMetadata
+  }
+
+  get name() {
+    return this.metadata.name || this.metadata.title
+  }
+
+  get keywords(): Array<String> {
+    return this.metadata.keywords ? this.metadata.keywords.split(',') : []
+  }
 }
 </script>
 

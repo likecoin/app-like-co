@@ -185,8 +185,8 @@ export default class UploadForm extends Vue {
     return this.isImage ? 2 : 1
   }
 
-  get size(){
-    return Math.round(this.fileSize*0.001)
+  get size() {
+    return Math.round(this.fileSize * 0.001)
   }
 
   async onFileUpload(event: DragEvent) {
