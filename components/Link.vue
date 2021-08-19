@@ -22,7 +22,6 @@ export default class Link extends Vue {
 
   get tag() {
     if (this.to) return 'NuxtLink'
-    if (this.href) return 'a'
     return 'a'
   }
 
