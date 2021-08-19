@@ -88,6 +88,7 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
     type,
     authorNames,
     authorUrls,
+    authorWallets,
   } = payload;
 
   const contentFingerprints = [];
@@ -118,6 +119,9 @@ function formatISCNPayload(payload: ISCNSignPayload, version = 1) {
     description,
     version,
     url,
+    authorNames,
+    authorUrls,
+    authorWallets,
     keywords: tagsString,
     usageInfo: license,
   };

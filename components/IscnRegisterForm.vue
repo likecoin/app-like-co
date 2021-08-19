@@ -87,10 +87,7 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <Link :href="`https://ipfs.io/ipfs/${ipfsHash}`">
-          {{ ipfsHash }}
-          <IconNorthEast class="ml-[4px]" />
-        </Link>
+        <ContentFingerprintLink :item="ipfs" />
       </FormField>
       <!-- Dialog -->
       <Dialog
@@ -140,7 +137,7 @@
             :label="$t('iscn.meta.creator.name')"
             content-classes="flex flex-row flex-wrap"
           >
-          <!-- add author -->
+            <!-- add author -->
             <span
               v-for="(author, index) in authors"
               :key="index"
@@ -201,7 +198,6 @@
           <!-- <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
             {{ $t('iscn.meta.version.placeholder') }}
           </FormField> -->
-         
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <!-- Hide for now
             <Label
@@ -352,6 +348,10 @@ export default class IscnRegisterForm extends Vue {
     return this.authors.map((a) => a.url)
   }
 
+  get authorWalletAddresses() {
+    return this.authors.map((a) => a.wallet)
+  }
+
   get isPhoto() {
     return this.exifInfo && this.exifInfo.ExifImageWidth
   }
@@ -360,6 +360,10 @@ export default class IscnRegisterForm extends Vue {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
     return 'CreativeWorks'
+  }
+
+  get ipfs() {
+    return `ipfs://${this.ipfsHash}`
   }
 
   mounted() {
@@ -427,7 +431,7 @@ export default class IscnRegisterForm extends Vue {
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
-      authorWalletAddress: this.authorWalletAddress,
+      authorWallets: this.authorWalletAddresses,
     }
     const [
       balance,
