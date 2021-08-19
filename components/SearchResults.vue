@@ -41,7 +41,7 @@
             </template>
           </Label>
           <FormField :label="$t('iscn.meta.name')">
-            {{ record.data.contentMetadata.name }}
+            {{ record.data.contentMetadata.name || record.data.contentMetadata.title }}
           </FormField>
           <Tag
             v-for="item in record.data.contentMetadata.keywords &&

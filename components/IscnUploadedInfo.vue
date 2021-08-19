@@ -78,7 +78,7 @@
         </template>
       </Label>
       <FormField :label="$t('iscn.meta.name')" class="mb-[12px]">
-        {{ title }}
+        {{ name }}
       </FormField>
       <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
         {{ description }}
@@ -124,7 +124,7 @@ export default class IscnUploadedInfo extends Vue {
   ) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>
 
   records: parsedISCNRecord[] | null = null
-  title = ''
+  name = ''
   description = ''
 
   get imgSrc() {
@@ -143,9 +143,9 @@ export default class IscnUploadedInfo extends Vue {
 
   async mounted() {
     this.records = await this.queryISCNByAddress(this.currentAddress)
-    const { title, description } =
+    const { name, description } =
       this.records[this.records.length - 1].data.contentMetadata
-    this.title = title
+    this.name = name
     this.description = description
   }
 }
