@@ -24,7 +24,7 @@ export default class ContentFingerprintLink extends Vue {
     if (this.item) {
       switch (this.prefix) {
         case ContentFirgerprints.arweave:
-          return this.item
+          return `https://arweave.net/${this.item.slice(5)}`
 
         case ContentFirgerprints.ipfs:
           return `https://cloudflare-ipfs.com/ipfs/${this.item.slice(7)}`

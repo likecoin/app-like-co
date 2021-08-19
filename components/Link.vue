@@ -5,6 +5,7 @@
     :to="to || null"
     :href="href || null"
     :target="href ? '_blank' : null"
+    :rel="ref"
   >
     <slot />
     <IconNorthEast v-if="href" class="ml-[4px]" />
@@ -23,6 +24,11 @@ export default class Link extends Vue {
   get tag() {
     if (this.to) return 'NuxtLink'
     return 'a'
+  }
+
+  get ref() {
+    if (this.href) return 'noopener noreferrer'
+    return null
   }
 
   get rootClasses() {
