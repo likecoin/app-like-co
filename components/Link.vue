@@ -3,6 +3,8 @@
     :is="tag"
     :class="rootClasses"
     :to="to || null"
+    :href="href || undefined"
+    :target="href ? '_blank': null"
   > 
     <slot />
   </component>

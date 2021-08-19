@@ -46,8 +46,14 @@
             :label="$t('iscn.meta.content.fingerprints')"
             class="mb-[12px]"
           >
-            <Link to="/">
-              {{ contentFingerprintLink }}
+            <Link 
+              v-for="item in record.contentFingerprints" 
+              :key=item.key  
+              :href="item[0] === 'i'
+              ? `https://cloudflare-ipfs.com/ipfs/${item.slice(7)}`
+              : item"
+            >
+              {{item}}
               <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
@@ -71,13 +77,13 @@
             {{ metadata.version }}
           </FormField>
           <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
-            <Link to="/">
+            <Link :href="metadata.url">
               {{ metadata.url }}
               <IconNorthEast class="ml-[4px]" />
             </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
-            <Link to="/">
+            <Link :href="metadata.usageInfo">
               {{ metadata.usageInfo }}
               <IconNorthEast class="ml-[4px]" />
             </Link>
@@ -143,11 +149,6 @@ export default class ViewIscnIdPage extends Vue {
     return this.metadata.name || this.metadata.title
   }
 
-  get contentFingerprintLink() {
-    return this.record.contentFingerprints.length > 1
-      ? this.record.contentFingerprints[1].slice(7)
-      : this.record.contentFingerprints[0].slice(7)
-  }
 
   get keywords(): Array<string> {
     return this.metadata.keywords ? this.metadata.keywords.split(',') : []

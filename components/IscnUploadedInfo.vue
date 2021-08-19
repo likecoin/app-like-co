@@ -91,7 +91,10 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        {{ ipfsHash }}
+        <Link :href="`https://cloudflare-ipfs.com/ipfs/${ipfsHash}`" >
+          {{ipfsHash}}
+          <IconNorthEast class="ml-[4px]" />
+        </Link>
       </FormField>
     </Card>
   </div>
