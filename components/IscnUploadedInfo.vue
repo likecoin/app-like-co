@@ -91,10 +91,7 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <Link :href="`https://cloudflare-ipfs.com/ipfs/${ipfsHash}`" >
-          {{ipfsHash}}
-          <IconNorthEast class="ml-[4px]" />
-        </Link>
+        <ContentFingerprintLink :item="ipfs" />
       </FormField>
     </Card>
   </div>
@@ -142,6 +139,10 @@ export default class IscnUploadedInfo extends Vue {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
     return 'CreativeContent'
+  }
+
+  get ipfs() {
+    return `ipfs://${this.ipfsHash}`
   }
 
   async mounted() {
