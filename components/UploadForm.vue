@@ -76,13 +76,14 @@
           <div v-else :class="[...formClasses]">
             <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
             <div class="flex flex-col items-stretch justify-start">
-              <Label text="File name" class="font-semibold text-dark-gray" />
+              <Label :text="fileName" class="font-semibold text-dark-gray" />
               <Label
-                text="File size"
+                :text="`${size} KB`"
                 class="font-normal text-medium-gray my-[8px]"
               />
               <Button
                 v-if="exifInfo"
+                class="w-min"
                 type="button"
                 :text="$t('UploadForm.view.file.button')"
                 preset="outline"
@@ -147,6 +148,8 @@ export default class UploadForm extends Vue {
   fileSHA256: string = ''
   fileBlob: Blob | null = null
   exifInfo: any = null
+  fileName: string = ''
+  fileSize: number = 0
 
   isOpenFileInfoDialog = false
 
@@ -182,6 +185,10 @@ export default class UploadForm extends Vue {
     return this.isImage ? 2 : 1
   }
 
+  get size(){
+    return Math.round(this.fileSize*0.001)
+  }
+
   async onFileUpload(event: DragEvent) {
     let files = null
     if (event.dataTransfer) {
@@ -192,6 +199,8 @@ export default class UploadForm extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
+      this.fileName= files[0].name
+      this.fileSize= files[0].size
       reader.onload = (e) => {
         if (!e.target) return
         this.fileData = e.target.result as string
@@ -199,7 +208,11 @@ export default class UploadForm extends Vue {
       reader.readAsDataURL(files[0])
       const fileBytes = (await fileToArrayBuffer(files[0])) as ArrayBuffer
       if (fileBytes) {
-        const [fileSHA256, imageType, ipfsHash] = await Promise.all([
+        const [
+          fileSHA256,
+          imageType,
+          ipfsHash,
+        ] = await Promise.all([
           digestFileSHA256(fileBytes),
           readImageType(fileBytes),
           Hash.of(Buffer.from(fileBytes)),
