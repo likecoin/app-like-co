@@ -70,6 +70,11 @@
           <template #icon>
             <IconMetadata />
           </template>
+          <FormField v-if="metadata.creator" :label="$t('iscn.meta.author.name')" class="mb-[12px]">
+            <div class="font-semibold">
+              {{ metadata.creator }}
+            </div>
+          </FormField>
           <FormField
             v-for="(item, index) in metadata.authorNames"
             :key="item.key"
