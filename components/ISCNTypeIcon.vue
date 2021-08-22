@@ -2,7 +2,7 @@
   <IconImage v-if="recordType === 'Image'" />
   <IconText v-else-if="recordType === 'Text'" />
   <IconVideo v-else-if="recordType === 'Video'" />
-  <IconCreativeContent v-else />
+  <IconCreativeWork v-else />
 </template>
 
 <script lang="ts">
@@ -15,7 +15,7 @@ export enum RecordType {
   Text = 'Text',
   Article = 'Article',
   Video = 'Video',
-  CreativeContent = 'CreativeContent',
+  CreativeWork = 'CreativeWork',
 }
 
 @Component
@@ -33,7 +33,7 @@ export default class ISCNTypeIcon extends Vue {
       case RecordType.Video:
         return 'Video'
       default:
-        return 'CreativeContent'
+        return 'CreativeWork'
     }
   }
 }
