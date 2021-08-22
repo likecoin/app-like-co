@@ -359,7 +359,7 @@ export default class IscnRegisterForm extends Vue {
   get type() {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
-    return 'CreativeWorks'
+    return 'CreativeWork'
   }
 
   get ipfs() {
