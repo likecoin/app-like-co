@@ -30,20 +30,33 @@
             <ISCNTypeIcon :type="type" />
           </template>
           <FormField
+            v-if="name"
             :label="$t('iscn.meta.name')"
             content-type="strong"
             class="mb-[12px]"
           >
             {{ name }}
           </FormField>
-          <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
+          <FormField
+            v-if="metadata.description"
+            :label="$t('iscn.meta.description')"
+            class="mb-[12px]"
+          >
             {{ metadata.description }}
           </FormField>
-          <FormField :label="$t('iscn.meta.owner')" class="mb-[12px]">
+          <FormField
+            v-if="owner"
+            :label="$t('iscn.meta.owner')"
+            class="mb-[12px]"
+          >
             {{ owner }}
           </FormField>
           <IconDiverMini class="my-[12px]" />
-          <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
+          <FormField
+            v-if="iscnId"
+            :label="$t('iscn.meta.id')"
+            class="mb-[12px]"
+          >
             {{ iscnId }}
           </FormField>
           <FormField
@@ -54,6 +67,7 @@
               v-for="item in record.contentFingerprints"
               :key="item.key"
               :item="item"
+              class="mb-[8px] break-all"
             />
           </FormField>
           <IconDiverMini class="my-[12px]" />
@@ -70,33 +84,40 @@
           <template #icon>
             <IconMetadata />
           </template>
-          <FormField v-if="metadata.creator" :label="$t('iscn.meta.author.name')" class="mb-[12px]">
-            <div class="font-semibold">
-              {{ metadata.creator }}
-            </div>
-          </FormField>
           <FormField
-            v-for="(item, index) in metadata.authorNames"
-            :key="item.key"
-            :label="$t('iscn.meta.author.name')"
+            v-for="(stakeholder, index) in stakeholders"
+            :key="stakeholder.key"
+            :label="$t('iscn.meta.stakeholders')"
             class="mb-[12px]"
           >
-            <div class="font-normal text-[16px] leading-[22px]">
-              {{ metadata.authorWallets[index] }}
-            </div>
-            <div class="font-semibold">
-              {{ metadata.authorNames[index] }}
-            </div>
+            <StakeholderInfo
+              :id="stakeholders[index].entity.id"
+              :address="stakeholders[index].entity['@id']"
+              :url="stakeholders[index].entity.url"
+              :name="stakeholders[index].entity.name"
+            />
           </FormField>
-          <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+          <FormField
+            v-if="metadata.version"
+            :label="$t('iscn.meta.version')"
+            class="mb-[12px]"
+          >
             {{ metadata.version }}
           </FormField>
-          <FormField :label="$t('iscn.meta.url')" class="mb-[12px]">
+          <FormField
+            v-if="metadata.url"
+            :label="$t('iscn.meta.url')"
+            class="mb-[12px]"
+          >
             <Link :href="metadata.url">
               {{ metadata.url }}
             </Link>
           </FormField>
-          <FormField :label="$t('iscn.meta.usage.info')" class="mb-[12px]">
+          <FormField
+            v-if="metadata.usageInfo"
+            :label="$t('iscn.meta.usage.info')"
+            class="mb-[12px]"
+          >
             <Link :href="metadata.usageInfo">
               {{ metadata.usageInfo }}
             </Link>
@@ -164,6 +185,10 @@ export default class ViewIscnIdPage extends Vue {
 
   get keywords(): Array<string> {
     return this.metadata.keywords ? this.metadata.keywords.split(',') : []
+  }
+
+  get stakeholders() {
+    return this.record.stakeholders
   }
 
   created() {
