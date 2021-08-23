@@ -4,15 +4,15 @@
       <div v-if="address">
         {{ `cosmos${address.slice(11)}` }}
       </div>
-      <div v-else-if="isAddress">
-        {{ isAddress }}
+      <div v-else-if="walletAddress">
+        {{ walletAddress }}
       </div>
     </div>
     <div class="font-semibold">
       <Link v-if="url" :href="url">
         {{ name }}
       </Link>
-      <Link v-else-if="isLink" :href="isLink">
+      <Link v-else-if="hrefLink" :href="hrefLink">
         {{ name }}
       </Link>
       <div v-else>
@@ -32,16 +32,15 @@ export default class StakeholderInfo extends Vue {
   @Prop(String) readonly name: string | undefined
   @Prop(String) readonly url: string | undefined
 
-  get isAddress() {
+  get walletAddress() {
     if (this.id && this.id.includes('cosmos'))
       return `cosmos${this.id.slice(11)}`
-    return false
+    return ''
   }
 
-  get isLink() {
-    if (this.id && this.id.includes('http'))
-      return this.id
-    return false
+  get hrefLink() {
+    if (this.id && this.id.includes('http')) return this.id
+    return ''
   }
 }
 </script>
