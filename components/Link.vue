@@ -8,7 +8,7 @@
     :rel="rel"
   >
     <slot />
-    <IconNorthEast v-if="href" class="ml-[4px]" />
+    <IconNorthEast v-if="href" class="ml-[4px] self-center" />
   </component>
 </template>
 
@@ -35,7 +35,6 @@ export default class Link extends Vue {
     return [
       'flex',
       'flex-row',
-      'items-baseline',
       'text-[16px]',
       'font-normal',
       'text-like-green',
