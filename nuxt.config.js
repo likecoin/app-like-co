@@ -23,6 +23,35 @@ export default {
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/global.css'],
 
+  render: {
+    csp: {
+      enabled: true,
+      unsafeInlineCompatibility: true,
+      hashAlgorithm: 'sha256',
+      policies: {
+        'default-src': [
+          "'self'",
+          'data:',
+          'blob:',
+          '*',
+        ],
+        'script-src': [
+          "'self'",
+          "'unsafe-inline'", // ignored by browser with sha support
+        ],
+        'connect-src': [
+          "'self'",
+          'data:',
+          '*',
+        ],
+        'style-src': [
+          "'self'",
+          "'unsafe-inline'",
+          'fonts.googleapis.com',
+        ],
+      },
+    },
+  },
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
   ],
