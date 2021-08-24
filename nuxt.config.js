@@ -1,3 +1,6 @@
+const siteDefaultDescription =
+  'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -5,11 +8,17 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
+      { hid: 'description', name: 'description', content: siteDefaultDescription },
+      { hid: 'og_title', property: 'og:title', content: 'ISCN App' },
+      { hid: 'og_image', property: 'og:image', content: 'https://app.like.co/og.png' },
+      { hid: 'og_description', property: 'og:description', content: siteDefaultDescription },
+      { hid: 'og_image_alt', property: 'og:image:alt', content: '#DePub' },
+      { hid: 'og_image_width', property: 'og:image:width', content: '1200' },
+      { hid: 'og_image_height', property: 'og:image:height', content: '630' },
       { name: 'format-detection', content: 'telephone=no' },
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap' },
