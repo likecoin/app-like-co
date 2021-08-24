@@ -443,7 +443,7 @@ export default class IscnRegisterForm extends Vue {
       estimateISCNTxFee(payload),
       estimateISCNTxGas(payload),
     ])
-    const iscnGasNanolike = parseInt(iscnGasEstimation.fee.amount[0].amount,10)
+    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
     const totalFee = new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9)
