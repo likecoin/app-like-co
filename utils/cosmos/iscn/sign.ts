@@ -18,8 +18,6 @@ import config from '~/constant/network'
 import { ISCNSignPayload } from './iscn.type'
 import { queryFeePerByte } from './query'
 
-BigNumber.config({ ROUNDING_MODE: 0 }) // round up
-
 const registry = new Registry([
   ...defaultRegistryTypes,
   [
@@ -57,8 +55,8 @@ export async function estimateISCNTxGas(tx: ISCNSignPayload) {
   const gasUsedEstimation = byteSize.multipliedBy(GAS_ESTIMATOR_SLOP).plus(interceptWithBuffer);
   return {
     fee: {
-      amount: [{ amount: gasUsedEstimation.toFixed(0), denom: 'nanolike' }],
-      gas: gasUsedEstimation.toFixed(0),
+      amount: [{ amount: gasUsedEstimation.toFixed(0,0), denom: 'nanolike' }],
+      gas: gasUsedEstimation.toFixed(0,0),
     },
   }
 }
