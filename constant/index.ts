@@ -8,6 +8,10 @@ export const DEFAULT_GAS_PRICE = [{ amount: 1000, denom: COSMOS_DENOM }];
 
 export const DEFAULT_GAS_PRICE_NUMBER = DEFAULT_GAS_PRICE[0].amount;
 
+export const GAS_ESTIMATOR_BUFFER = 50000;
+export const GAS_ESTIMATOR_SLOP = 3.58;
+export const GAS_ESTIMATOR_INTERCEPT = 99443.87;
+
 export const IPFS_ENDPOINT = 'https://ipfs.infura.io:5001/api/v0';
 
 export const IPFS_VIEW_GATEWAY_URL = 'https://cloudflare-ipfs.com/ipfs';

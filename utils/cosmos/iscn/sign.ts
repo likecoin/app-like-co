@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { OfflineSigner, Registry } from '@cosmjs/proto-signing'
 import {
   defaultRegistryTypes,
@@ -8,9 +9,10 @@ import { MsgCreateIscnRecord } from '@likecoin/iscn-message-types/dist/iscn/tx'
 import jsonStringify from 'fast-json-stable-stringify'
 
 import {
-  DEFAULT_GAS_PRICE_NUMBER,
   ISCN_REGISTRY_NAME,
-  ISCN_GAS_FEE,
+  GAS_ESTIMATOR_INTERCEPT,
+  GAS_ESTIMATOR_BUFFER,
+  GAS_ESTIMATOR_SLOP,
 } from '~/constant'
 import config from '~/constant/network'
 import { ISCNSignPayload } from './iscn.type'
@@ -24,13 +26,38 @@ const registry = new Registry([
   ], // Replace with your own type URL and Msg class
 ])
 
-export function estimateISCNTxGas() {
+export async function estimateISCNTxGas(tx: ISCNSignPayload) {
+  const record = await formatISCNPayload(tx);
+  const msg = {
+    type: Buffer.from('likecoin-chain/MsgCreateIscnRecord', 'utf-8'),
+    value: {
+      from: Buffer.from(tx.cosmosWallet, 'utf-8'),
+      record,
+    },
+  };
+  const value = {
+    msg: [msg],
+    fee: {
+      amount: [{
+          denom: 'nanolike',
+          amount: '200000', // temp number here for estimation
+      }],
+      gas: '200000', // temp number here for estimation
+    },
+  };
+  const obj = {
+    type: 'cosmos-sdk/StdTx',
+    value: Buffer.from(jsonStringify(value), 'utf-8'),
+  };
+  const interceptWithBuffer = new BigNumber(GAS_ESTIMATOR_INTERCEPT).plus(GAS_ESTIMATOR_BUFFER);
+  const txBytes = Buffer.from(jsonStringify(obj), 'utf-8');
+  const byteSize = new BigNumber(txBytes.length);
+  const gasUsedEstimation = byteSize.multipliedBy(GAS_ESTIMATOR_SLOP).plus(interceptWithBuffer);
   return {
-    amount: [{
-      amount: (DEFAULT_GAS_PRICE_NUMBER * ISCN_GAS_FEE).toFixed(),
-      denom: 'nanolike',
-    }],
-    gas: ISCN_GAS_FEE.toFixed(),
+    fee: {
+      amount: [{ amount: gasUsedEstimation.toFixed(0), denom: 'nanolike' }],
+      gas: gasUsedEstimation.toFixed(0),
+    },
   }
 }
 
@@ -168,7 +195,7 @@ export async function signISCNTx(
       record,
     },
   }
-  const fee = estimateISCNTxGas()
+  const { fee } = await estimateISCNTxGas(tx)
   const memo = 'app.like.co'
   const response = await client.signAndBroadcast(address, [message], fee, memo)
   assertIsBroadcastTxSuccess(response)

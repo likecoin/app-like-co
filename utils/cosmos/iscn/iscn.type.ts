@@ -10,4 +10,5 @@ export interface ISCNSignPayload {
   authorNames: string[];
   authorUrls: string[];
   authorWallets:string[];
+  cosmosWallet: string;
 }
