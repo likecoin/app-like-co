@@ -18,6 +18,8 @@ import config from '~/constant/network'
 import { ISCNSignPayload } from './iscn.type'
 import { queryFeePerByte } from './query'
 
+BigNumber.config({ ROUNDING_MODE: 0 }) // round up
+
 const registry = new Registry([
   ...defaultRegistryTypes,
   [
