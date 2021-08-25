@@ -452,17 +452,20 @@ export default class IscnRegisterForm extends Vue {
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
+      cosmosWallet: this.address,
     }
     const [
       balance,
       iscnFeeNanolike,
+      iscnGasEstimation,
     ] = await Promise.all([
       getAccountBalance(this.address),
       estimateISCNTxFee(payload),
+      estimateISCNTxGas(payload),
     ])
-    const gasFee = estimateISCNTxGas()
+    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
     const totalFee = new BigNumber(iscnFeeNanolike)
-      .plus(gasFee.amount[0].amount)
+      .plus(iscnGasNanolike)
       .shiftedBy(-9)
     if (new BigNumber(balance).lt(totalFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
