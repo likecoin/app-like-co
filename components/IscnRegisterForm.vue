@@ -220,8 +220,8 @@
               </Button>
               <span
                 v-if="error"
-                class="text-[red] text-[10px]"
-                >{{ error }}
+                class="text-[red] text-[10px] self-center"
+                >{{ errorMsg }}
               </span>
             </div>
           </div>
@@ -375,6 +375,17 @@ export default class IscnRegisterForm extends Vue {
     return `ipfs://${this.ipfsHash}`
   }
 
+  get errorMsg() {
+    switch (this.error) {
+      case 'INSUFFICIENT_BALANCE':
+        return this.$t('IscnRegisterForm.error.insufficient')
+      case 'MISSING_SIGNER':
+        return this.$t('IscnRegisterForm.error.missingSigner')
+      default:
+        return ''
+    }
+  }
+
   mounted() {
     this.uploadStatus = ''
   }
@@ -457,10 +468,10 @@ export default class IscnRegisterForm extends Vue {
       this.error = 'INSUFFICIENT_BALANCE'
       return
     }
-    if (!this.signer){
+    if (!this.signer) {
       this.error = 'MISSING_SIGNER'
       return
-    } 
+    }
     this.uploadStatus = 'Waiting for signature'
     const tx = await signISCNTx(payload, this.signer, this.address)
     this.uploadStatus = 'Success'
