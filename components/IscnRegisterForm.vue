@@ -206,16 +206,24 @@
               class="mx-[24px]"
             />
             -->
-            <Button
-              type="submit"
-              preset="secondary"
-              :is-disabled="!!uploadStatus"
-            >
-              {{ uploadStatus || $t('iscn.meta.register') }}
-              <template #append>
-                <IconArrowRight />
-              </template>
-            </Button>
+            <div class="flex flex-col">
+              <Button
+                :class="[{ 'border-[red] border-2': error }]"
+                type="submit"
+                preset="secondary"
+                :is-disabled="!!uploadStatus || error"
+              >
+                {{ $t('iscn.meta.register') || uploadStatus }}
+                <template #append>
+                  <IconArrowRight />
+                </template>
+              </Button>
+              <span
+                v-if="error"
+                class="text-[red] text-[10px] self-center"
+                >{{ errorMsg }}
+              </span>
+            </div>
           </div>
         </form>
       </div>
@@ -328,6 +336,7 @@ export default class IscnRegisterForm extends Vue {
   authorWalletAddress: string = ''
   uploadStatus: string = ''
   uploadIpfsHash: string = this.ipfsHash
+  error: string = ''
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
@@ -364,6 +373,17 @@ export default class IscnRegisterForm extends Vue {
 
   get ipfs() {
     return `ipfs://${this.ipfsHash}`
+  }
+
+  get errorMsg() {
+    switch (this.error) {
+      case 'INSUFFICIENT_BALANCE':
+        return this.$t('IscnRegisterForm.error.insufficient')
+      case 'MISSING_SIGNER':
+        return this.$t('IscnRegisterForm.error.missingSigner')
+      default:
+        return ''
+    }
   }
 
   mounted() {
@@ -445,9 +465,13 @@ export default class IscnRegisterForm extends Vue {
       .plus(gasFee.amount[0].amount)
       .shiftedBy(-9)
     if (new BigNumber(balance).lt(totalFee)) {
-      throw new Error('INSUFFICIENT_BALANCE')
+      this.error = 'INSUFFICIENT_BALANCE'
+      return
     }
-    if (!this.signer) throw new Error('MISSING_SIGNER')
+    if (!this.signer) {
+      this.error = 'MISSING_SIGNER'
+      return
+    }
     this.uploadStatus = 'Waiting for signature'
     const tx = await signISCNTx(payload, this.signer, this.address)
     this.uploadStatus = 'Success'

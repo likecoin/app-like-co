@@ -47,6 +47,8 @@
   "iscn.meta.usage.info": "Usage Info",
   "iscn.meta.version.placeholder": "Version",
   "iscn.meta.version": "Version",
+  "IscnRegisterForm.error.insufficient": "Insufficient Balance",
+  "IscnRegisterForm.error.missingSigner": "Missing Signer",
   "IscnRegisterForm.guide.title": "Review and edit metadata",
   "IscnRegisterForm.title.done": "Published to IPFS",
   "IscnUploaded.guide.title": "Completed! Here is your ISCN",
