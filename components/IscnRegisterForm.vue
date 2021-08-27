@@ -87,7 +87,7 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink :item="ipfs" />
+        <ContentFingerprintLink :item="formattedIpfs" />
       </FormField>
       <!-- Dialog -->
       <Dialog
@@ -199,7 +199,7 @@
             {{ $t('iscn.meta.version.placeholder') }}
           </FormField> -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
-            <Label :text="registerFee" class="mx-[24px]" />
+            <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div class="flex flex-col">
               <Button
                 :class="[{ 'border-[red] border-2': error }]"
@@ -344,7 +344,6 @@ export default class IscnRegisterForm extends Vue {
   isOpenAuthorDialog = false
   activeEditingAuthorIndex = -1
 
-
   get tagsString(): string {
     return this.tags.join(',')
   }
@@ -371,8 +370,8 @@ export default class IscnRegisterForm extends Vue {
     return 'CreativeWork'
   }
 
-  get ipfs() {
-    return `ipfs://${this.ipfsHash}`
+  get formattedIpfs() {
+    return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
   }
 
   get errorMsg() {
@@ -386,8 +385,8 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  get registerFee() {
-    return `Fee: ${this.totalFee} LIKE`
+  get formattedRegisterFee() {
+    return this.$t('IscnRegisterForm.register.fee', { fee: this.totalFee })
   }
 
   get payload() {
