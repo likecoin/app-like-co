@@ -292,7 +292,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js'
-import _ from 'lodash'
+import debounce from 'lodash.debounce'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
@@ -338,8 +338,7 @@ export default class IscnRegisterForm extends Vue {
 
   totalFee: any = 0
   balance: any = 0
-  payload: any = {}
-  debounceTotalFee = _.debounce(this.countTotalFee, 400)
+  debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
@@ -391,6 +390,23 @@ export default class IscnRegisterForm extends Vue {
     return `Fee: ${this.totalFee} LIKE`
   }
 
+  get payload() {
+    return {
+      type: this.type,
+      name: this.name,
+      description: this.description,
+      tagsString: this.tagsString,
+      url: this.url,
+      license: this.license,
+      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
+      fileSHA256: this.fileSHA256,
+      authorNames: this.authorNames,
+      authorUrls: this.authorUrls,
+      authorWallets: this.authorWalletAddresses,
+      cosmosWallet: this.address,
+    }
+  }
+
   @Watch('name')
   @Watch('description')
   @Watch('tagsString')
@@ -400,12 +416,12 @@ export default class IscnRegisterForm extends Vue {
   @Watch('authorUrl')
   @Watch('authorWallets')
   change() {
-    this.debounceTotalFee()
+    this.debouncedCalculateTotalFee()
   }
 
   mounted() {
     this.uploadStatus = ''
-    this.countTotalFee()
+    this.calculateTotalFee()
   }
 
   editAuthor(index: number) {
@@ -444,21 +460,7 @@ export default class IscnRegisterForm extends Vue {
     this.dismissAuthorDialog()
   }
 
-  async countTotalFee(): Promise<void> {
-    this.payload = {
-      type: this.type,
-      name: this.name,
-      description: this.description,
-      tagsString: this.tagsString,
-      url: this.url,
-      license: this.license,
-      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-      fileSHA256: this.fileSHA256,
-      authorNames: this.authorNames,
-      authorUrls: this.authorUrls,
-      authorWallets: this.authorWalletAddresses,
-      cosmosWallet: this.address,
-    }
+  async calculateTotalFee(): Promise<void> {
     const [
       balance,
       iscnFeeNanolike,
@@ -489,7 +491,7 @@ export default class IscnRegisterForm extends Vue {
 
   async submitToISCN(): Promise<void> {
     this.uploadStatus = 'Loading'
-    await this.countTotalFee()
+    await this.calculateTotalFee()
     if (new BigNumber(this.balance).lt(this.totalFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.uploadStatus = ''
