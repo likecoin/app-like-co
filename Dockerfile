@@ -5,6 +5,8 @@ COPY ./yarn.lock ./
 RUN yarn install
 ARG IS_TESTNET
 ENV IS_TESTNET ${IS_TESTNET}
+ARG GA_TRACKING_ID
+ENV GA_TRACKING_ID ${GA_TRACKING_ID}
 ENV NODE_ENV production
 COPY ./ ./
 RUN yarn build
