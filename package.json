@@ -23,6 +23,7 @@
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.0.1",
     "@nuxtjs/pwa": "^3.3.5",
+    "@types/lodash.debounce": "^4.0.6",
     "bignumber.js": "^9.0.1",
     "core-js": "^3.15.1",
     "exifr": "^7.1.2",
