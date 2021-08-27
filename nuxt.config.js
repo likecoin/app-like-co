@@ -1,6 +1,12 @@
 const siteDefaultDescription =
   'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
 
+const {
+  IS_TESTNET,
+  CI,
+  GA_TRACKING_ID,
+} = process.env;
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -26,8 +32,9 @@ export default {
   },
 
   env: {
-    IS_TESTNET: process.env.IS_TESTNET,
-    CI: process.env.CI,
+    IS_TESTNET,
+    CI,
+    GA_TRACKING_ID,
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/global.css'],
@@ -47,6 +54,7 @@ export default {
         'script-src': [
           "'self'",
           "'unsafe-inline'", // ignored by browser with sha support
+          "www.googletagmanager.com",
         ],
         'connect-src': [
           "'self'",
@@ -62,8 +70,7 @@ export default {
     },
   },
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-  ],
+  plugins: [{ src: '~/plugins/gtag.client.ts', mode: 'client' }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
