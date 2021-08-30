@@ -22,7 +22,7 @@
       ]"
     >
       <div class="mr-[32px]">
-        <MetadataCard v-if="imgSrc" :img-src="imgSrc" />
+        <MetadataCard v-if="imgSrc" :img-src="imgSrc" class="w-[280px]" />
       </div>
       <div>
         <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
