@@ -1,7 +1,6 @@
 <template>
-  <div class="bg-white max-w-[280px] py-[32px] px-[24px] rounded-[24px]">
+  <Card>
     <Label
-      class="w-min"
       :text="$t('iscn.meta.card.title')"
       tag="div"
       preset="p5"
@@ -31,7 +30,7 @@
     >
       {{ item }}
     </FormField>
-  </div>
+  </Card>
 </template>
 
 <script lang="ts">
