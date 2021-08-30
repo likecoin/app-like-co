@@ -23,23 +23,19 @@ export default {
         type: 'text',
       },
     },
-    isError: {
+    preset:{
       type: {
-        name: 'boolean',
+        name: 'string',
         required: false,
       },
-      defaultValue: false,
-      description: 'Switch to warning style if set to true',
-      table: {
-        type: {
-          summary: 'boolean',
-        },
-        defaultValue: {
-          summary: false,
-        },
-      },
+      defaultValue: 'success',
+      description: 'Preset of the Snackbar',
+      options: [
+        'warn',
+        'success',
+      ],
       control: {
-        type: 'boolean',
+        type: 'radio',
       },
     },
   },
@@ -66,5 +62,5 @@ Suggestion.parameters = { customSlot: true }
 export const Error = Template.bind({})
 Error.args = {
   text: 'The whole world is an error, please try later',
-  isError: true,
+  preset: 'warn',
 }

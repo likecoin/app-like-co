@@ -23,14 +23,19 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+export enum Preset {
+  warn = 'warn',
+  success = 'success',
+}
+
 @Component
 export default class Snackbar extends Vue {
 
   // Inner text of the label
   @Prop(String) readonly text!: string
 
-  // Switch to warning style if set to true
-  @Prop(Boolean) readonly isError!: boolean
+  // Preset of the Snackbar
+  @Prop(String) readonly preset!: string
 
   // Class of the content wrapper
   @Prop([
@@ -48,11 +53,15 @@ export default class Snackbar extends Vue {
   @Prop([
     String,
     Array,
-    ]) readonly appendClass!: string | [] | undefined
+  ]) readonly appendClass!: string | [] | undefined
 
   // Preset of the label that affects the label style
   @Prop(String) readonly textPreset!: string | undefined
 
+  get isError(): any {
+    return this.preset === Preset.warn
+  }
+  
   get containerWrapperClasses(): any {
     return [
       'w-min',
@@ -69,7 +78,7 @@ export default class Snackbar extends Vue {
     return [
       'whitespace-nowrap',
       this.contentClass,
-      ]
+    ]
   }
 
   get appendWrapperClasses(): any {
