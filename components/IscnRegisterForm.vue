@@ -406,14 +406,7 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  @Watch('name')
-  @Watch('description')
-  @Watch('tagsString')
-  @Watch('url')
-  @Watch('license')
-  @Watch('authorNames')
-  @Watch('authorUrl')
-  @Watch('authorWallets')
+  @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateTotalFee()
   }
