@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white max-w-[648px] p-[32px] mb-[16px] rounded-[24px]">
+  <div class="bg-white w-[648px] p-[32px] mb-[16px] rounded-[24px]">
     <div class="flex flex-row justify-between mb-[28px]">
       <Label
         class="w-min"
