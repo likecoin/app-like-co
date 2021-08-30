@@ -18,9 +18,7 @@
       <div
         :class="[
           'fixed',
-          'top-[50vh]',
-          'translate-y-[-50%]',
-          'min-w-[304px]',
+          'top-[20vh]',
         ]"
       >
         <Button

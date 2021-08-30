@@ -12,7 +12,7 @@
           <IconArrowLeft />
         </template>
       </Button>
-      <Card :has-padding="false" set-padding-classes="p-[32px]">
+      <Card class="p-[32px]" :has-padding="false">
         <!-- header -->
         <div class="flex flex-row items-start justify-between">
           <Label
@@ -73,8 +73,11 @@
             />
           </form>
           <!-- upload field__Submit  -->
-          <div v-else :class="[...formClasses]">
-            <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+          <div v-else :class="formClasses">
+            <div class="flex justify-center w-[138px] max-h-[150px] mr-[16px]">
+              <img class="object-contain rounded-[8px]" :src="fileData" />
+            </div>
+            <!-- <img class="w-[138px] max-h-[150px] object-contain mr-[16px] rounded-[8px]" :src="fileData" /> -->
             <div class="flex flex-col items-stretch justify-start">
               <Label :text="fileName" class="font-semibold text-dark-gray" />
               <Label
@@ -121,7 +124,11 @@
           :has-padding="false"
           preset="custom"
         >
-          <MetadataCard :img-src="fileData" :data="exifInfo" />
+          <MetadataCard
+            class="w-[616px] max-h-[65vh] overflow-y-scroll"
+            :img-src="fileData"
+            :data="exifInfo"
+          />
         </Dialog>
       </Card>
     </div>
