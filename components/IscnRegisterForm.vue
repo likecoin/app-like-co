@@ -13,7 +13,7 @@
       </template>
     </Button>
     <!-- ////// Review Card /////// -->
-    <Card :has-padding="false" set-padding-classes="p-[32px]">
+    <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <div class="flex flex-row items-start justify-between">
         <Label
@@ -95,14 +95,17 @@
         :has-padding="false"
         preset="custom"
       >
-        <MetadataCard :img-src="fileData" :data="exifInfo" />
+        <MetadataCard
+          class="max-w-[280px] max-h-[65vh] overflow-y-scroll"
+          :img-src="fileData"
+          :data="exifInfo"
+        />
       </Dialog>
     </Card>
     <!-- ////// Input Card /////// -->
     <Card
-      class="flex flex-col mt-[16px]"
+      class="flex flex-col mt-[16px] p-[32px]"
       :has-padding="false"
-      set-padding-classes="p-[32px]"
     >
       <!-- header -->
       <Label

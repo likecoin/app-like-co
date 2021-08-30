@@ -20,12 +20,6 @@ export default class Card extends Vue {
   // Has 32px padding around the card.
   @Prop({ default: true }) readonly hasPadding!: boolean
 
-    // Customize padding for the card.
-  @Prop([
-    String,
-    Array,
-  ]) readonly setPaddingClasses!: string | [] | undefined
-
   get rootClasses() {
     return [
       'bg-white',
@@ -33,7 +27,6 @@ export default class Card extends Vue {
       {
         'px-[24px] py-[32px]': this.hasPadding,
       },
-      this.setPaddingClasses,
     ]
   }
 }
