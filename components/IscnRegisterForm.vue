@@ -211,7 +211,7 @@
                 :class="[{ 'border-[red] border-2': error }]"
                 type="submit"
                 preset="secondary"
-                :is-disabled="!!uploadStatus || error"
+                :is-disabled="!!uploadStatus"
               >
                 {{ $t('iscn.meta.register') || uploadStatus }}
                 <template #append>
