@@ -3,6 +3,7 @@
     :is="tag"
     :class="rootClasses"
     :to="to || null"
+    :disabled="isDisabled"
     v-on="$listeners"
   >
     <Label
