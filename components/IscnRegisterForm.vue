@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px]">
+  <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px] mb-[166px]">
     <!-- Back btn -->
     <Button
       :to="localeLocation({ name: 'index' })"
@@ -205,7 +205,6 @@
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div class="flex flex-col">
               <Button
-                :class="[{ 'border-[red] border-2': error }]"
                 type="submit"
                 preset="secondary"
                 :is-disabled="!!uploadStatus"
@@ -215,15 +214,16 @@
                   <IconArrowRight />
                 </template>
               </Button>
-              <span
-                v-if="error"
-                class="text-[red] text-[10px] self-center"
-                >{{ errorMsg }}
-              </span>
             </div>
           </div>
         </form>
       </div>
+      <!-- Snackbar -->
+      <Snackbar
+        v-model="isOpenWarningSnackbar"
+        :text="errorMsg"
+        preset="warn"
+      />
       <!-- Dialog -->
       <Dialog
         v-model="isOpenAuthorDialog"
@@ -345,6 +345,7 @@ export default class IscnRegisterForm extends Vue {
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
+  isOpenWarningSnackbar = false
   activeEditingAuthorIndex = -1
 
   get tagsString(): string {
@@ -414,6 +415,12 @@ export default class IscnRegisterForm extends Vue {
     this.debouncedCalculateTotalFee()
   }
 
+  @Watch('error')
+  showWarning(errormsg:any){
+    if(errormsg)
+    this.isOpenWarningSnackbar = true
+  }
+
   mounted() {
     this.uploadStatus = ''
     this.calculateTotalFee()
@@ -473,6 +480,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
+    this.error=''
     if (!this.isIPFSLink) await this.submitToIPFS()
     await this.submitToISCN()
   }
