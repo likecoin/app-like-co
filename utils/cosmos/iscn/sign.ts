@@ -13,6 +13,7 @@ import {
   GAS_ESTIMATOR_INTERCEPT,
   GAS_ESTIMATOR_BUFFER,
   GAS_ESTIMATOR_SLOP,
+  DEFAULT_GAS_PRICE_NUMBER,
 } from '~/constant'
 import config from '~/constant/network'
 import { ISCNSignPayload } from './iscn.type'
@@ -55,7 +56,7 @@ export async function estimateISCNTxGas(tx: ISCNSignPayload) {
   const gasUsedEstimation = byteSize.multipliedBy(GAS_ESTIMATOR_SLOP).plus(interceptWithBuffer);
   return {
     fee: {
-      amount: [{ amount: gasUsedEstimation.toFixed(0,0), denom: 'nanolike' }],
+      amount: [{ amount: gasUsedEstimation.multipliedBy(DEFAULT_GAS_PRICE_NUMBER).toFixed(0,0), denom: 'nanolike' }],
       gas: gasUsedEstimation.toFixed(0,0),
     },
   }
