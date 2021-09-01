@@ -87,7 +87,7 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink :item="ipfs" />
+        <ContentFingerprintLink :item="formattedIpfs" />
       </FormField>
       <!-- Dialog -->
       <Dialog
@@ -202,13 +202,7 @@
             {{ $t('iscn.meta.version.placeholder') }}
           </FormField> -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
-            <!-- Hide for now
-            <Label
-              v-if="isImage"
-              text="Est.Fee:~123.123 Like"
-              class="mx-[24px]"
-            />
-            -->
+            <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div class="flex flex-col">
               <Button
                 :class="[{ 'border-[red] border-2': error }]"
@@ -216,7 +210,7 @@
                 preset="secondary"
                 :is-disabled="!!uploadStatus"
               >
-                {{ $t('iscn.meta.register') || uploadStatus }}
+                {{ uploadStatus || $t('iscn.meta.register') }}
                 <template #append>
                   <IconArrowRight />
                 </template>
@@ -301,8 +295,9 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js'
+import debounce from 'lodash.debounce'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author'
@@ -328,6 +323,9 @@ export default class IscnRegisterForm extends Vue {
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
 
+  @signerModule.Getter('getAddress') address!: string
+  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+
   authors: Author[] = []
   name: string = ''
   description: string = ''
@@ -341,12 +339,13 @@ export default class IscnRegisterForm extends Vue {
   uploadIpfsHash: string = this.ipfsHash
   error: string = ''
 
+  totalFee: any = 0
+  balance: any = 0
+  debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
+
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   activeEditingAuthorIndex = -1
-
-  @signerModule.Getter('getAddress') address!: string
-  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -374,8 +373,8 @@ export default class IscnRegisterForm extends Vue {
     return 'CreativeWork'
   }
 
-  get ipfs() {
-    return `ipfs://${this.ipfsHash}`
+  get formattedIpfs() {
+    return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
   }
 
   get errorMsg() {
@@ -389,8 +388,35 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
+  get formattedRegisterFee() {
+    return this.$t('IscnRegisterForm.register.fee', { fee: this.totalFee })
+  }
+
+  get payload() {
+    return {
+      type: this.type,
+      name: this.name,
+      description: this.description,
+      tagsString: this.tagsString,
+      url: this.url,
+      license: this.license,
+      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
+      fileSHA256: this.fileSHA256,
+      authorNames: this.authorNames,
+      authorUrls: this.authorUrls,
+      authorWallets: this.authorWalletAddresses,
+      cosmosWallet: this.address,
+    }
+  }
+
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateTotalFee()
+  }
+
   mounted() {
     this.uploadStatus = ''
+    this.calculateTotalFee()
   }
 
   editAuthor(index: number) {
@@ -429,6 +455,23 @@ export default class IscnRegisterForm extends Vue {
     this.dismissAuthorDialog()
   }
 
+  async calculateTotalFee(): Promise<void> {
+    const [
+      balance,
+      iscnFeeNanolike,
+      iscnGasEstimation,
+    ] = await Promise.all([
+      getAccountBalance(this.address),
+      estimateISCNTxFee(this.payload),
+      estimateISCNTxGas(this.payload),
+    ])
+    this.balance = balance
+    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
+    this.totalFee = new BigNumber(iscnFeeNanolike)
+      .plus(iscnGasNanolike)
+      .shiftedBy(-9)
+  }
+
   async onSubmit(): Promise<void> {
     if (!this.isIPFSLink) await this.submitToIPFS()
     await this.submitToISCN()
@@ -443,43 +486,19 @@ export default class IscnRegisterForm extends Vue {
 
   async submitToISCN(): Promise<void> {
     this.uploadStatus = 'Loading'
-    const payload = {
-      type: this.type,
-      name: this.name,
-      description: this.description,
-      tagsString: this.tagsString,
-      url: this.url,
-      license: this.license,
-      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-      fileSHA256: this.fileSHA256,
-      authorNames: this.authorNames,
-      authorUrls: this.authorUrls,
-      authorWallets: this.authorWalletAddresses,
-      cosmosWallet: this.address,
-    }
-    const [
-      balance,
-      iscnFeeNanolike,
-      iscnGasEstimation,
-    ] = await Promise.all([
-      getAccountBalance(this.address),
-      estimateISCNTxFee(payload),
-      estimateISCNTxGas(payload),
-    ])
-    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
-    const totalFee = new BigNumber(iscnFeeNanolike)
-      .plus(iscnGasNanolike)
-      .shiftedBy(-9)
-    if (new BigNumber(balance).lt(totalFee)) {
+    await this.calculateTotalFee()
+    if (new BigNumber(this.balance).lt(this.totalFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
+      this.uploadStatus = ''
       return
     }
     if (!this.signer) {
       this.error = 'MISSING_SIGNER'
+      this.uploadStatus = ''
       return
     }
     this.uploadStatus = 'Waiting for signature'
-    const tx = await signISCNTx(payload, this.signer, this.address)
+    const tx = await signISCNTx(this.payload, this.signer, this.address)
     this.uploadStatus = 'Success'
     this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx))
   }
