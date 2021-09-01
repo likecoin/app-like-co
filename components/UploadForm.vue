@@ -223,7 +223,11 @@ export default class UploadForm extends Vue {
         // eslint-disable-next-line prefer-destructuring
         this.fileBlob = files[0]
         if (this.isImage) {
-          this.exifInfo = await exifr.parse(files[0])
+          try {
+            this.exifInfo = await exifr.parse(files[0])
+          } catch (exifInfo) {
+            this.exifInfo = null
+          }
         } else {
           this.exifInfo = null
         }
