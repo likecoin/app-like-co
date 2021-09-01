@@ -1,29 +1,76 @@
+const siteDefaultDescription =
+  'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
+
+const {
+  IS_TESTNET,
+  CI,
+  GA_TRACKING_ID,
+} = process.env;
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'app-like-co',
+    title: 'ISCN App',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
-      { name: 'format-detection', content: 'telephone=no' }
+      { hid: 'description', name: 'description', content: siteDefaultDescription },
+      { hid: 'og_title', property: 'og:title', content: 'ISCN App' },
+      { hid: 'og_image', property: 'og:image', content: 'https://app.like.co/og.png' },
+      { hid: 'og_description', property: 'og:description', content: siteDefaultDescription },
+      { hid: 'og_image_alt', property: 'og:image:alt', content: '#DePub' },
+      { hid: 'og_image_width', property: 'og:image:width', content: '1200' },
+      { hid: 'og_image_height', property: 'og:image:height', content: '630' },
+      { name: 'format-detection', content: 'telephone=no' },
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+      { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap' },
+    ],
   },
 
   env: {
-    IS_TESTNET: process.env.IS_TESTNET,
-    CI: process.env.CI,
+    IS_TESTNET,
+    CI,
+    GA_TRACKING_ID,
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-  ],
+  css: ['~/assets/css/global.css'],
 
+  render: {
+    csp: {
+      enabled: true,
+      unsafeInlineCompatibility: true,
+      hashAlgorithm: 'sha256',
+      policies: {
+        'default-src': [
+          "'self'",
+          'data:',
+          'blob:',
+          '*',
+        ],
+        'script-src': [
+          "'self'",
+          "'unsafe-inline'", // ignored by browser with sha support
+          "www.googletagmanager.com",
+        ],
+        'connect-src': [
+          "'self'",
+          'data:',
+          '*',
+        ],
+        'style-src': [
+          "'self'",
+          "'unsafe-inline'",
+          'fonts.googleapis.com',
+        ],
+      },
+    },
+  },
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-  ],
+  plugins: [{ src: '~/plugins/gtag.client.ts', mode: 'client' }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -47,6 +94,9 @@ export default {
 
     // https://i18n.nuxtjs.org
     '@nuxtjs/i18n',
+
+    // https://portal-vue.linusb.org/guide/installation.html#nuxt-module
+    'portal-vue/nuxt',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

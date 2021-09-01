@@ -1,10 +1,7 @@
 <template>
-  <div class="container mx-auto">
-    <upload-form
-      v-if="state === 'init'"
-      @submit="onSubmitUpload"
-    />
-    <iscn-register-form
+  <Page>
+    <UploadForm v-if="state === 'init'" @submit="onSubmitUpload" />
+    <IscnRegisterForm
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
       :arweave-id="arweaveId"
@@ -15,7 +12,7 @@
       :exif-info="exifInfo"
       @txBroadcasted="onISCNTxInfo"
     />
-    <iscn-uploaded-info
+    <IscnUploadedInfo
       v-else-if="state === 'done'"
       :is-image="isImage"
       :ipfs-hash="ipfsHash"
@@ -24,9 +21,10 @@
       :file-s-h-a256="fileSHA256"
       :iscn-id="iscnId"
       :iscn-hash="iscnTxHash"
+      :exif-info="exifInfo"
       :iscn-timestamp="iscnTimestamp"
     />
-  </div>
+  </Page>
 </template>
 
 <script lang="ts">
@@ -80,12 +78,19 @@ export default class NewIndexPage extends Vue {
     this.state = 'iscn';
   }
 
-  onISCNTxInfo({ txHash, iscnId, timestamp }: { txHash: string, iscnId: string, timestamp: string }) {
-    this.iscnTxHash = txHash;
-    this.iscnId = iscnId;
-    this.iscnTimestamp = timestamp;
-    this.state = 'done';
+  onISCNTxInfo({
+    txHash,
+    iscnId,
+    timestamp,
+  }: {
+    txHash: string
+    iscnId: string
+    timestamp: string
+  }) {
+    this.iscnTxHash = txHash
+    this.iscnId = iscnId
+    this.iscnTimestamp = timestamp
+    this.state = 'done'
   }
 }
-
 </script>

@@ -1,5 +1,5 @@
 export interface ISCNSignPayload {
-  title: string;
+  name: string;
   description: string;
   tagsString: string;
   url: string;
@@ -10,4 +10,6 @@ export interface ISCNSignPayload {
   type: string;
   authorNames: string[];
   authorUrls: string[];
+  authorWallets:string[];
+  cosmosWallet: string;
 }

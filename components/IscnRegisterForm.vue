@@ -1,170 +1,407 @@
 <template>
-  <div>
-    <img class="max-w-md" :src="fileData">
-    <ul>
-      <li>{{ fileSHA256 }}</li>
-      <li>{{ ipfsUrl }}</li>
-      <li>{{ arweaveUrl }}</li>
-      <li>{{ type }}</li>
-    </ul>
-    <form class="space-y-4" @submit.prevent="onSubmit">
-      <fieldset>
-        <label for="title">{{ $t('iscn.meta.title') }}</label>
-        <input
-          id="title"
-          v-model="title"
-          :placeholder="$t('iscn.meta.title.placeholder')"
-          required
+  <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px]">
+    <!-- Back btn -->
+    <Button
+      :to="localeLocation({ name: 'index' })"
+      preset="plain"
+      tag="div"
+      :text="$t('UploadForm.button.back')"
+      class="text-dark-gray"
+    >
+      <template #prepend>
+        <IconArrowLeft />
+      </template>
+    </Button>
+    <!-- ////// Review Card /////// -->
+    <Card class="p-[32px]" :has-padding="false">
+      <!-- header -->
+      <div class="flex flex-row items-start justify-between">
+        <Label
+          class="w-min"
+          :text="$t('UploadForm.title.registerISCN')"
+          tag="div"
+          preset="p5"
+          valign="middle"
+          content-class="font-semibold whitespace-nowrap text-like-green"
+          prepend-class="text-like-green"
         >
-        <br />
-        <label for="description">{{ $t('iscn.meta.description') }}</label>
-        <input
-          id="description"
-          v-model="description"
-          :placeholder="$t('iscn.meta.description.placeholder')"
-        >
-      </fieldset>
-      <fieldset v-for="(author,index) in authors" :key="index">
-        <label :for="`author_${index}_id`">{{ $t('iscn.meta.creator.name') }}</label>
-        <input
-          :id="`author_${index}_name`"
-          v-model="author.name"
-          :placeholder="$t('iscn.meta.creator.name.placeholder')"
-        >
-        <br />
-        <label :for="`author_${index}_url`">{{ $t('iscn.meta.creator.url') }}</label>
-        <input
-          :id="`author_${index}_url`"
-          v-model="author.url"
-          :placeholder="$t('iscn.meta.creator.url.placeholder')"
-        >
-      </fieldset>
-      <a class="p-2 bg-green-400 rounded-lg" href="#" @click.prevent="onClickAddAuthor">Add Author</a>
-      <fieldset>
-        <label for="tagsString">{{ $t('iscn.meta.keywords') }}</label>
-        <input
-          id="tagsString"
-          v-model="tagsString"
-          :placeholder="$t('iscn.meta.keywords.placeholder')"
-        >
-      </fieldset>
-      <fieldset>
-        <label for="url">{{ $t('iscn.meta.url') }}</label>
-        <input
-          id="url"
-          v-model="url"
-          :placeholder="$t('iscn.meta.url.placeholder')"
-        >
-        <br />
-        <label for="license">{{ $t('iscn.meta.license') }}</label>
-        <input
-          id="license"
-          v-model="license"
-          :placeholder="$t('iscn.meta.license.placeholder')"
-        >
-      </fieldset>
-      <button type=submit class="p-2 bg-green-400 rounded-lg" :disabled="!!uploadStatus" >
-        {{ uploadStatus || $t('HomePage.submit.button') }}
-      </button>
-    </form>
+          <template #prepend>
+            <IconRegister />
+          </template>
+        </Label>
+        <div class="flex flex-col items-end">
+          <Stepper :step=3 />
+          <Label preset="p6" text="Step 3/4" class="text-medium-gray" />
+        </div>
+      </div>
+      <!-- guide text -->
+      <Label
+        :text="$t('IscnRegisterForm.guide.title')"
+        class="text-medium-gray my-[12px]"
+      />
+      <!-- review metadata -->
+      <div
+        class="
+          flex
+          w-[584px]
+          h-[196px]
+          flex-row
+          justify-start
+          items-center
+          p-[32px]
+          mb-[12px]
+          border-[2px] border-dashed border-shade-gray
+          rounded-[12px]
+          text-medium-gray
+        "
+      >
+        <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+        <div class="flex flex-col justify-start">
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('IscnRegisterForm.title.done')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
+          >
+            <template #prepend>
+              <IconDone />
+            </template>
+          </Label>
+          <Button
+            type="button"
+            :text="$t('UploadForm.view.file.button')"
+            preset="outline"
+            @click="isOpenFileInfoDialog = true"
+          >
+            <template #prepend>
+              <IconInfo />
+            </template>
+          </Button>
+        </div>
+      </div>
+      <!-- fingerPrint -->
+      <FormField
+        :label="$t('iscn.meta.content.fingerprints')"
+        class="mb-[12px]"
+      >
+        <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
+        <ContentFingerprintLink v-if="arweaveId" :item="formattedArweave" />
+      </FormField>
+      <!-- Dialog -->
+      <Dialog
+        v-model="isOpenFileInfoDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <MetadataCard
+          class="max-w-[280px] max-h-[65vh] overflow-y-scroll"
+          :img-src="fileData"
+          :data="exifInfo"
+        />
+      </Dialog>
+    </Card>
+    <!-- ////// Input Card /////// -->
+    <Card
+      class="flex flex-col mt-[16px] p-[32px]"
+      :has-padding="false"
+    >
+      <!-- header -->
+      <Label
+        class="w-min mb-[16px]"
+        :text="type"
+        tag="div"
+        preset="p5"
+        valign="middle"
+        content-class="font-semibold whitespace-nowrap text-like-green"
+        prepend-class="text-like-green"
+      >
+        <template #prepend>
+          <ISCNTypeIcon :type="type" />
+        </template>
+      </Label>
+      <!-- form fieldset -->
+      <div>
+        <form @submit.prevent="onSubmit">
+          <FormField :label="$t('iscn.meta.name')" class="my-[12px]">
+            <TextField
+              v-model="name"
+              :placeholder="$t('iscn.meta.name.placeholder')"
+            />
+          </FormField>
+          <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
+            <TextField
+              v-model="description"
+              :placeholder="$t('iscn.meta.description.placeholder')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('iscn.meta.creator.name')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <!-- add author -->
+            <span
+              v-for="(author, index) in authors"
+              :key="index"
+              class="mr-[8px] mb-[4px]"
+            >
+              <Button
+                size="mini"
+                preset="secondary"
+                tag="div"
+                text-preset="h6"
+                type="button"
+                :text="author.name"
+                @click="editAuthor(index)"
+              />
+            </span>
+            <Button
+              type="button"
+              class="mb-[4px]"
+              size="mini"
+              preset="secondary"
+              content-class="py-[4px]"
+              @click="isOpenAuthorDialog = true"
+            >
+              <IconAddMini />
+            </Button>
+          </FormField>
+          <!-- add tags -->
+          <IconDiverMini class="my-[12px]" />
+          <FormField
+            :label="$t('iscn.meta.keywords')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <EditableTagList v-model="tags" />
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <FormField :label="$t('iscn.meta.creator.url')" class="mb-[12px]">
+            <TextField
+              v-model="url"
+              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+            />
+          </FormField>
+          <FormField :label="$t('iscn.meta.license')" class="mb-[12px]">
+            <TextField
+              v-model="license"
+              :placeholder="$t('iscn.meta.license.placeholder')"
+            />
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <!-- register -->
+          <FormField :label="$t('iscn.meta.register')" class="mb-[12px]">
+            <div class="font-normal text-[16px] leading-[22px]">
+              {{ address }}
+            </div>
+            <!-- <div class="font-semibold">
+              {{ $t('iscn.meta.register.placeholder') }}
+            </div> -->
+          </FormField>
+          <!-- <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
+            {{ $t('iscn.meta.version.placeholder') }}
+          </FormField> -->
+          <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
+            <Label :text="formattedRegisterFee" class="mx-[24px]" />
+            <div class="flex flex-col">
+              <Button
+                :class="[{ 'border-[red] border-2': error }]"
+                type="submit"
+                preset="secondary"
+                :is-disabled="!!uploadStatus"
+              >
+                {{ uploadStatus || $t('iscn.meta.register') }}
+                <template #append>
+                  <IconArrowRight />
+                </template>
+              </Button>
+              <span
+                v-if="error"
+                class="text-[red] text-[10px] self-center"
+                >{{ errorMsg }}
+              </span>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- Dialog -->
+      <Dialog
+        v-model="isOpenAuthorDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <Card class="flex flex-col w-[616px]">
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('UploadForm.title.editAuthor')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
+          >
+            <template #prepend>
+              <IconAdd />
+            </template>
+          </Label>
+          <!-- name -->
+          <FormField :label="$t('iscn.meta.creator.name')" class="my-[12px]">
+            <TextField
+              v-model="authorName"
+              :placeholder="$t('iscn.meta.creator.name.placeholder')"
+            />
+          </FormField>
+          <IconDiverMini class="my-[12px]" />
+          <!-- wallet address -->
+          <FormField :label="$t('iscn.meta.creator.wallet.title')">
+            <TextField
+              v-model="authorWalletAddress"
+              :placeholder="$t('iscn.meta.creator.wallet')"
+            />
+          </FormField>
+          <!-- url -->
+          <FormField :label="$t('iscn.meta.creator.url')">
+            <TextField
+              v-model="authorUrl"
+              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+            />
+          </FormField>
+          <!-- submit btn -->
+          <div class="flex flex-row self-end">
+            <Button
+              type="button"
+              size="small"
+              preset="secondary"
+              content-class="font-semibold"
+              :text="$t('UploadForm.button.confirm')"
+              @click.prevent="confirmAuthorChange"
+            />
+            <Button
+              v-if="activeEditingAuthorIndex >= 0"
+              class="ml-[8px]"
+              type="button"
+              size="small"
+              preset="tertiary"
+              @click="deleteAuthor"
+            >
+              <IconDelete />
+            </Button>
+          </div>
+        </Card>
+      </Dialog>
+    </Card>
   </div>
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
+import BigNumber from 'bignumber.js'
+import debounce from 'lodash.debounce'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
-import { Author } from '~/types/author';
+import { Author } from '~/types/author'
 
-import { signISCNTx, estimateISCNTxGas, estimateISCNTxFee } from '~/utils/cosmos/iscn/sign';
-import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn';
-import IPFSClient from '~/utils/ipfs';
-import { getAccountBalance } from '~/utils/cosmos';
+import {
+  signISCNTx,
+  estimateISCNTxGas,
+  estimateISCNTxFee,
+} from '~/utils/cosmos/iscn/sign'
+import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn'
+import IPFSClient from '~/utils/ipfs'
+import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
 
 @Component
-export default class IscnRegisterForm extends Vue{
+export default class IscnRegisterForm extends Vue {
   @Prop({ default: false }) readonly isImage!: boolean
-  @Prop({ default: null }) readonly exifInfo: any|null|undefined
-  @Prop({ default: null }) readonly fileBlob: Blob|null|undefined
-  @Prop({ default: null }) readonly fileData: string|null|undefined
+  @Prop({ default: null }) readonly exifInfo: any | null | undefined
+  @Prop({ default: null }) readonly fileBlob: Blob | null | undefined
+  @Prop({ default: null }) readonly fileData: string | null | undefined
   @Prop(String) readonly fileSHA256!: string
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
 
-  authors: Author[] = [];
-  title: string = '';
-  description: string = '';
-  tagsString: string = '';
-  url: string = '';
-  license: string = '';
-  authorName: string = '';
-  authorUrl: string = '';
-  uploadStatus: string = '';
-  uploadIpfsHash: string = this.ipfsHash;
-
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
-  get tags(): string[] {
-    return (this.tagsString as string).split(',');
+  authors: Author[] = []
+  name: string = ''
+  description: string = ''
+  tags: string[] = []
+  url: string = ''
+  license: string = ''
+  authorName: string = ''
+  authorUrl: string = ''
+  authorWalletAddress: string = ''
+  uploadStatus: string = ''
+  uploadIpfsHash: string = this.ipfsHash
+  error: string = ''
+
+  totalFee: any = 0
+  balance: any = 0
+  debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
+
+  isOpenFileInfoDialog = false
+  isOpenAuthorDialog = false
+  activeEditingAuthorIndex = -1
+
+  get tagsString(): string {
+    return this.tags.join(',')
   }
 
   get authorNames() {
-    return this.authors.map(a => a.name);
+    return this.authors.map((a) => a.name)
   }
 
   get authorUrls() {
-    return this.authors.map(a => a.url);
+    return this.authors.map((a) => a.url)
+  }
+
+  get authorWalletAddresses() {
+    return this.authors.map((a) => a.wallet)
   }
 
   get isPhoto() {
-    return this.exifInfo && this.exifInfo.ExifImageWidth;
+    return this.exifInfo && this.exifInfo.ExifImageWidth
   }
 
   get type() {
-    if (this.isPhoto) return 'Photo';
-    if (this.isImage) return 'Image';
-    return 'CreativeWorks';
+    if (this.isPhoto) return 'Photo'
+    if (this.isImage) return 'Image'
+    return 'CreativeWork'
   }
 
-  get ipfsUrl() {
-    return this.ipfsHash ? `ipfs://${this.ipfsHash}` : '';
+  get formattedIpfs() {
+    return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
   }
 
-  get arweaveUrl() {
-    return this.arweaveId ? `ar://${this.arweaveId}` : '';
+  get formattedArweave() {
+    return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.arweaveId })
   }
 
-  mounted() {
-    this.uploadStatus = '';
+  get errorMsg() {
+    switch (this.error) {
+      case 'INSUFFICIENT_BALANCE':
+        return this.$t('IscnRegisterForm.error.insufficient')
+      case 'MISSING_SIGNER':
+        return this.$t('IscnRegisterForm.error.missingSigner')
+      default:
+        return ''
+    }
   }
 
-  onClickAddAuthor() {
-    this.authors.push({ name: '', url: '' });
+  get formattedRegisterFee() {
+    return this.$t('IscnRegisterForm.register.fee', { fee: this.totalFee })
   }
 
-  async onSubmit(): Promise<void> {
-    if (!this.arweaveId) await this.submitToIPFS();
-    await this.submitToISCN();
-  }
-
-  async submitToIPFS(): Promise<void> {
-    if (!this.fileBlob) return
-    this.uploadStatus = "Uploading";
-    const res = await IPFSClient.add(this.fileBlob);
-    if (res.path) this.uploadIpfsHash = res.path;
-  }
-
-  async submitToISCN(): Promise<void> {
-    this.uploadStatus = "Loading";
-    const payload = {
+  get payload() {
+    return {
       type: this.type,
-      title: this.title,
+      name: this.name,
       description: this.description,
       tagsString: this.tagsString,
       url: this.url,
@@ -174,22 +411,103 @@ export default class IscnRegisterForm extends Vue{
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
-    };
-    const [balance, iscnFeeNanolike] = await Promise.all([
-      getAccountBalance(this.address),
-      estimateISCNTxFee(payload),
-    ]);
-    const gasFee = estimateISCNTxGas();
-    const totalFee = new BigNumber(iscnFeeNanolike).plus(gasFee.amount[0].amount).shiftedBy(-9);
-    if (new BigNumber(balance).lt(totalFee)) {
-      throw new Error('INSUFFICIENT_BALANCE');
+      authorWallets: this.authorWalletAddresses,
+      cosmosWallet: this.address,
     }
-    if (!this.signer) throw new Error('MISSING_SIGNER');
-    this.uploadStatus = "Waiting for signature";
-    const tx = await signISCNTx(payload, this.signer, this.address);
-    this.uploadStatus = "Success";
-    this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx));
+  }
+
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateTotalFee()
+  }
+
+  mounted() {
+    this.uploadStatus = ''
+    this.calculateTotalFee()
+  }
+
+  editAuthor(index: number) {
+    const { name, wallet, url } = this.authors[index]
+    this.authorName = name
+    this.authorWalletAddress = wallet
+    this.authorUrl = url
+    this.activeEditingAuthorIndex = index
+    this.isOpenAuthorDialog = true
+  }
+
+  dismissAuthorDialog() {
+    this.isOpenAuthorDialog = false
+    this.activeEditingAuthorIndex = -1
+    this.authorName = ''
+    this.authorUrl = ''
+    this.authorWalletAddress = ''
+  }
+
+  deleteAuthor() {
+    this.authors.splice(this.activeEditingAuthorIndex, 1)
+    this.dismissAuthorDialog()
+  }
+
+  confirmAuthorChange() {
+    const newAuthor = {
+      name: this.authorName,
+      wallet: this.authorWalletAddress,
+      url: this.authorUrl,
+    }
+    if (this.activeEditingAuthorIndex >= 0) {
+      this.authors.splice(this.activeEditingAuthorIndex, 1, newAuthor)
+    } else {
+      this.authors.push(newAuthor)
+    }
+    this.dismissAuthorDialog()
+  }
+
+  async calculateTotalFee(): Promise<void> {
+    const [
+      balance,
+      iscnFeeNanolike,
+      iscnGasEstimation,
+    ] = await Promise.all([
+      getAccountBalance(this.address),
+      estimateISCNTxFee(this.payload),
+      estimateISCNTxGas(this.payload),
+    ])
+    this.balance = balance
+    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
+    this.totalFee = new BigNumber(iscnFeeNanolike)
+      .plus(iscnGasNanolike)
+      .shiftedBy(-9)
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.arweaveId && !this.isIPFSLink) await this.submitToIPFS();
+    await this.submitToISCN()
+  }
+
+  async submitToIPFS(): Promise<void> {
+    if (!this.fileBlob) return
+    this.uploadStatus = 'Uploading'
+    const res = await IPFSClient.add(this.fileBlob)
+    if (res.path) this.uploadIpfsHash = res.path
+  }
+
+  async submitToISCN(): Promise<void> {
+    this.uploadStatus = 'Loading'
+    await this.calculateTotalFee()
+    if (new BigNumber(this.balance).lt(this.totalFee)) {
+      this.error = 'INSUFFICIENT_BALANCE'
+      this.uploadStatus = ''
+      return
+    }
+    if (!this.signer) {
+      this.error = 'MISSING_SIGNER'
+      this.uploadStatus = ''
+      return
+    }
+    this.uploadStatus = 'Waiting for signature'
+    const tx = await signISCNTx(this.payload, this.signer, this.address)
+    this.uploadStatus = 'Success'
+    this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx))
   }
 }
-
 </script>
