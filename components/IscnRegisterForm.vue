@@ -44,7 +44,6 @@
         class="
           flex
           w-[584px]
-          h-[196px]
           flex-row
           justify-start
           items-center
@@ -55,7 +54,14 @@
           text-medium-gray
         "
       >
-        <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+        <div class="flex justify-center w-[138px] max-h-[150px] mr-[16px]">
+          <img
+            v-if="isImage"
+            class="object-contain rounded-[8px]"
+            :src="fileData"
+          />
+          <IconFile v-else class="text-dark-gray" />
+        </div>
         <div class="flex flex-col justify-start">
           <Label
             class="w-min mb-[16px]"
@@ -71,6 +77,7 @@
             </template>
           </Label>
           <Button
+            v-if="exifInfo"
             type="button"
             :text="$t('UploadForm.view.file.button')"
             preset="outline"
@@ -96,7 +103,7 @@
         preset="custom"
       >
         <MetadataCard
-          class="max-w-[280px] max-h-[65vh] overflow-y-scroll"
+          class="w-[616px] max-h-[65vh] overflow-y-scroll"
           :img-src="fileData"
           :data="exifInfo"
         />
