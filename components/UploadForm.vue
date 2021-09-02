@@ -67,7 +67,6 @@
             <input
               ref="imageFile"
               class="hidden"
-              accept="image/*,audio/*,video/*,.doc,.docx,.pdf,txt,"
               type="file"
               @change="onFileUpload"
             />
