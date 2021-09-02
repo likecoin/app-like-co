@@ -92,7 +92,7 @@
         class="mb-[12px]"
       >
         <ContentFingerprintLink v-if="ipfsHash" :item="ipfs" />
-        <ContentFingerprintLink v-if="arweaveId" :item="arweave" />
+        <ContentFingerprintLink v-if="arweaveId" :item="arweaveURI" />
       </FormField>
     </Card>
   </div>
@@ -147,7 +147,7 @@ export default class IscnUploadedInfo extends Vue {
     return `ipfs://${this.ipfsHash}`
   }
 
-  get arweave() {
+  get arweaveURI() {
     return `ar://${this.arweaveId}`;
   }
 

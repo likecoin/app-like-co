@@ -60,10 +60,10 @@ export default class NewIndexPage extends Vue {
     fileBlob,
     exifInfo,
   }: {
-    ipfsHash: string,
-    arweaveId: string,
-    fileData: string,
-    fileSHA256: string,
+    ipfsHash: string;
+    arweaveId: string;
+    fileData: string;
+    fileSHA256: string;
     isImage: boolean;
     fileBlob: Blob | null;
     exifInfo: any;

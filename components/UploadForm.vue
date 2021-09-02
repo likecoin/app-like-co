@@ -111,7 +111,7 @@
               type="submit"
               :preset="submitBtnClasses"
               :is-disabled="!isImage"
-              >{{ uploadStatus || $t('UploadForm.button') }} }}
+              >{{ uploadStatus || $t('UploadForm.button') }}
               <template #append>
                 <IconArrowRight />
               </template>
