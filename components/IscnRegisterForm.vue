@@ -54,14 +54,7 @@
           text-medium-gray
         "
       >
-        <div class="flex justify-center w-[138px] max-h-[150px] mr-[16px]">
-          <img
-            v-if="isImage"
-            class="object-contain rounded-[8px]"
-            :src="fileData"
-          />
-          <IconFile v-else class="text-dark-gray" />
-        </div>
+        <Previewer :is-image="isImage" :file-data="fileData" />
         <div class="flex flex-col justify-start">
           <Label
             class="w-min mb-[16px]"
@@ -201,13 +194,7 @@
             <div class="font-normal text-[16px] leading-[22px]">
               {{ address }}
             </div>
-            <!-- <div class="font-semibold">
-              {{ $t('iscn.meta.register.placeholder') }}
-            </div> -->
           </FormField>
-          <!-- <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
-            {{ $t('iscn.meta.version.placeholder') }}
-          </FormField> -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div class="flex flex-col">
