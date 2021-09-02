@@ -1,7 +1,7 @@
 <template>
   <Portal
     v-if="isOpen"
-    to="dialog"
+    to="snackbar"
   >
     <div :class="rootClasses">
       <div
