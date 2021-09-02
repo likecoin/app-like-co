@@ -220,7 +220,8 @@ export default class UploadForm extends Vue {
         if (this.isImage) {
           try {
             this.exifInfo = await exifr.parse(files[0])
-          } catch (exifInfo) {
+          } catch (err) {
+            console.error(err)
             this.exifInfo = null
           }
         } else {
