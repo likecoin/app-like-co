@@ -348,6 +348,21 @@ export default class IscnRegisterForm extends Vue {
   isOpenWarningSnackbar = false
   activeEditingAuthorIndex = -1
 
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateTotalFee()
+  }
+
+  @Watch('error')
+  showWarning(errormsg: any) {
+    if (errormsg) this.isOpenWarningSnackbar = true
+  }
+
+  mounted() {
+    this.uploadStatus = ''
+    this.calculateTotalFee()
+  }
+
   get tagsString(): string {
     return this.tags.join(',')
   }
@@ -410,22 +425,6 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  @Watch('payload', { immediate: true, deep: true })
-  change() {
-    this.debouncedCalculateTotalFee()
-  }
-
-  @Watch('error')
-  showWarning(errormsg:any){
-    if(errormsg)
-    this.isOpenWarningSnackbar = true
-  }
-
-  mounted() {
-    this.uploadStatus = ''
-    this.calculateTotalFee()
-  }
-
   editAuthor(index: number) {
     const { name, wallet, url } = this.authors[index]
     this.authorName = name
@@ -480,7 +479,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
-    this.error=''
+    this.error = ''
     if (!this.isIPFSLink) await this.submitToIPFS()
     await this.submitToISCN()
   }
