@@ -41,7 +41,7 @@
         <!-- upload field__upload -->
         <form @submit.prevent="onSubmit">
           <form
-            v-if="!isImage"
+            v-if="!ipfsHash"
             :class="formClasses"
             @drop.prevent="onFileUpload"
             @dragover.prevent="
@@ -67,17 +67,13 @@
             <input
               ref="imageFile"
               class="hidden"
-              accept="image/*"
               type="file"
               @change="onFileUpload"
             />
           </form>
           <!-- upload field__Submit  -->
           <div v-else :class="formClasses">
-            <div class="flex justify-center w-[138px] max-h-[150px] mr-[16px]">
-              <img class="object-contain rounded-[8px]" :src="fileData" />
-            </div>
-            <!-- <img class="w-[138px] max-h-[150px] object-contain mr-[16px] rounded-[8px]" :src="fileData" /> -->
+            <Previewer :is-image="isImage" :file-data="fileData" />
             <div class="flex flex-col items-stretch justify-start">
               <Label :text="fileName" class="font-semibold text-dark-gray" />
               <Label
@@ -100,17 +96,10 @@
           </div>
           <!-- Publish btn -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
-            <!-- Hide for now
-            <Label
-              v-if="isImage"
-              text="Est.Fee:~123.123 Like"
-              class="mx-[24px]"
-            />
-            -->
             <Button
               type="submit"
               :preset="submitBtnClasses"
-              :is-disabled="!isImage"
+              :is-disabled="!ipfsHash"
               >{{ uploadStatus || $t('UploadForm.button') }}
               <template #append>
                 <IconArrowRight />
@@ -167,10 +156,9 @@ export default class UploadForm extends Vue {
     return [
       'flex',
       'w-[584px]',
-      'h-[196px]',
       {
-        'flex-row justify-start': this.isImage,
-        'flex-col justify-center': !this.isImage,
+        'flex-row justify-start': this.ipfsHash,
+        'h-[196px] flex-col justify-center': !this.ipfsHash,
       },
       'items-center',
       'p-[32px]',
@@ -184,15 +172,15 @@ export default class UploadForm extends Vue {
   }
 
   get submitBtnClasses() {
-    return this.isImage ? 'secondary' : 'outline'
+    return this.ipfsHash ? 'secondary' : 'outline'
   }
 
   get stepText() {
-    return this.isImage ? 'Step 2/4' : 'Step 1/4'
+    return this.ipfsHash ? 'Step 2/4' : 'Step 1/4'
   }
 
   get stepNum() {
-    return this.isImage ? 2 : 1
+    return this.ipfsHash ? 2 : 1
   }
 
   get size() {
@@ -233,7 +221,12 @@ export default class UploadForm extends Vue {
         // eslint-disable-next-line prefer-destructuring
         this.fileBlob = files[0]
         if (this.isImage) {
-          this.exifInfo = await exifr.parse(files[0])
+          try {
+            this.exifInfo = await exifr.parse(files[0])
+          } catch (err) {
+            console.error(err)
+            this.exifInfo = null
+          }
         } else {
           this.exifInfo = null
         }

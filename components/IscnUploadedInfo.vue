@@ -11,7 +11,7 @@
         <IconArrowLeft />
       </template>
     </Button>
-    <Card :has-padding="false" set-padding-classes="p-[32px]">
+    <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <div class="flex flex-row items-start justify-between">
         <Label

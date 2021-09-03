@@ -44,7 +44,6 @@
         class="
           flex
           w-[584px]
-          h-[196px]
           flex-row
           justify-start
           items-center
@@ -55,7 +54,7 @@
           text-medium-gray
         "
       >
-        <img class="w-[138px] mr-[16px] rounded-[8px]" :src="fileData" />
+        <Previewer :is-image="isImage" :file-data="fileData" />
         <div class="flex flex-col justify-start">
           <Label
             class="w-min mb-[16px]"
@@ -71,6 +70,7 @@
             </template>
           </Label>
           <Button
+            v-if="exifInfo"
             type="button"
             :text="$t('UploadForm.view.file.button')"
             preset="outline"
@@ -97,7 +97,7 @@
         preset="custom"
       >
         <MetadataCard
-          class="max-w-[280px] max-h-[65vh] overflow-y-scroll"
+          class="w-[616px] max-h-[65vh] overflow-y-scroll"
           :img-src="fileData"
           :data="exifInfo"
         />
@@ -195,13 +195,7 @@
             <div class="font-normal text-[16px] leading-[22px]">
               {{ address }}
             </div>
-            <!-- <div class="font-semibold">
-              {{ $t('iscn.meta.register.placeholder') }}
-            </div> -->
           </FormField>
-          <!-- <FormField :label="$t('iscn.meta.version')" class="mb-[12px]">
-            {{ $t('iscn.meta.version.placeholder') }}
-          </FormField> -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div class="flex flex-col">
