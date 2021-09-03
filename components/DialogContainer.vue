@@ -1,6 +1,12 @@
 <template>
-  <PortalTarget
-    name="dialog"
-    multiple
-  />
+  <div>
+    <PortalTarget
+      name="dialog"
+      multiple
+    />
+    <PortalTarget
+      name="snackbar"
+      multiple
+    />
+  </div>
 </template>
