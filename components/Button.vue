@@ -4,6 +4,7 @@
     :class="rootClasses"
     :to="to || null"
     :disabled="isDisabled"
+    :target="$attrs.href ? '_blank' : null"
     v-on="$listeners"
   >
     <Label
