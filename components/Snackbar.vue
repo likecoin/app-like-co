@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, ModelSync } from 'vue-property-decorator'
+import { Vue, Component, Prop, ModelSync, Watch } from 'vue-property-decorator'
 
 export enum Preset {
   warn = 'warn',
@@ -50,6 +50,9 @@ export default class Snackbar extends Vue {
 
   // Preset of the Snackbar
   @Prop(String) readonly preset!: string
+
+  // Set timeout to close the Snackbar
+  @Prop(Number) readonly timeout!: number
 
   // Class of the content wrapper
   @Prop([
@@ -75,6 +78,13 @@ export default class Snackbar extends Vue {
   // Show/Hide dialog.
   @ModelSync('open', 'toggle', { type: Boolean, default: false })
   isOpen!: boolean
+
+  @Watch('isOpen')
+  timeOut() {
+    if(this.timeout){
+      setTimeout(()=>{this.close()},this.timeout)
+    }
+  }
 
   get rootClasses() {
     return [
