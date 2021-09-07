@@ -93,6 +93,15 @@
       >
         <ContentFingerprintLink :item="ipfs" />
       </FormField>
+      <IconDiverMini class="mb-[24px]" />
+      <FormField
+        :label="$t('iscn.meta.transaction')"
+        class="mb-[12px]"
+      >
+        <Link :href="`https://node.iscn-dev-2.like.co/txs/${iscnHash}`">
+          {{ iscnHash }}
+        </Link>
+      </FormField>
     </Card>
   </div>
 </template>
