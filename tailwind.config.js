@@ -1,3 +1,5 @@
+const aspectRatio = require('@tailwindcss/aspect-ratio')
+
 module.exports = {
   mode: 'jit',
   theme: {
@@ -24,5 +26,12 @@ module.exports = {
     boxShadow: {
       popup: '2px 4px 8px rgba(0, 0, 0, 0.25)',
     },
+    fontFamily: {
+      'mono': [
+        'PT Mono',
+        'monospace',
+      ],
+    },
   },
+  plugins: [aspectRatio],
 }

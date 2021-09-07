@@ -4,6 +4,7 @@
     <div
       :class="[
         'fixed',
+        'z-10',
         'top-0',
         'inset-x-0',
         'py-[24px]',

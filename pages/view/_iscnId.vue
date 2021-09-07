@@ -22,10 +22,20 @@
       ]"
     >
       <div class="mr-[32px]">
-        <MetadataCard :img-src="imgSrc" class="w-[280px]" />
+        <ClientOnly>
+          <IscnCard
+            :key="record.id"
+            :record="record"
+          />
+        </ClientOnly>
+        <MetadataCard
+          v-if="imgSrc"
+          :img-src="imgSrc"
+          class="w-[280px] mt-[16px]"
+        />
       </div>
       <div>
-        <InfoCard :label-text="type" :time-stamp="record.recordTimestamp">
+        <InfoCard :label-text="type" :time-stamp="recordData.recordTimestamp">
           <template #icon>
             <ISCNTypeIcon :type="type" />
           </template>
@@ -69,7 +79,7 @@
             class="mb-[12px]"
           >
             <ContentFingerprintLink
-              v-for="item in record.contentFingerprints"
+              v-for="item in recordData.contentFingerprints"
               :key="item.key"
               :item="item"
               class="mb-[8px] break-all text-[14px]"
@@ -366,11 +376,15 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get record() {
-    return this.getISCNById(this.iscnId)?.data
+    return this.getISCNById(this.iscnId)
+  }
+
+  get recordData() {
+    return this.record?.data
   }
 
   get metadata() {
-    return this.record && (this.record as any).contentMetadata
+    return this.recordData && this.recordData.contentMetadata
   }
 
   get type() {
@@ -393,7 +407,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get stakeholders() {
-    return this.record.stakeholders
+    return this.recordData.stakeholders
   }
 
   get transactionsURL() {

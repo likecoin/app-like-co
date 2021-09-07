@@ -1,20 +1,11 @@
 <template>
   <div class="w-min">
-    <div
-      class="
-        flex
-        w-[220px]
-        h-[440px]
-        justify-center
-        items-center
-        mb-[16px]
-        rounded-[24px]
-        bg-shade-gray
-        text-white
-      "
-    >
-      ISCN Card
-    </div>
+    <ClientOnly>
+      <IscnCard
+        :record="record"
+        class="mb-[16px]"
+      />
+    </ClientOnly>
     <Label
       class="w-min mb-[16px]"
       :text="metadata['@type']"
