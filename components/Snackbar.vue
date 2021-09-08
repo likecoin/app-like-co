@@ -52,7 +52,7 @@ export default class Snackbar extends Vue {
   @Prop(String) readonly preset!: string
 
   // Set timeout to close the Snackbar
-  @Prop(Number) readonly timeout!: number
+  @Prop({ default: 0 }) readonly timeout!: number
 
   // Class of the content wrapper
   @Prop([
@@ -81,8 +81,10 @@ export default class Snackbar extends Vue {
 
   @Watch('isOpen')
   timeOut() {
-    if(this.timeout){
-      setTimeout(()=>{this.close()},this.timeout)
+    if (this.timeout) {
+      setTimeout(() => {
+        this.close()
+      }, this.timeout)
     }
   }
 
