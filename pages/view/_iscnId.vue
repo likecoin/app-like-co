@@ -52,6 +52,9 @@
             <Label :text="owner" tag="div" preset="p6" />
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
+            <Link class="text-[14px]" :href="transactionsURL">
+              {{ txHash }}
+            </Link>
           </FormField>
           <IconDiverMini class="my-[12px]" />
           <FormField
@@ -78,7 +81,7 @@
               v-for="item in keywords"
               :key="item.key"
               :text="item"
-              class="mr-[8px]"
+              class="mr-[8px] mb-[4px]"
             />
           </FormField>
         </InfoCard>
@@ -137,7 +140,7 @@
             type="button"
             content-class="font-medium ml-[-4px]"
             prepend-class="font-bold"
-            :href="`https://node.iscn-dev-2.like.co/txs/`"
+            :href="rawDataURL"
           >
             <template #prepend>
               <IconInfo />
@@ -180,7 +183,7 @@
                 :label="$t('iscn.meta.stakeholders.likerId')"
                 class="w-[50%] my-[12px]"
               >
-                <Link :href="`https://liker.land/${stakeholderInfo.likerId}`">{{
+                <Link :href="likerIdURL">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>
@@ -243,8 +246,14 @@ import { namespace } from 'vuex-class'
 
 import { isCosmosTransactionHash } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
-import { ISCN_PREFIX } from '~/constant'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import {
+  LIKER_LAND_URL,
+  ISCN_PREFIX,
+  BIG_DIPPER_TRANSACTIONS,
+  RAWDATA_URL_PRODUCTION,
+  RAWDATA_URL_STAGING,
+} from '~/constant'
 
 const iscnModule = namespace('iscn')
 
@@ -269,6 +278,8 @@ export enum ErrorMessage {
 export default class ViewIscnIdPage extends Vue {
   owner = ''
   iscnId = ''
+  txHash = ''
+  url = ''
   isOpenAuthorDialog = false
   isOpenCopiedAlert = false
   stakeholderInfo = {
@@ -299,6 +310,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
+    this.txHash = await this.fetchTxHash()
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
       if (!isCosmosTransactionHash(param)) {
@@ -357,6 +369,33 @@ export default class ViewIscnIdPage extends Vue {
 
   get stakeholders() {
     return this.record.stakeholders
+  }
+
+  get likerIdURL(){
+     return LIKER_LAND_URL + this.stakeholderInfo.likerId
+  }
+
+  get transactionsURL() {
+    return BIG_DIPPER_TRANSACTIONS + this.txHash
+  }
+
+  get rawDataURL(){
+    return this.url + this.iscnId
+  }
+
+  async fetchTxHash() {
+    let txHash = await fetch(RAWDATA_URL_PRODUCTION + this.iscnId)
+      .then((res) => res.json())
+    if (!txHash.txs) {
+      txHash = await fetch(RAWDATA_URL_STAGING + this.iscnId)
+        .then((res) => res.json())
+        .then((res) => res.txs[0].txhash)
+      this.url = RAWDATA_URL_STAGING
+    } else {
+      this.url = RAWDATA_URL_PRODUCTION
+      return txHash.txs[0].txhash
+    }
+    return txHash
   }
 
   showStakeholder(index: number) {
