@@ -98,7 +98,7 @@
         :label="$t('iscn.meta.transaction')"
         class="mb-[12px]"
       >
-        <Link :href="`https://node.iscn-dev-2.like.co/txs/${iscnHash}`">
+        <Link :href="transactionsURL">
           {{ iscnHash }}
         </Link>
       </FormField>
@@ -113,6 +113,10 @@ import { namespace } from 'vuex-class'
 import { getIPFSURLFromHash } from '~/utils/ipfs'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
+
+import {
+  BIG_DIPPER_TRANSACTIONS,
+} from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -154,6 +158,10 @@ export default class IscnUploadedInfo extends Vue {
   get ipfs() {
     return `ipfs://${this.ipfsHash}`
   }
+
+   get transactionsURL(){
+     return BIG_DIPPER_TRANSACTIONS + this.iscnHash
+   }
 
   async mounted() {
     this.records = await this.queryISCNByAddress(this.currentAddress)
