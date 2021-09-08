@@ -7263,6 +7263,11 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
+easyqrcodejs@^4.4.6:
+  version "4.4.6"
+  resolved "https://registry.yarnpkg.com/easyqrcodejs/-/easyqrcodejs-4.4.6.tgz#3f6c6b4b97e5b9a2a20620fd1c03be96e941761c"
+  integrity sha512-LP24ScT1io86Sv6Cp1rKLCDBmSRBbnqWsF32qfykWV3ojW6iVUN2paaiaUy5tjJ/dAw+YCJ/qkrfy7MrAihY/A==
+
 editorconfig@^0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-0.15.3.tgz#bef84c4e75fb8dcb0ce5cee8efd51c15999befc5"
