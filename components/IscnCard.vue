@@ -1,13 +1,6 @@
 <template>
-  <div
-    :class="[
-      'bg-white',
-      'rounded-[24px]',
-      'text-like-green',
-      'overflow-hidden',
-    ]"
-  >
-    <div class="relative min-w-[220px] aspect-w-1 aspect-h-2">
+  <div :class="rootClasses">
+    <div :class="containerClasses">
       <div
         :key="encodedIDInHex"
         ref="canvas"
@@ -24,12 +17,15 @@
           'rounded-[24px]',
         ]"
       />
-      <div class="absolute inset-0 flex justify-between">
+      <div class="absolute inset-0 flex items-center justify-between">
         <div
           :class="labelClasses"
           style="writing-mode: vertical-lr"
         >
           {{ labelTextLeft }}
+        </div>
+        <div :class="qrCodeWrapperClasses">
+          <div ref="qrcode" class="qrcode" />
         </div>
         <div
           :class="labelClasses"
@@ -45,9 +41,11 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import P5 from 'p5'
+import QRCode from 'easyqrcodejs'
 
-function easeOutExpo(x: number): number {
-  return x === 1 ? 1 : 1 - 2 ** (-10 * x)
+function defaultEasingFunction(x: number): number {
+  // Ease Out Cubic
+  return 1 - (1 - x) ** 3
 }
 
 interface ShapeConfig {
@@ -63,6 +61,13 @@ interface ShapeConfig {
 
 @Component
 export default class IscnCard extends Vue {
+  static baseWidth = 220
+  static qrCodeSize = 112
+  static qrCodeColor = '#333'
+  static qrCodeLogoSize = 22
+  static qrCodeLogoQuietZoneSize = 4
+  static qrCodePositionZoneColor = '#343434'
+
   /**
    * The ISCN record
    */
@@ -79,23 +84,63 @@ export default class IscnCard extends Vue {
   @Prop({ default: 10 }) readonly colorMultiplier!: number
 
   /**
-   * Animation duration in frame. Default is 120 frames.
+   * Set to true to show stunning mounting animation.
    */
-  @Prop({ default: 120 }) readonly animationDuration!: number
+  @Prop({ default: false }) readonly isAnimated!: boolean
 
   /**
-   * Easing function of the animation. Default is ease out expo.
+   * Animation duration in frame. Default is 80 frames.
    */
-  @Prop({ default: () => easeOutExpo }) readonly easingFunction!: (x: number) => number
+  @Prop({ default: 80 }) readonly animationDuration!: number
+
+  /**
+   * Easing function of the animation. Default is ease out cubic.
+   */
+  @Prop({ default: () => defaultEasingFunction }) readonly easingFunction!: (x: number) => number
 
   canvas: P5 | undefined
 
+  qrcode: QRCode | undefined
+
+  isQRCodeRendering = true
+
+  get recordID() {
+    return this.record?.id || ''
+  }
+
   get encodedIDInHex() {
-    if (!this.record) return ''
-    const id = this.record.id || ''
-    const matches = id.match(/iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+)\/\d+/)
+    const matches = this.recordID.match(/iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+)\/\d+/)
     if (!matches || !matches[1]) return ''
     return Buffer.from(matches[1]).toString('hex')
+  }
+
+  get rootClasses() {
+    const isShowLoadingIndicator = !this.isAnimated && this.isQRCodeRendering
+    return [
+      isShowLoadingIndicator ? 'bg-shade-gray' : 'bg-white',
+      'rounded-[24px]',
+      'text-like-green',
+      'overflow-hidden',
+      {
+        'animate-pulse': isShowLoadingIndicator,
+      },
+    ]
+  }
+
+  get containerClasses() {
+    return [
+      'relative',
+      'min-w-[220px]',
+      'aspect-w-1',
+      'aspect-h-2',
+      'transition',
+      'transition-all',
+      this.isAnimated ? 'duration-1000' : 'duration-500',
+      'ease-out',
+      this.isAnimated && this.isQRCodeRendering ? 'scale-125' : 'scale-100',
+      !this.isAnimated && this.isQRCodeRendering ? 'blur-3xl' : 'blur-none',
+      !this.isAnimated && this.isQRCodeRendering ? 'opacity-0' : 'opacity-100',
+    ]
   }
 
   get labelClasses() {
@@ -114,7 +159,7 @@ export default class IscnCard extends Vue {
   }
 
   get labelTextLeft() {
-    return this.record ? this.record.id : ''
+    return this.recordID
   }
 
   get labelTextRight() {
@@ -129,9 +174,22 @@ export default class IscnCard extends Vue {
     return `${type} ${timestamp} ${version ? 'Version ' : ''}${version}`
   }
 
+  get qrCodeWrapperClasses() {
+    return [
+      'rounded-[4px]',
+      'bg-white',
+      'mix-blend-luminosity',
+      'transition',
+      'transition-all',
+      'duration-700',
+      'ease-out',
+      this.isAnimated && this.isQRCodeRendering ? 'scale-50' : 'scale-100',
+      this.isAnimated && this.isQRCodeRendering ? 'opacity-0' : 'opacity-80',
+    ]
+  }
+
   mounted() {
-    // HACK: To fix canvas not responsive issue
-    setTimeout(this.sketchGraph, 100)
+    this.sketchGraph()
   }
 
   @Watch('record')
@@ -186,19 +244,17 @@ export default class IscnCard extends Vue {
 
       // eslint-disable-next-line no-param-reassign
       s.setup = () => {
-        const {
-          offsetWidth: width = 0,
-          offsetHeight: height = 0,
-        } = this.$refs.canvas as HTMLElement || {}
+        const { width, height } = this.getCardSize()
         s.createCanvas(width, height)
       }
 
       // Current animation time
-      let t = 0
+      const animationDuration = Math.max(1, this.animationDuration)
+      let t = this.isAnimated ? 0 : animationDuration
 
       // eslint-disable-next-line no-param-reassign
       s.draw = () => {
-        const progress = this.easingFunction(t / this.animationDuration)
+        const progress = this.easingFunction(t / animationDuration)
 
         const shapes: ShapeConfig[] = []
         for (let i = 0; i < firstChunks.length; i += 2) {
@@ -231,7 +287,7 @@ export default class IscnCard extends Vue {
         }
 
         // Scale the shape corresponding to the size of the canvas
-        s.scale(s.width / 220)
+        s.scale(s.width / IscnCard.baseWidth)
 
         s.background(255) // White
         s.noStroke()
@@ -243,7 +299,7 @@ export default class IscnCard extends Vue {
         s.blendMode(s.SCREEN)
         drawShapes({ shapes, shouldFill: false })
 
-        if (t <= this.animationDuration) {
+        if (t <= animationDuration) {
           t += 1
         } else {
           s.noLoop()
@@ -253,9 +309,9 @@ export default class IscnCard extends Vue {
       // eslint-disable-next-line no-param-reassign
       s.windowResized = () => {
         const {
-          offsetWidth: newWidth = 0,
-          offsetHeight: newHeight = 0,
-        } = this.$refs.canvas as HTMLElement || {}
+          width: newWidth,
+          height: newHeight,
+        } = this.getCardSize()
         s.resizeCanvas(newWidth, newHeight)
       }
     }
@@ -263,6 +319,43 @@ export default class IscnCard extends Vue {
     if (!this.canvas) {
       this.canvas = new P5(sketch, this.$refs.canvas as HTMLElement)
     }
+
+    const { width } = this.getCardSize()
+    const qrCodeRatio = width / IscnCard.baseWidth
+    const qrCodeSize = qrCodeRatio * IscnCard.qrCodeSize
+    const qrCodeLogoSize = qrCodeRatio * IscnCard.qrCodeLogoSize
+    const quietZoneSize = qrCodeRatio * IscnCard.qrCodeLogoQuietZoneSize
+    if (!this.qrcode) {
+      this.qrcode = new QRCode(this.$refs.qrcode, {
+        text: this.recordID,
+        width: qrCodeSize,
+        height: qrCodeSize,
+        colorDark: IscnCard.qrCodeColor,
+        colorLight: 'transparent',
+        drawer: 'svg',
+        correctLevel: QRCode.CorrectLevel.H,
+        quietZone: quietZoneSize,
+        PO: IscnCard.qrCodePositionZoneColor,
+        PI: IscnCard.qrCodePositionZoneColor,
+        logo: '/images/iscn-card/logo/portrait.svg',
+        logoWidth: qrCodeLogoSize,
+        logoHeight: qrCodeLogoSize,
+        onRenderingEnd: () => {
+          this.isQRCodeRendering = false
+        },
+      })
+    } else {
+      this.qrcode.makeCode(this.recordID)
+      this.qrcode.resize(qrCodeSize, qrCodeSize)
+    }
+  }
+
+  getCardSize() {
+    const {
+      offsetWidth: width = 0,
+      offsetHeight: height = 0,
+    } = this.$refs.canvas as HTMLElement || {}
+    return { width, height }
   }
 
   handleResize() {
@@ -270,3 +363,11 @@ export default class IscnCard extends Vue {
   }
 }
 </script>
+
+<style>
+/* To make circle dot */
+.qrcode rect[fill="#333"] {
+  rx: 50%;
+  ry: 50%;
+}
+</style>

@@ -25,7 +25,9 @@
         <ClientOnly>
           <IscnCard
             :key="record.id"
+            class="w-[280px]"
             :record="record"
+            :is-animated="true"
           />
         </ClientOnly>
         <MetadataCard
