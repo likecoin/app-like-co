@@ -1,113 +1,28 @@
-import {
-  BroadcastTxSuccess,
-  IndexedTx,
-} from '@cosmjs/stargate';
-import { decodeTxRaw } from '@cosmjs/proto-signing';
-import { IscnRecord, MsgCreateIscnRecord } from "@likecoin/iscn-message-types/dist/iscn/tx";
-import { QueryResponseRecord } from "@likecoin/iscn-message-types/dist/iscn/query";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { OfflineSigner } from '@cosmjs/proto-signing';
+import { ISCNRecord, ISCNSignPayload } from '@likecoin/iscn-js';
+import { signISCN as sign } from './sign';
+import getQueryClient from './query';
+import { getIPFSURLFromHash } from '../../ipfs';
 
-export interface parsedISCNData {
-  stakeholders: any[];
-  contentMetadata: any;
-  recordNotes: string;
-  contentFingerprints: string[];
-}
-export interface parsedISCNRecord {
-  ipld: string;
-  id: string;
-  data: parsedISCNData
-}
-
-function parseISCNRecordFields(record: IscnRecord): parsedISCNData {
-  const {
-    stakeholders,
-    contentMetadata,
-  } = record;
+export async function signISCNTx(
+  tx: ISCNSignPayload,
+  signer: OfflineSigner,
+  address: string,
+) {
+  const client = await getQueryClient();
+  const res = await sign(tx, signer, address);
+  const iscnId = await client.queryISCNIdsByTx(res.transactionHash);
   return {
-    ...record,
-    stakeholders: stakeholders.map((s: Uint8Array) => {
-      if (s) {
-        const sString = Buffer.from(s).toString('utf-8');
-        if (sString) return JSON.parse(sString);
-      }
-      return s;
-    }),
-    contentMetadata: JSON.parse(Buffer.from(contentMetadata).toString('utf-8')),
-  }
-}
-
-export function parseISCNTxInfoFromTxSuccess(tx: BroadcastTxSuccess) {
-  const { transactionHash } = tx;
-  let iscnId;
-  if (tx.rawLog) {
-    const [log] = JSON.parse(tx.rawLog)
-    if (log) {
-      const ev = log.events.find((e: { type: string; }) => e.type === 'iscn_record');
-      if (ev) iscnId = ev.attributes[0].value;
-    }
-  }
-  return {
-    txHash: transactionHash,
     iscnId,
-  }
-}
-
-export function parseISCNTxInfoFromIndexedTx(tx: IndexedTx) {
-  const { tx: txBytes, rawLog } = tx;
-  const decodedTx = decodeTxRaw(txBytes);
-  const messages = decodedTx.body.messages.map((m) => {
-    if (m.typeUrl === '/likechain.iscn.MsgCreateIscnRecord') {
-      const msg = MsgCreateIscnRecord.decode(m.value);
-      if (msg.record) {
-        msg.record = parseISCNRecordFields(msg.record);
-      }
-      return {
-        ...m,
-        value: msg,
-      };
-    }
-    /* Do not handle msg except creat for now */
-    // if (m.typeUrl === '/likechain.iscn.MsgUpdateIscnRecord') {
-    //   const msg = MsgUpdateIscnRecord.decode(m.value);
-    //   if (msg.record) {
-    //     msg.record = parseISCNRecordFields(msg.record);
-    //   }
-    //   return {
-    //     ...m,
-    //     value: msg,
-    //   };
-    // }
-    // if (m.typeUrl === '/likechain.iscn.MsgChangeIscnRecordOwnership') {
-    //   const msg = MsgChangeIscnRecordOwnership.decode(m.value);
-    //   return {
-    //     ...m,
-    //     value: msg,
-    //   };
-    // }
-    return null;
-  });
-
-  return {
-    ...tx,
-    logs: JSON.parse(rawLog),
-    tx : {
-      ...decodedTx,
-      body: {
-        ...decodedTx.body,
-        messages: messages.filter(m => m),
-      },
-    },
+    txHash: res.transactionHash,
   };
 }
 
-export function parseISCNTxRecordFromQuery(records: QueryResponseRecord[]) {
-  return records.map((r): parsedISCNRecord => {
-    const { data, ipld } = r;
-    const parsedData = JSON.parse(Buffer.from(data).toString('utf-8'));
-    return {
-      ipld,
-      id: parsedData['@id'],
-      data: parsedData,
-    }
-  });
+export function getIPFSUrlFromISCN(record: ISCNRecord): string{
+  if (!record) return '';
+  const ipfsUrl = record.data.contentFingerprints.find(f => f.startsWith('ipfs://'));
+  if (!ipfsUrl) return '';
+  const ipfsHash = ipfsUrl.replace('ipfs://','');
+  return getIPFSURLFromHash(ipfsHash);
 }

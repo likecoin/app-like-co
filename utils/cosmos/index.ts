@@ -3,17 +3,15 @@ import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { QueryClient, setupBankExtension, BankExtension, Coin } from "@cosmjs/stargate";
 import BigNumber from 'bignumber.js';
 
-import { setupISCNExtension, ISCNExtension } from "./iscn/ISCNQueryExtension";
 import config from '~/constant/network';
 import { COSMOS_DENOM } from '~/constant';
 
-let queryClient: QueryClient & ISCNExtension & BankExtension;
+let queryClient: QueryClient  & BankExtension;
 
 async function initQueryClient() {
   const tendermintClient = await Tendermint34Client.connect(config.rpcURL);
   queryClient = QueryClient.withExtensions(
     tendermintClient,
-    setupISCNExtension,
     setupBankExtension,
   );
   return queryClient;
