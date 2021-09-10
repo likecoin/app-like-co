@@ -1,4 +1,4 @@
-export interface ISCNSignPayload {
+export interface ISCNRegisterPayload {
   name: string;
   description: string;
   tagsString: string;
