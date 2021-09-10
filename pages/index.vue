@@ -65,14 +65,13 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
-import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 
 const iscnModule = namespace('iscn')
 
 @Component
 export default class IndexPage extends Vue {
-  @iscnModule.Action queryISCNByKeyword!: (arg0: string) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>;
+  @iscnModule.Action queryISCNByKeyword!: (arg0: string) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>;
 
   keyword = '';
   state = 'idle';
@@ -84,7 +83,7 @@ export default class IndexPage extends Vue {
   async onSearch() {
     this.state = 'loading';
     const { keyword } = this
-    const res: parsedISCNRecord[] = await this.queryISCNByKeyword(keyword);
+    const res: ISCNRecordWithID[] = await this.queryISCNByKeyword(keyword);
     if (!res.length) {
       this.state = 'not-found';
     } else {

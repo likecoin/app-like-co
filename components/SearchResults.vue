@@ -20,11 +20,11 @@
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { ISCNRecord } from '@likecoin/iscn-js'
 
 @Component
 export default class SearchResults extends Vue {
-  @Prop(Array) readonly records!: parsedISCNRecord[]
+  @Prop(Array) readonly records!: ISCNRecord[]
 }
 </script>
 

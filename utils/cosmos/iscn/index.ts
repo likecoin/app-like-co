@@ -12,7 +12,7 @@ export async function signISCNTx(
 ) {
   const client = await getQueryClient();
   const res = await sign(tx, signer, address);
-  const iscnId = await client.queryISCNIdsByTx(res.transactionHash);
+  const [iscnId] = await client.queryISCNIdsByTx(res.transactionHash);
   return {
     iscnId,
     txHash: res.transactionHash,
