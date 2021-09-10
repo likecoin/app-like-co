@@ -2,14 +2,14 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
-import { parsedISCNRecord } from '~/utils/cosmos/iscn';
-import {
-  queryRecordsByTx,
-  queryRecordsById,
-  queryRecordsByFingerprint,
-  queryRecordsByOwner,
-} from '~/utils/cosmos/iscn/query';
+import { ISCNRecord } from '@likecoin/iscn-js';
+import getQueryClient from '~/utils/cosmos/iscn/query';
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 
+
+function addIDToRecords(records: ISCNRecord[]): ISCNRecordWithID[] {
+  return records.map(r => ({ id: r.data['@id'] as string, ...r }));
+}
 @Module({
   name: 'iscn',
   stateFactory: true,
@@ -17,18 +17,19 @@ import {
 })
 export default class ISCN extends VuexModule {
   recordsById: {
-    [key: string]: parsedISCNRecord;
+    [key: string]: ISCNRecordWithID;
  } = {};
 
   recordsByIPLD: {
-    [key: string]: parsedISCNRecord;
+    [key: string]: ISCNRecordWithID;
   } = {};
 
   @Mutation
-  setRecords(records: parsedISCNRecord[]) {
+  setRecords(records: ISCNRecord[]) {
     records.forEach((r) => {
-      Vue.set(this.recordsById, r.id, r)
-      Vue.set(this.recordsByIPLD, r.id, r)
+      const id = r.data['@id'] as string;
+      Vue.set(this.recordsById, id, { id, ...r })
+      Vue.set(this.recordsByIPLD, r.ipld, { id, ...r })
     })
   }
 
@@ -40,68 +41,81 @@ export default class ISCN extends VuexModule {
 
   @Action
   async fetchISCNByTx(iscnId: string): Promise<{
-    records: parsedISCNRecord[];
+    records: ISCNRecord[];
 } | null> {
-    const txRes = await queryRecordsByTx(iscnId).catch(() => null);
-    let txRecords: parsedISCNRecord[] = [];
+    const client = await getQueryClient();
+    const txRes = await client.queryISCNIdsByTx(iscnId).catch(() => null);
+    let txRecords: ISCNRecord[] = [];
     if (txRes) {
       txRecords = (await Promise.all(txRes.map(async (t) => {
         if (typeof t ==='string') {
-          const res = await queryRecordsById(t);
+          const res = await client.queryRecordsById(t);
           return res?.records[0]
         }
         return t;
-      }))).filter(t => t) as parsedISCNRecord[];
+      }))).filter(t => t) as ISCNRecord[];
     }
     this.context.commit('setRecords', txRecords);
-    return { records: txRecords };
+    return { records: addIDToRecords(txRecords) };
   }
 
   @Action
   async fetchISCNById(iscnId: string): Promise<{
-    records: parsedISCNRecord[];
+    records: ISCNRecordWithID[];
     owner: string;
     latestVersion: Long.Long;
 } | null> {
-    const res = await queryRecordsById(iscnId).catch(() => null);
+    const client = await getQueryClient();
+    const res = await client.queryRecordsById(iscnId).catch(() => null);
+    if (!res) return null;
     const records = res ? res.records : [];
     this.context.commit('setRecords', records);
-    return res;
+    return {
+      ...res,
+      records: addIDToRecords(records),
+    };
   }
 
   @Action
-  async queryISCNByAddress(address: string): Promise<parsedISCNRecord[]> {
-    const ownerRes = await queryRecordsByOwner(address).catch(() => {})
-    const result: parsedISCNRecord[] = ownerRes ? ownerRes.records : [];
-    this.context.commit('setRecords', result)
-    return result;
+  async queryISCNByAddress(address: string): Promise<ISCNRecordWithID[]> {
+    const client = await getQueryClient();
+    const res = await client.queryRecordsByOwner(address).catch(() => {})
+    const records: ISCNRecord[] = res ? res.records : [];
+    this.context.commit('setRecords', records)
+    return addIDToRecords(records);
   }
 
   @Action
-  async queryISCNByKeyword(keyword: string): Promise<parsedISCNRecord[]> {
-    const [txRes, idRes, fingerprintRes, ownerRes] = await Promise.all([
-      queryRecordsByTx(keyword).catch(() => {}),
-      queryRecordsById(keyword).catch(() => {}),
-      queryRecordsByFingerprint(keyword).catch(() => {}),
-      queryRecordsByOwner(keyword).catch(() => {}),
+  async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
+    const client = await getQueryClient();
+    const [
+      txRes,
+      idRes,
+      fingerprintRes,
+      ownerRes,
+    ] = await Promise.all([
+      client.queryISCNIdsByTx(keyword).catch(() => {}),
+      client.queryRecordsById(keyword).catch(() => {}),
+      client.queryRecordsByFingerprint(keyword).catch(() => {}),
+      client.queryRecordsByOwner(keyword).catch(() => {}),
     ]);
-    let txRecords: parsedISCNRecord[] = [];
+    let txRecords: ISCNRecord[] = [];
     if (txRes) {
       txRecords = (await Promise.all(txRes.map(async (t) => {
         if (typeof t ==='string') {
-          const res = await queryRecordsById(t);
+          const res = await client.queryRecordsById(t);
           return res?.records[0]
         }
         return t;
-      }))).filter(t => t) as parsedISCNRecord[];
+      }))).filter(t => t) as ISCNRecord[];
     }
-    const result: parsedISCNRecord[] = ([] as parsedISCNRecord[])
+    const result: ISCNRecord[] = ([] as ISCNRecord[])
       .concat(txRecords)
       .concat(idRes ? idRes.records : [])
       .concat(fingerprintRes ? fingerprintRes.records : [])
-      .concat(ownerRes ? ownerRes.records : []);
+      .concat(ownerRes ? ownerRes.records : [])
     this.context.commit('setRecords', result)
-    return result;
+    return addIDToRecords(result);
   }
 
   get getISCNById() {

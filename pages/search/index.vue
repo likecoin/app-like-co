@@ -15,15 +15,14 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
-import { parsedISCNRecord } from '~/utils/cosmos/iscn';
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const iscnModule = namespace('iscn')
 
 @Component
 export default class SearchIndexPage extends Vue {
-  @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
-  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<parsedISCNRecord[]>
+  @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
+  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<ISCNRecordWithID[]>
   get iscnIds(): string[] {
     try {
       const ids = JSON.parse(this.$route.params.iscnIds);
@@ -44,7 +43,7 @@ export default class SearchIndexPage extends Vue {
       this.$router.push(this.localeLocation({ name: 'index' })!);
       return;
     }
-    const promises: Promise<parsedISCNRecord[]>[] = [];
+    const promises: Promise<ISCNRecordWithID[]>[] = [];
     iscnIds.forEach((iscnId) => {
       if (!this.getISCNById(iscnId)) {
         promises.push(this.fetchISCNById(iscnId));
