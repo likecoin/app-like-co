@@ -16,7 +16,7 @@
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import SearchResults from '~/components/SearchResults.vue'
-import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -26,12 +26,12 @@ const iscnModule = namespace('iscn')
   components: { SearchResults },
 })
 export default class WorksIndexPageextends extends Vue {
-  records: parsedISCNRecord[] | null = null
+  records: ISCNRecordWithID[] | null = null
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
-  ) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>
+  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   @Watch('currentAddress')
   onCurrentAddressChanged() {

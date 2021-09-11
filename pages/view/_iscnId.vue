@@ -133,9 +133,9 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 import { isCosmosTransactionHash } from '~/utils/cosmos'
-import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn/view'
-import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCN_PREFIX } from '~/constant'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const iscnModule = namespace('iscn')
 
@@ -149,16 +149,16 @@ export default class ViewIscnIdPage extends Vue {
   owner = ''
   iscnId = ''
 
-  @iscnModule.Getter getISCNById!: (arg0: string) => parsedISCNRecord
+  @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
-    records: parsedISCNRecord[]
+    records: ISCNRecordWithID[]
     owner: string
     latestVersion: Long.Long
   } | null>
 
   @iscnModule.Action fetchISCNByTx!: (
     arg0: string
-  ) => Promise<{ records: parsedISCNRecord[] }>
+  ) => Promise<{ records: ISCNRecordWithID[] }>
 
   get record() {
     return this.getISCNById(this.iscnId)?.data

@@ -289,20 +289,17 @@
 </template>
 
 <script lang="ts">
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
 import debounce from 'lodash.debounce'
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author'
 
-import {
-  signISCNTx,
-  estimateISCNTxGas,
-  estimateISCNTxFee,
-} from '~/utils/cosmos/iscn/sign'
-import { parseISCNTxInfoFromTxSuccess } from '~/utils/cosmos/iscn'
+import { signISCNTx } from '~/utils/cosmos/iscn';
+import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import IPFSClient from '~/utils/ipfs'
 import { getAccountBalance } from '~/utils/cosmos'
 
@@ -465,15 +462,15 @@ export default class IscnRegisterForm extends Vue {
   async calculateTotalFee(): Promise<void> {
     const [
       balance,
-      iscnFeeNanolike,
-      iscnGasEstimation,
+      estimation,
     ] = await Promise.all([
       getAccountBalance(this.address),
-      estimateISCNTxFee(this.payload),
-      estimateISCNTxGas(this.payload),
+      esimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
     ])
     this.balance = balance
+    const { iscnFee, gas: iscnGasEstimation } = estimation;
     const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
+    const iscnFeeNanolike = iscnFee.amount[0]
     this.totalFee = new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9)
@@ -506,9 +503,9 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     this.uploadStatus = 'Waiting for signature'
-    const tx = await signISCNTx(this.payload, this.signer, this.address)
+    const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
     this.uploadStatus = 'Success'
-    this.$emit('txBroadcasted', parseISCNTxInfoFromTxSuccess(tx))
+    this.$emit('txBroadcasted', res)
   }
 }
 </script>

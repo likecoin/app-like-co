@@ -103,7 +103,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 import { getIPFSURLFromHash } from '~/utils/ipfs'
-import { parsedISCNRecord } from '~/utils/cosmos/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -123,9 +124,9 @@ export default class IscnUploadedInfo extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
-  ) => parsedISCNRecord[] | PromiseLike<parsedISCNRecord[]>
+  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  records: parsedISCNRecord[] | null = null
+  records: ISCNRecordWithID[] | null = null
   name = ''
   description = ''
 

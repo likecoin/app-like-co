@@ -1,4 +1,6 @@
-export interface ISCNSignPayload {
+import { ISCNRecord } from "@likecoin/iscn-js";
+
+export interface ISCNRegisterPayload {
   name: string;
   description: string;
   tagsString: string;
@@ -12,4 +14,8 @@ export interface ISCNSignPayload {
   authorUrls: string[];
   authorWallets:string[];
   cosmosWallet: string;
+}
+
+export interface ISCNRecordWithID extends ISCNRecord {
+  id: string;
 }
