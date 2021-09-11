@@ -1924,10 +1924,10 @@
     methods "^1.1.2"
     path-to-regexp "^6.1.0"
 
-"@likecoin/iscn-js@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.0.1.tgz#fe7843d7143165e530346ab6f5a34886a86be429"
-  integrity sha512-A2DfobPkHvIXf8re5sl2Hlvw7Wy4Yf1BoTRXF0L41MODej2Aq2MC0gl0ZtgOkmNR7kSrQJIBj1A13MKZlmuhGA==
+"@likecoin/iscn-js@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.0.2.tgz#f1e9e5fb7f1b340ba28f4c604b99a118de7b15b6"
+  integrity sha512-UV0ywmtx5TObOi+14KJld5HGLhmfq8s5L9u4cc+Ys3ApCC2vE2CTGdPoQDwvmjfoV8o0m0u5k4SiC8/R8d5Uug==
   dependencies:
     "@likecoin/iscn-message-types" "^0.0.1"
     bignumber.js "^9.0.1"
