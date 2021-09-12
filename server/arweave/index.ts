@@ -1,5 +1,8 @@
 import Arweave from 'arweave/node';
+import axios from 'axios';
+import BigNumber from 'bignumber.js';
 import { uploadToIPFS } from '../ipfs';
+import { COINGECKO_PRICE_API } from '../constant';
 
 const hash = require('ipfs-only-hash');
 
@@ -24,24 +27,27 @@ export async function getArIdFromHashes(ipfsHash: string) {
     expr2: {
       op: 'equals',
       expr1: IPFS_CONSTRAINT_KEY,
-      expr2: IPFS_CONSTRAINT
-    }
-  })
+      expr2: IPFS_CONSTRAINT,
+    },
+  });
   return res[0] || null;
 }
 
-export async function estimatePrice(data: { mimetype: string; buffer: Buffer; }) {
+export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; }) {
   const { buffer } = data;
   const ipfsHash = await hash.of(buffer)
   const id = await getArIdFromHashes(ipfsHash)
-  if (id) return {
-    AR: 0,
-  }
+  if (id) return '0'
   const transaction = await arweave.createTransaction({ data: buffer }, jwk)
   const { reward } = transaction;
-  return {
-    AR: arweave.ar.winstonToAr(reward),
-  }
+  return arweave.ar.winstonToAr(reward);
+}
+
+export async function converARPriceToLIKE(ar: string, { margin = 0.05 } = {}) {
+  const { data } = await axios.get(COINGECKO_PRICE_API);
+  const { likecoin, arweave: arweavePrice } = data;
+  const res = new BigNumber(ar).multipliedBy(arweavePrice.usd).dividedBy(likecoin.usd).multipliedBy(1 + margin).toFixed();
+  return res;
 }
 
 export async function submitToArweave(data: { mimetype: string; buffer: Buffer; }, ipfsHash: string) {

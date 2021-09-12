@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { estimatePrice, getAreweaveIdFromFile } from '.';
+import { estimateARPrice, converARPriceToLIKE, getAreweaveIdFromFile } from '.';
 
 const router = Router();
 
@@ -10,8 +10,9 @@ router.post('/estimate', multer().single('file'), async (req, res, next) => {
       res.sendStatus(400);
       return
     }
-    const price = await estimatePrice(req.file);
-    res.json(price);
+    const AR = await estimateARPrice(req.file);
+    const LIKE = await converARPriceToLIKE(AR);
+    res.json({ AR, LIKE });
   } catch (error) {
     next(error);
   }
