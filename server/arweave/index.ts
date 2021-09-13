@@ -43,10 +43,13 @@ export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; 
   return arweave.ar.winstonToAr(reward);
 }
 
-export async function converARPriceToLIKE(ar: string, { margin = 0.05 } = {}) {
+export async function converARPriceToLIKE(ar: string, { margin = 0.05, decimal = 0 } = {}) {
   const { data } = await axios.get(COINGECKO_PRICE_API);
   const { likecoin, arweave: arweavePrice } = data;
-  const res = new BigNumber(ar).multipliedBy(arweavePrice.usd).dividedBy(likecoin.usd).multipliedBy(1 + margin).toFixed();
+  let priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd);
+  // At least 1 LIKE for 1 AR
+  priceRatio = BigNumber.max(priceRatio, 1);
+  const res = new BigNumber(ar).multipliedBy(priceRatio).multipliedBy(1 + margin).toFixed(decimal, BigNumber.ROUND_UP);
   return res;
 }
 
