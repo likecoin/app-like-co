@@ -1,10 +1,8 @@
 import Arweave from 'arweave/node';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { uploadToIPFS } from '../ipfs';
+import { getIPFSHash, uploadToIPFS } from '../ipfs';
 import { COINGECKO_PRICE_API } from '../constant';
-
-const hash = require('ipfs-only-hash');
 
 const IPFS_KEY = 'IPFS-Add'
 
@@ -35,7 +33,7 @@ export async function getArIdFromHashes(ipfsHash: string) {
 
 export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; }) {
   const { buffer } = data;
-  const ipfsHash = await hash.of(buffer)
+  const ipfsHash = await getIPFSHash(buffer);
   const id = await getArIdFromHashes(ipfsHash)
   if (id) return '0'
   const transaction = await arweave.createTransaction({ data: buffer }, jwk)
@@ -72,7 +70,7 @@ export async function submitToArweave(data: { mimetype: string; buffer: Buffer; 
 
 export async function getAreweaveIdFromFile(data: { mimetype: string; buffer: Buffer; }) {
   const { buffer } = data
-  const ipfsHash = await hash.of(buffer)
+  const ipfsHash = await getIPFSHash(buffer)
   const id = await getArIdFromHashes(ipfsHash)
   if (id) return {
     arweaveId: id,
