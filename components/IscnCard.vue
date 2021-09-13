@@ -50,6 +50,28 @@ function defaultEasingFunction(x: number): number {
     : 1 - (-2 * x + 2) ** 3 / 2
 }
 
+function animateX({
+  i,
+  magnitude,
+  progress,
+  x,
+}: {
+  i: number
+  x: number
+  magnitude: number
+  progress: number
+}) {
+  const mod = i % 3
+  switch (mod) {
+    case 0:
+      return x + magnitude * (1 - progress)
+    case 1:
+      return x + magnitude * progress
+    default:
+      return x - magnitude * (1 - progress)
+  }
+}
+
 interface ShapeConfig {
   x1: number
   x2: number
@@ -94,6 +116,11 @@ export default class IscnCard extends Vue {
    * Animation duration in frame in a cycle. Default is 500 frames.
    */
   @Prop({ default: 500 }) readonly animationDuration!: number
+
+  /**
+   * Morphing magniture of shapes. Default is 2.
+   */
+  @Prop({ default: 2 }) readonly shapeMorphingMagnitude!: number
 
   /**
    * Easing function of the animation. Default is ease in out sine.
@@ -276,26 +303,17 @@ export default class IscnCard extends Vue {
           shapeTimes[i] += 1 * shapeSpeeds[i]
           const progress = this.easingFunction(((shapeTimes[i] + delay)) / (animationDuration + shapeDelay * firstChunks.length))
 
-          // eslint-disable-next-line
-          function animateX(x: number) {
-            const mod = i % 3
-            switch (mod) {
-              case 0:
-                return x + offset / 8 * (1 - progress)
-              case 1:
-                return x * progress
-              default:
-                return x - offset / 8 * (1 - progress)
-            }
-          }
-
+          const r = offset * value1 % 255
+          const g = offset * value2 % 255
+          const b = offset * (value1 - value2) % 255
+          const magnitude = this.shapeMorphingMagnitude
           shapes.push({
-            x1: animateX(offset * value1 % 255),
-            x2: animateX(offset * value2 % 255),
-            x3: animateX(offset * (value1 - value2) % 255),
-            r: offset * value1 % 255,
-            g: offset * value2 % 255,
-            b: offset * (value1 - value2) % 255,
+            x1: animateX({ i, magnitude, progress, x: r }),
+            x2: animateX({ i, magnitude, progress, x: g }),
+            x3: animateX({ i, magnitude, progress, x: b }),
+            r,
+            g,
+            b,
             opacity: this.colorMultiplier * (value1 - value2) % 255 / 255 * 100,
             offsetY: s.height * (1 - progress),
           })
