@@ -44,8 +44,10 @@ import P5 from 'p5'
 import QRCode from 'easyqrcodejs'
 
 function defaultEasingFunction(x: number): number {
-  // Ease Out Cubic
-  return 1 - (1 - x) ** 3
+  // Ease In Out Cubic
+  return x < 0.5
+    ? 4 * x * x * x
+    : 1 - (-2 * x + 2) ** 3 / 2
 }
 
 interface ShapeConfig {
@@ -89,12 +91,12 @@ export default class IscnCard extends Vue {
   @Prop({ default: false }) readonly isAnimated!: boolean
 
   /**
-   * Animation duration in frame. Default is 80 frames.
+   * Animation duration in frame in a cycle. Default is 500 frames.
    */
-  @Prop({ default: 80 }) readonly animationDuration!: number
+  @Prop({ default: 500 }) readonly animationDuration!: number
 
   /**
-   * Easing function of the animation. Default is ease out cubic.
+   * Easing function of the animation. Default is ease in out sine.
    */
   @Prop({ default: () => defaultEasingFunction }) readonly easingFunction!: (x: number) => number
 
@@ -246,31 +248,44 @@ export default class IscnCard extends Vue {
       s.setup = () => {
         const { width, height } = this.getCardSize()
         s.createCanvas(width, height)
+
+        if (!this.isAnimated) {
+          s.noLoop()
+        }
       }
 
       // Current animation time
       const animationDuration = Math.max(1, this.animationDuration)
-      let t = this.isAnimated ? 0 : animationDuration
+      const shapeSpeeds = new Array(firstChunks.length).fill(1)
+      const shapeTimes = new Array(firstChunks.length).fill(this.isAnimated ? animationDuration / 2 : animationDuration)
+      const shapeDelay = animationDuration / firstChunks.length
 
       // eslint-disable-next-line no-param-reassign
       s.draw = () => {
-        const progress = this.easingFunction(t / animationDuration)
-
         const shapes: ShapeConfig[] = []
         for (let i = 0; i < firstChunks.length; i += 2) {
           const value1 = parseInt(firstChunks.slice(i, i + 2), 16)
           const value2 = parseInt(lastChunks.slice(i, i + 2), 16)
+
+          const delay = i * shapeDelay
+          if (shapeTimes[i] + delay >= animationDuration + shapeDelay * firstChunks.length) {
+            shapeSpeeds[i] = -1
+          } else if (shapeTimes[i] + delay <= 0) {
+            shapeSpeeds[i] = 1
+          }
+          shapeTimes[i] += 1 * shapeSpeeds[i]
+          const progress = this.easingFunction(((shapeTimes[i] + delay)) / (animationDuration + shapeDelay * firstChunks.length))
 
           // eslint-disable-next-line
           function animateX(x: number) {
             const mod = i % 3
             switch (mod) {
               case 0:
-                return x + offset * (1 - progress)
+                return x + offset / 8 * (1 - progress)
               case 1:
                 return x * progress
               default:
-                return x - offset * (1 - progress)
+                return x - offset / 8 * (1 - progress)
             }
           }
 
@@ -278,10 +293,10 @@ export default class IscnCard extends Vue {
             x1: animateX(offset * value1 % 255),
             x2: animateX(offset * value2 % 255),
             x3: animateX(offset * (value1 - value2) % 255),
-            r: offset * value1 % 255 * progress,
-            g: offset * value2 % 255 * progress,
-            b: offset * (value1 - value2) % 255 * progress,
-            opacity: this.colorMultiplier * (value1 - value2) % 255 / 255 * 100 * progress,
+            r: offset * value1 % 255,
+            g: offset * value2 % 255,
+            b: offset * (value1 - value2) % 255,
+            opacity: this.colorMultiplier * (value1 - value2) % 255 / 255 * 100,
             offsetY: s.height * (1 - progress),
           })
         }
@@ -298,12 +313,6 @@ export default class IscnCard extends Vue {
         s.noFill()
         s.blendMode(s.SCREEN)
         drawShapes({ shapes, shouldFill: false })
-
-        if (t <= animationDuration) {
-          t += 1
-        } else {
-          s.noLoop()
-        }
       }
 
       // eslint-disable-next-line no-param-reassign
