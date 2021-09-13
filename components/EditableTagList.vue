@@ -120,6 +120,7 @@ export default class EditableTagList extends Vue {
   blurInput() {
     if (this.currentInput.length) {
       this.saveChip()
+      this.$nuxt.$nextTick(() => this.$refs.input.focus())
     } else {
       this.shouldShowInput = false
     }

@@ -10,11 +10,12 @@ export interface ISCNRegisterPayload {
   fileSHA256: string;
   type: string;
   authorNames: string[];
-  authorUrls: string[];
-  authorWallets:string[];
+  authorUrls: string[][];
+  authorWallets:string[][];
   cosmosWallet: string;
+  likerIds: string[];
+  descriptions: string[];
 }
-
 export interface ISCNRecordWithID extends ISCNRecord {
   id: string;
 }

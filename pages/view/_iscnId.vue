@@ -171,12 +171,12 @@
             <!-- name -->
             <div class="flex flex-row items-center justify-between flex-nowrap">
               <FormField
-                v-if="stakeholderInfo.name"
+                v-if="stakeholderInfo.authorName"
                 content-type="strong"
                 :label="$t('iscn.meta.creator.name')"
                 class="w-[50%] my-[12px]"
               >
-                <Label :text="stakeholderInfo.name" tag="div" preset="p4" />
+                <Label :text="stakeholderInfo.authorName" tag="div" preset="p4" />
               </FormField>
               <FormField
                 v-if="stakeholderInfo.likerId"
@@ -189,12 +189,12 @@
               </FormField>
             </div>
             <FormField
-              v-if="stakeholderInfo.description"
+              v-if="stakeholderInfo.authorDescription"
               :label="$t('iscn.meta.stakeholders.description')"
               class="w-[50%] my-[12px]"
             >
               <Label
-                :text="stakeholderInfo.description"
+                :text="stakeholderInfo.authorDescription"
                 tag="div"
                 preset="p5"
               />
@@ -202,16 +202,22 @@
             <IconDiverMini class="my-[12px]" />
             <!-- url -->
             <FormField
-              v-if="stakeholderInfo.url"
+              v-if="stakeholderInfo.authorUrl.length"
               :label="$t('iscn.meta.stakeholders.url')"
             >
-              <Link :href="stakeholderInfo.url">{{ stakeholderInfo.url }}</Link>
+              <Link v-for="url in stakeholderInfo.authorUrl" :key="url.key" :href="url.content">{{ url.content }}</Link>
             </FormField>
             <IconDiverMini class="my-[12px]" />
             <!-- wallet address -->
-            <FormField :label="$t('iscn.meta.stakeholders.wallet')">
+            <FormField
+              v-if="stakeholderInfo.authorWalletAddress.length"
+              :label="$t('iscn.meta.stakeholders.wallet')"
+              content-classes="flex flex-row"
+              >
               <Button
-                class="mr-[8px]"
+                v-for="address in stakeholderInfo.authorWalletAddress"
+                :key="address.content"
+                class="mr-[8px] mb-[4px]"
                 size="mini"
                 preset="tertiary"
                 tag="div"
@@ -224,7 +230,7 @@
                 <template #prepend>{{
                   $t('iscn.meta.stakeholders.wallet.LIKE')
                 }}</template>
-                {{ stakeholderInfo.address.slice(4) | ellipsis }}
+                {{ address.content | ellipsis }}
               </Button>
             </FormField>
           </Card>
@@ -283,12 +289,12 @@ export default class ViewIscnIdPage extends Vue {
   isOpenAuthorDialog = false
   isOpenCopiedAlert = false
   stakeholderInfo = {
-    address: '',
-    description: '',
+    authorWalletAddress: [],
+    authorDescription: '',
     id: '',
     likerId: '',
-    name: '',
-    url: '',
+    authorName: '',
+    authorUrl: [],
   }
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
@@ -310,6 +316,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
+    console.log(this.record)
     this.txHash = await this.fetchTxHash()
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
@@ -386,7 +393,7 @@ export default class ViewIscnIdPage extends Vue {
   async fetchTxHash() {
     let txHash = await fetch(RAWDATA_URL_PRODUCTION + this.iscnId)
       .then((res) => res.json())
-    if (!txHash.txs) {
+    if (!txHash.txs.length) {
       txHash = await fetch(RAWDATA_URL_STAGING + this.iscnId)
         .then((res) => res.json())
         .then((res) => res.txs[0].txhash)
@@ -401,9 +408,11 @@ export default class ViewIscnIdPage extends Vue {
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
     this.stakeholderInfo.id = this.stakeholders[index].entity.id
-    this.stakeholderInfo.address = this.stakeholders[index].entity['@id']
-    this.stakeholderInfo.url = this.stakeholders[index].entity.url
-    this.stakeholderInfo.name = this.stakeholders[index].entity.name
+    this.stakeholderInfo.likerId = this.stakeholders[index].entity.likerId
+    this.stakeholderInfo.authorDescription = this.stakeholders[index].entity.authorDescription
+    this.stakeholderInfo.authorWalletAddress = this.stakeholders[index].entity.authorWalletAddress
+    this.stakeholderInfo.authorUrl = this.stakeholders[index].entity.url
+    this.stakeholderInfo.authorName = this.stakeholders[index].entity.name
   }
 
   copyWalletAddress() {

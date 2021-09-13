@@ -25,10 +25,13 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorNames,
     authorUrls,
     authorWallets,
+    likerIds,
+    descriptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     cosmosWallet,
     ...data
   } = payload;
+
   const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
@@ -38,13 +41,19 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       const authorName = authorNames[i]
       const authorUrl = authorUrls[i]
       const authorId = authorWallets[i]
+      const authorWalletAddress = authorWallets[i]
+      const likerId = likerIds[i]
+      const authorDescription = descriptions[i]
       const isNonEmpty = authorUrl || authorName || authorId
       if (isNonEmpty) {
         stakeholders.push({
             entity: {
               '@id': authorId ? `did:cosmos:${authorId.slice(6)}` : authorUrl || authorName,
-              name: authorName,
-              url: authorUrl,
+                name: authorName,
+                url: authorUrl,
+                authorWalletAddress,
+                likerId,
+                authorDescription,
             },
             rewardProportion: 1,
             contributionType: 'http://schema.org/author',
