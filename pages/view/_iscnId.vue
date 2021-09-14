@@ -27,6 +27,7 @@
             :key="record.id"
             class="w-[280px]"
             :record="record"
+            orientation="portrait"
             :is-animated="true"
           />
         </ClientOnly>

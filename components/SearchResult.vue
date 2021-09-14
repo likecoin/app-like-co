@@ -2,8 +2,9 @@
   <div class="w-min">
     <ClientOnly>
       <IscnCard
+        class="w-[220px] mb-[16px]"
         :record="record"
-        class="mb-[16px]"
+        orientation="portrait"
       />
     </ClientOnly>
     <Label

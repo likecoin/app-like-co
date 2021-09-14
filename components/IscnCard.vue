@@ -1,39 +1,69 @@
 <template>
-  <div :class="rootClasses">
+  <div
+    :key="encodedIDInHex"
+    v-bind="rootProps"
+  >
     <div :class="containerClasses">
       <div
-        :key="encodedIDInHex"
         ref="canvas"
-        class="absolute inset-0"
+        :class="canvasWrapperClasses"
         @resize="handleResize"
       />
-      <div
-        :class="[
-          'absolute',
-          'inset-0',
-          'border-[18px]',
-          'border-white',
-          'border-opacity-60',
-          'rounded-[24px]',
-        ]"
-      />
-      <div class="absolute inset-0 flex items-center justify-between">
-        <div
-          :class="labelClasses"
-          style="writing-mode: vertical-lr"
-        >
-          {{ labelTextLeft }}
-        </div>
-        <div :class="qrCodeWrapperClasses">
-          <div ref="qrcode" class="qrcode" />
-        </div>
-        <div
-          :class="labelClasses"
-          style="writing-mode: vertical-rl"
-        >
-          {{ labelTextRight }}
-        </div>
-      </div>
+      <svg
+        ref="svg"
+        class="relative"
+        xmlns="http://www.w3.org/2000/svg"
+        :viewBox="viewBox"
+      >
+        <g :class="infoWrapperClasses">
+          <rect
+            x="9"
+            y="9"
+            v-bind="borderProps"
+            rx="12"
+            fill="none"
+            stroke="#fff"
+            stroke-linejoin="round"
+            stroke-opacity="0.6"
+            stroke-width="18"
+          />
+          <text
+            v-bind="upperTextProps"
+            font-size="10"
+            fill="#28646e"
+            alignment-baseline="middle"
+            text-anchor="middle"
+            font-family="PT Mono, monospace"
+          >{{ recordID }}</text>
+          <text
+            v-bind="lowerTextProps"
+            font-size="10"
+            fill="#28646e"
+            alignment-baseline="middle"
+            text-anchor="middle"
+            font-family="PT Mono, monospace"
+          >{{ recordInfoText }}</text>
+        </g>
+        <g :class="qrCodeWrapperClasses">
+          <rect
+            v-bind="qrCodeSizeProps"
+            rx="4"
+            fill="#fff"
+          />
+          <foreignObject v-bind="qrCodeSizeProps">
+            <div
+              ref="qrcode"
+              :class="[
+                'flex',
+                'items-center',
+                'justify-center',
+                'w-[112px]',
+                'h-[112px]',
+              ]"
+            />
+          </foreignObject>
+        </g>
+      </svg>
     </div>
   </div>
 </template>
@@ -50,43 +80,34 @@ function defaultEasingFunction(x: number): number {
     : 1 - (-2 * x + 2) ** 3 / 2
 }
 
-function animateX({
-  i,
-  magnitude,
-  progress,
-  x,
-}: {
-  i: number
-  x: number
-  magnitude: number
-  progress: number
-}) {
-  const mod = i % 3
-  switch (mod) {
-    case 0:
-      return x + magnitude * (1 - progress)
-    case 1:
-      return x + magnitude * progress
-    default:
-      return x - magnitude * (1 - progress)
-  }
-}
-
 interface ShapeConfig {
-  x1: number
-  x2: number
-  x3: number
+  value1: number
+  value2: number
+  value3: number
   r: number
   g: number
   b: number
   opacity: number
+  offsetX: number
   offsetY: number
+}
+
+export enum IscnCardOrientation {
+  portrait = 'portrait',
+  landscape = 'landscape',
 }
 
 @Component
 export default class IscnCard extends Vue {
-  static baseWidth = 220
-  static qrCodeSize = 112
+  static baseWidth = 560
+  static baseHeight = 280
+  static baseBorderWidth = 18
+  static baseBorderRadius = 24
+  static baseAnimationDuration = 500
+  static baseShapeMorphingMagnitude = 4
+  static baseColorMultiplier = 10
+  static bleeding = 5
+  static qrCodeSize = 122
   static qrCodeColor = '#333'
   static qrCodeLogoSize = 22
   static qrCodeLogoQuietZoneSize = 4
@@ -103,9 +124,14 @@ export default class IscnCard extends Vue {
   @Prop(String) readonly labelClass!: string
 
   /**
+   * Custom class for the labels
+   */
+  @Prop({ default: IscnCardOrientation.portrait }) readonly orientation!: IscnCardOrientation
+
+  /**
    * Control the saturation of the card. Default is 10.
    */
-  @Prop({ default: 10 }) readonly colorMultiplier!: number
+  @Prop({ default: IscnCard.baseColorMultiplier }) readonly colorMultiplier!: number
 
   /**
    * Set to true to show stunning mounting animation.
@@ -115,17 +141,20 @@ export default class IscnCard extends Vue {
   /**
    * Animation duration in frame in a cycle. Default is 500 frames.
    */
-  @Prop({ default: 500 }) readonly animationDuration!: number
+  @Prop({ default: IscnCard.baseAnimationDuration }) readonly animationDuration!: number
 
   /**
-   * Morphing magniture of shapes. Default is 2.
+   * Morphing magniture of shapes. Default is 4.
    */
-  @Prop({ default: 2 }) readonly shapeMorphingMagnitude!: number
+  @Prop({ default: IscnCard.baseShapeMorphingMagnitude }) readonly shapeMorphingMagnitude!: number
 
   /**
-   * Easing function of the animation. Default is ease in out sine.
+   * Easing function of the animation. Default is ease in out cubic.
    */
   @Prop({ default: () => defaultEasingFunction }) readonly easingFunction!: (x: number) => number
+
+  width = IscnCard.baseWidth
+  height = IscnCard.baseHeight
 
   canvas: P5 | undefined
 
@@ -137,61 +166,7 @@ export default class IscnCard extends Vue {
     return this.record?.id || ''
   }
 
-  get encodedIDInHex() {
-    const matches = this.recordID.match(/iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+)\/\d+/)
-    if (!matches || !matches[1]) return ''
-    return Buffer.from(matches[1]).toString('hex')
-  }
-
-  get rootClasses() {
-    const isShowLoadingIndicator = !this.isAnimated && this.isQRCodeRendering
-    return [
-      isShowLoadingIndicator ? 'bg-shade-gray' : 'bg-white',
-      'rounded-[24px]',
-      'text-like-green',
-      'overflow-hidden',
-      {
-        'animate-pulse': isShowLoadingIndicator,
-      },
-    ]
-  }
-
-  get containerClasses() {
-    return [
-      'relative',
-      'min-w-[220px]',
-      'aspect-w-1',
-      'aspect-h-2',
-      'transition',
-      'transition-all',
-      this.isAnimated ? 'duration-1000' : 'duration-500',
-      'ease-out',
-      this.isAnimated && this.isQRCodeRendering ? 'scale-125' : 'scale-100',
-      !this.isAnimated && this.isQRCodeRendering ? 'blur-3xl' : 'blur-none',
-      !this.isAnimated && this.isQRCodeRendering ? 'opacity-0' : 'opacity-100',
-    ]
-  }
-
-  get labelClasses() {
-    return [
-      'flex',
-      'justify-center',
-      'items-center',
-      'w-[18px]',
-      'font-mono',
-      'text-center',
-      'text-[8px]',
-      'transform',
-      'rotate-180',
-      this.labelClass,
-    ]
-  }
-
-  get labelTextLeft() {
-    return this.recordID
-  }
-
-  get labelTextRight() {
+  get recordInfoText() {
     if (!this.record) return ''
     const {
       recordTimestamp: timestamp = '',
@@ -203,17 +178,150 @@ export default class IscnCard extends Vue {
     return `${type} ${timestamp} ${version ? 'Version ' : ''}${version}`
   }
 
+  get encodedIDInHex() {
+    const matches = this.recordID.match(/iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+)\/\d+/)
+    if (!matches || !matches[1]) return ''
+    return Buffer.from(matches[1]).toString('hex')
+  }
+
+  get cardGraphData() {
+    const firstChunks = this.encodedIDInHex.slice(0, 42)
+    const lastChunks = this.encodedIDInHex.slice(42)
+    const offset = parseInt(lastChunks.slice(42), 16)
+    return { firstChunks, lastChunks, offset }
+  }
+
+  get isPortrait() {
+    return this.orientation === IscnCardOrientation.portrait
+  }
+
+  get borderRadius() {
+    return IscnCard.baseBorderRadius * this.width / this.svgSizeProps.width
+  }
+
+  get viewBox() {
+    return this.isPortrait
+      ? `0 0 ${IscnCard.baseHeight} ${IscnCard.baseWidth}`
+      : `0 0 ${IscnCard.baseWidth} ${IscnCard.baseHeight}`
+  }
+
+  get isShowLoadingIndicator() {
+    return !this.isAnimated && this.isQRCodeRendering
+  }
+
+  get rootProps() {
+    return {
+      class: [
+        'relative',
+        'overflow-hidden',
+        'bg-shade-gray',
+        {
+          'animate-pulse': this.isShowLoadingIndicator,
+        },
+      ],
+      style: {
+        borderRadius: `${this.borderRadius}px`,
+      },
+    }
+  }
+
+  get svgSizeProps() {
+    return {
+      width: this.isPortrait ? IscnCard.baseHeight : IscnCard.baseWidth,
+      height: this.isPortrait ? IscnCard.baseWidth : IscnCard.baseHeight,
+    }
+  }
+
+  get qrCodeSizeProps() {
+    return {
+      x: this.isPortrait ? 84 : 224,
+      y: this.isPortrait ? 224 : 84,
+      width: 112,
+      height: 112,
+    }
+  }
+
+  get borderProps() {
+    return {
+      width: this.isPortrait
+        ? IscnCard.baseHeight - IscnCard.baseBorderWidth
+        : IscnCard.baseWidth - IscnCard.baseBorderWidth,
+      height: this.isPortrait
+        ? IscnCard.baseWidth - IscnCard.baseBorderWidth
+        : IscnCard.baseHeight - IscnCard.baseBorderWidth,
+    }
+  }
+
+  get upperTextProps() {
+    return {
+      x: IscnCard.baseHeight * (this.isPortrait ? -1 : 1),
+      y: 10,
+      transform: this.isPortrait ? 'rotate(-90)' : null,
+    }
+  }
+
+  get lowerTextProps() {
+    return {
+      x: IscnCard.baseHeight * (this.isPortrait ? -1 : 1),
+      y: IscnCard.baseHeight - 8,
+      transform: this.isPortrait ? 'rotate(-90)' : null,
+    }
+  }
+
+  get containerClasses() {
+    return [
+      'transition',
+      'transition-all',
+      'duration-500',
+      'ease-out',
+      {
+        'opacity-0 blur-3xl brightness-200': this.isShowLoadingIndicator,
+      },
+    ]
+  }
+
+  get canvasWrapperClasses() {
+    return [
+      'absolute',
+      'inset-0',
+      'transition',
+      'transition-opacity',
+      'transform',
+      'duration-1000',
+      'ease-out',
+      {
+        'scale-150 opacity-0': this.isAnimated && this.isQRCodeRendering,
+      },
+    ]
+  }
+
+  get infoWrapperClasses() {
+    return [
+      'transition',
+      'transition-all',
+      'origin-center',
+      'duration-500',
+      'ease-out',
+      {
+        'opacity-0': this.isShowLoadingIndicator,
+        'scale-150': this.isAnimated && this.isQRCodeRendering
+      },
+    ]
+  }
+
   get qrCodeWrapperClasses() {
     return [
-      'rounded-[4px]',
-      'bg-white',
+      'qrcode',
       'mix-blend-luminosity',
       'transition',
       'transition-all',
-      'duration-700',
+      'origin-center',
+      'duration-1000',
       'ease-out',
-      this.isAnimated && this.isQRCodeRendering ? 'scale-50' : 'scale-100',
-      this.isAnimated && this.isQRCodeRendering ? 'opacity-0' : 'opacity-80',
+      this.isAnimated && this.isQRCodeRendering ? 'opacity-0 scale-50' : 'opacity-80',
+      {
+        'transform -rotate-90': this.isPortrait,
+      },
     ]
   }
 
@@ -221,14 +329,49 @@ export default class IscnCard extends Vue {
     this.sketchGraph()
   }
 
+  detectCardSize() {
+    const {
+      width = 0,
+      height = 0,
+    } = (this.$refs.svg as HTMLElement).getBoundingClientRect() || {}
+    this.width = width
+    this.height = height
+  }
+
+  animateValue({
+    i,
+    progress,
+    value,
+  }: {
+    i: number
+    value: number
+    progress: number
+  }) {
+    const mod = i % 3
+    const magnitude = this.shapeMorphingMagnitude
+    switch (mod) {
+      case 0:
+        return value + magnitude * (1 - progress)
+      case 1:
+        return value + magnitude * progress
+      default:
+        return value - magnitude * (1 - progress)
+    }
+  }
+
   @Watch('record')
   sketchGraph() {
     if (!this.record) return
 
-    const bleeding = 5
-    const firstChunks = this.encodedIDInHex.slice(0, 42)
-    const lastChunks = this.encodedIDInHex.slice(42)
-    const offset = parseInt(lastChunks.slice(42), 16)
+    this.detectCardSize()
+    if (this.width === 0 || this.height === 0) {
+      // Back-off rendering if width or height is 0
+      setTimeout(this.sketchGraph, 10)
+      return
+    }
+
+    const orientation = this.isPortrait ? 0 : 1
+    const { firstChunks, lastChunks, offset } = this.cardGraphData
 
     const sketch = (s: P5) => {
       function drawShapes({
@@ -255,27 +398,88 @@ export default class IscnCard extends Vue {
             s.stroke(255, 255, 255, input.opacity)
           }
 
-          s.beginShape();
-          const startX = i % 2 === 0 ? -bleeding : s.width + bleeding
+          const isEven = i % 2 === 0
+          const v = [
+            // Portrait
+            [
+              // Vertex 1
+              {
+                x: isEven ? -IscnCard.bleeding : s.width + IscnCard.bleeding,
+                y: -IscnCard.bleeding - input.offsetY,
+              },
+              // Vertex 2
+              // Vertex 3a
+              {
+                x: input.value1,
+                y: -IscnCard.bleeding - input.offsetY,
+              },
+              // Vertex 3b
+              {
+                x: input.value2,
+                y: s.height / 2,
+              },
+              // Vertex 3c
+              // Vertex 4
+              {
+                x: input.value3,
+                y: s.height + IscnCard.bleeding + input.offsetY,
+              },
+              // Vertex 5
+              {
+                x: isEven ? -IscnCard.bleeding : s.width + IscnCard.bleeding,
+                y: s.height + IscnCard.bleeding + input.offsetY,
+              },
+            ],
+            // Landscape
+            [
+              // Vertex 1
+              {
+                x: s.width + IscnCard.bleeding + input.offsetX,
+                y: isEven ? -IscnCard.bleeding : s.height + IscnCard.bleeding,
+              },
+              // Vertex 2
+              // Vertex 3a
+              {
+                x: s.width + IscnCard.bleeding + input.offsetX,
+                y: input.value1,
+              },
+              // Vertex 3b
+              {
+                x: s.width / 2,
+                y: input.value2,
+              },
+              // Vertex 3c
+              // Vertex 4
+              {
+                x: -IscnCard.bleeding - input.offsetX,
+                y: input.value3,
+              },
+              // Vertex 5
+              {
+                x: -IscnCard.bleeding - input.offsetX,
+                y: isEven ? -IscnCard.bleeding : s.height + IscnCard.bleeding,
+              },
+            ],
+          ]
 
-          s.vertex(startX, -bleeding - input.offsetY)
-          s.vertex(input.x1, -bleeding - input.offsetY)
+          s.beginShape()
+          s.vertex(v[orientation][0].x, v[orientation][0].y)
+          s.vertex(v[orientation][1].x, v[orientation][1].y)
           s.bezierVertex(
-            input.x1, -bleeding - input.offsetY,
-            input.x2, s.height / 2,
-            input.x3, s.height + bleeding + input.offsetY,
+            v[orientation][1].x, v[orientation][1].y,
+            v[orientation][2].x, v[orientation][2].y,
+            v[orientation][3].x, v[orientation][3].y,
           )
-          s.vertex(input.x3, s.height + bleeding + input.offsetY)
-          s.vertex(startX, s.height + bleeding + input.offsetY)
+          s.vertex(v[orientation][3].x, v[orientation][3].y)
+          s.vertex(v[orientation][4].x, v[orientation][4].y)
           s.endShape()
         }
       }
 
       // eslint-disable-next-line no-param-reassign
       s.setup = () => {
-        const { width, height } = this.getCardSize()
-        s.createCanvas(width, height)
-
+        const canvas = s.createCanvas(this.width, this.height)
+        canvas.style('border-radius', `${this.borderRadius}px`)
         if (!this.isAnimated) {
           s.noLoop()
         }
@@ -306,25 +510,22 @@ export default class IscnCard extends Vue {
           const r = offset * value1 % 255
           const g = offset * value2 % 255
           const b = offset * (value1 - value2) % 255
-          const magnitude = this.shapeMorphingMagnitude
           shapes.push({
-            x1: animateX({ i, magnitude, progress, x: r }),
-            x2: animateX({ i, magnitude, progress, x: g }),
-            x3: animateX({ i, magnitude, progress, x: b }),
+            value1: this.animateValue({ i, progress, value: r }),
+            value2: this.animateValue({ i, progress, value: g }),
+            value3: this.animateValue({ i, progress, value: b }),
             r,
             g,
             b,
             opacity: this.colorMultiplier * (value1 - value2) % 255 / 255 * 100,
-            offsetY: s.height * (1 - progress),
+            offsetX: this.isPortrait ? 0 : s.width * (1 - progress),
+            offsetY: this.isPortrait ? s.height * (1 - progress) : 0,
           })
         }
 
-        // Scale the shape corresponding to the size of the canvas
-        s.scale(s.width / IscnCard.baseWidth)
-
         s.background(255) // White
         s.noStroke()
-
+        s.scale(Math.max(1, this.width / this.svgSizeProps.width))
         s.blendMode(s.BLEND)
         drawShapes({ shapes, shouldFill: true })
         s.strokeWeight(1)
@@ -335,11 +536,8 @@ export default class IscnCard extends Vue {
 
       // eslint-disable-next-line no-param-reassign
       s.windowResized = () => {
-        const {
-          width: newWidth,
-          height: newHeight,
-        } = this.getCardSize()
-        s.resizeCanvas(newWidth, newHeight)
+        this.detectCardSize()
+        s.resizeCanvas(this.width, this.height)
       }
     }
 
@@ -347,42 +545,28 @@ export default class IscnCard extends Vue {
       this.canvas = new P5(sketch, this.$refs.canvas as HTMLElement)
     }
 
-    const { width } = this.getCardSize()
-    const qrCodeRatio = width / IscnCard.baseWidth
-    const qrCodeSize = qrCodeRatio * IscnCard.qrCodeSize
-    const qrCodeLogoSize = qrCodeRatio * IscnCard.qrCodeLogoSize
-    const quietZoneSize = qrCodeRatio * IscnCard.qrCodeLogoQuietZoneSize
     if (!this.qrcode) {
       this.qrcode = new QRCode(this.$refs.qrcode, {
         text: this.recordID,
-        width: qrCodeSize,
-        height: qrCodeSize,
+        width: IscnCard.qrCodeSize,
+        height: IscnCard.qrCodeSize,
         colorDark: IscnCard.qrCodeColor,
         colorLight: 'transparent',
         drawer: 'svg',
         correctLevel: QRCode.CorrectLevel.H,
-        quietZone: quietZoneSize,
+        quietZone: IscnCard.qrCodeLogoQuietZoneSize,
         PO: IscnCard.qrCodePositionZoneColor,
         PI: IscnCard.qrCodePositionZoneColor,
-        logo: '/images/iscn-card/logo/portrait.svg',
-        logoWidth: qrCodeLogoSize,
-        logoHeight: qrCodeLogoSize,
+        logo: '/images/iscn-card/logo.svg',
+        logoWidth: IscnCard.qrCodeLogoSize,
+        logoHeight: IscnCard.qrCodeLogoSize,
         onRenderingEnd: () => {
           this.isQRCodeRendering = false
         },
       })
     } else {
       this.qrcode.makeCode(this.recordID)
-      this.qrcode.resize(qrCodeSize, qrCodeSize)
     }
-  }
-
-  getCardSize() {
-    const {
-      offsetWidth: width = 0,
-      offsetHeight: height = 0,
-    } = this.$refs.canvas as HTMLElement || {}
-    return { width, height }
   }
 
   handleResize() {

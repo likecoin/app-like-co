@@ -17,12 +17,6 @@ module.exports = {
       'shade-gray': '#EBEBEB',
       'light-gray': '#F7F7F7',
     },
-    height: {
-      '40px': '40px',
-      '44px': '44px',
-      '48px': '48px',
-      '64px': '64px',
-    },
     boxShadow: {
       popup: '2px 4px 8px rgba(0, 0, 0, 0.25)',
     },
@@ -31,6 +25,14 @@ module.exports = {
         'PT Mono',
         'monospace',
       ],
+    },
+    extend: {
+      height: {
+        '40px': '40px',
+        '44px': '44px',
+        '48px': '48px',
+        '64px': '64px',
+      },
     },
   },
   plugins: [aspectRatio],
