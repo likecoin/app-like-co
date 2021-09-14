@@ -2,11 +2,9 @@
 import { decodeTxRaw } from "@cosmjs/proto-signing";
 import { StargateClient } from "@cosmjs/stargate";
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
+import { COSMOS_RPC_ENDPOINT } from '../constant';
 
-const {
-  COSMOS_RPC_ENDPOINT,
-  COSMOS_DENOM,
-} = require('../config/config')
+const { COSMOS_DENOM = 'nanolike' } = require('../config/config')
 
 let stargateClient: StargateClient | null = null;
 
