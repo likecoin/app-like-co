@@ -35,10 +35,15 @@ export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; 
   const { buffer } = data;
   const ipfsHash = await getIPFSHash(buffer);
   const id = await getArIdFromHashes(ipfsHash)
-  if (id) return '0'
+  if (id) return {
+    arweaveId: id,
+    AR: '0',
+  }
   const transaction = await arweave.createTransaction({ data: buffer }, jwk)
   const { reward } = transaction;
-  return arweave.ar.winstonToAr(reward);
+  return {
+    AR: arweave.ar.winstonToAr(reward),
+  };
 }
 
 export async function converARPriceToLIKE(ar: string, { margin = 0.05, decimal = 0 } = {}) {
@@ -68,7 +73,7 @@ export async function submitToArweave(data: { mimetype: string; buffer: Buffer; 
   return transaction.id;
 }
 
-export async function getAreweaveIdFromFile(data: { mimetype: string; buffer: Buffer; }) {
+export async function uploadFileToArweave(data: { mimetype: string; buffer: Buffer; }) {
   const { buffer } = data
   const ipfsHash = await getIPFSHash(buffer)
   const id = await getArIdFromHashes(ipfsHash)

@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { Router } from 'express';
 import multer from 'multer';
-import { estimateARPrice, converARPriceToLIKE, getAreweaveIdFromFile } from '.';
+import { estimateARPrice, converARPriceToLIKE, uploadFileToArweave } from '.';
 import { getIPFSHash } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 
@@ -15,20 +15,29 @@ router.post('/estimate', multer().single('file'), async (req, res, next) => {
       res.sendStatus(400);
       return
     }
-    const AR = await estimateARPrice(req.file);
+    const { AR, arweaveId } = await estimateARPrice(req.file);
     const LIKE = await converARPriceToLIKE(AR);
-    res.json({ AR, LIKE });
+    res.json({ AR, LIKE, arweaveId, address: LIKE_TARGET_ADDRESS });
   } catch (error) {
     next(error);
   }
 });
 
-router.post('/', multer().single('file'), async (req, res, next) => {
+router.post('/upload', multer().single('file'), async (req, res, next) => {
   try {
     if (!req.file) {
       res.status(400).send('MISSING_FILE');
       return
     }
+    const ipfsHash = await getIPFSHash(req.file.buffer);
+    const { AR, arweaveId: existingArweaveId } = await estimateARPrice(req.file);
+
+    // shortcut for existing file without checking tx
+    if (existingArweaveId) {
+      res.json({ arweaveId: existingArweaveId, ipfsHash })
+      return;
+    }
+
     const { txHash } = req.query;
     if (!txHash) {
       res.status(400).send('MISSING_TX_HASH');
@@ -46,19 +55,17 @@ router.post('/', multer().single('file'), async (req, res, next) => {
     } catch (err) {
       // ignore non-JSON memo
     }
-    const ipfsHash = await getIPFSHash(req.file.buffer);
     if (!memoIPFS || memoIPFS !== ipfsHash) {
       res.status(400).send('TX_MEMO_NOT_MATCH');
       return;
     }
-    const AR = await estimateARPrice(req.file);
     const LIKE = await converARPriceToLIKE(AR, { margin: 0.03 });
     const txAmount = new BigNumber(amount.amount).shiftedBy(-9);
     if (txAmount.lt(LIKE)) {
       res.status(400).send('TX_AMOUNT_NOT_ENOUGH');
       return;
     }
-    const { arweaveId } = await getAreweaveIdFromFile(req.file);
+    const { arweaveId } = await uploadFileToArweave(req.file);
     res.json({ arweaveId, ipfsHash });
   } catch (error) {
     next(error);
