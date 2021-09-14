@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js';
 import config from '~/constant/network';
 import { COSMOS_DENOM } from '~/constant';
 
-let queryClient: QueryClient  & BankExtension;
+let queryClient: QueryClient & BankExtension;
 
 async function initQueryClient() {
   const tendermintClient = await Tendermint34Client.connect(config.rpcURL);

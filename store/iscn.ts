@@ -6,7 +6,6 @@ import { ISCNRecord } from '@likecoin/iscn-js';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 
-
 function addIDToRecords(records: ISCNRecord[]): ISCNRecordWithID[] {
   return records.map(r => ({ id: r.data['@id'] as string, ...r }));
 }
