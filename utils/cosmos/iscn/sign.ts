@@ -21,6 +21,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     tagsString = '',
     license,
     ipfsHash,
+    arweaveId,
     fileSHA256,
     authorNames,
     authorUrls,
@@ -32,6 +33,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
+  if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
   const stakeholders = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {

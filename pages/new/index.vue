@@ -4,6 +4,7 @@
     <IscnRegisterForm
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"
       :file-blob="fileBlob"
@@ -15,6 +16,7 @@
       v-else-if="state === 'done'"
       :is-image="isImage"
       :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
       :file-data="fileData"
       :file-s-h-a256="fileSHA256"
       :iscn-id="iscnId"
@@ -35,41 +37,45 @@ const signerModule = namespace('signer')
   layout: 'wallet',
 })
 export default class NewIndexPage extends Vue {
-  state = 'init'
-  ipfsHash = ''
-  fileSHA256 = ''
-  fileData = ''
-  iscnId = ''
-  iscnTxHash = ''
-  iscnTimestamp = ''
-  isImage = false
-  fileBlob: Blob | null = null
-  exifInfo: any = null
+  state = 'init';
+  ipfsHash = '';
+  arweaveId = '';
+  fileSHA256 = '';
+  fileData = '';
+  iscnId = '';
+  iscnTxHash = '';
+  iscnTimestamp = '';
+  isImage = false;
+  fileBlob: Blob | null = null;
+  exifInfo: any = null;
 
   @signerModule.Getter('getAddress') currentAddress!: string
 
   onSubmitUpload({
     ipfsHash,
+    arweaveId,
     fileData,
     fileSHA256,
     isImage,
     fileBlob,
     exifInfo,
   }: {
-    ipfsHash: string
-    fileData: string
-    fileSHA256: string
-    isImage: boolean
-    fileBlob: Blob | null
-    exifInfo: any
+    ipfsHash: string;
+    arweaveId: string;
+    fileData: string;
+    fileSHA256: string;
+    isImage: boolean;
+    fileBlob: Blob | null;
+    exifInfo: any;
   }) {
-    this.ipfsHash = ipfsHash
-    this.fileData = fileData
-    this.fileSHA256 = fileSHA256
-    this.isImage = isImage
-    this.fileBlob = fileBlob
-    this.exifInfo = exifInfo
-    this.state = 'iscn'
+    this.ipfsHash = ipfsHash;
+    this.arweaveId = arweaveId;
+    this.fileData = fileData;
+    this.fileSHA256 = fileSHA256;
+    this.isImage = isImage;
+    this.fileBlob = fileBlob;
+    this.exifInfo = exifInfo;
+    this.state = 'iscn';
   }
 
   onISCNTxInfo({

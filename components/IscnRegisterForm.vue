@@ -87,7 +87,8 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink :item="formattedIpfs" />
+        <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
+        <ContentFingerprintLink v-if="arweaveId" :item="formattedArweave" />
       </FormField>
       <!-- Dialog -->
       <Dialog
@@ -313,6 +314,7 @@ export default class IscnRegisterForm extends Vue {
   @Prop(String) readonly fileSHA256!: string
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
+  @Prop(String) readonly arweaveId!: string
 
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
@@ -384,6 +386,10 @@ export default class IscnRegisterForm extends Vue {
     return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
   }
 
+  get formattedArweave() {
+    return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.arweaveId })
+  }
+
   get errorMsg() {
     switch (this.error) {
       case 'INSUFFICIENT_BALANCE':
@@ -408,6 +414,7 @@ export default class IscnRegisterForm extends Vue {
       url: this.url,
       license: this.license,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
+      arweaveId: this.arweaveId,
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
@@ -471,7 +478,7 @@ export default class IscnRegisterForm extends Vue {
 
   async onSubmit(): Promise<void> {
     this.error = ''
-    if (!this.isIPFSLink) await this.submitToIPFS()
+    if (!this.arweaveId && !this.isIPFSLink) await this.submitToIPFS();
     await this.submitToISCN()
   }
 

@@ -91,7 +91,8 @@
         :label="$t('iscn.meta.content.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink :item="ipfs" />
+        <ContentFingerprintLink v-if="ipfsHash" :item="ipfs" />
+        <ContentFingerprintLink v-if="arweaveId" :item="arweaveURI" />
       </FormField>
     </Card>
   </div>
@@ -118,6 +119,7 @@ export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
   @Prop(String) readonly iscnTimestamp!: string
+  @Prop(String) readonly arweaveId!: string
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
@@ -144,6 +146,10 @@ export default class IscnUploadedInfo extends Vue {
 
   get ipfs() {
     return `ipfs://${this.ipfsHash}`
+  }
+
+  get arweaveURI() {
+    return `ar://${this.arweaveId}`;
   }
 
   async mounted() {
