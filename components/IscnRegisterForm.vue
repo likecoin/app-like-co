@@ -299,8 +299,9 @@ import { namespace } from 'vuex-class'
 import { Author } from '~/types/author'
 
 import { signISCNTx } from '~/utils/cosmos/iscn';
+import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
-import IPFSClient from '~/utils/ipfs'
+import { API_POST_ARWEAVE_ESTIMATE, API_POST_ARWEAVE_UPLOAD } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
@@ -330,10 +331,13 @@ export default class IscnRegisterForm extends Vue {
   authorWalletAddress: string = ''
   uploadStatus: string = ''
   uploadIpfsHash: string = this.ipfsHash
+  uploadArweaveId: string = this.arweaveId
   error: string = ''
 
-  totalFee: any = 0
-  balance: any = 0
+  arweaveFeeTargetAddress: string = ''
+  arweaveFee = new BigNumber(0)
+  totalFee = new BigNumber(0)
+  balance = new BigNumber(0)
   debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
 
   isOpenFileInfoDialog = false
@@ -351,9 +355,12 @@ export default class IscnRegisterForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
-  mounted() {
+  async mounted() {
+    this.uploadStatus = 'Loading'
+    await this.estimateArweaveFee();
+    // Total Fee needs Arweave fee to calculate
+    await this.calculateTotalFee()
     this.uploadStatus = ''
-    this.calculateTotalFee()
   }
 
   get tagsString(): string {
@@ -414,13 +421,19 @@ export default class IscnRegisterForm extends Vue {
       url: this.url,
       license: this.license,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-      arweaveId: this.arweaveId,
+      arweaveId: this.uploadArweaveId ||this.arweaveId,
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       cosmosWallet: this.address,
     }
+  }
+
+  get arweaveFeePlusGas() {
+    if (this.arweaveFee.lte(0)) return this.arweaveFee;
+    const gasAmount = new BigNumber(DEFAULT_TRANSFER_FEE.amount[0].amount).shiftedBy(-9);
+    return this.arweaveFee.plus(gasAmount);
   }
 
   editAuthor(index: number) {
@@ -467,32 +480,78 @@ export default class IscnRegisterForm extends Vue {
       getAccountBalance(this.address),
       esimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
     ])
-    this.balance = balance
+    this.balance = new BigNumber(balance);
     const { iscnFee, gas: iscnGasEstimation } = estimation;
     const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
     const iscnFeeNanolike = iscnFee.amount[0]
     this.totalFee = new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9)
+      .plus(this.arweaveFeePlusGas)
   }
 
   async onSubmit(): Promise<void> {
     this.error = ''
-    if (!this.arweaveId && !this.isIPFSLink) await this.submitToIPFS();
+    if (!this.arweaveId) await this.submitToArweave();
     await this.submitToISCN()
   }
 
-  async submitToIPFS(): Promise<void> {
-    if (!this.fileBlob) return
-    this.uploadStatus = 'Uploading'
-    const res = await IPFSClient.add(this.fileBlob)
-    if (res.path) this.uploadIpfsHash = res.path
+  async estimateArweaveFee(): Promise<void> {
+    const formData = new FormData();
+    if (this.fileBlob) formData.append('file', this.fileBlob);
+    try {
+      const { address, arweaveId, LIKE } = await this.$axios.$post(
+        API_POST_ARWEAVE_ESTIMATE,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      this.uploadArweaveId = arweaveId;
+      if (LIKE) this.arweaveFee = new BigNumber(LIKE);
+      this.arweaveFeeTargetAddress = address;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendArweaveFeeTx(): Promise<string> {
+    if (!this.signer) throw new Error('SIGNER_NOT_INITED');
+    if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
+    this.uploadStatus = 'Waiting for signature'
+    const memo = JSON.stringify({ ipfs: this.ipfsHash });
+    const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
+    return transactionHash;
+  }
+
+  async submitToArweave(): Promise<void> {
+    if (this.uploadArweaveId) return;
+    const transactionHash = await this.sendArweaveFeeTx();
+    const formData = new FormData();
+    if (this.fileBlob) formData.append('file', this.fileBlob);
+    this.uploadStatus = this.$t('UploadForm.button.uploading') as string;
+    try {
+      const { arweaveId } = await this.$axios.$post(
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      this.uploadArweaveId = arweaveId;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async submitToISCN(): Promise<void> {
     this.uploadStatus = 'Loading'
     await this.calculateTotalFee()
-    if (new BigNumber(this.balance).lt(this.totalFee)) {
+    if (this.balance.lt(this.totalFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.uploadStatus = ''
       return

@@ -129,7 +129,6 @@ import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import { Vue, Component } from 'vue-property-decorator'
 
-import { API_POST_ARWEAVE } from '~/constant/api';
 import {
   fileToArrayBuffer,
   digestFileSHA256,
@@ -147,7 +146,6 @@ export default class UploadForm extends Vue {
   exifInfo: any = null
   fileName: string = ''
   fileSize: number = 0
-  arweaveId: string = '';
   uploadStatus: string = '';
 
   isOpenFileInfoDialog = false
@@ -250,26 +248,8 @@ export default class UploadForm extends Vue {
     }
   }
 
-  async onSubmit() {
-    const formData = new FormData();
-    if (this.fileBlob) formData.append('file', this.fileBlob);
-    this.uploadStatus = this.$t('UploadForm.button.uploading') as string;
-    try {
-      const { arweaveId } = await this.$axios.$post(
-        API_POST_ARWEAVE,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      this.arweaveId = arweaveId;
-    } catch (err) {
-      console.error(err);
-    }
+  onSubmit() {
     this.$emit('submit', {
-      arweaveId: this.arweaveId,
       ipfsHash: this.ipfsHash,
       fileData: this.fileData,
       fileSHA256: this.fileSHA256,
