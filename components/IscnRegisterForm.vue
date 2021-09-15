@@ -337,9 +337,8 @@ export default class IscnRegisterForm extends Vue {
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
   iscnFee = new BigNumber(0)
-  totalFee = new BigNumber(0)
   balance = new BigNumber(0)
-  debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
+  debouncedCalculateISCNFee = debounce(this.calculateISCNFee, 400)
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
@@ -348,7 +347,12 @@ export default class IscnRegisterForm extends Vue {
 
   @Watch('payload', { immediate: true, deep: true })
   change() {
-    this.debouncedCalculateTotalFee()
+    this.debouncedCalculateISCNFee()
+  }
+
+  @Watch('uploadArweaveId')
+  chang(newId: string) {
+    if (newId) this.arweaveFee = new BigNumber(0)
   }
 
   @Watch('error')
@@ -360,7 +364,7 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = 'Loading'
     await this.estimateArweaveFee();
     // Total Fee needs Arweave fee to calculate
-    await this.calculateTotalFee()
+    await this.calculateISCNFee()
     this.uploadStatus = ''
   }
 
@@ -437,6 +441,10 @@ export default class IscnRegisterForm extends Vue {
     return this.arweaveFee.plus(gasAmount);
   }
 
+  get totalFee() {
+    return this.iscnFee.plus(this.arweaveFeePlusGas)
+  }
+
   editAuthor(index: number) {
     const { name, wallet, url } = this.authors[index]
     this.authorName = name
@@ -473,7 +481,7 @@ export default class IscnRegisterForm extends Vue {
     this.dismissAuthorDialog()
   }
 
-  async calculateTotalFee(): Promise<void> {
+  async calculateISCNFee(): Promise<void> {
     const [
       balance,
       estimation,
@@ -488,7 +496,6 @@ export default class IscnRegisterForm extends Vue {
     this.iscnFee =  new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9);
-    this.totalFee = this.iscnFee.plus(this.arweaveFeePlusGas)
   }
 
   async onSubmit(): Promise<void> {
@@ -554,7 +561,7 @@ export default class IscnRegisterForm extends Vue {
 
   async submitToISCN(): Promise<void> {
     this.uploadStatus = 'Loading'
-    await this.calculateTotalFee()
+    await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.uploadStatus = ''
