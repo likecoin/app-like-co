@@ -546,6 +546,7 @@ export default class IscnRegisterForm extends Vue {
         },
       );
       this.uploadArweaveId = arweaveId;
+      this.$emit('arweaveUploaded', { arweaveId })
     } catch (err) {
       console.error(err);
     }

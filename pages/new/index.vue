@@ -10,6 +10,7 @@
       :file-blob="fileBlob"
       :is-image="isImage"
       :exif-info="exifInfo"
+      @arweaveUploaded="onArweaveIdUpdate"
       @txBroadcasted="onISCNTxInfo"
     />
     <IscnUploadedInfo
@@ -76,6 +77,10 @@ export default class NewIndexPage extends Vue {
     this.fileBlob = fileBlob;
     this.exifInfo = exifInfo;
     this.state = 'iscn';
+  }
+
+  onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
+    this.arweaveId = arweaveId;
   }
 
   onISCNTxInfo({
