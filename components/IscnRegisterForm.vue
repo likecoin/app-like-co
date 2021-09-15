@@ -88,7 +88,7 @@
         class="mb-[12px]"
       >
         <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
-        <ContentFingerprintLink v-if="arweaveId" :item="formattedArweave" />
+        <ContentFingerprintLink v-if="uploadArweaveId" :item="formattedArweave" />
       </FormField>
       <!-- Dialog -->
       <Dialog
@@ -330,12 +330,13 @@ export default class IscnRegisterForm extends Vue {
   authorUrl: string = ''
   authorWalletAddress: string = ''
   uploadStatus: string = ''
-  uploadIpfsHash: string = this.ipfsHash
-  uploadArweaveId: string = this.arweaveId
+  uploadIpfsHash: string = this.ipfsHash || ''
+  uploadArweaveId: string = this.arweaveId || ''
   error: string = ''
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
+  iscnFee = new BigNumber(0)
   totalFee = new BigNumber(0)
   balance = new BigNumber(0)
   debouncedCalculateTotalFee = debounce(this.calculateTotalFee, 400)
@@ -394,7 +395,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get formattedArweave() {
-    return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.arweaveId })
+    return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.uploadArweaveId })
   }
 
   get errorMsg() {
@@ -484,15 +485,17 @@ export default class IscnRegisterForm extends Vue {
     const { iscnFee, gas: iscnGasEstimation } = estimation;
     const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
     const iscnFeeNanolike = iscnFee.amount[0]
-    this.totalFee = new BigNumber(iscnFeeNanolike)
+    this.iscnFee =  new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
-      .shiftedBy(-9)
-      .plus(this.arweaveFeePlusGas)
+      .shiftedBy(-9);
+    this.totalFee = this.iscnFee.plus(this.arweaveFeePlusGas)
   }
 
   async onSubmit(): Promise<void> {
     this.error = ''
-    if (!this.arweaveId) await this.submitToArweave();
+    if (!this.uploadArweaveId) {
+      await this.submitToArweave();
+    }
     await this.submitToISCN()
   }
 
@@ -551,7 +554,7 @@ export default class IscnRegisterForm extends Vue {
   async submitToISCN(): Promise<void> {
     this.uploadStatus = 'Loading'
     await this.calculateTotalFee()
-    if (this.balance.lt(this.totalFee)) {
+    if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.uploadStatus = ''
       return
