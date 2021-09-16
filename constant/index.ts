@@ -26,7 +26,10 @@ export const ISCN_PREFIX = `iscn://${ISCN_REGISTRY_NAME}`;
 
 export const LIKER_LAND_URL = 'https://liker.land/'
 
-export const RAWDATA_URL_PRODUCTION = 'https://mainnet-node.like.co/txs?iscn_record.iscn_id='
-export const RAWDATA_URL_STAGING = 'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id='
+export const RAWDATA_URL = {
+    text:'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id=',
+    prod:'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
+}
+export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET ? RAWDATA_URL.text : RAWDATA_URL.prod
 
 export const BIG_DIPPER_TRANSACTIONS = 'https://likecoin.bigdipper.live/transactions/'

@@ -202,21 +202,26 @@
             <IconDiverMini class="my-[12px]" />
             <!-- url -->
             <FormField
-              v-if="stakeholderInfo.authorUrl.length"
+              v-if="stakeholderInfo.authorUrl"
               :label="$t('iscn.meta.stakeholders.url')"
             >
-              <Link v-for="url in stakeholderInfo.authorUrl" :key="url.key" :href="url.content">{{ url.content }}</Link>
+              <Link
+                v-for="url in stakeholderInfo.authorUrl"
+                :key="url.key"
+                :href="url"
+                >{{ url }}</Link
+              >
             </FormField>
             <IconDiverMini class="my-[12px]" />
             <!-- wallet address -->
             <FormField
-              v-if="stakeholderInfo.authorWalletAddress.length"
+              v-if="stakeholderInfo.authorWalletAddress"
               :label="$t('iscn.meta.stakeholders.wallet')"
               content-classes="flex flex-row"
               >
               <Button
-                v-for="address in stakeholderInfo.authorWalletAddress"
-                :key="address.content"
+                v-for="wallet in stakeholderInfo.authorWalletAddress"
+                :key="wallet.address"
                 class="mr-[8px] mb-[4px]"
                 size="mini"
                 preset="tertiary"
@@ -225,12 +230,13 @@
                 type="button"
                 content-class="font-medium ml-[-4px]"
                 prepend-class="font-bold"
-                @click="copyWalletAddress"
               >
                 <template #prepend>{{
-                  $t('iscn.meta.stakeholders.wallet.LIKE')
+                  wallet.type === 'cosmos'
+                    ? $t('iscn.meta.stakeholders.wallet.LIKE')
+                    : $t('iscn.meta.stakeholders.wallet.ETH')
                 }}</template>
-                {{ address.content | ellipsis }}
+                {{ wallet.address | ellipsis }}
               </Button>
             </FormField>
           </Card>
@@ -257,8 +263,7 @@ import {
   LIKER_LAND_URL,
   ISCN_PREFIX,
   BIG_DIPPER_TRANSACTIONS,
-  RAWDATA_URL_PRODUCTION,
-  RAWDATA_URL_STAGING,
+  ISCN_TX_RAW_DATA_ENDPOINT,
 } from '~/constant'
 
 const iscnModule = namespace('iscn')
@@ -316,7 +321,6 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
-    console.log(this.record)
     this.txHash = await this.fetchTxHash()
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
@@ -378,45 +382,54 @@ export default class ViewIscnIdPage extends Vue {
     return this.record.stakeholders
   }
 
-  get likerIdURL(){
-     return LIKER_LAND_URL + this.stakeholderInfo.likerId
+  get likerIdURL() {
+    return `${LIKER_LAND_URL}${this.stakeholderInfo.likerId}`
   }
 
   get transactionsURL() {
-    return BIG_DIPPER_TRANSACTIONS + this.txHash
+    return `${BIG_DIPPER_TRANSACTIONS}${this.txHash}`
   }
 
-  get rawDataURL(){
-    return this.url + this.iscnId
+  get rawDataURL() {
+    return `${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`
   }
 
   async fetchTxHash() {
-    let txHash = await fetch(RAWDATA_URL_PRODUCTION + this.iscnId)
-      .then((res) => res.json())
-    if (!txHash.txs.length) {
-      txHash = await fetch(RAWDATA_URL_STAGING + this.iscnId)
-        .then((res) => res.json())
-        .then((res) => res.txs[0].txhash)
-      this.url = RAWDATA_URL_STAGING
-    } else {
-      this.url = RAWDATA_URL_PRODUCTION
-      return txHash.txs[0].txhash
-    }
+    const txHash = await this.$axios.get(`${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`)
+      .then((res) =>this.getTxHash(res.data.txs))
     return txHash
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTxHash(item: any) {
+    let txhash = ''
+    item.forEach((element: any, i: any) => {
+      element.logs.forEach((logs: any) => {
+        logs.events.forEach((events: any) => {
+          events.attributes.forEach((attributes: any) => {
+            if (
+              attributes.key === 'action' &&
+              attributes.value === 'create_iscn_record'
+            ) {
+              txhash = item[i].txhash
+            }
+          })
+        })
+      })
+    })
+    return txhash
   }
 
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
     this.stakeholderInfo.id = this.stakeholders[index].entity.id
     this.stakeholderInfo.likerId = this.stakeholders[index].entity.likerId
-    this.stakeholderInfo.authorDescription = this.stakeholders[index].entity.authorDescription
-    this.stakeholderInfo.authorWalletAddress = this.stakeholders[index].entity.authorWalletAddress
+    this.stakeholderInfo.authorDescription =
+      this.stakeholders[index].entity.authorDescription
+    this.stakeholderInfo.authorWalletAddress =
+      this.stakeholders[index].entity.authorWalletAddress
     this.stakeholderInfo.authorUrl = this.stakeholders[index].entity.url
     this.stakeholderInfo.authorName = this.stakeholders[index].entity.name
-  }
-
-  copyWalletAddress() {
-    this.isOpenCopiedAlert = true
   }
 }
 </script>

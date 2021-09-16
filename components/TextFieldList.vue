@@ -2,7 +2,7 @@
   <div>
     <div
       v-for="(items, i) in value"
-      :key="items.key"
+      :key="items.id"
       :class="['flex', 'flex-row', 'items-center', 'justify-center']"
     >
       <div v-if="$slots.prepend" class="mr-[4px]">
@@ -39,40 +39,37 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Model, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop, Model} from 'vue-property-decorator'
 
 @Component
 export default class TextFieldList extends Vue {
   @Prop(String) readonly text!: String
+
   @Prop(String) readonly placeholder!: String
+
   @Prop(String) readonly textPreset!: String
+
   @Prop(String) readonly labelTag!: String
-  @Prop({default:false}) readonly confirm!: boolean
 
   @Model('change', { type: Array, default: () => [] }) value!: Array<object>
 
   created() {
-    this.inputValue = this.value
-    if(!this.value.length){
+    this.inputValue.content = this.value
+    if (!this.value.length) {
       this.value.push({
-      content: '',
-    })
+        content: '',
+        id: 1,
+      })
     }
   }
 
-  @Watch('authorUrl')
-  onValueChange() {
-    this.inputValue = this.value
-  }
-
-  inputValue: any = [{content: ''}]
+  inputValue: any = [{ content: '', id: 1 }]
 
   addFields() {
-    this.deleteEmptyField()
     this.value.push({
       content: '',
+      id: Date.now(),
     })
-    console.log(this.value)
   }
 
   deleteEmptyField() {
@@ -83,16 +80,10 @@ export default class TextFieldList extends Vue {
         }
       })
     }
-    this.emitChange()
   }
 
   deleteField(index: number) {
     this.value.splice(index, 1)
-    this.emitChange()
-  }
-
-  emitChange() {
-    this.$emit('change', this.value)
   }
 }
 </script>

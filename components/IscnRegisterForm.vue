@@ -239,12 +239,16 @@
         preset="warn"
       />
       <!-- Dialog -->
-      <Dialog
-        v-model="isOpenAuthorDialog"
-        :has-padding="false"
-        preset="custom"
-      >
-        <Card class="flex flex-col w-[616px] max-h-[75vh] overflow-y-scroll">
+      <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
+        <Card
+          class="
+            flex flex-col
+            w-[616px]
+            max-h-[75vh]
+            pb-[80px]
+            overflow-y-scroll
+          "
+        >
           <Label
             class="w-min mb-[16px]"
             :text="$t('IscnRegisterForm.title.editAuthor')"
@@ -259,21 +263,32 @@
             </template>
           </Label>
           <!-- name -->
-          <FormField :label="$t('IscnRegisterForm.label.name')">
+          <FormField
+            class="mb-[24px]"
+            content-classes="flex flex-row flex-nowarp items-center"
+            :label="$t('IscnRegisterForm.label.name')"
+          >
             <TextField
               v-model="authorName"
+              :size="40"
+              class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
             />
+            <Selector
+              class="h-[40px] w-[52px] ml-[8px] z-[1000]"
+              @input="setAuthorName"
+            />
           </FormField>
-          <FormField :label="$t('IscnRegisterForm.label.likerID')">
+          <FormField class="mb-[16px]" :label="$t('IscnRegisterForm.label.likerID')">
             <TextField
               v-model="likerId"
+              :size="40"
               :placeholder="$t('IscnRegisterForm.placeholder.likerID')"
             />
           </FormField>
           <FormField
             :label="$t('IscnRegisterForm.label.description')"
-            class="mb-[12px]"
+            class="mb-[24px]"
           >
             <TextField
               v-model="authorDescription"
@@ -282,19 +297,18 @@
             />
           </FormField>
           <!-- url -->
-          <FormField :label="$t('IscnRegisterForm.label.url')">
+          <FormField class="mb-[24px]" :label="$t('IscnRegisterForm.label.url')">
             <TextFieldList
               v-model="authorUrl"
+              :size="40"
               :text="$t('IscnRegisterForm.label.url')"
               :placeholder="$t('IscnRegisterForm.placeholder.url')"
             />
           </FormField>
           <!-- wallet address -->
           <FormField :label="$t('IscnRegisterForm.label.wallet')">
-            <TextFieldList
+            <WalletFieldList
               v-model="authorWalletAddress"
-              :text="$t('IscnRegisterForm.label.wallet')"
-              :placeholder="$t('IscnRegisterForm.placeholder.wallet')"
             />
           </FormField>
           <!-- submit btn -->
@@ -402,11 +416,13 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get authorUrls() {
-    return this.authors.map((a) => a.url)
+    return this.authors.map((a) => a.url.map((b: any) => b.content))
   }
 
   get authorWalletAddresses() {
-    return this.authors.map((a) => a.wallet)
+    return this.authors.map((a) =>
+      a.wallet.map((b: any) => ({ address: b.content, type: b.type })),
+    )
   }
 
   get likerIds() {
@@ -515,6 +531,10 @@ export default class IscnRegisterForm extends Vue {
     this.likerId = ''
     this.authorDescription = ''
     this.activeEditingAuthorIndex = -1
+  }
+
+  setAuthorName(value: string) {
+    this.authorName = value
   }
 
   async calculateTotalFee(): Promise<void> {

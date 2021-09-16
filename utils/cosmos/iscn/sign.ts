@@ -40,7 +40,17 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName = authorNames[i]
       const authorUrl = authorUrls[i]
-      const authorId = authorWallets[i]
+      let authorId = ''
+      authorWallets[i].forEach((a: any) => {
+        if(a.type === 'cosmos'){
+          authorId =`did:cosmos:${a.address.slice(6)}`
+        }else if (a.type ==='eth' && !authorId ){
+          authorId = `did:eth:${a.address}`
+        }else{
+          return ''
+        }
+        return undefined
+      })
       const authorWalletAddress = authorWallets[i]
       const likerId = likerIds[i]
       const authorDescription = descriptions[i]
@@ -48,7 +58,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       if (isNonEmpty) {
         stakeholders.push({
             entity: {
-              '@id': authorId ? `did:cosmos:${authorId.slice(6)}` : authorUrl || authorName,
+              '@id': authorId || authorUrl || authorName,
                 name: authorName,
                 url: authorUrl,
                 authorWalletAddress,
