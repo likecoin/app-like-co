@@ -35,35 +35,38 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
-  const stakeholders = []
+  const stakeholders:any = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName = authorNames[i]
       const authorUrl = authorUrls[i]
       let authorId = ''
+      const authorWalletAddress:any = []
+      const sameAs:any = []
       authorWallets[i].forEach((a: any) => {
-        if(a.type === 'cosmos'){
-          authorId =`did:cosmos:${a.address.slice(6)}`
-        }else if (a.type ==='eth' && !authorId ){
+        if (a.type === 'cosmos') {
+          authorId = `did:cosmos:${a.address.slice(6)}`
+          authorWalletAddress.push({ address:authorId,type:a.type })
+          sameAs.push(authorId)
+        } else if (a.type === 'eth' && !authorId) {
           authorId = `did:eth:${a.address}`
-        }else{
-          return ''
+          authorWalletAddress.push({ address:authorId,type:a.type })
+          sameAs.push(authorId)
         }
-        return undefined
       })
-      const authorWalletAddress = authorWallets[i]
-      const likerId = likerIds[i]
-      const authorDescription = descriptions[i]
+      const likerId = `https://like.co/${likerIds[i]}`
+      const description = descriptions[i]
       const isNonEmpty = authorUrl || authorName || authorId
       if (isNonEmpty) {
         stakeholders.push({
             entity: {
               '@id': authorId || authorUrl || authorName,
-                name: authorName,
-                url: authorUrl,
-                authorWalletAddress,
-                likerId,
-                authorDescription,
+              name: authorName,
+              url: authorUrl,
+              walletAddress: authorWalletAddress,
+              likerId,
+              description,
+              sameAs,
             },
             rewardProportion: 1,
             contributionType: 'http://schema.org/author',

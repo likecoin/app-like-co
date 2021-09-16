@@ -160,7 +160,7 @@ export default class IscnUploadedInfo extends Vue {
   }
 
    get transactionsURL(){
-     return BIG_DIPPER_TRANSACTIONS + this.iscnHash
+     return `${BIG_DIPPER_TRANSACTIONS}${this.iscnHash}`
    }
 
   async mounted() {

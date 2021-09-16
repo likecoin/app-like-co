@@ -183,7 +183,7 @@
                 :label="$t('iscn.meta.stakeholders.likerId')"
                 class="w-[50%] my-[12px]"
               >
-                <Link :href="likerIdURL">{{
+                <Link :href="stakeholderInfo.likerId">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>
@@ -260,7 +260,6 @@ import { isCosmosTransactionHash } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import {
-  LIKER_LAND_URL,
   ISCN_PREFIX,
   BIG_DIPPER_TRANSACTIONS,
   ISCN_TX_RAW_DATA_ENDPOINT,
@@ -382,10 +381,6 @@ export default class ViewIscnIdPage extends Vue {
     return this.record.stakeholders
   }
 
-  get likerIdURL() {
-    return `${LIKER_LAND_URL}${this.stakeholderInfo.likerId}`
-  }
-
   get transactionsURL() {
     return `${BIG_DIPPER_TRANSACTIONS}${this.txHash}`
   }
@@ -401,35 +396,39 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getTxHash(item: any) {
-    let txhash = ''
-    item.forEach((element: any, i: any) => {
-      element.logs.forEach((logs: any) => {
-        logs.events.forEach((events: any) => {
-          events.attributes.forEach((attributes: any) => {
-            if (
-              attributes.key === 'action' &&
-              attributes.value === 'create_iscn_record'
-            ) {
-              txhash = item[i].txhash
-            }
-          })
-        })
-      })
-    })
-    return txhash
-  }
+  getTxHash(items: any) {
+      const index = items.findIndex((item: any) =>
+        item.logs.find((log: any) =>
+          log.events.find((event: any) =>
+            event.attributes.some(
+              (attribute: any) =>
+                attribute.key === 'action' &&
+                attribute.value === 'create_iscn_record',
+            ),
+          ),
+        ),
+      )
+      return items[index].txhash
+    }
 
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
-    this.stakeholderInfo.id = this.stakeholders[index].entity.id
-    this.stakeholderInfo.likerId = this.stakeholders[index].entity.likerId
-    this.stakeholderInfo.authorDescription =
-      this.stakeholders[index].entity.authorDescription
-    this.stakeholderInfo.authorWalletAddress =
-      this.stakeholders[index].entity.authorWalletAddress
-    this.stakeholderInfo.authorUrl = this.stakeholders[index].entity.url
-    this.stakeholderInfo.authorName = this.stakeholders[index].entity.name
+    const {
+      id,
+      likerId,
+      description: authorDescription,
+      walletAddress: authorWalletAddress,
+      url: authorUrl,
+      name: authorName,
+    } = this.stakeholders[index].entity
+    this.stakeholderInfo = {
+      id,
+      likerId,
+      authorDescription,
+      authorWalletAddress,
+      authorUrl,
+      authorName,
+    }
   }
 }
 </script>
