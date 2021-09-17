@@ -230,13 +230,18 @@
                 type="button"
                 content-class="font-medium ml-[-4px]"
                 prepend-class="font-bold"
+                @click="handleCopy(wallet.address, wallet.type)"
               >
                 <template #prepend>{{
                   wallet.type === 'cosmos'
                     ? $t('iscn.meta.stakeholders.wallet.LIKE')
                     : $t('iscn.meta.stakeholders.wallet.ETH')
                 }}</template>
-                {{ wallet.address | ellipsis }}
+                 {{
+                  wallet.type === 'cosoms'
+                    ? wallet.address.replace(/(did:|:)/g, '')
+                    : wallet.address.replace(/(did:|eth:|:)/g, '') | ellipsis
+                }}
               </Button>
             </FormField>
           </Card>
@@ -246,7 +251,11 @@
           :text="$t('iscn.meta.stakeholders.wallet.copied')"
           preset="success"
           :timeout="2000"
-        />
+        >
+          <template #prepend>
+            <IconDone/>
+          </template>
+        </Snackbar>
       </div>
     </div>
   </Page>
@@ -430,5 +439,31 @@ export default class ViewIscnIdPage extends Vue {
       authorName,
     }
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleCopy(address: string, type: string) {
+    let text = ''
+    if (type === 'cosmos') {
+      text = address.replace(/(did:|:)/g, '')
+    } else {
+      text = address.replace(/(did:|eth:|:)/g, '')
+    }
+    const copyText = document.createElement('p')
+    copyText.textContent = text
+    document.body.appendChild(copyText)
+
+    const selection = document.getSelection()
+    const range = document.createRange()
+
+    range.selectNode(copyText)
+    selection!.removeAllRanges()
+    selection!.addRange(range)
+    document.execCommand('copy')
+    this.isOpenCopiedAlert = true
+
+    selection!.removeAllRanges()
+    document.body.removeChild(copyText)
+  }
+
 }
 </script>

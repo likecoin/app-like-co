@@ -46,11 +46,11 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       authorWallets[i].forEach((a: any) => {
         if (a.type === 'cosmos') {
           authorId = `did:cosmos:${a.address.slice(6)}`
-          authorWalletAddress.push({ address:authorId,type:a.type })
+          authorWalletAddress.push({ address: authorId, type: a.type })
           sameAs.push(authorId)
-        } else if (a.type === 'eth' && !authorId) {
+        } else if (a.type === 'eth') {
           authorId = `did:eth:${a.address}`
-          authorWalletAddress.push({ address:authorId,type:a.type })
+          authorWalletAddress.push({ address: authorId, type: a.type })
           sameAs.push(authorId)
         }
       })
