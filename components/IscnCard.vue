@@ -57,8 +57,8 @@
                 'flex',
                 'items-center',
                 'justify-center',
-                'w-[112px]',
-                'h-[112px]',
+                'w-full',
+                'h-full',
               ]"
             />
           </foreignObject>
@@ -72,6 +72,8 @@
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import P5 from 'p5'
 import QRCode from 'easyqrcodejs'
+
+import { SITE_URL } from '~/constant'
 
 function defaultEasingFunction(x: number): number {
   // Ease In Out Cubic
@@ -107,10 +109,9 @@ export default class IscnCard extends Vue {
   static baseShapeMorphingMagnitude = 4
   static baseColorMultiplier = 10
   static bleeding = 5
-  static qrCodeSize = 122
+  static qrCodeSize = 128
   static qrCodeColor = '#333'
   static qrCodeLogoSize = 22
-  static qrCodeLogoQuietZoneSize = 4
   static qrCodePositionZoneColor = '#343434'
 
   /**
@@ -234,11 +235,19 @@ export default class IscnCard extends Vue {
 
   get qrCodeSizeProps() {
     return {
-      x: this.isPortrait ? 84 : 224,
-      y: this.isPortrait ? 224 : 84,
-      width: 112,
-      height: 112,
+      x: this.isPortrait
+        ? (IscnCard.baseHeight - IscnCard.qrCodeSize) / 2
+        : (IscnCard.baseWidth - IscnCard.qrCodeSize) / 2,
+      y: this.isPortrait
+        ? (IscnCard.baseWidth - IscnCard.qrCodeSize) / 2
+        : (IscnCard.baseHeight - IscnCard.qrCodeSize) / 2,
+      width: IscnCard.qrCodeSize,
+      height: IscnCard.qrCodeSize,
     }
+  }
+
+  get qrCodeContent() {
+    return SITE_URL.concat(`/view/${encodeURIComponent(this.recordID)}`)
   }
 
   get borderProps() {
@@ -547,14 +556,13 @@ export default class IscnCard extends Vue {
 
     if (!this.qrcode) {
       this.qrcode = new QRCode(this.$refs.qrcode, {
-        text: this.recordID,
+        text: this.qrCodeContent,
         width: IscnCard.qrCodeSize,
         height: IscnCard.qrCodeSize,
         colorDark: IscnCard.qrCodeColor,
         colorLight: 'transparent',
         drawer: 'svg',
         correctLevel: QRCode.CorrectLevel.H,
-        quietZone: IscnCard.qrCodeLogoQuietZoneSize,
         PO: IscnCard.qrCodePositionZoneColor,
         PI: IscnCard.qrCodePositionZoneColor,
         logo: '/images/iscn-card/logo.svg',
@@ -565,7 +573,7 @@ export default class IscnCard extends Vue {
         },
       })
     } else {
-      this.qrcode.makeCode(this.recordID)
+      this.qrcode.makeCode(this.qrCodeContent)
     }
   }
 
