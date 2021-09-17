@@ -8,7 +8,7 @@
         class="fixed inset-0"
         @click="close"
       />
-      <div class="fixed">
+      <div class="fixed bottom-[40px]">
         <div :class="containerWrapperClasses">
           <Label
             class="w-min"
@@ -92,12 +92,9 @@ export default class Snackbar extends Vue {
     return [
       'absolute',
       'inset-x-0',
-      'top-[80vh]',
       'flex',
       'justify-center',
-      'min-h-screen',
-      'px-[8px]',
-      'py-[80px]',
+      'max-h-screen',
       this.preset,
     ]
   }
@@ -114,6 +111,7 @@ export default class Snackbar extends Vue {
       'pl-[24px]',
       'pr-[27px]',
       'rounded-[24px]',
+      'shadow-popup',
       this.isError ? 'bg-red text-white' : 'bg-white',
     ]
   }
