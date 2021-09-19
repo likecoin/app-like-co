@@ -130,6 +130,9 @@
           >
             <TextField
               v-model="name"
+              :error-message=" !checkedRegisterInfo || name
+                ? undefined
+                : $t('IscnRegisterForm.error.titleIsEmpty')"
               :placeholder="$t('IscnRegisterForm.placeholder.iscn')"
             />
           </FormField>
@@ -140,6 +143,9 @@
             <TextField
               v-model="description"
               :is-textarea="true"
+              :error-message=" !checkedRegisterInfo || description
+                ? undefined
+                : $t('IscnRegisterForm.error.descriptionIsEmpty')"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
@@ -261,19 +267,23 @@
           <!-- name -->
           <FormField
             class="mb-[24px]"
-            content-classes="flex flex-row flex-nowarp items-center"
+            content-classes="flex flex-row flex-nowarp items-top"
             :label="$t('IscnRegisterForm.label.name')"
           >
             <TextField
               v-model="authorName"
+              :error-message="!checkedAuthorInfo || authorName
+                ? undefined
+                : $t('IscnRegisterForm.error.authorNameIsEmpty')"
               :size="40"
               class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
             />
-            <Selector
+            <!-- hide for now -->
+            <!-- <Selector
               class="h-[40px] w-[52px] ml-[8px] z-[1000]"
               @input="setAuthorName"
-            />
+            /> -->
           </FormField>
           <FormField class="mb-[16px]" :label="$t('IscnRegisterForm.label.likerID')">
             <TextField
@@ -388,6 +398,9 @@ export default class IscnRegisterForm extends Vue {
   isOpenWarningSnackbar = false
   activeEditingAuthorIndex = -1
 
+  checkedAuthorInfo = false
+  checkedRegisterInfo = false
+
   @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateTotalFee()
@@ -478,6 +491,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   handleOpenAuthorDialog() {
+    this.checkedAuthorInfo = false
     this.isOpenAuthorDialog = true
     this.initAuthorInfo()
   }
@@ -510,6 +524,10 @@ export default class IscnRegisterForm extends Vue {
   }
 
   confirmAuthorChange() {
+    this.checkedAuthorInfo = true
+    if(!this.authorName){
+      return
+    }
     this.authorWalletAddress.forEach((a: any, i: number) => {
       if (!a.content) {
         this.authorWalletAddress.splice(i, 1)
@@ -561,6 +579,10 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
+    this.checkedRegisterInfo = true
+    if(!this.name || !this.description) {
+      return
+    }
     this.error = ''
     if (!this.isIPFSLink) await this.submitToIPFS()
     await this.submitToISCN()
