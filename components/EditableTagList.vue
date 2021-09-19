@@ -65,6 +65,12 @@
           'bg-transparent',
           'outline-none',
         ]"
+        @keypress="
+          (e) => {
+            if (e.keyCode === 32) {
+              e.returnValue = false
+            }
+          }"
         @blur="blurInput"
       />
       <div
@@ -118,6 +124,7 @@ export default class EditableTagList extends Vue {
   }
 
   blurInput() {
+    if(this.currentInput === ' ') return
     if (this.currentInput.length) {
       this.saveChip()
       this.$nuxt.$nextTick(() => this.$refs.input.focus())
@@ -127,6 +134,7 @@ export default class EditableTagList extends Vue {
   }
 
   saveChip() {
+    if(this.currentInput === '') return
     if (this.tags.includes(this.currentInput)) return
     this.tags.push(this.currentInput)
     this.emitChange()
