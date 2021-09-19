@@ -79,12 +79,17 @@ export default class Snackbar extends Vue {
   @ModelSync('open', 'toggle', { type: Boolean, default: false })
   isOpen!: boolean
 
+  setTime: any
+
   @Watch('isOpen')
   timeOut() {
-    if (this.timeout) {
-      setTimeout(() => {
+    if (this.timeout && this.isOpen) {
+      this.setTime = setTimeout(() => {
         this.close()
       }, this.timeout)
+    }
+    if (!this.isOpen) {
+      clearTimeout(this.setTime)
     }
   }
 
