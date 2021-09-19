@@ -199,10 +199,13 @@
                 preset="p5"
               />
             </FormField>
-            <IconDiverMini class="my-[12px]" />
+            <IconDiverMini
+              v-if="stakeholderInfo.authorUrl.length"
+              class="my-[12px]"
+            />
             <!-- url -->
             <FormField
-              v-if="stakeholderInfo.authorUrl"
+              v-if="stakeholderInfo.authorUrl.length"
               :label="$t('iscn.meta.stakeholders.url')"
             >
               <Link
@@ -212,10 +215,13 @@
                 >{{ url }}</Link
               >
             </FormField>
-            <IconDiverMini class="my-[12px]" />
+            <IconDiverMini
+              v-if="stakeholderInfo.authorWalletAddress.length"
+              class="my-[12px]"
+            />
             <!-- wallet address -->
             <FormField
-              v-if="stakeholderInfo.authorWalletAddress"
+              v-if="stakeholderInfo.authorWalletAddress.length"
               :label="$t('iscn.meta.stakeholders.wallet')"
               content-classes="flex flex-row"
             >
@@ -232,15 +238,13 @@
                 prepend-class="font-bold"
                 @click="handleCopy(wallet.address, wallet.type)"
               >
-                <template #prepend>{{
+                <template #prepend>
+                  {{$t(`iscn.meta.stakeholders.wallet.${wallet.type}`)}}
+                </template>
+                {{
                   wallet.type === 'cosmos'
-                    ? $t('iscn.meta.stakeholders.wallet.LIKE')
-                    : $t('iscn.meta.stakeholders.wallet.ETH')
-                }}</template>
-                 {{
-                  wallet.type === 'cosoms'
                     ? wallet.address.replace(/(did:|:)/g, '')
-                    : wallet.address.replace(/(did:|eth:|:)/g, '') | ellipsis
+                    : wallet.address.split(`did:${wallet.type}:`).join('') | ellipsis
                 }}
               </Button>
             </FormField>
@@ -273,6 +277,7 @@ import {
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
   ISCN_TX_RAW_DATA_ENDPOINT,
+  WALLET_TYPE_REPLACER,
 } from '~/constant'
 
 const iscnModule = namespace('iscn')
@@ -305,7 +310,6 @@ export default class ViewIscnIdPage extends Vue {
   stakeholderInfo = {
     authorWalletAddress: [],
     authorDescription: '',
-    id: '',
     likerId: '',
     authorName: '',
     authorUrl: [],
@@ -423,22 +427,50 @@ export default class ViewIscnIdPage extends Vue {
 
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
-    const {
-      id,
-      likerId,
-      description: authorDescription,
-      walletAddress: authorWalletAddress,
-      url: authorUrl,
-      name: authorName,
-    } = this.stakeholders[index].entity
-    this.stakeholderInfo = {
-      id,
-      likerId,
-      authorDescription,
-      authorWalletAddress,
-      authorUrl,
-      authorName,
+    const stakeholders = this.stakeholders[index].entity
+    
+    if (this.stakeholders[index].entity.identifier) {
+      const { description: authorDescription, name: authorName } = stakeholders
+      const likerId = stakeholders!.url.includes('like.co')
+        ? stakeholders.url.slice(16)
+        : ''
+      const authorWalletAddress: any = []
+      stakeholders.identifier.forEach((a: any) => {
+        authorWalletAddress.push({
+          address: a.value,
+          type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
+        })
+      })
+      const authorUrl = stakeholders.sameAs
+      this.stakeholderInfo = {
+        likerId,
+        authorDescription,
+        authorWalletAddress,
+        authorUrl,
+        authorName,
+      }
+    } else {
+      const authorWalletAddress: any = []
+      authorWalletAddress.push({
+        type: 'cosmos',
+        address: stakeholders['@id'],
+      })
+      const authorUrl: any = []
+      authorUrl.push(stakeholders.url)
+
+      this.stakeholderInfo = {
+        likerId: '',
+        authorDescription: '',
+        authorWalletAddress,
+        authorUrl,
+        authorName: stakeholders.name,
+      }
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getKeyByValue(object: any, value: string) {
+    return Object.keys(object).find((key) => object[key] === value)
   }
 
   // eslint-disable-next-line class-methods-use-this

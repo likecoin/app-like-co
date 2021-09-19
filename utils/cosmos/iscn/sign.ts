@@ -4,6 +4,7 @@ import { ISCNSigningClient, ISCNSignPayload } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { BroadcastTxSuccess } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
+import { WALLET_TYPE_REPLACER } from '~/constant'
 
 let client: ISCNSigningClient | null = null;
 
@@ -35,43 +36,53 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
-  const stakeholders:any = []
+  const stakeholders: any = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
-      const authorName = authorNames[i]
-      const authorUrl = authorUrls[i]
-      let authorId = ''
-      const authorWalletAddress:any = []
-      const sameAs:any = []
+      const authorName: string = authorNames[i]
+      const sameAs: any = []
+      const identifier: any = []
+      const description = descriptions[i]
+      const url: string = likerIds[i]
+        ? `https://like.co/${likerIds[i]}`
+        : authorUrls[i][0] || authorName
+
       authorWallets[i].forEach((a: any) => {
         if (a.type === 'cosmos') {
-          authorId = `did:cosmos:${a.address.slice(6)}`
-          authorWalletAddress.push({ address: authorId, type: a.type })
-          sameAs.push(authorId)
-        } else if (a.type === 'eth') {
-          authorId = `did:eth:${a.address}`
-          authorWalletAddress.push({ address: authorId, type: a.type })
-          sameAs.push(authorId)
+          identifier.push({
+            '@type': 'PropertyValue',
+            propertyID: WALLET_TYPE_REPLACER[a.type],
+            value: `did:cosmos:${a.address.slice(6)}`,
+          })
+        } else {
+          identifier.push({
+            '@type': 'PropertyValue',
+            propertyID: WALLET_TYPE_REPLACER[a.type],
+            value: `did:${a.type}:${a.address}`,
+          })
         }
       })
-      const likerId = `https://like.co/${likerIds[i]}`
-      const description = descriptions[i]
-      const isNonEmpty = authorUrl || authorName || authorId
+      if (authorUrls[i].length) {
+        authorUrls[i].forEach((a: any) => {
+          if (a.length) {
+            sameAs.push(a)
+          }
+        })
+      }
+      const isNonEmpty = url || authorName || identifier
       if (isNonEmpty) {
         stakeholders.push({
-            entity: {
-              '@id': authorId || authorUrl || authorName,
-              name: authorName,
-              url: authorUrl,
-              walletAddress: authorWalletAddress,
-              likerId,
-              description,
-              sameAs,
-            },
-            rewardProportion: 1,
-            contributionType: 'http://schema.org/author',
+          entity: {
+            '@id': identifier.length ? identifier[0].value : url,
+            name: authorName,
+            url,
+            description,
+            sameAs,
+            identifier,
           },
-        )
+          rewardProportion: 1,
+          contributionType: 'http://schema.org/author',
+        })
       }
     }
   }

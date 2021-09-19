@@ -510,6 +510,11 @@ export default class IscnRegisterForm extends Vue {
   }
 
   confirmAuthorChange() {
+    this.authorWalletAddress.forEach((a: any, i: number) => {
+      if (!a.content) {
+        this.authorWalletAddress.splice(i, 1)
+      }
+    })
     const newAuthor = {
       name: this.authorName,
       wallet: this.authorWalletAddress,
