@@ -24,12 +24,23 @@ export const ISCN_REGISTRY_NAME = 'likecoin-chain';
 
 export const ISCN_PREFIX = `iscn://${ISCN_REGISTRY_NAME}`;
 
-export const LIKER_LAND_URL = 'https://liker.land/'
+export const LIKER_LAND_URL = 'https://liker.land/';
 
 export const RAWDATA_URL = {
-    text:'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id=',
-    prod:'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
-}
-export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET ? RAWDATA_URL.text : RAWDATA_URL.prod
+    text: 'https://node.iscn-dev-2.like.co/iscn/records/id?iscn_id=',
+    prod: 'https://mainnet-node.like.co/iscn/records/id?iscn_id=',
+  }
+  
+  export const RAWDATA_TX_URL = {
+    text: 'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id=',
+    prod: 'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
+  }
+  
+  export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
+    ? RAWDATA_URL.text
+    : RAWDATA_URL.prod
+  export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
+    ? RAWDATA_TX_URL.text
+    : RAWDATA_TX_URL.prod
 
-export const BIG_DIPPER_TRANSACTIONS = 'https://likecoin.bigdipper.live/transactions/'
+export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';

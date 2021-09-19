@@ -218,7 +218,7 @@
               v-if="stakeholderInfo.authorWalletAddress"
               :label="$t('iscn.meta.stakeholders.wallet')"
               content-classes="flex flex-row"
-              >
+            >
               <Button
                 v-for="wallet in stakeholderInfo.authorWalletAddress"
                 :key="wallet.address"
@@ -270,7 +270,8 @@ import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import {
   ISCN_PREFIX,
-  BIG_DIPPER_TRANSACTIONS,
+  BIG_DIPPER_TX_BASE_URL,
+  ISCN_RAW_DATA_ENDPOINT,
   ISCN_TX_RAW_DATA_ENDPOINT,
 } from '~/constant'
 
@@ -391,22 +392,22 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get transactionsURL() {
-    return `${BIG_DIPPER_TRANSACTIONS}${this.txHash}`
+    return `${BIG_DIPPER_TX_BASE_URL}${this.txHash}`
   }
 
   get rawDataURL() {
-    return `${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`
+    return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
   }
 
   async fetchTxHash() {
-    const txHash = await this.$axios.get(`${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`)
-      .then((res) =>this.getTxHash(res.data.txs))
+    const res = await this.$axios.get(`${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`)
+    const txHash = this.getTxHash(res.data.txs)
     return txHash
   }
 
   // eslint-disable-next-line class-methods-use-this
   getTxHash(items: any) {
-      const index = items.findIndex((item: any) =>
+      const targetItem = items.find((item: any) =>
         item.logs.find((log: any) =>
           log.events.find((event: any) =>
             event.attributes.some(
@@ -417,7 +418,7 @@ export default class ViewIscnIdPage extends Vue {
           ),
         ),
       )
-      return items[index].txhash
+      return targetItem.txhash
     }
 
   showStakeholder(index: number) {

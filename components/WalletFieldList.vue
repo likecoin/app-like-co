@@ -3,7 +3,7 @@
     <div
       v-for="(items, i) in value"
       :key="items.id"
-      class="flex flex-row items-center justify-center "
+      class="flex flex-row items-center justify-center"
     >
       <button
         :class="[
@@ -64,43 +64,14 @@
           "
         >
           <div
-            class="
-              w-[100%]
-              flex
-              items-center
-              justify-center
-              mb-[6px]
-              pt-[10px]
-              pb-[10px]
-              rounded-[6px]
-              hover:bg-light-gray
-              active:bg-medium-gray
-              transition
-              duration-100
-            "
-            @click="
-              items.type = 'cosmos'
-              items.isOpenOptions = false"
+            :class="optionsClass"
+            @click="handleSelectType('cosmos',i)"
           >
             <IconLike />
           </div>
           <div
-            class="
-              w-[100%]
-              flex
-              items-center
-              justify-center
-              pt-[10px]
-              pb-[10px]
-              rounded-[6px]
-              transition
-              duration-100
-              hover:bg-light-gray
-              active:bg-medium-gray
-            "
-            @click="
-              items.type = 'eth'
-              items.isOpenOptions = false"
+            :class="optionsClass"
+            @click="handleSelectType('eth',i)"
           >
             <IconEthereum />
           </div>
@@ -124,7 +95,6 @@
       class="mx-auto my-[4px]"
       preset="secondary"
       text-preset="p6"
-      :text="text"
       size="mini"
       prepend-class="mr-[4px]"
       @click="addFields"
@@ -142,8 +112,7 @@ import { Vue, Component, Model } from 'vue-property-decorator'
 
 @Component
 export default class WalletFieldList extends Vue {
-
-  @Model('type', { type: Array, default: () => [] }) value!: Array<object>
+  @Model('type', { type: Array, default: () => [] }) value!: Array<any>
 
   isSelecting: boolean = false
   inputValue: any = [
@@ -165,6 +134,29 @@ export default class WalletFieldList extends Vue {
         isOpenOptions: false,
       })
     }
+  }
+
+  get optionsClass() {
+    return [
+      'w-[100%]',
+      'flex',
+      'items-center',
+      'justify-center',
+      'mb-[6px]',
+      'pt-[10px]',
+      'pb-[10px]',
+      'rounded-[6px]',
+      'hover:bg-light-gray',
+      'active:bg-medium-gray',
+      'transition',
+      'duration-100',
+      this.isSelecting,
+    ]
+  }
+
+  handleSelectType(type: string, index: number) {
+    this.value[index].type = type
+    this.value[index].isOpenOptions = false
   }
 
   addFields() {

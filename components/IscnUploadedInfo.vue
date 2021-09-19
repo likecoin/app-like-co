@@ -115,7 +115,7 @@ import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 
 import {
-  BIG_DIPPER_TRANSACTIONS,
+  BIG_DIPPER_TX_BASE_URL,
 } from '~/constant'
 
 const signerModule = namespace('signer')
@@ -160,7 +160,7 @@ export default class IscnUploadedInfo extends Vue {
   }
 
    get transactionsURL(){
-     return `${BIG_DIPPER_TRANSACTIONS}${this.iscnHash}`
+     return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
    }
 
   async mounted() {

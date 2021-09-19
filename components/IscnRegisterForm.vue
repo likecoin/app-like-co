@@ -169,11 +169,7 @@
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
-              @click="
-                () => {
-                  isOpenAuthorDialog = true
-                  initAuthorInfo()
-                }"
+              @click="handleOpenAuthorDialog()"
             >
               <IconAddMini />
             </Button>
@@ -479,6 +475,11 @@ export default class IscnRegisterForm extends Vue {
       likerIds: this.likerIds,
       descriptions: this.descriptions,
     }
+  }
+
+  handleOpenAuthorDialog() {
+    this.isOpenAuthorDialog = true
+    this.initAuthorInfo()
   }
 
   editAuthor(index: number) {

@@ -48,7 +48,7 @@ export default class TextField extends Vue {
   get rootClasses(): any {
     return [
       TextField.presetClasses,
-      this.isTextarea? 'h-[62px] font-semibold resize-none': this.sizeClasses,
+      this.isTextarea ? 'h-[62px] font-semibold resize-none' : this.sizeClasses,
       this.errorClasses,
       {
         'pointer-events-none': this.isDisabled,
