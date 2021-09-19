@@ -200,33 +200,33 @@
               />
             </FormField>
             <IconDiverMini
-              v-if="stakeholderInfo.authorUrl.length"
+              v-if="stakeholderInfo.authorUrls.length"
               class="my-[12px]"
             />
             <!-- url -->
             <FormField
-              v-if="stakeholderInfo.authorUrl.length"
+              v-if="stakeholderInfo.authorUrls.length"
               :label="$t('iscn.meta.stakeholders.url')"
             >
               <Link
-                v-for="url in stakeholderInfo.authorUrl"
+                v-for="url in stakeholderInfo.authorUrls"
                 :key="url.key"
                 :href="url"
                 >{{ url }}</Link
               >
             </FormField>
             <IconDiverMini
-              v-if="stakeholderInfo.authorWalletAddress.length"
+              v-if="stakeholderInfo.authorWalletAddresses.length"
               class="my-[12px]"
             />
             <!-- wallet address -->
             <FormField
-              v-if="stakeholderInfo.authorWalletAddress.length"
+              v-if="stakeholderInfo.authorWalletAddresses.length"
               :label="$t('iscn.meta.stakeholders.wallet')"
               content-classes="flex flex-row"
             >
               <Button
-                v-for="wallet in stakeholderInfo.authorWalletAddress"
+                v-for="wallet in stakeholderInfo.authorWalletAddresses"
                 :key="wallet.address"
                 class="mr-[8px] mb-[4px]"
                 size="mini"
@@ -308,11 +308,11 @@ export default class ViewIscnIdPage extends Vue {
   isOpenAuthorDialog = false
   isOpenCopiedAlert = false
   stakeholderInfo = {
-    authorWalletAddress: [],
+    authorWalletAddresses: [],
     authorDescription: '',
     likerId: '',
     authorName: '',
-    authorUrl: [],
+    authorUrls: [],
   }
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
@@ -434,35 +434,35 @@ export default class ViewIscnIdPage extends Vue {
       const likerId = stakeholders!.url.includes('like.co')
         ? stakeholders.url.slice(16)
         : ''
-      const authorWalletAddress: any = []
+      const authorWalletAddresses: any = []
       stakeholders.identifier.forEach((a: any) => {
-        authorWalletAddress.push({
+        authorWalletAddresses.push({
           address: a.value,
           type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
         })
       })
-      const authorUrl = stakeholders.sameAs
+      const authorUrls = stakeholders.sameAs
       this.stakeholderInfo = {
         likerId,
         authorDescription,
-        authorWalletAddress,
-        authorUrl,
+        authorWalletAddresses,
+        authorUrls,
         authorName,
       }
     } else {
-      const authorWalletAddress: any = []
-      authorWalletAddress.push({
+      const authorWalletAddresses: any = []
+      authorWalletAddresses.push({
         type: 'cosmos',
         address: stakeholders['@id'],
       })
-      const authorUrl: any = []
-      authorUrl.push(stakeholders.url)
+      const authorUrls: any = []
+      authorUrls.push(stakeholders.url)
 
       this.stakeholderInfo = {
         likerId: '',
         authorDescription: '',
-        authorWalletAddress,
-        authorUrl,
+        authorWalletAddresses,
+        authorUrls,
         authorName: stakeholders.name,
       }
     }

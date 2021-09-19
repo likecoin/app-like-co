@@ -40,8 +40,8 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
-      const sameAs: any = []
-      const identifier: any = []
+      const sameAsArray: any = []
+      const identifiers: any = []
       const description = descriptions[i]
       const url: string = likerIds[i]
         ? `https://like.co/${likerIds[i]}`
@@ -49,36 +49,34 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
 
       authorWallets[i].forEach((a: any) => {
         if (a.type === 'cosmos') {
-          identifier.push({
+          identifiers.push({
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
             value: `did:cosmos:${a.address.slice(6)}`,
           })
         } else {
-          identifier.push({
+          identifiers.push({
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
             value: `did:${a.type}:${a.address}`,
           })
         }
       })
-      if (authorUrls[i].length) {
-        authorUrls[i].forEach((a: any) => {
-          if (a.length) {
-            sameAs.push(a)
-          }
-        })
-      }
-      const isNonEmpty = url || authorName || identifier
+      authorUrls[i].forEach((a: any) => {
+        if (a) {
+          sameAsArray.push(a)
+        }
+      })
+      const isNonEmpty = url || authorName || identifiers.length
       if (isNonEmpty) {
         stakeholders.push({
           entity: {
-            '@id': identifier.length ? identifier[0].value : url,
+            '@id': identifiers.length ? identifiers[0].value : url,
             name: authorName,
             url,
             description,
-            sameAs,
-            identifier,
+            sameAs: sameAsArray,
+            identifier: identifiers,
           },
           rewardProportion: 1,
           contributionType: 'http://schema.org/author',
