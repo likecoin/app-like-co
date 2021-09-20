@@ -428,19 +428,16 @@ export default class ViewIscnIdPage extends Vue {
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
     const stakeholders = this.stakeholders[index].entity
-    
+
     if (this.stakeholders[index].entity.identifier) {
       const { description: authorDescription, name: authorName } = stakeholders
       const likerId = stakeholders!.url.includes('like.co')
         ? stakeholders.url.slice(16)
         : ''
-      const authorWalletAddresses: any = []
-      stakeholders.identifier.forEach((a: any) => {
-        authorWalletAddresses.push({
-          address: a.value,
-          type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
-        })
-      })
+      const authorWalletAddresses = stakeholders.identifier.map((a: any) => ({
+        address: a.value,
+        type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
+      }))
       const authorUrls = stakeholders.sameAs
       this.stakeholderInfo = {
         likerId,
@@ -482,7 +479,7 @@ export default class ViewIscnIdPage extends Vue {
     if (type === 'cosmos') {
       text = address.replace(/(did:|:)/g, '')
     } else {
-      text = address.replace(/(did:|eth:|:)/g, '')
+      text = address.replace(new RegExp(`(did:|${type}:|:)`, 'g'), '')
     }
     const copyText = document.createElement('p')
     copyText.textContent = text

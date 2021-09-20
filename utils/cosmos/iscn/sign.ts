@@ -40,33 +40,27 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
-      const sameAsArray: any = []
-      const identifiers: any = []
       const description = descriptions[i]
       const url: string = likerIds[i]
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
 
-      authorWallets[i].forEach((a: any) => {
+      const identifiers = authorWallets[i].map((a: any) => {
         if (a.type === 'cosmos') {
-          identifiers.push({
+          return {
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
             value: `did:cosmos:${a.address.slice(6)}`,
-          })
-        } else {
-          identifiers.push({
-            '@type': 'PropertyValue',
-            propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: `did:${a.type}:${a.address}`,
-          })
+          }
+        }
+        return {
+          '@type': 'PropertyValue',
+          propertyID: WALLET_TYPE_REPLACER[a.type],
+          value: `did:${a.type}:${a.address}`,
         }
       })
-      authorUrls[i].forEach((a: any) => {
-        if (a) {
-          sameAsArray.push(a)
-        }
-      })
+
+      const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
       if (isNonEmpty) {
         stakeholders.push({
