@@ -238,9 +238,10 @@
                 prepend-class="font-bold"
                 @click="handleCopy(wallet.address, wallet.type)"
               >
-                <template #prepend>
-                  {{$t(`iscn.meta.stakeholders.wallet.${wallet.type}`)}}
-                </template>
+                <IconCoin
+                  class="mr-[4px]"
+                  :type="wallet.type"
+                />
                 {{
                   wallet.type === 'cosmos'
                     ? wallet.address.replace(/(did:|:)/g, '')

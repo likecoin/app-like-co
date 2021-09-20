@@ -30,7 +30,7 @@ export const RAWDATA_URL = {
     text: 'https://node.iscn-dev-2.like.co/iscn/records/id?iscn_id=',
     prod: 'https://mainnet-node.like.co/iscn/records/id?iscn_id=',
   }
-  
+
 export const RAWDATA_TX_URL = {
   text: 'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id=',
   prod: 'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
@@ -46,3 +46,9 @@ export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
 export const WALLET_TYPE_REPLACER: any = { cosmos: 'Cosmos Wallet', eth: 'Ethereum Wallet' }
+
+export const WALLET_TYPES = [
+  'cosmos',
+  'btc',
+  'eth',
+]

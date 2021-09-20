@@ -37,8 +37,7 @@
             isSelecting = !isSelecting"
         >
           <div class="w-[20px] mx-[8px]">
-            <IconLike v-if="item.type === 'cosmos'" />
-            <IconEthereum v-if="item.type === 'eth'" />
+            <IconCoin :type="item.type" />
           </div>
           <IconArrowDown />
         </div>
@@ -64,24 +63,20 @@
           "
         >
           <div
+            v-for="type in options"
+            :key="type"
             :class="optionsClass"
-            @click="handleSelectType('cosmos',i)"
+            @click="handleSelectType(type, i)"
           >
-            <IconLike />
-          </div>
-          <div
-            :class="optionsClass"
-            @click="handleSelectType('eth', i)"
-          >
-            <IconEthereum />
+            <IconCoin :type="type" />
           </div>
         </div>
       </button>
       <TextField
         v-model="item.content"
-        :size="40"
         :class="['my-[4px]', 'flex-grow']"
-        :placeholder="item.type === 'cosmos' ? 'cosmos....' : '0x.....'"
+        :size="40"
+        :placeholder="getWalletAddressPlaceholder(item.type)"
         @delete-empty-field="deleteEmptyField"
       />
       <span
@@ -109,6 +104,8 @@
 <script lang="ts">
 import { Vue, Component, Model } from 'vue-property-decorator'
 
+import { WALLET_TYPES } from '~/constant'
+
 @Component
 export default class WalletFieldList extends Vue {
   @Model('type', { type: Array, default: () => [] }) value!: Array<any>
@@ -118,7 +115,7 @@ export default class WalletFieldList extends Vue {
     {
       content: '',
       id: 1,
-      type: 'cosmos',
+      type: WALLET_TYPES[0],
       isOpenOptions: false,
     },
   ]
@@ -129,10 +126,15 @@ export default class WalletFieldList extends Vue {
       this.value.push({
         content: '',
         id: 1,
-        type: 'cosmos',
+        type: WALLET_TYPES[0],
         isOpenOptions: false,
       })
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get options() {
+    return WALLET_TYPES
   }
 
   get optionsClass() {
@@ -151,6 +153,20 @@ export default class WalletFieldList extends Vue {
       'duration-100',
       this.isSelecting,
     ]
+  }
+
+  getWalletAddressPlaceholder(type: string) {
+    switch (type) {
+      case 'like':
+      case 'cosmos':
+        return 'cosmos1...'
+
+      case 'eth':
+        return '0x...'
+
+      default:
+        return this.$t('iscn.meta.stakeholders.wallet.placeholder')
+    }
   }
 
   handleSelectType(type: string, index: number) {
