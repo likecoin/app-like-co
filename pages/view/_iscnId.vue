@@ -210,7 +210,7 @@
             >
               <Link
                 v-for="url in stakeholderInfo.authorUrls"
-                :key="url.key"
+                :key="url"
                 :href="url"
                 >{{ url }}</Link
               >
@@ -451,13 +451,16 @@ export default class ViewIscnIdPage extends Vue {
       }
     } else {
       const authorWalletAddresses: any = []
-      authorWalletAddresses.push({
-        type: 'cosmos',
-        address: stakeholders['@id'],
-      })
+      if (stakeholders['@id']) {
+        authorWalletAddresses.push({
+          type: 'cosmos',
+          address: stakeholders['@id'],
+        })
+      }
       const authorUrls: any = []
-      authorUrls.push(stakeholders.url)
-
+      if (stakeholders.url) {
+        authorUrls.push(stakeholders.url)
+      }
       this.stakeholderInfo = {
         likerId: '',
         authorDescription: '',
