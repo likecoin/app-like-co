@@ -1,8 +1,8 @@
 <template>
   <div>
     <div
-      v-for="(items, i) in value"
-      :key="items.id"
+      v-for="(item, i) in value"
+      :key="item.id"
       class="flex flex-row items-center justify-center"
     >
       <button
@@ -17,12 +17,12 @@
           'rounded-[12px]',
           'box-border',
           'outline-none',
-          items.isOpenOptions ? 'bg-medium-gray' : 'hover:bg-light-gray',
+          item.isOpenOptions ? 'bg-medium-gray' : 'hover:bg-light-gray',
           'transition',
           'duration-150',
           'cursor-pointer',
         ]"
-        @blur="items.isOpenOptions = false"
+        @blur="item.isOpenOptions = false"
       >
         <div
           class="
@@ -33,17 +33,17 @@
             justify-center
           "
           @click="
-            items.isOpenOptions = !items.isOpenOptions
+            item.isOpenOptions = !item.isOpenOptions
             isSelecting = !isSelecting"
         >
           <div class="w-[20px] mx-[8px]">
-            <IconLike v-if="items.type === 'cosmos'" />
-            <IconEthereum v-if="items.type === 'eth'" />
+            <IconLike v-if="item.type === 'cosmos'" />
+            <IconEthereum v-if="item.type === 'eth'" />
           </div>
           <IconArrowDown />
         </div>
         <div
-          v-if="items.isOpenOptions"
+          v-if="item.isOpenOptions"
           class="
             w-[100%]
             absolute
@@ -71,25 +71,24 @@
           </div>
           <div
             :class="optionsClass"
-            @click="handleSelectType('eth',i)"
+            @click="handleSelectType('eth', i)"
           >
             <IconEthereum />
           </div>
         </div>
       </button>
       <TextField
-        v-model="items.content"
+        v-model="item.content"
         :size="40"
         :class="['my-[4px]', 'flex-grow']"
-        :placeholder="items.type === 'cosmos' ? 'comos....' : '0x.....'"
+        :placeholder="item.type === 'cosmos' ? 'cosmos....' : '0x.....'"
         @delete-empty-field="deleteEmptyField"
       />
       <span
         v-if="value.length > 1"
         :class="['ml-[12px]', 'cursor-pointer']"
         @click="deleteField(i)"
-        ><IconCloseMini
-      /></span>
+      ><IconCloseMini /></span>
     </div>
     <Button
       class="mx-auto my-[4px]"
