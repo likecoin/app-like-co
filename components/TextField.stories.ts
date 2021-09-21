@@ -20,7 +20,10 @@ export default {
     size: {
       name: 'size',
       type: { name: 'number', required: false },
-      options: [44, 40],
+      options: [
+        44,
+        40,
+      ],
       defaultValue: 44,
       description: 'Size of TextField, including height and font-weight',
       table: {

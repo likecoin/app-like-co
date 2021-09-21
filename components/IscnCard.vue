@@ -313,7 +313,7 @@ export default class IscnCard extends Vue {
       'ease-out',
       {
         'opacity-0': this.isShowLoadingIndicator,
-        'scale-150': this.isAnimated && this.isQRCodeRendering
+        'scale-150': this.isAnimated && this.isQRCodeRendering,
       },
     ]
   }
