@@ -111,14 +111,12 @@ export default class WalletFieldList extends Vue {
   @Model('type', { type: Array, default: () => [] }) value!: Array<any>
 
   isSelecting: boolean = false
-  inputValue: any = [
-    {
+  inputValue: any = [{
       content: '',
       id: 1,
       type: WALLET_TYPES[0],
       isOpenOptions: false,
-    },
-  ]
+    }]
 
   created() {
     this.inputValue.content = this.value

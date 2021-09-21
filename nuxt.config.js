@@ -105,17 +105,15 @@ export default {
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
     manifest: {
-      lang: 'en'
-    }
+      lang: 'en',
+    },
   },
 
   i18n: {
-    locales: [
-      {
+    locales: [{
         code: 'en',
         file: 'en.json',
-      },
-    ],
+      }],
     defaultLocale: 'en',
     langDir: '~/locales/',
     vuex: false,
