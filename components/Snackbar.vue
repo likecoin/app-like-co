@@ -8,7 +8,7 @@
         class="fixed inset-0"
         @click="close"
       />
-      <div class="fixed">
+      <div class="fixed bottom-[40px]">
         <div :class="containerWrapperClasses">
           <Label
             class="w-min"
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, ModelSync } from 'vue-property-decorator'
+import { Vue, Component, Prop, ModelSync, Watch } from 'vue-property-decorator'
 
 export enum Preset {
   warn = 'warn',
@@ -50,6 +50,9 @@ export default class Snackbar extends Vue {
 
   // Preset of the Snackbar
   @Prop(String) readonly preset!: string
+
+  // Set timeout to close the Snackbar
+  @Prop({ default: 0 }) readonly timeout!: number
 
   // Class of the content wrapper
   @Prop([
@@ -76,16 +79,27 @@ export default class Snackbar extends Vue {
   @ModelSync('open', 'toggle', { type: Boolean, default: false })
   isOpen!: boolean
 
+  setTime: any
+
+  @Watch('isOpen')
+  timeOut() {
+    if (this.timeout && this.isOpen) {
+      this.setTime = setTimeout(() => {
+        this.close()
+      }, this.timeout)
+    }
+    if (!this.isOpen) {
+      clearTimeout(this.setTime)
+    }
+  }
+
   get rootClasses() {
     return [
       'absolute',
       'inset-x-0',
-      'top-[80vh]',
       'flex',
       'justify-center',
-      'min-h-screen',
-      'px-[8px]',
-      'py-[80px]',
+      'max-h-screen',
       this.preset,
     ]
   }
@@ -102,6 +116,7 @@ export default class Snackbar extends Vue {
       'pl-[24px]',
       'pr-[27px]',
       'rounded-[24px]',
+      'shadow-popup',
       this.isError ? 'bg-red text-white' : 'bg-white',
     ]
   }

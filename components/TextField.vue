@@ -1,11 +1,13 @@
 <template>
   <div class="flex flex-col">
-    <input
+    <component
+      :is="tag"
       v-bind="$attrs"
       :class="rootClasses"
       :value="value"
       :placeholder="placeholder"
       @input="$emit('input', $event.target.value)"
+      @blur="$emit('delete-empty-field')"
     />
     <span :class="errorMsgClasses">{{ errorMessage }}</span>
   </div>
@@ -21,6 +23,7 @@ export default class TextField extends Vue {
   @Prop({ default: 44 }) readonly size!: number
   @Prop(String) readonly errorMessage!: string | undefined
   @Prop({ default: false }) readonly isDisabled!: boolean
+  @Prop({ default: false }) readonly isTextarea!: boolean
 
   static presetClasses: Array<string> = [
     'py-[12px]',
@@ -37,10 +40,15 @@ export default class TextField extends Vue {
     'hover:border-like-cyan-light',
   ]
 
+  get tag(): any {
+    if (this.isTextarea) return 'textarea'
+    return 'input'
+  }
+
   get rootClasses(): any {
     return [
       TextField.presetClasses,
-      ...this.sizeClasses,
+      this.isTextarea ? 'h-[62px] font-semibold resize-none' : this.sizeClasses,
       this.errorClasses,
       {
         'pointer-events-none': this.isDisabled,
@@ -51,10 +59,16 @@ export default class TextField extends Vue {
   get sizeClasses(): any {
     switch (this.size) {
       case 44:
-        return ['h-44px', 'font-semibold']
+        return [
+          'h-44px', 
+          'font-semibold',
+        ]
 
       case 40:
-        return ['h-40px', 'font-normal']
+        return [
+          'h-40px',
+          'font-normal',
+        ]
 
       default:
         return []

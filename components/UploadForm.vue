@@ -114,7 +114,7 @@
           preset="custom"
         >
           <MetadataCard
-            class="w-[616px] max-h-[65vh] overflow-y-scroll"
+            class="w-[616px] max-h-[75vh] overflow-y-scroll"
             :img-src="fileData"
             :data="exifInfo"
           />
