@@ -18,7 +18,7 @@
       <div
         :class="[
           'fixed',
-          'top-[20vh]',
+          'top-[15vh]',
         ]"
       >
         <Button

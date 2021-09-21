@@ -36,7 +36,7 @@
       </div>
       <!-- guide text -->
       <Label
-        :text="$t('IscnRegisterForm.guide.title')"
+        :text="$t('IscnRegisterForm.guide.review')"
         class="text-medium-gray my-[12px]"
       />
       <!-- review metadata -->
@@ -58,7 +58,7 @@
         <div class="flex flex-col justify-start">
           <Label
             class="w-min mb-[16px]"
-            :text="$t('IscnRegisterForm.title.done')"
+            :text="$t('IscnRegisterForm.title.published')"
             tag="div"
             preset="p5"
             valign="middle"
@@ -84,7 +84,7 @@
       </div>
       <!-- fingerPrint -->
       <FormField
-        :label="$t('iscn.meta.content.fingerprints')"
+        :label="$t('IscnRegisterForm.label.fingerprints')"
         class="mb-[12px]"
       >
         <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
@@ -97,7 +97,7 @@
         preset="custom"
       >
         <MetadataCard
-          class="w-[616px] max-h-[65vh] overflow-y-scroll"
+          class="w-[616px] max-h-[75vh] overflow-y-scroll"
           :img-src="fileData"
           :data="exifInfo"
         />
@@ -125,20 +125,33 @@
       <!-- form fieldset -->
       <div>
         <form @submit.prevent="onSubmit">
-          <FormField :label="$t('iscn.meta.name')" class="my-[12px]">
+          <FormField
+            :label="$t('IscnRegisterForm.label.iscn')"
+            class="my-[12px]"
+          >
             <TextField
               v-model="name"
-              :placeholder="$t('iscn.meta.name.placeholder')"
-            />
-          </FormField>
-          <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
-            <TextField
-              v-model="description"
-              :placeholder="$t('iscn.meta.description.placeholder')"
+              :error-message=" !checkedRegisterInfo || name
+                ? undefined
+                : $t('IscnRegisterForm.error.titleIsEmpty')"
+              :placeholder="$t('IscnRegisterForm.placeholder.iscn')"
             />
           </FormField>
           <FormField
-            :label="$t('iscn.meta.creator.name')"
+            :label="$t('IscnRegisterForm.label.description')"
+            class="mb-[12px]"
+          >
+            <TextField
+              v-model="description"
+              :is-textarea="true"
+              :error-message=" !checkedRegisterInfo || description
+                ? undefined
+                : $t('IscnRegisterForm.error.descriptionIsEmpty')"
+              :placeholder="$t('IscnRegisterForm.placeholder.description')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.author')"
             content-classes="flex flex-row flex-wrap"
           >
             <!-- add author -->
@@ -163,7 +176,7 @@
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
-              @click="isOpenAuthorDialog = true"
+              @click="handleOpenAuthorDialog()"
             >
               <IconAddMini />
             </Button>
@@ -171,27 +184,36 @@
           <!-- add tags -->
           <IconDiverMini class="my-[12px]" />
           <FormField
-            :label="$t('iscn.meta.keywords')"
+            :label="$t('IscnRegisterForm.label.tags')"
             content-classes="flex flex-row flex-wrap"
           >
             <EditableTagList v-model="tags" />
           </FormField>
           <IconDiverMini class="my-[12px]" />
-          <FormField :label="$t('iscn.meta.creator.url')" class="mb-[12px]">
+          <FormField
+            :label="$t('IscnRegisterForm.label.url')"
+            class="mb-[12px]"
+          >
             <TextField
               v-model="url"
-              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+              :placeholder="$t('IscnRegisterForm.placeholder.url')"
             />
           </FormField>
-          <FormField :label="$t('iscn.meta.license')" class="mb-[12px]">
+          <FormField
+            :label="$t('IscnRegisterForm.label.license')"
+            class="mb-[12px]"
+          >
             <TextField
               v-model="license"
-              :placeholder="$t('iscn.meta.license.placeholder')"
+              :placeholder="$t('IscnRegisterForm.placeholder.license')"
             />
           </FormField>
           <IconDiverMini class="my-[12px]" />
           <!-- register -->
-          <FormField :label="$t('iscn.meta.register')" class="mb-[12px]">
+          <FormField
+            :label="$t('IscnRegisterForm.label.registrant')"
+            class="mb-[12px]"
+          >
             <div class="font-normal text-[16px] leading-[22px]">
               {{ address }}
             </div>
@@ -204,7 +226,7 @@
                 preset="secondary"
                 :is-disabled="!!uploadStatus"
               >
-                {{ uploadStatus || $t('iscn.meta.register') }}
+                {{ uploadStatus || $t('IscnRegisterForm.button.register') }}
                 <template #append>
                   <IconArrowRight />
                 </template>
@@ -220,15 +242,19 @@
         preset="warn"
       />
       <!-- Dialog -->
-      <Dialog
-        v-model="isOpenAuthorDialog"
-        :has-padding="false"
-        preset="custom"
-      >
-        <Card class="flex flex-col w-[616px]">
+      <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
+        <Card
+          class="
+            flex flex-col
+            w-[616px]
+            max-h-[75vh]
+            pb-[80px]
+            overflow-y-scroll
+          "
+        >
           <Label
             class="w-min mb-[16px]"
-            :text="$t('UploadForm.title.editAuthor')"
+            :text="$t('IscnRegisterForm.title.editAuthor')"
             tag="div"
             preset="p5"
             valign="middle"
@@ -240,25 +266,56 @@
             </template>
           </Label>
           <!-- name -->
-          <FormField :label="$t('iscn.meta.creator.name')" class="my-[12px]">
+          <FormField
+            class="mb-[24px]"
+            content-classes="flex flex-row flex-nowarp items-top"
+            :label="$t('IscnRegisterForm.label.name')"
+          >
             <TextField
               v-model="authorName"
-              :placeholder="$t('iscn.meta.creator.name.placeholder')"
+              :error-message="!checkedAuthorInfo || authorName
+                ? undefined
+                : $t('IscnRegisterForm.error.authorNameIsEmpty')"
+              :size="40"
+              class="w-[219px]"
+              :placeholder="$t('IscnRegisterForm.placeholder.name')"
+            />
+            <!-- hide for now -->
+            <!-- <Selector
+              class="h-[40px] w-[52px] ml-[8px] z-[1000]"
+              @input="setAuthorName"
+            /> -->
+          </FormField>
+          <FormField class="mb-[16px]" :label="$t('IscnRegisterForm.label.likerID')">
+            <TextField
+              v-model="likerId"
+              :size="40"
+              :placeholder="$t('IscnRegisterForm.placeholder.likerID')"
             />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
-          <!-- wallet address -->
-          <FormField :label="$t('iscn.meta.creator.wallet.title')">
+          <FormField
+            :label="$t('IscnRegisterForm.label.description')"
+            class="mb-[24px]"
+          >
             <TextField
-              v-model="authorWalletAddress"
-              :placeholder="$t('iscn.meta.creator.wallet')"
+              v-model="authorDescription"
+              :is-textarea="true"
+              :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
           <!-- url -->
-          <FormField :label="$t('iscn.meta.creator.url')">
-            <TextField
+          <FormField class="mb-[24px]" :label="$t('IscnRegisterForm.label.url')">
+            <TextFieldList
               v-model="authorUrl"
-              :placeholder="$t('iscn.meta.creator.url.placeholder')"
+              :size="40"
+              :text="$t('IscnRegisterForm.label.url')"
+              :placeholder="$t('IscnRegisterForm.placeholder.url')"
+            />
+          </FormField>
+          <!-- wallet address -->
+          <FormField :label="$t('IscnRegisterForm.label.wallet')">
+            <WalletFieldList
+              v-model="authorWalletAddress"
             />
           </FormField>
           <!-- submit btn -->
@@ -268,7 +325,7 @@
               size="small"
               preset="secondary"
               content-class="font-semibold"
-              :text="$t('UploadForm.button.confirm')"
+              :text="$t('IscnRegisterForm.button.confirm')"
               @click.prevent="confirmAuthorChange"
             />
             <Button
@@ -327,12 +384,14 @@ export default class IscnRegisterForm extends Vue {
   url: string = ''
   license: string = ''
   authorName: string = ''
-  authorUrl: string = ''
-  authorWalletAddress: string = ''
+  authorUrl: string[] = []
+  authorWalletAddress: string[] = []
   uploadStatus: string = ''
   uploadIpfsHash: string = this.ipfsHash || ''
   uploadArweaveId: string = this.arweaveId || ''
   error: string = ''
+  likerId: string = ''
+  authorDescription: string = ''
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
@@ -344,6 +403,9 @@ export default class IscnRegisterForm extends Vue {
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
   activeEditingAuthorIndex = -1
+
+  checkedAuthorInfo = false
+  checkedRegisterInfo = false
 
   @Watch('payload', { immediate: true, deep: true })
   change() {
@@ -377,11 +439,21 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get authorUrls() {
-    return this.authors.map((a) => a.url)
+    return this.authors.map((a) => a.url.map((b: any) => b.content))
   }
 
   get authorWalletAddresses() {
-    return this.authors.map((a) => a.wallet)
+    return this.authors.map((a) =>
+      a.wallet.map((b: any) => ({ address: b.content, type: b.type })),
+    )
+  }
+
+  get likerIds() {
+    return this.authors.map((a) => a.likerId)
+  }
+
+  get descriptions() {
+    return this.authors.map((a) => a.authorDescription)
   }
 
   get isPhoto() {
@@ -432,6 +504,8 @@ export default class IscnRegisterForm extends Vue {
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       cosmosWallet: this.address,
+      likerIds: this.likerIds,
+      descriptions: this.descriptions,
     }
   }
 
@@ -445,11 +519,20 @@ export default class IscnRegisterForm extends Vue {
     return this.iscnFee.plus(this.arweaveFeePlusGas)
   }
 
+  handleOpenAuthorDialog() {
+    this.checkedAuthorInfo = false
+    this.isOpenAuthorDialog = true
+    this.initAuthorInfo()
+  }
+
   editAuthor(index: number) {
-    const { name, wallet, url } = this.authors[index]
+    const { name, wallet, url, likerId, authorDescription } =
+      this.authors[index]
     this.authorName = name
     this.authorWalletAddress = wallet
     this.authorUrl = url
+    this.likerId = likerId
+    this.authorDescription = authorDescription
     this.activeEditingAuthorIndex = index
     this.isOpenAuthorDialog = true
   }
@@ -458,8 +541,10 @@ export default class IscnRegisterForm extends Vue {
     this.isOpenAuthorDialog = false
     this.activeEditingAuthorIndex = -1
     this.authorName = ''
-    this.authorUrl = ''
-    this.authorWalletAddress = ''
+    this.authorUrl = []
+    this.authorWalletAddress = []
+    this.likerId = ''
+    this.authorDescription = ''
   }
 
   deleteAuthor() {
@@ -468,10 +553,21 @@ export default class IscnRegisterForm extends Vue {
   }
 
   confirmAuthorChange() {
+    this.checkedAuthorInfo = true
+    if(!this.authorName){
+      return
+    }
+    this.authorWalletAddress.forEach((a: any, i: number) => {
+      if (!a.content) {
+        this.authorWalletAddress.splice(i, 1)
+      }
+    })
     const newAuthor = {
       name: this.authorName,
       wallet: this.authorWalletAddress,
       url: this.authorUrl,
+      likerId: this.likerId,
+      authorDescription: this.authorDescription,
     }
     if (this.activeEditingAuthorIndex >= 0) {
       this.authors.splice(this.activeEditingAuthorIndex, 1, newAuthor)
@@ -479,6 +575,19 @@ export default class IscnRegisterForm extends Vue {
       this.authors.push(newAuthor)
     }
     this.dismissAuthorDialog()
+  }
+
+  initAuthorInfo() {
+    this.authorName = ''
+    this.authorWalletAddress = []
+    this.authorUrl = []
+    this.likerId = ''
+    this.authorDescription = ''
+    this.activeEditingAuthorIndex = -1
+  }
+
+  setAuthorName(value: string) {
+    this.authorName = value
   }
 
   async calculateISCNFee(): Promise<void> {
@@ -499,6 +608,10 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
+    this.checkedRegisterInfo = true
+    if(!this.name || !this.description) {
+      return
+    }
     this.error = ''
     if (!this.uploadArweaveId) {
       await this.submitToArweave();

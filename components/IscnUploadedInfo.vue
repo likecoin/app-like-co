@@ -38,21 +38,15 @@
         class="text-medium-gray mt-[12px] mb-[28px]"
       />
       <!-- ISCN card -->
-      <div
-        class="
-          flex
-          w-[580px]
-          h-[280px]
-          justify-center
-          items-center
-          mb-[16px]
-          rounded-[24px]
-          bg-shade-gray
-          text-white
-        "
-      >
-        ISCN Card
-      </div>
+      <ClientOnly v-if="record">
+        <IscnCard
+          class="mb-[16px]"
+          :record="record"
+          :is-animated="true"
+          orientation="landscape"
+        />
+      </ClientOnly>
+      <!--
       <div class="flex flex-row justify-center items-center my-[16px]">
         <Button circle size="small" preset="tertiary" class="mx-[8px]">
           <IconUploadMini />
@@ -64,6 +58,7 @@
           <IconShare />
         </Button>
       </div>
+      -->
       <IconDiverMini class="mb-[24px]" />
       <Label
         class="w-min mb-[28px]"
@@ -94,6 +89,15 @@
         <ContentFingerprintLink v-if="ipfsHash" :item="ipfs" />
         <ContentFingerprintLink v-if="arweaveId" :item="arweaveURI" />
       </FormField>
+      <IconDiverMini class="mb-[24px]" />
+      <FormField
+        :label="$t('iscn.meta.transaction')"
+        class="mb-[12px]"
+      >
+        <Link :href="transactionsURL">
+          {{ iscnHash }}
+        </Link>
+      </FormField>
     </Card>
   </div>
 </template>
@@ -105,6 +109,10 @@ import { namespace } from 'vuex-class'
 import { getIPFSURLFromHash } from '~/utils/ipfs'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
+
+import {
+  BIG_DIPPER_TX_BASE_URL,
+} from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -127,8 +135,18 @@ export default class IscnUploadedInfo extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   records: ISCNRecordWithID[] | null = null
-  name = ''
-  description = ''
+
+  get record() {
+    return this.records ? this.records[this.records.length - 1] : null
+  }
+
+  get name() {
+    return this.record ? this.record.data.contentMetadata.name : ''
+  }
+
+  get description() {
+    return this.record ? this.record.data.contentMetadata.description : ''
+  }
 
   get imgSrc() {
     return this.isImage && (getIPFSURLFromHash(this.ipfsHash) || this.fileData)
@@ -152,12 +170,12 @@ export default class IscnUploadedInfo extends Vue {
     return `ar://${this.arweaveId}`;
   }
 
+  get transactionsURL(){
+     return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
+  }
+
   async mounted() {
     this.records = await this.queryISCNByAddress(this.currentAddress)
-    const { name, description } =
-      this.records[this.records.length - 1].data.contentMetadata
-    this.name = name
-    this.description = description
   }
 }
 </script>
