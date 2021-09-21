@@ -93,6 +93,15 @@
       >
         <ContentFingerprintLink :item="ipfs" />
       </FormField>
+      <IconDiverMini class="mb-[24px]" />
+      <FormField
+        :label="$t('iscn.meta.transaction')"
+        class="mb-[12px]"
+      >
+        <Link :href="transactionsURL">
+          {{ iscnHash }}
+        </Link>
+      </FormField>
     </Card>
   </div>
 </template>
@@ -104,6 +113,10 @@ import { namespace } from 'vuex-class'
 import { getIPFSURLFromHash } from '~/utils/ipfs'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
+
+import {
+  BIG_DIPPER_TX_BASE_URL,
+} from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -145,6 +158,10 @@ export default class IscnUploadedInfo extends Vue {
   get ipfs() {
     return `ipfs://${this.ipfsHash}`
   }
+
+   get transactionsURL(){
+     return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
+   }
 
   async mounted() {
     this.records = await this.queryISCNByAddress(this.currentAddress)

@@ -4,6 +4,7 @@ import { ISCNSigningClient, ISCNSignPayload } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { BroadcastTxSuccess } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
+import { WALLET_TYPE_REPLACER } from '~/constant'
 
 let client: ISCNSigningClient | null = null;
 
@@ -25,31 +26,55 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorNames,
     authorUrls,
     authorWallets,
+    likerIds,
+    descriptions,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     cosmosWallet,
     ...data
   } = payload;
+
   const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
-  const stakeholders = []
+  const stakeholders: any = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
-      const authorName = authorNames[i]
-      const authorUrl = authorUrls[i]
-      const authorId = authorWallets[i]
-      const isNonEmpty = authorUrl || authorName || authorId
+      const authorName: string = authorNames[i]
+      const description = descriptions[i]
+      const url: string = likerIds[i]
+        ? `https://like.co/${likerIds[i]}`
+        : authorUrls[i][0] || authorName
+
+      const identifiers = authorWallets[i].map((a: any) => {
+        if (a.type === 'cosmos') {
+          return {
+            '@type': 'PropertyValue',
+            propertyID: WALLET_TYPE_REPLACER[a.type],
+            value: `did:cosmos:${a.address.slice(6)}`,
+          }
+        }
+        return {
+          '@type': 'PropertyValue',
+          propertyID: WALLET_TYPE_REPLACER[a.type],
+          value: `did:${a.type}:${a.address}`,
+        }
+      })
+
+      const sameAsArray = authorUrls[i].filter(a => !!a)
+      const isNonEmpty = url || authorName || identifiers.length
       if (isNonEmpty) {
         stakeholders.push({
-            entity: {
-              '@id': authorId ? `did:cosmos:${authorId.slice(6)}` : authorUrl || authorName,
-              name: authorName,
-              url: authorUrl,
-            },
-            rewardProportion: 1,
-            contributionType: 'http://schema.org/author',
+          entity: {
+            '@id': identifiers.length ? identifiers[0].value : url,
+            name: authorName,
+            url,
+            description,
+            sameAs: sameAsArray,
+            identifier: identifiers,
           },
-        )
+          rewardProportion: 1,
+          contributionType: 'http://schema.org/author',
+        })
       }
     }
   }
