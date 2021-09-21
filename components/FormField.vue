@@ -73,7 +73,7 @@ export default class FormField extends Vue {
         : 'w-full',
       'break-words',
       'text-dark-gray',
-      ...this.contentrootClasses,
+      this.contentrootClasses,
       this.contentClasses,
     ]
   }
