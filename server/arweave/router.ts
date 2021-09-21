@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { Router } from 'express';
 import multer from 'multer';
-import { estimateARPrice, converARPriceToLIKE, uploadFileToArweave } from '.';
+import { estimateARPrice, convertARPriceToLIKE, uploadFileToArweave } from '.';
 import { getIPFSHash } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 
@@ -16,7 +16,7 @@ router.post('/estimate', multer().single('file'), async (req, res, next) => {
       return
     }
     const { AR, arweaveId } = await estimateARPrice(req.file);
-    const LIKE = await converARPriceToLIKE(AR);
+    const LIKE = await convertARPriceToLIKE(AR);
     res.json({ AR, LIKE, arweaveId, address: LIKE_TARGET_ADDRESS });
   } catch (error) {
     next(error);
@@ -59,7 +59,7 @@ router.post('/upload', multer().single('file'), async (req, res, next) => {
       res.status(400).send('TX_MEMO_NOT_MATCH');
       return;
     }
-    const LIKE = await converARPriceToLIKE(AR, { margin: 0.03 });
+    const LIKE = await convertARPriceToLIKE(AR, { margin: 0.03 });
     const txAmount = new BigNumber(amount.amount).shiftedBy(-9);
     if (txAmount.lt(LIKE)) {
       res.status(400).send('TX_AMOUNT_NOT_ENOUGH');

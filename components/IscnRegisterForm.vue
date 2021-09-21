@@ -351,7 +351,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   @Watch('uploadArweaveId')
-  chang(newId: string) {
+  handleUploadArweaveIDChange(newId: string) {
     if (newId) this.arweaveFee = new BigNumber(0)
   }
 
@@ -363,7 +363,7 @@ export default class IscnRegisterForm extends Vue {
   async mounted() {
     this.uploadStatus = 'Loading'
     await this.estimateArweaveFee();
-    // Total Fee needs Arweave fee to calculate
+    // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
     this.uploadStatus = ''
   }
@@ -523,6 +523,7 @@ export default class IscnRegisterForm extends Vue {
       if (LIKE) this.arweaveFee = new BigNumber(LIKE);
       this.arweaveFeeTargetAddress = address;
     } catch (err) {
+      // TODO: Handle error
       console.error(err);
     }
   }
@@ -530,7 +531,7 @@ export default class IscnRegisterForm extends Vue {
   async sendArweaveFeeTx(): Promise<string> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
-    this.uploadStatus = 'Waiting for signature'
+    this.uploadStatus = this.$t('IscnRegisterForm.button.signing') as string;
     const memo = JSON.stringify({ ipfs: this.ipfsHash });
     const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
     return transactionHash;
@@ -541,7 +542,7 @@ export default class IscnRegisterForm extends Vue {
     const transactionHash = await this.sendArweaveFeeTx();
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
-    this.uploadStatus = this.$t('UploadForm.button.uploading') as string;
+    this.uploadStatus = this.$t('IscnRegisterForm.button.uploading') as string;
     try {
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
@@ -555,6 +556,7 @@ export default class IscnRegisterForm extends Vue {
       this.uploadArweaveId = arweaveId;
       this.$emit('arweaveUploaded', { arweaveId })
     } catch (err) {
+       // TODO: Handle error
       console.error(err);
     }
   }
@@ -572,7 +574,7 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    this.uploadStatus = 'Waiting for signature'
+    this.uploadStatus = this.$t('IscnRegisterForm.button.signing') as string;
     const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
     this.uploadStatus = 'Success'
     this.$emit('txBroadcasted', res)

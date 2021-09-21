@@ -46,7 +46,7 @@ export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; 
   };
 }
 
-export async function converARPriceToLIKE(ar: string, { margin = 0.05, decimal = 0 } = {}) {
+export async function convertARPriceToLIKE(ar: string, { margin = 0.05, decimal = 0 } = {}) {
   const { data } = await axios.get(COINGECKO_PRICE_API);
   const { likecoin, arweave: arweavePrice } = data;
   let priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd);
