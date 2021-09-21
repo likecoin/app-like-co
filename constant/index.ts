@@ -52,3 +52,5 @@ export const WALLET_TYPES = [
   'btc',
   'eth',
 ]
+
+export const SITE_URL = IS_TESTNET ? 'https://app.rinkeby.like.co' : 'https://app.like.co';
