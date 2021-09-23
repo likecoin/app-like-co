@@ -341,6 +341,22 @@
           </div>
         </Card>
       </Dialog>
+      <Dialog
+        v-model="isOpenSignDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <div v-if="isUploadingArweave">
+          Please don't close the window...
+        </div>
+        <div v-else>
+          <div>State {{ currentSignState }}/{{ totalSignState }}</div>
+          <div>{{ signDialogMessage }}</div>
+          <div>Fee: {{ signDialogFee }}/{{ totalFee }}</div>
+          <div v-if="signDialogError">{{ signDialogError }}</div>
+          <button @click="onRetry">Retry</button>
+        </div>
+      </Dialog>
     </Card>
   </div>
 </template>
@@ -404,17 +420,16 @@ export default class IscnRegisterForm extends Vue {
   isOpenWarningSnackbar = false
   activeEditingAuthorIndex = -1
 
+  isOpenSignDialog = false
+  isUploadingArweave = false
+  signDialogError = ''
+
   checkedAuthorInfo = false
   checkedRegisterInfo = false
 
   @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateISCNFee()
-  }
-
-  @Watch('uploadArweaveId')
-  handleUploadArweaveIDChange(newId: string) {
-    if (newId) this.arweaveFee = new BigNumber(0)
   }
 
   @Watch('error')
@@ -519,6 +534,28 @@ export default class IscnRegisterForm extends Vue {
     return this.iscnFee.plus(this.arweaveFeePlusGas)
   }
 
+  get currentSignState() {
+    if (this.arweaveFee.lte(0)) {
+      return '1';
+    }
+    return this.uploadArweaveId ? '2' : '1';
+  }
+
+  get totalSignState() {
+    if (this.uploadArweaveId && this.arweaveFee.lte(0)) return '1'
+    return '2';
+  }
+
+  get signDialogMessage() {
+    if (this.uploadArweaveId) return 'Please sign to register ISCN record';
+    return 'Please sign to upload to arweave';
+  }
+
+  get signDialogFee() {
+    if (this.uploadArweaveId) return this.iscnFee;
+    return this.arweaveFeePlusGas;
+  }
+
   handleOpenAuthorDialog() {
     this.checkedAuthorInfo = false
     this.isOpenAuthorDialog = true
@@ -607,16 +644,18 @@ export default class IscnRegisterForm extends Vue {
       .shiftedBy(-9);
   }
 
+  onRetry(): Promise<void> {
+    return this.onSubmit();
+  }
+
   async onSubmit(): Promise<void> {
     this.checkedRegisterInfo = true
     if(!this.name || !this.description) {
       return
     }
     this.error = ''
-    if (!this.uploadArweaveId) {
-      await this.submitToArweave();
-    }
-    await this.submitToISCN()
+    await this.submitToArweave();
+    if (this.uploadArweaveId) await this.submitToISCN()
   }
 
   async estimateArweaveFee(): Promise<void> {
@@ -646,15 +685,26 @@ export default class IscnRegisterForm extends Vue {
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = this.$t('IscnRegisterForm.button.signing') as string;
     const memo = JSON.stringify({ ipfs: this.ipfsHash });
-    const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
-    return transactionHash;
+    try {
+      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
+      return transactionHash;
+    } catch (err) {
+      this.signDialogError = err;
+      console.error(err);
+    } finally {
+      this.uploadStatus = '';
+    }
+    return '';
   }
 
   async submitToArweave(): Promise<void> {
     if (this.uploadArweaveId) return;
+    this.isOpenSignDialog = true;
     const transactionHash = await this.sendArweaveFeeTx();
+    if (!transactionHash) throw new Error('TX_NO_SUCCESS');
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
+    this.isUploadingArweave = true;
     this.uploadStatus = this.$t('IscnRegisterForm.button.uploading') as string;
     try {
       const { arweaveId } = await this.$axios.$post(
@@ -668,13 +718,18 @@ export default class IscnRegisterForm extends Vue {
       );
       this.uploadArweaveId = arweaveId;
       this.$emit('arweaveUploaded', { arweaveId })
+      this.isOpenSignDialog = false;
     } catch (err) {
        // TODO: Handle error
       console.error(err);
+    } finally {
+      this.isUploadingArweave = false;
+      this.uploadStatus = '';
     }
   }
 
   async submitToISCN(): Promise<void> {
+    this.isOpenSignDialog = true;
     this.uploadStatus = 'Loading'
     await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
@@ -687,10 +742,17 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    this.uploadStatus = this.$t('IscnRegisterForm.button.signing') as string;
-    const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
-    this.uploadStatus = 'Success'
-    this.$emit('txBroadcasted', res)
+    this.uploadStatus = this.$t('IscnRegister Form.button.signing') as string;
+    try {
+      const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
+      this.uploadStatus = 'Success'
+      this.$emit('txBroadcasted', res)
+      this.isOpenSignDialog = false;
+    } catch (err) {
+      this.signDialogError = err;
+      this.uploadStatus = '';
+      console.error(err)
+    }
   }
 }
 </script>
