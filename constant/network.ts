@@ -11,15 +11,13 @@ const mainConfig = {
   rpcURL: 'https://mainnet-node.like.co/rpc/',
   stakingWalletURL: 'https://stake.like.co',
   stakingDenom: 'LIKE',
-  coinLookup: [
-    {
+  coinLookup: [{
       viewDenom: 'LIKE',
       chainDenom: COSMOS_DENOM,
       chainToViewConversionFactor: '0.000000001',
       icon: 'currencies/like.png',
       coinGeckoId: 'likecoin',
-    },
-  ],
+    }],
   addressPrefix: 'cosmos',
   validatorAddressPrefix: 'cosmosvaloper',
   validatorConsensusaddressPrefix: 'cosmosvalcons',
@@ -28,12 +26,10 @@ const mainConfig = {
   fees: {
     default: {
       gasEstimate: 350000,
-      feeOptions: [
-        {
+      feeOptions: [{
           denom: 'LIKE',
           amount: '0.00000001',
-        },
-      ],
+        }],
     },
   },
   icon: 'https://like.co/logo.png',
