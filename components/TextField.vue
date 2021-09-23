@@ -2,13 +2,10 @@
   <div class="flex flex-col">
     <component
       :is="tag"
-      v-bind="$attrs"
-      :class="rootClasses"
-      :value="value"
-      :placeholder="placeholder"
+      v-bind="inputProps"
       @input="$emit('input', $event.target.value)"
       @blur="$emit('delete-empty-field')"
-    />
+    ><template v-if="isTextarea && value">{{ value }}</template></component>
     <span :class="errorMsgClasses">{{ errorMessage }}</span>
   </div>
 </template>
@@ -45,10 +42,24 @@ export default class TextField extends Vue {
     return 'input'
   }
 
+  get inputProps() {
+    const props: any = {
+      class: this.rootClasses,
+      placeholder: this.placeholder,
+      ...this.$attrs,
+    }
+    if (this.isTextarea) {
+      props.rows = 4
+    } else {
+      props.value = this.value
+    }
+    return props
+  }
+
   get rootClasses(): any {
     return [
       TextField.presetClasses,
-      this.isTextarea ? 'h-[62px] font-semibold resize-none' : this.sizeClasses,
+      this.isTextarea ? 'font-semibold resize-none' : this.sizeClasses,
       this.errorClasses,
       {
         'pointer-events-none': this.isDisabled,
@@ -60,7 +71,7 @@ export default class TextField extends Vue {
     switch (this.size) {
       case 44:
         return [
-          'h-44px', 
+          'h-44px',
           'font-semibold',
         ]
 
