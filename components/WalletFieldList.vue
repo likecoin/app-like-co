@@ -46,7 +46,6 @@
           class="
             w-[100%]
             absolute
-            z-[2500]
             flex
             flex-col
             justify-center
