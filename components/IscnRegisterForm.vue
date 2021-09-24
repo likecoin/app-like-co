@@ -281,7 +281,7 @@
             />
             <!-- hide for now -->
             <!-- <Selector
-              class="h-[40px] w-[52px] ml-[8px] z-[1000]"
+              class="h-[40px] w-[52px] ml-[8px]"
               @input="setAuthorName"
             /> -->
           </FormField>
