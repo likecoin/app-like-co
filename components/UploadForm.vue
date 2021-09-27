@@ -121,6 +121,25 @@
         </Dialog>
       </Card>
     </div>
+    <div
+      class="
+        min-w-[648px]
+        flex
+        items-center
+        justify-between
+        px-[44px]
+        py-[32px]
+        my-[16px]
+        text-medium-gray
+      "
+    >
+      <IconAttention />
+      <IconLedger />
+      <div 
+        class="whitespace-pre-line text-dark-gray"
+        >{{ $t('UploadForm.attention') }}
+      </div>
+    </div>
   </div>
 </template>
 
