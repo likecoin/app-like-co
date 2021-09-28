@@ -182,14 +182,14 @@
             </Button>
           </FormField>
           <!-- add tags -->
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.tags')"
             content-classes="flex flex-row flex-wrap"
           >
             <EditableTagList v-model="tags" />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.url')"
             class="mb-[12px]"
@@ -208,7 +208,7 @@
               :placeholder="$t('IscnRegisterForm.placeholder.license')"
             />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <!-- register -->
           <FormField
             :label="$t('IscnRegisterForm.label.registrant')"
