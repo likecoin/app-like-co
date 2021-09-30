@@ -11,6 +11,14 @@ export default {
       },
       defaultValue: 'intermediate',
       description: 'Type of the indicator',
+      table: {
+        type: {
+          summary: 'string',
+        },
+        defaultValue: {
+          summary: 'intermediate',
+        },
+      },
       options: [
         'intermediate',
         'determine',
@@ -36,6 +44,8 @@ export default {
       },
       control: {
         type: 'number',
+        min: 0,
+        max: 100,
       },
     },
   },
