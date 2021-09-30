@@ -114,7 +114,12 @@
           preset="custom"
         >
           <MetadataCard
-            class="w-[616px] max-h-[75vh] overflow-y-scroll"
+            :class="[
+              'w-[616px]',
+              'max-h-[75vh]',
+              'overflow-y-scroll',
+              'scrollbar-hidden',
+            ]"
             :img-src="fileData"
             :data="exifInfo"
           />
@@ -122,16 +127,16 @@
       </Card>
     </div>
     <div
-      class="
-        min-w-[648px]
-        flex
-        items-center
-        justify-between
-        px-[44px]
-        py-[32px]
-        my-[16px]
-        text-medium-gray
-      "
+      :class="[
+        'min-w-[648px]',
+        'flex',
+        'items-center',
+        'justify-between',
+        'px-[44px]',
+        'py-[32px]',
+        'my-[16px]',
+        'text-medium-gray',
+      ]"
     >
       <IconAttention />
       <IconLedger />

@@ -41,18 +41,20 @@
       />
       <!-- review metadata -->
       <div
-        class="
-          flex
-          w-[584px]
-          flex-row
-          justify-start
-          items-center
-          p-[32px]
-          mb-[12px]
-          border-[2px] border-dashed border-shade-gray
-          rounded-[12px]
-          text-medium-gray
-        "
+        :class="[
+          'flex',
+          'w-[584px]',
+          'flex-row',
+          'justify-start',
+          'items-center',
+          'p-[32px]',
+          'mb-[12px]',
+          'border-[2px]',
+          'border-dashed',
+          'border-shade-gray',
+          'rounded-[12px]',
+          'text-medium-gray',
+        ]"
       >
         <Previewer :is-image="isImage" :file-data="fileData" />
         <div class="flex flex-col justify-start">
@@ -96,7 +98,12 @@
         preset="custom"
       >
         <MetadataCard
-          class="w-[616px] max-h-[75vh] overflow-y-scroll"
+          :class="[
+            'w-[616px]',
+            'max-h-[75vh]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
           :img-src="fileData"
           :data="exifInfo"
         />
@@ -243,13 +250,15 @@
       <!-- Dialog -->
       <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
         <Card
-          class="
-            flex flex-col
-            w-[616px]
-            max-h-[75vh]
-            pb-[80px]
-            overflow-y-scroll
-          "
+          :class="[
+            'flex',
+            'flex-col',
+            'w-[616px]',
+            'max-h-[75vh]',
+            'pb-[80px]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
         >
           <Label
             class="w-min mb-[16px]"
@@ -525,7 +534,7 @@ export default class IscnRegisterForm extends Vue {
 
   confirmAuthorChange() {
     this.checkedAuthorInfo = true
-    if(!this.authorName){
+    if (!this.authorName) {
       return
     }
     this.authorWalletAddress.forEach((a: any, i: number) => {
@@ -580,7 +589,7 @@ export default class IscnRegisterForm extends Vue {
 
   async onSubmit(): Promise<void> {
     this.checkedRegisterInfo = true
-    if(!this.name || !this.description) {
+    if (!this.name || !this.description) {
       return
     }
     this.error = ''
