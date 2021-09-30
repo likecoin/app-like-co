@@ -1,4 +1,5 @@
 const aspectRatio = require('@tailwindcss/aspect-ratio')
+const plugin = require('tailwindcss/plugin')
 
 module.exports = {
   mode: 'jit',
@@ -35,5 +36,19 @@ module.exports = {
       },
     },
   },
-  plugins: [aspectRatio],
+  plugins: [
+    aspectRatio,
+    plugin(({ addUtilities }) => {
+      const newUtilities = {
+        '.scrollbar-hidden': {
+          '-ms-overflow-style': 'none', /* IE and Edge */
+          'scrollbar-width': 'none', /* Firefox */
+          '&::-webkit-scrollbar': { 
+            display: 'none', /* Chrome */
+          },
+        },
+      }
+      addUtilities(newUtilities)
+    }),
+  ],
 }
