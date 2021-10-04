@@ -107,5 +107,6 @@
   "UploadForm.title.registerISCN": "Register ISCN",
   "UploadForm.url.placeholder": "Use existing IPFS content",
   "UploadForm.view.file.button": "View File Info",
+  "UploadForm.attention":"Do not connect to Ledger hardware wallets for signing.\n Ledger service temporarily unavailable.",
   "WorksPage.empty.label": "No works"
 }
