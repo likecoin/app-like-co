@@ -95,7 +95,7 @@
   "IscnRegisterForm.signDialog.closeWarning": "Please don't close the window...",
   "IscnRegisterForm.signDialog.fee": "Fee",
   "IscnRegisterForm.signDialog.retry": "Retry",
-  "IscnRegisterForm.signDialog.sign.arweave.upload": "Please sign to upload to arweave",
+  "IscnRegisterForm.signDialog.sign.arweave.upload": "Please sign to upload to Arweave",
   "IscnRegisterForm.signDialog.sign.iscn.register": "Please sign to register ISCN record",
   "IscnRegisterForm.title.editAuthor": "Edit Author",
   "IscnRegisterForm.title.published": "Published to IPFS",
