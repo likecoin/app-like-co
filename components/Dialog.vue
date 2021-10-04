@@ -117,6 +117,7 @@ export default class Dialog extends Vue {
   }
 
   close() {
+    this.$emit('close')
     this.isOpen = false
   }
 }

@@ -87,6 +87,10 @@
   "IscnRegisterForm.placeholder.name": "Name",
   "IscnRegisterForm.placeholder.url": "URL",
   "IscnRegisterForm.placeholder.wallet": "Wallet Address",
+  "IscnRegisterForm.quitAlertDialog.cancel": "Continue",
+  "IscnRegisterForm.quitAlertDialog.confirm": "Cancel Registration",
+  "IscnRegisterForm.quitAlertDialog.content": "Your registration will be cancelled if you leave this page, and the paid fee cannot be refunded.",
+  "IscnRegisterForm.quitAlertDialog.title": "Are you sure to quit your registration?",
   "IscnRegisterForm.register.fee": "Fee: {fee} LIKE",
   "IscnRegisterForm.signDialog.closeWarning": "Please don't close the window...",
   "IscnRegisterForm.signDialog.fee": "Fee",
@@ -98,6 +102,7 @@
   "IscnUploaded.guide.title": "Completed! Here is your ISCN",
   "IscnUploaded.title": "ISCN Registed",
   "SearchPage.empty.label": "No record",
+  "UploadForm.attention":"Do not connect to Ledger hardware wallets for signing.\n Ledger service temporarily unavailable.",
   "UploadForm.button.back": "Back",
   "UploadForm.button.confirm": "Confirm",
   "UploadForm.button.selectFile": "Select a file",
@@ -107,6 +112,5 @@
   "UploadForm.title.registerISCN": "Register ISCN",
   "UploadForm.url.placeholder": "Use existing IPFS content",
   "UploadForm.view.file.button": "View File Info",
-  "UploadForm.attention":"Do not connect to Ledger hardware wallets for signing.\n Ledger service temporarily unavailable.",
   "WorksPage.empty.label": "No works"
 }

@@ -232,7 +232,7 @@
               class="flex flex-col items-end"
             >
               <ProgressIndicator />
-              <div class="text-[12px] mt-[4px]">{{ registerButtonText }}</div>
+              <div class="text-[12px] mt-[4px]">{{ formattedUploadStatus }}</div>
             </div>
             <Button
               v-else
@@ -358,11 +358,29 @@
       <Dialog
         v-model="isOpenSignDialog"
         :header-text="signDialogHeaderText"
+        @close="handleSignDialogClose"
       >
         <template #header-prepend>
           <IconStar class="w-[20px]" />
         </template>
+        <ProgressIndicator
+          v-if="isUploadingArweave"
+          class="mx-auto mb-[24px]"
+        />
         <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
+        <pre
+          v-if="signDialogError"
+          :class="[
+            'mt-[12px]',
+            'p-[8px]',
+            'bg-red',
+            'bg-opacity-20',
+            'rounded-[8px]',
+            'text-red',
+            'text-[12px]',
+            'font-400',
+          ]"
+        >{{ signDialogError }}</pre>
         <template v-if="!isUploadingArweave">
           <Divider class="my-[12px]" />
           <Label
@@ -376,10 +394,6 @@
               />
             </template>
           </Label>
-          <div
-            v-if="signDialogError"
-            class="mt-[12px] text-red text-[12px] font-400"
-          >{{ signDialogError }}</div>
           <div class="flex justify-center mt-[24px]">
             <Button
               preset="outline"
@@ -388,6 +402,33 @@
             />
           </div>
         </template>
+      </Dialog>
+      <Dialog
+        v-model="isOpenQuitAlertDialog"
+        :header-text="$t('IscnRegisterForm.quitAlertDialog.title')"
+        @close="handleQuitAlertDialogClose"
+      >
+        <div
+          v-t="'IscnRegisterForm.quitAlertDialog.content'"
+          class="max-w-[336px] text-center text-medium-gray text-[16px] font-500"
+        />
+        <div class="mx-auto mt-[24px] grid grid-flow-col gap-x-[12px] text-center">
+          <Button
+            preset="outline"
+            class="text-red border-red hover:bg-red active:bg-red hover:bg-opacity-20 active:bg-opacity-30"
+            :text="$t('IscnRegisterForm.quitAlertDialog.confirm')"
+            @click="$emit('quit')"
+          >
+            <template #prepend>
+              <IconBin class="w-[20px]" />
+            </template>
+          </Button>
+          <Button
+            preset="outline"
+            :text="$t('IscnRegisterForm.quitAlertDialog.cancel')"
+            @click="handleQuitAlertDialogClose"
+          />
+        </div>
       </Dialog>
     </Card>
   </div>
@@ -453,6 +494,7 @@ export default class IscnRegisterForm extends Vue {
   activeEditingAuthorIndex = -1
 
   isOpenSignDialog = false
+  isOpenQuitAlertDialog = false
   isUploadingArweave = false
   signDialogError = ''
 
@@ -532,7 +574,7 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  get registerButtonText() {
+  get formattedUploadStatus() {
     switch (this.uploadStatus) {
       case 'loading':
         return this.$t('IscnRegisterForm.button.loading')
@@ -704,6 +746,16 @@ export default class IscnRegisterForm extends Vue {
       .shiftedBy(-9);
   }
 
+  handleSignDialogClose() {
+    if (this.uploadArweaveId) {
+      this.isOpenQuitAlertDialog = true
+    }
+  }
+
+  handleQuitAlertDialogClose() {
+    this.isOpenQuitAlertDialog = false
+  }
+
   onRetry(): Promise<void> {
     return this.onSubmit();
   }
@@ -818,6 +870,8 @@ export default class IscnRegisterForm extends Vue {
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err)
+    } finally {
+      this.isOpenQuitAlertDialog = false;
     }
   }
 }

@@ -1,6 +1,9 @@
 <template>
   <Page>
-    <UploadForm v-if="state === 'init'" @submit="onSubmitUpload" />
+    <UploadForm
+      v-if="state === 'init'"
+      @submit="onSubmitUpload"
+    />
     <IscnRegisterForm
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
@@ -12,6 +15,7 @@
       :exif-info="exifInfo"
       @arweaveUploaded="onArweaveIdUpdate"
       @txBroadcasted="onISCNTxInfo"
+      @quit="handleQuitRegistration"
     />
     <IscnUploadedInfo
       v-else-if="state === 'done'"
@@ -77,6 +81,10 @@ export default class NewIndexPage extends Vue {
     this.fileBlob = fileBlob;
     this.exifInfo = exifInfo;
     this.state = 'iscn';
+  }
+
+  handleQuitRegistration() {
+    this.state = 'init';
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
