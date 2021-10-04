@@ -226,18 +226,23 @@
           </FormField>
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
-            <div class="flex flex-col">
-              <Button
-                type="submit"
-                preset="secondary"
-                :is-disabled="!!uploadStatus"
-              >
-                {{ uploadStatus || $t('IscnRegisterForm.button.register') }}
-                <template #append>
-                  <IconArrowRight />
-                </template>
-              </Button>
+            <div
+              v-if="uploadStatus"
+              class="flex flex-col items-end"
+            >
+              <ProgressIndicator />
+              <div class="text-[12px] mt-[4px]">{{ uploadStatus }}</div>
             </div>
+            <Button
+              v-else
+              :text="$t('IscnRegisterForm.button.register')"
+              type="submit"
+              preset="secondary"
+            >
+              <template #append>
+                <IconArrowRight />
+              </template>
+            </Button>
           </div>
         </form>
       </div>
