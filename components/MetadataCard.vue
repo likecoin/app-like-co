@@ -5,6 +5,7 @@
       tag="div"
       preset="p5"
       valign="middle"
+      :class="[{ 'mb-[12px]': !imgSrc }]"
       content-class="font-semibold whitespace-nowrap text-like-green"
       prepend-class="text-like-green"
     >
@@ -22,7 +23,7 @@
     </template>
     <FormField
       v-for="(item, name) in exifInfo"
-      :key="item.key"
+      :key="name"
       class="mb-[8px]"
       :label="name"
       direction="row"
@@ -45,21 +46,6 @@ export default class MetadataCard extends Vue {
 
   exifInfo: Object = {}
 
-  created() {
-    if (this.data) this.exifInfo = this.data
-  }
-
-  async extractEXIFInfo() {
-    const imgElement = this.$refs.iscnImg
-    if (imgElement) {
-      this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
-    }
-  }
-
-  mounted() {
-    this.extractEXIFInfo()
-  }
-
   @Watch('imgSrc')
   onImgSrcChanged() {
     this.$nuxt.$nextTick(this.extractEXIFInfo)
@@ -68,6 +54,18 @@ export default class MetadataCard extends Vue {
   @Watch('data')
   onDataChange() {
     if (this.data) this.exifInfo = this.data
+  }
+
+  mounted() {
+    if (this.data) this.exifInfo = this.data
+    else this.extractEXIFInfo()
+  }
+
+  async extractEXIFInfo() {
+    const imgElement = this.$refs.iscnImg
+    if (imgElement) {
+      this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
+    }
   }
 }
 </script>

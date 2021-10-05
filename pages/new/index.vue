@@ -5,6 +5,8 @@
       v-else-if="state === 'iscn'"
       :ipfs-hash="ipfsHash"
       :file-data="fileData"
+      :file-type="fileType"
+      :file-size="fileSize"
       :file-s-h-a256="fileSHA256"
       :file-blob="fileBlob"
       :is-image="isImage"
@@ -39,6 +41,8 @@ export default class NewIndexPage extends Vue {
   ipfsHash = ''
   fileSHA256 = ''
   fileData = ''
+  fileType = ''
+  fileSize = ''
   iscnId = ''
   iscnTxHash = ''
   iscnTimestamp = ''
@@ -55,6 +59,8 @@ export default class NewIndexPage extends Vue {
     isImage,
     fileBlob,
     exifInfo,
+    fileType,
+    fileSize,
   }: {
     ipfsHash: string
     fileData: string
@@ -62,6 +68,8 @@ export default class NewIndexPage extends Vue {
     isImage: boolean
     fileBlob: Blob | null
     exifInfo: any
+    fileType: string
+    fileSize: string
   }) {
     this.ipfsHash = ipfsHash
     this.fileData = fileData
@@ -69,6 +77,8 @@ export default class NewIndexPage extends Vue {
     this.isImage = isImage
     this.fileBlob = fileBlob
     this.exifInfo = exifInfo
+    this.fileType = fileType
+    this.fileSize = fileSize
     this.state = 'iscn'
   }
 

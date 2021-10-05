@@ -77,7 +77,7 @@
             <div class="flex flex-col items-stretch justify-start">
               <Label :text="fileName" class="font-semibold text-dark-gray" />
               <Label
-                :text="`${size} KB`"
+                :text="size"
                 class="font-normal text-medium-gray my-[8px]"
               />
               <Button
@@ -205,7 +205,12 @@ export default class UploadForm extends Vue {
   }
 
   get size() {
-    return Math.round(this.fileSize * 0.001)
+    return `${Math.round(this.fileSize * 0.001)} KB`
+  }
+
+  get fileType() {
+    const format = this.fileName.split('.')
+    return format[format.length - 1].toUpperCase()
   }
 
   async onFileUpload(event: DragEvent) {
@@ -277,6 +282,8 @@ export default class UploadForm extends Vue {
       fileData: this.fileData,
       fileSHA256: this.fileSHA256,
       fileBlob: this.fileBlob,
+      fileSize: this.size,
+      fileType: this.fileType,
       isImage: this.isImage,
       exifInfo: this.exifInfo,
     })
