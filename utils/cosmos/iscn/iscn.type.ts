@@ -5,6 +5,7 @@ export interface ISCNRegisterPayload {
   description: string;
   tagsString: string;
   url: string;
+  exifInfo: any;
   license: string;
   ipfsHash: string;
   fileSHA256: string;
@@ -12,7 +13,6 @@ export interface ISCNRegisterPayload {
   authorNames: string[];
   authorUrls: string[][];
   authorWallets: any[][];
-  cosmosWallet: string;
   likerIds: string[];
   descriptions: string[];
 }

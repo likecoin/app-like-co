@@ -28,8 +28,6 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorWallets,
     likerIds,
     descriptions,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    cosmosWallet,
     ...data
   } = payload;
 
