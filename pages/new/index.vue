@@ -85,6 +85,16 @@ export default class NewIndexPage extends Vue {
 
   handleQuitRegistration() {
     this.state = 'init';
+    this.ipfsHash = '';
+    this.arweaveId = '';
+    this.fileSHA256 = '';
+    this.fileData = '';
+    this.iscnId = '';
+    this.iscnTxHash = '';
+    this.iscnTimestamp = '';
+    this.isImage = false;
+    this.fileBlob = null;
+    this.exifInfo = null;
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
