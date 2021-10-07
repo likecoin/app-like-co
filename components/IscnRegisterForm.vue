@@ -41,18 +41,20 @@
       />
       <!-- review metadata -->
       <div
-        class="
-          flex
-          w-[584px]
-          flex-row
-          justify-start
-          items-center
-          p-[32px]
-          mb-[12px]
-          border-[2px] border-dashed border-shade-gray
-          rounded-[12px]
-          text-medium-gray
-        "
+        :class="[
+          'flex',
+          'w-[584px]',
+          'flex-row',
+          'justify-start',
+          'items-center',
+          'p-[32px]',
+          'mb-[12px]',
+          'border-[2px]',
+          'border-dashed',
+          'border-shade-gray',
+          'rounded-[12px]',
+          'text-medium-gray',
+        ]"
       >
         <Previewer :is-image="isImage" :file-data="fileData" />
         <div class="flex flex-col justify-start">
@@ -97,7 +99,12 @@
         preset="custom"
       >
         <MetadataCard
-          class="w-[616px] max-h-[75vh] overflow-y-scroll"
+          :class="[
+            'w-[616px]',
+            'max-h-[75vh]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
           :img-src="fileData"
           :data="exifInfo"
         />
@@ -182,14 +189,14 @@
             </Button>
           </FormField>
           <!-- add tags -->
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.tags')"
             content-classes="flex flex-row flex-wrap"
           >
             <EditableTagList v-model="tags" />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.url')"
             class="mb-[12px]"
@@ -208,7 +215,7 @@
               :placeholder="$t('IscnRegisterForm.placeholder.license')"
             />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <!-- register -->
           <FormField
             :label="$t('IscnRegisterForm.label.registrant')"
@@ -220,18 +227,23 @@
           </FormField>
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
-            <div class="flex flex-col">
-              <Button
-                type="submit"
-                preset="secondary"
-                :is-disabled="!!uploadStatus"
-              >
-                {{ uploadStatus || $t('IscnRegisterForm.button.register') }}
-                <template #append>
-                  <IconArrowRight />
-                </template>
-              </Button>
+            <div
+              v-if="uploadStatus"
+              class="flex flex-col items-end"
+            >
+              <ProgressIndicator />
+              <div class="text-[12px] mt-[4px]">{{ formattedUploadStatus }}</div>
             </div>
+            <Button
+              v-else
+              :text="$t('IscnRegisterForm.button.register')"
+              type="submit"
+              preset="secondary"
+            >
+              <template #append>
+                <IconArrowRight />
+              </template>
+            </Button>
           </div>
         </form>
       </div>
@@ -244,13 +256,15 @@
       <!-- Dialog -->
       <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
         <Card
-          class="
-            flex flex-col
-            w-[616px]
-            max-h-[75vh]
-            pb-[80px]
-            overflow-y-scroll
-          "
+          :class="[
+            'flex',
+            'flex-col',
+            'w-[616px]',
+            'max-h-[75vh]',
+            'pb-[80px]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
         >
           <Label
             class="w-min mb-[16px]"
@@ -282,7 +296,7 @@
             />
             <!-- hide for now -->
             <!-- <Selector
-              class="h-[40px] w-[52px] ml-[8px] z-[1000]"
+              class="h-[40px] w-[52px] ml-[8px]"
               @input="setAuthorName"
             /> -->
           </FormField>
@@ -343,18 +357,77 @@
       </Dialog>
       <Dialog
         v-model="isOpenSignDialog"
-        :has-padding="false"
-        preset="custom"
+        :header-text="signDialogHeaderText"
+        @close="handleSignDialogClose"
       >
-        <div v-if="isUploadingArweave">
-          Please don't close the window...
-        </div>
-        <div v-else>
-          <div>State {{ currentSignState }}/{{ totalSignState }}</div>
-          <div>{{ signDialogMessage }}</div>
-          <div>Fee: {{ signDialogFee }}/{{ totalFee }}</div>
-          <div v-if="signDialogError">{{ signDialogError }}</div>
-          <button @click="onRetry">Retry</button>
+        <template #header-prepend>
+          <IconStar class="w-[20px]" />
+        </template>
+        <ProgressIndicator
+          v-if="isUploadingArweave"
+          class="mx-auto mb-[24px]"
+        />
+        <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
+        <pre
+          v-if="signDialogError"
+          :class="[
+            'mt-[12px]',
+            'p-[8px]',
+            'bg-red',
+            'bg-opacity-20',
+            'rounded-[8px]',
+            'text-red',
+            'text-[12px]',
+            'font-400',
+          ]"
+        >{{ signDialogError }}</pre>
+        <template v-if="!isUploadingArweave">
+          <Divider class="my-[12px]" />
+          <Label
+            class="text-[14px] font-400"
+            :text="`${signDialogFee} / ${totalFee}`"
+          >
+            <template #prepend>
+              <span
+                v-t="'IscnRegisterForm.signDialog.fee'"
+                class="min-w-[64px] mr-[8px] text-[12px] text-medium-gray font-600"
+              />
+            </template>
+          </Label>
+          <div class="flex justify-center mt-[24px]">
+            <Button
+              preset="outline"
+              :text="$t('IscnRegisterForm.signDialog.retry')"
+              @click="onRetry"
+            />
+          </div>
+        </template>
+      </Dialog>
+      <Dialog
+        v-model="isOpenQuitAlertDialog"
+        :header-text="$t('IscnRegisterForm.quitAlertDialog.title')"
+        @close="handleQuitAlertDialogClose"
+      >
+        <div
+          v-t="'IscnRegisterForm.quitAlertDialog.content'"
+          class="max-w-[336px] text-center text-medium-gray text-[16px] font-500"
+        />
+        <div class="mx-auto mt-[24px] grid grid-flow-col gap-x-[12px] text-center">
+          <Button
+            preset="outline"
+            class="text-red border-red hover:bg-red active:bg-red hover:bg-opacity-20 active:bg-opacity-30"
+            :text="$t('IscnRegisterForm.quitAlertDialog.confirm')"
+            @click="$emit('quit')"
+          >
+            <template #prepend>
+              <IconBin class="w-[20px]" />
+            </template>
+          </Button>
+          <Button
+            preset="outline"
+            :text="$t('IscnRegisterForm.quitAlertDialog.cancel')"
+            @click="handleQuitAlertDialogClose"
+          />
         </div>
       </Dialog>
     </Card>
@@ -421,6 +494,7 @@ export default class IscnRegisterForm extends Vue {
   activeEditingAuthorIndex = -1
 
   isOpenSignDialog = false
+  isOpenQuitAlertDialog = false
   isUploadingArweave = false
   signDialogError = ''
 
@@ -500,6 +574,25 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
+  get formattedUploadStatus() {
+    switch (this.uploadStatus) {
+      case 'loading':
+        return this.$t('IscnRegisterForm.button.loading')
+
+      case 'signing':
+        return this.$t('IscnRegisterForm.button.signing')
+
+      case 'uploading':
+        return this.$t('IscnRegisterForm.button.uploading')
+
+      case 'success':
+        return this.$t('IscnRegisterForm.button.success')
+
+      default:
+        return this.$t('IscnRegisterForm.button.register')
+    }
+  }
+
   get formattedRegisterFee() {
     return this.$t('IscnRegisterForm.register.fee', { fee: this.totalFee })
   }
@@ -534,21 +627,30 @@ export default class IscnRegisterForm extends Vue {
     return this.iscnFee.plus(this.arweaveFeePlusGas)
   }
 
-  get currentSignState() {
+  get currentSignStep() {
     if (this.arweaveFee.lte(0)) {
-      return '1';
+      return 1;
     }
-    return this.uploadArweaveId ? '2' : '1';
+    return this.uploadArweaveId ? 2 : 1;
   }
 
-  get totalSignState() {
-    if (this.uploadArweaveId && this.arweaveFee.lte(0)) return '1'
-    return '2';
+  get totalSignStep() {
+    if (this.uploadArweaveId && this.arweaveFee.lte(0)) return 1
+    return 2;
+  }
+
+  get signDialogHeaderText() {
+    return `Sign (${this.currentSignStep}/${ this.totalSignStep})`;
   }
 
   get signDialogMessage() {
-    if (this.uploadArweaveId) return 'Please sign to register ISCN record';
-    return 'Please sign to upload to arweave';
+    if (this.isUploadingArweave) {
+      return this.$t('IscnRegisterForm.signDialog.closeWarning')
+    }
+    if (this.uploadArweaveId) {
+      return this.$t('IscnRegisterForm.signDialog.sign.iscn.register');
+    }
+    return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload');
   }
 
   get signDialogFee() {
@@ -591,7 +693,7 @@ export default class IscnRegisterForm extends Vue {
 
   confirmAuthorChange() {
     this.checkedAuthorInfo = true
-    if(!this.authorName){
+    if (!this.authorName) {
       return
     }
     this.authorWalletAddress.forEach((a: any, i: number) => {
@@ -644,13 +746,23 @@ export default class IscnRegisterForm extends Vue {
       .shiftedBy(-9);
   }
 
+  handleSignDialogClose() {
+    if (this.uploadArweaveId) {
+      this.isOpenQuitAlertDialog = true
+    }
+  }
+
+  handleQuitAlertDialogClose() {
+    this.isOpenQuitAlertDialog = false
+  }
+
   onRetry(): Promise<void> {
     return this.onSubmit();
   }
 
   async onSubmit(): Promise<void> {
     this.checkedRegisterInfo = true
-    if(!this.name || !this.description) {
+    if (!this.name || !this.description) {
       return
     }
     this.error = ''
@@ -676,6 +788,7 @@ export default class IscnRegisterForm extends Vue {
       this.arweaveFeeTargetAddress = address;
     } catch (err) {
       // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.error(err);
     }
   }
@@ -683,13 +796,15 @@ export default class IscnRegisterForm extends Vue {
   async sendArweaveFeeTx(): Promise<string> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
-    this.uploadStatus = this.$t('IscnRegisterForm.button.signing') as string;
+    this.uploadStatus = 'signing';
     const memo = JSON.stringify({ ipfs: this.ipfsHash });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
     } catch (err) {
       this.signDialogError = err;
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.error(err);
     } finally {
       this.uploadStatus = '';
@@ -705,7 +820,7 @@ export default class IscnRegisterForm extends Vue {
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
     this.isUploadingArweave = true;
-    this.uploadStatus = this.$t('IscnRegisterForm.button.uploading') as string;
+    this.uploadStatus = 'uploading';
     try {
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
@@ -720,7 +835,8 @@ export default class IscnRegisterForm extends Vue {
       this.$emit('arweaveUploaded', { arweaveId })
       this.isOpenSignDialog = false;
     } catch (err) {
-       // TODO: Handle error
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.error(err);
     } finally {
       this.isUploadingArweave = false;
@@ -730,7 +846,7 @@ export default class IscnRegisterForm extends Vue {
 
   async submitToISCN(): Promise<void> {
     this.isOpenSignDialog = true;
-    this.uploadStatus = 'Loading'
+    this.uploadStatus = 'loading'
     await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
@@ -745,13 +861,17 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = this.$t('IscnRegister Form.button.signing') as string;
     try {
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
-      this.uploadStatus = 'Success'
+      this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
       this.isOpenSignDialog = false;
     } catch (err) {
       this.signDialogError = err;
       this.uploadStatus = '';
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.error(err)
+    } finally {
+      this.isOpenQuitAlertDialog = false;
     }
   }
 }

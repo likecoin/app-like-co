@@ -43,12 +43,16 @@
         >
           <template v-if="isBasic">
             <Label
-              class="text-like-green"
+              class="font-bold text-like-green"
               tag="header"
               preset="h5"
               align="left"
               :text="headerText"
-            />
+            >
+              <template v-if="$slots['header-prepend']" #prepend>
+                <slot name="header-prepend" />
+              </template>
+            </Label>
             <div class="mt-[24px]">
               <template v-if="text">{{ text }}</template>
               <slot v-else />
@@ -101,6 +105,7 @@ export default class Dialog extends Vue {
     return [
       'absolute',
       'inset-x-0',
+      'z-20',
       'top-0',
       'flex',
       'justify-center',
@@ -112,6 +117,7 @@ export default class Dialog extends Vue {
   }
 
   close() {
+    this.$emit('close')
     this.isOpen = false
   }
 }

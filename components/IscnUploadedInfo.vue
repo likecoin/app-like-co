@@ -59,7 +59,7 @@
         </Button>
       </div>
       -->
-      <IconDiverMini class="mb-[24px]" />
+      <Divider class="mb-[24px]" />
       <Label
         class="w-min mb-[28px]"
         :text="type"
@@ -78,7 +78,7 @@
       <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
         {{ description }}
       </FormField>
-      <IconDiverMini class="mb-[12px]" />
+      <Divider class="mb-[12px]" />
       <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
         {{ iscnId }}
       </FormField>
@@ -89,7 +89,7 @@
         <ContentFingerprintLink v-if="ipfsHash" :item="ipfs" />
         <ContentFingerprintLink v-if="arweaveId" :item="arweaveURI" />
       </FormField>
-      <IconDiverMini class="mb-[24px]" />
+      <Divider class="mb-[24px]" />
       <FormField
         :label="$t('iscn.meta.transaction')"
         class="mb-[12px]"

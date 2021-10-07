@@ -15,7 +15,7 @@
       :append-class="appendClass"
       :preset="textPreset"
       :tag="labelTag"
-      :align="align"
+      align="center"
     >
       <template
         v-if="shouldShowPrepend"
@@ -222,10 +222,6 @@ export default class Button extends Vue {
         [this.classForSize]: this.isCircle || this.isMini,
       },
     ]
-  }
-
-  get align() {
-    return this.circle ? 'center' : ''
   }
 
   get shouldShowPrepend() {
