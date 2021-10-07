@@ -73,12 +73,10 @@
           </form>
           <!-- upload field__Submit  -->
           <div v-else :class="formClasses">
-            <Previewer :is-image="isImage" :file-data="fileData" />
-            <div class="flex flex-col items-stretch justify-start">
-              <Label :text="fileName" class="font-semibold text-dark-gray" />
-              <Label
-                :text="size"
-                class="font-normal text-medium-gray my-[8px]"
+            <div class="flex">
+              <Previewer
+                :is-image="isImage"
+                :file-data="fileData"
               />
               <div
                 :class="[
@@ -96,7 +94,7 @@
                   ]"
                 />
                 <Label
-                  :text="`${size} KB`"
+                  :text="size"
                   :class="[
                     'font-normal',
                     'text-medium-gray',
@@ -133,7 +131,7 @@
               type="submit"
               :preset="submitBtnClasses"
               :is-disabled="!ipfsHash"
-              >{{ $t('UploadForm.button') }}
+              >{{ uploadStatus || $t('UploadForm.button') }}
               <template #append>
                 <IconArrowRight />
               </template>
@@ -204,6 +202,7 @@ export default class UploadForm extends Vue {
   fileName: string = ''
   fileSize: number = 0
   fileType: string = ''
+  uploadStatus: string = '';
 
   isOpenFileInfoDialog = false
 
