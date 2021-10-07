@@ -170,6 +170,7 @@ export default class UploadForm extends Vue {
   exifInfo: any = null
   fileName: string = ''
   fileSize: number = 0
+  fileType: string = ''
 
   isOpenFileInfoDialog = false
 
@@ -208,11 +209,6 @@ export default class UploadForm extends Vue {
     return `${Math.round(this.fileSize * 0.001)} KB`
   }
 
-  get fileType() {
-    const format = this.fileName.split('.')
-    return format[format.length - 1].toUpperCase()
-  }
-
   async onFileUpload(event: DragEvent) {
     let files = null
     if (event.dataTransfer) {
@@ -225,6 +221,7 @@ export default class UploadForm extends Vue {
       const reader = new FileReader()
       this.fileName = files[0].name
       this.fileSize = files[0].size
+      this.fileType = `${files[0].type}`
       reader.onload = (e) => {
         if (!e.target) return
         this.fileData = e.target.result as string
