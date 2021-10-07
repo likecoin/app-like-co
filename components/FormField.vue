@@ -47,6 +47,7 @@ export default class FormField extends Vue {
   get containerClasses(): any {
     return [
       'flex',
+      'w-full',
       this.direction === FormField.direction.row
         ? 'flex-row items-baseline'
         : 'flex-col items-start pb-[16px]',
@@ -69,7 +70,7 @@ export default class FormField extends Vue {
   get contentWrapperClasses(): any {
     return [
       this.direction === FormField.direction.row
-        ? 'flex-grow'
+        ? 'flex-shrink overflow-hidden'
         : 'w-full',
       'break-words',
       'text-dark-gray',
