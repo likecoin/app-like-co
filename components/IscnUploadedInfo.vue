@@ -11,7 +11,14 @@
         <IconArrowLeft />
       </template>
     </Button>
-    <Card class="p-[32px]" :has-padding="false">
+    <Card
+      :class="[
+        'p-[32px]',
+        'border-[2px]',
+        'border-like-cyan',
+      ]"
+      :has-padding="false"
+    >
       <!-- header -->
       <div class="flex flex-row items-start justify-between">
         <Label
@@ -59,43 +66,144 @@
         </Button>
       </div>
       -->
-      <IconDiverMini class="mb-[24px]" />
-      <Label
-        class="w-min mb-[28px]"
-        :text="type"
-        tag="div"
-        preset="p5"
-        content-class="font-semibold whitespace-nowrap text-like-green"
-        prepend-class="text-like-green"
+      <div
+        :class="[
+          'flex',
+          'justify-center',
+        ]"
       >
-        <template #prepend>
-          <ISCNTypeIcon :type="type" />
-        </template>
-      </Label>
-      <FormField :label="$t('iscn.meta.name')" class="mb-[12px]">
+        <Button
+          :class="[
+            'mt-[16px]',
+            'mb-[28px]',
+          ]"
+          preset="secondary"
+          :text="$t('IscnUploaded.button.new')"
+          :to="localeLocation({ name: 'new' })"
+        >
+          <template #prepend>
+            <IconAddToISCN class="w-[20px]" />
+          </template>
+        </Button>
+      </div>
+      <IconDiverMini class="mb-[24px]" />
+      <div
+        :class="[
+          'flex',
+          'items-start',
+          'justify-between',
+        ]"
+      >
+        <Label
+          :class="[
+            'w-min',
+            'mb-[28px]',
+          ]"
+          :text="type"
+          tag="div"
+          preset="p5"
+          content-class="font-semibold whitespace-nowrap text-like-green"
+          prepend-class="text-like-green"
+        >
+          <template #prepend>
+            <ISCNTypeIcon :type="type" />
+          </template>
+        </Label>
+        <Label
+          :text="recordTimestamp"
+          tag="div"
+          preset="p6"
+          content-class="text-medium-gray"
+        />
+      </div>
+      <FormField
+        v-if="name"
+        :label="$t('iscn.meta.name')"
+        content-type="strong"
+        class="mb-[12px]"
+      >
         {{ name }}
       </FormField>
-      <FormField :label="$t('iscn.meta.description')" class="mb-[12px]">
+      <FormField
+        v-if="description"
+        :label="$t('iscn.meta.description')"
+        class="mb-[12px]"
+      >
         {{ description }}
       </FormField>
       <IconDiverMini class="mb-[12px]" />
-      <FormField :label="$t('iscn.meta.id')" class="mb-[12px]">
-        {{ iscnId }}
-      </FormField>
       <FormField
-        :label="$t('iscn.meta.content.fingerprints')"
-        class="mb-[12px]"
+        v-if="owner"
+        :label="$t('iscn.meta.owner')"
+        :class="[
+          'mb-[12px]',
+          'text-[14px]',
+        ]"
       >
-        <ContentFingerprintLink :item="ipfs" />
+        {{ owner }}
       </FormField>
-      <IconDiverMini class="mb-[24px]" />
       <FormField
+        v-if="iscnHash"
         :label="$t('iscn.meta.transaction')"
         class="mb-[12px]"
       >
-        <Link :href="transactionsURL">
+        <Link 
+          class="text-[14px]"
+          :href="transactionsURL"
+        >
           {{ iscnHash }}
         </Link>
+      </FormField>
+      <IconDiverMini class="mb-[12px]" />
+      <FormField 
+        v-if="iscnId"
+        :label="$t('iscn.meta.id')"
+        :class="[
+          'mb-[12px]',
+          'text-[14px]',
+        ]"
+      >
+        <Link
+          :to="localeLocation({
+            name: 'view-iscnId',
+            params: { iscnId: iscnId },
+          })"
+          class="text-[14px]"
+        >
+          {{ iscnId }}
+        </Link>
+      </FormField>
+      <FormField
+        v-if="contentFingerprints"
+        :label="$t('iscn.meta.content.fingerprints')"
+        class="mb-[12px]"
+      >
+        <ContentFingerprintLink
+          v-for="item in contentFingerprints"
+          :key="item.key"
+          :item="item"
+          :class="[
+            'mb-[8px]',
+            'break-all',
+            'text-[14px]',
+          ]"
+        />
+      </FormField>
+      <IconDiverMini class="mb-[24px]" />
+      <FormField
+        v-if="keywords"
+        :label="$t('iscn.meta.tags.title')"
+        class="mb-[12px]"
+      >
+        <Tag
+          v-for="item in keywords"
+          :key="item.key"
+          :text="item"
+          :class="[
+            'mr-[8px]',
+            'mb-[4px]',
+          ]"
+        />
       </FormField>
     </Card>
   </div>
@@ -104,14 +212,8 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
-import { getIPFSURLFromHash } from '~/utils/ipfs'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-
-
-import {
-  BIG_DIPPER_TX_BASE_URL,
-} from '~/constant'
+import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -119,13 +221,10 @@ const iscnModule = namespace('iscn')
 @Component
 export default class IscnUploadedInfo extends Vue {
   @Prop({ default: false }) readonly isImage!: boolean
-  @Prop({ default: null }) readonly fileData: string | null | undefined
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
-  @Prop(String) readonly fileSHA256!: string
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
-  @Prop(String) readonly iscnTimestamp!: string
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
@@ -146,10 +245,6 @@ export default class IscnUploadedInfo extends Vue {
     return this.record ? this.record.data.contentMetadata.description : ''
   }
 
-  get imgSrc() {
-    return this.isImage && (getIPFSURLFromHash(this.ipfsHash) || this.fileData)
-  }
-
   get isPhoto() {
     return this.exifInfo && this.exifInfo.ExifImageWidth
   }
@@ -164,9 +259,25 @@ export default class IscnUploadedInfo extends Vue {
     return `ipfs://${this.ipfsHash}`
   }
 
-   get transactionsURL(){
-     return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
-   }
+  get transactionsURL() {
+    return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
+  }
+
+  get keywords() {
+    return this.record ? this.record.data.contentMetadata.keywords : ''
+  }
+
+  get owner() {
+    return this.currentAddress
+  }
+
+  get contentFingerprints() {
+    return this.record ? this.record.data.contentFingerprints : ''
+  }
+
+  get recordTimestamp() {
+    return this.record ? this.record.data.recordTimestamp : ''
+  }
 
   async mounted() {
     this.records = await this.queryISCNByAddress(this.currentAddress)
