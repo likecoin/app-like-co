@@ -45,7 +45,10 @@ export default class MetadataCard extends Vue {
   @Prop(Object) readonly data!: Object
 
   exifInfo: Object = {}
-  isFromData: boolean = false
+
+  get isFromData() {
+    return !!this.data
+  }
 
   @Watch('imgSrc')
   onImgSrcChanged() {
@@ -54,13 +57,12 @@ export default class MetadataCard extends Vue {
 
   @Watch('data')
   onDataChange() {
-    if (this.data) this.exifInfo = this.data
+    if (this.isFromData) this.exifInfo = this.data
   }
 
   mounted() {
-    if (this.data) {
+    if (this.isFromData) {
       this.exifInfo = this.data
-      this.isFromData = true
     } else this.extractEXIFInfo()
   }
 
