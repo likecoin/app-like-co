@@ -131,7 +131,7 @@
               type="submit"
               :preset="submitBtnClasses"
               :is-disabled="!ipfsHash"
-              >{{ $t('UploadForm.button') }}
+              >{{ uploadStatus || $t('UploadForm.button') }}
               <template #append>
                 <IconArrowRight />
               </template>
@@ -202,6 +202,7 @@ export default class UploadForm extends Vue {
   fileName: string = ''
   fileSize: number = 0
   fileType: string = ''
+  uploadStatus: string = '';
 
   isOpenFileInfoDialog = false
 

@@ -69,7 +69,7 @@
               {{ txHash }}
             </Link>
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField
             v-if="iscnId"
             :label="$t('iscn.meta.id')"
@@ -88,7 +88,7 @@
               class="mb-[8px] break-all text-[14px]"
             />
           </FormField>
-          <IconDiverMini class="my-[12px]" />
+          <Divider class="my-[12px]" />
           <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
             <Tag
               v-for="item in keywords"
@@ -212,7 +212,7 @@
                 preset="p5"
               />
             </FormField>
-            <IconDiverMini
+            <Divider
               v-if="stakeholderInfo.authorUrls.length"
               class="my-[12px]"
             />
@@ -228,7 +228,7 @@
                 >{{ url }}</Link
               >
             </FormField>
-            <IconDiverMini
+            <Divider
               v-if="stakeholderInfo.authorWalletAddresses.length"
               class="my-[12px]"
             />

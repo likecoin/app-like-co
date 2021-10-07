@@ -86,7 +86,7 @@
           </template>
         </Button>
       </div>
-      <IconDiverMini class="mb-[24px]" />
+      <Divider class="mb-[24px]" />
       <div
         :class="[
           'flex',
@@ -131,7 +131,7 @@
       >
         {{ description }}
       </FormField>
-      <IconDiverMini class="mb-[12px]" />
+      <Divider class="mb-[12px]" />
       <FormField
         v-if="owner"
         :label="$t('iscn.meta.owner')"
@@ -189,7 +189,7 @@
           ]"
         />
       </FormField>
-      <IconDiverMini class="mb-[24px]" />
+      <Divider class="mb-[24px]" />
       <FormField
         v-if="keywords"
         :label="$t('iscn.meta.tags.title')"
@@ -225,6 +225,7 @@ export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
+  @Prop(String) readonly arweaveId!: string
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
@@ -277,6 +278,10 @@ export default class IscnUploadedInfo extends Vue {
 
   get recordTimestamp() {
     return this.record ? this.record.data.recordTimestamp : ''
+  }
+
+  get arweaveURI() {
+    return `ar://${this.arweaveId}`;
   }
 
   async mounted() {
