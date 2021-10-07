@@ -80,18 +80,51 @@
                 :text="size"
                 class="font-normal text-medium-gray my-[8px]"
               />
-              <Button
-                v-if="exifInfo"
-                class="w-min"
-                type="button"
-                :text="$t('UploadForm.view.file.button')"
-                preset="outline"
-                @click="isOpenFileInfoDialog = true"
+              <div
+                :class="[
+                  'flex',
+                  'flex-col',
+                  'items-stretch',
+                  'justify-start',
+                ]"
               >
-                <template #prepend>
-                  <IconInfo />
-                </template>
-              </Button>
+                <Label
+                  :text="fileName"
+                  :class="[
+                    'font-semibold',
+                    'text-dark-gray',
+                  ]"
+                />
+                <Label
+                  :text="`${size} KB`"
+                  :class="[
+                    'font-normal',
+                    'text-medium-gray',
+                    'my-[8px]',
+                  ]"
+                />
+                <Button
+                  v-if="exifInfo"
+                  class="w-min"
+                  type="button"
+                  :text="$t('UploadForm.view.file.button')"
+                  preset="outline"
+                  @click="isOpenFileInfoDialog = true"
+                >
+                  <template #prepend>
+                    <IconInfo />
+                  </template>
+                </Button>
+              </div>
+            </div>
+            <div
+              :class="[
+                'mr-[24px]',
+                'cursor-pointer',
+              ]"
+              @click="handleInitFile"
+            >
+              <IconDelete />
             </div>
           </div>
           <!-- Publish btn -->
@@ -140,7 +173,7 @@
     >
       <IconAttention />
       <IconLedger />
-      <div 
+      <div
         class="whitespace-pre-line text-dark-gray"
         >{{ $t('UploadForm.attention') }}
       </div>
@@ -183,6 +216,7 @@ export default class UploadForm extends Vue {
         'h-[196px] flex-col justify-center': !this.ipfsHash,
       },
       'items-center',
+      'justify-between',
       'p-[32px]',
       'mb-[12px]',
       'border-[2px]',
@@ -284,6 +318,18 @@ export default class UploadForm extends Vue {
       isImage: this.isImage,
       exifInfo: this.exifInfo,
     })
+  }
+
+  handleInitFile() {
+    this.isImage = false
+    this.ipfsURL = ''
+    this.ipfsHash = ''
+    this.fileData = ''
+    this.fileSHA256 = ''
+    this.fileBlob = null
+    this.exifInfo = null
+    this.fileName = ''
+    this.fileSize = 0
   }
 }
 </script>
