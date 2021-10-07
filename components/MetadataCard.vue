@@ -23,9 +23,9 @@
     </template>
     <FormField
       v-for="(item, name) in exifInfo"
-      :key="name"
+      :key="isFromData ? $t(`iscn.exif.label.${name}`) : name"
       class="mb-[8px]"
-      :label="name"
+      :label="isFromData ? $t(`iscn.exif.label.${name}`) : name"
       direction="row"
       label-classes="min-w-[98px]"
     >
@@ -45,6 +45,7 @@ export default class MetadataCard extends Vue {
   @Prop(Object) readonly data!: Object
 
   exifInfo: Object = {}
+  isFromData: boolean = false
 
   @Watch('imgSrc')
   onImgSrcChanged() {
@@ -57,8 +58,10 @@ export default class MetadataCard extends Vue {
   }
 
   mounted() {
-    if (this.data) this.exifInfo = this.data
-    else this.extractEXIFInfo()
+    if (this.data) {
+      this.exifInfo = this.data
+      this.isFromData = true
+    } else this.extractEXIFInfo()
   }
 
   async extractEXIFInfo() {
