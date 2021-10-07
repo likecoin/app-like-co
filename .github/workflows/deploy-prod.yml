@@ -11,7 +11,6 @@ env:
   GKE_ZONE: ${{ secrets.GKE_ZONE }}
   DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
   IMAGE: ${{ secrets.GCR_IMAGE }}
-  IS_TESTNET: 'FALSE'
 
 jobs:
   setup-build-publish-deploy:
@@ -45,7 +44,6 @@ jobs:
       run: |-
         docker build \
           --tag "us.gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
-          --build-arg IS_TESTNET="$IS_TESTNET" \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" \
           .
