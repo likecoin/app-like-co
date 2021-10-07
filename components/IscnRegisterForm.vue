@@ -381,6 +381,8 @@ export default class IscnRegisterForm extends Vue {
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop({ default: null }) readonly fileBlob: Blob | null | undefined
   @Prop({ default: null }) readonly fileData: string | null | undefined
+  @Prop({ default: null }) readonly fileType: string | null | undefined
+  @Prop({ default: null }) readonly fileSize: string | null | undefined
   @Prop(String) readonly fileSHA256!: string
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
@@ -414,21 +416,6 @@ export default class IscnRegisterForm extends Vue {
 
   checkedAuthorInfo = false
   checkedRegisterInfo = false
-
-  @Watch('payload', { immediate: true, deep: true })
-  change() {
-    this.debouncedCalculateTotalFee()
-  }
-
-  @Watch('error')
-  showWarning(errormsg: any) {
-    if (errormsg) this.isOpenWarningSnackbar = true
-  }
-
-  mounted() {
-    this.uploadStatus = ''
-    this.calculateTotalFee()
-  }
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -485,6 +472,20 @@ export default class IscnRegisterForm extends Vue {
     return this.$t('IscnRegisterForm.register.fee', { fee: this.totalFee })
   }
 
+  get exif() {
+    const extension = this.fileType!.split('/')
+    return {
+      ...this.exifInfo,
+      Format: this.fileType,
+      Size:
+        this.type === 'Photo' || this.type === 'Image'
+          ? `${this.exifInfo.ExifImageHeight} x ${
+              this.exifInfo.ExifImageWidth
+            } ${extension[extension.length - 1].toUpperCase()} (${this.fileSize})`
+          : this.fileSize,
+    }
+  }
+
   get payload() {
     return {
       type: this.type,
@@ -492,16 +493,31 @@ export default class IscnRegisterForm extends Vue {
       description: this.description,
       tagsString: this.tagsString,
       url: this.url,
+      exifInfo: this.exif,
       license: this.license,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
-      cosmosWallet: this.address,
       likerIds: this.likerIds,
       descriptions: this.descriptions,
     }
+  }
+
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateTotalFee()
+  }
+
+  @Watch('error')
+  showWarning(errormsg: any) {
+    if (errormsg) this.isOpenWarningSnackbar = true
+  }
+
+  mounted() {
+    this.uploadStatus = ''
+    this.calculateTotalFee()
   }
 
   handleOpenAuthorDialog() {

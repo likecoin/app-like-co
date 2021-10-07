@@ -94,7 +94,7 @@
                   ]"
                 />
                 <Label
-                  :text="`${size} KB`"
+                  :text="size"
                   :class="[
                     'font-normal',
                     'text-medium-gray',
@@ -201,6 +201,7 @@ export default class UploadForm extends Vue {
   exifInfo: any = null
   fileName: string = ''
   fileSize: number = 0
+  fileType: string = ''
 
   isOpenFileInfoDialog = false
 
@@ -237,7 +238,7 @@ export default class UploadForm extends Vue {
   }
 
   get size() {
-    return Math.round(this.fileSize * 0.001)
+    return `${Math.round(this.fileSize * 0.001)} KB`
   }
 
   async onFileUpload(event: DragEvent) {
@@ -252,6 +253,7 @@ export default class UploadForm extends Vue {
       const reader = new FileReader()
       this.fileName = files[0].name
       this.fileSize = files[0].size
+      this.fileType = `${files[0].type}`
       reader.onload = (e) => {
         if (!e.target) return
         this.fileData = e.target.result as string
@@ -309,6 +311,8 @@ export default class UploadForm extends Vue {
       fileData: this.fileData,
       fileSHA256: this.fileSHA256,
       fileBlob: this.fileBlob,
+      fileSize: this.size,
+      fileType: this.fileType,
       isImage: this.isImage,
       exifInfo: this.exifInfo,
     })

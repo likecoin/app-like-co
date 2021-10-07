@@ -32,8 +32,8 @@
           />
         </ClientOnly>
         <MetadataCard
-          v-if="imgSrc"
           :img-src="imgSrc"
+          :data="exifInfo"
           class="w-[280px] mt-[16px]"
         />
       </div>
@@ -301,6 +301,17 @@ export enum ErrorMessage {
   statusCode404 = 'iscn id not found',
 }
 
+export enum ExifList {
+  artist = 'artist',
+  camera = 'camera',
+  date = 'date',
+  exposure = 'exposure',
+  flash = 'flash',
+  format = 'format',
+  lens = 'lens',
+  size = 'size',
+}
+
 @Component({
   filters: {
     ellipsis(value: any) {
@@ -321,6 +332,7 @@ export default class ViewIscnIdPage extends Vue {
   url = ''
   isOpenAuthorDialog = false
   isOpenCopiedAlert = false
+  exifInfo = {}
   stakeholderInfo = {
     authorWalletAddresses: [],
     authorDescription: '',
@@ -339,44 +351,6 @@ export default class ViewIscnIdPage extends Vue {
   @iscnModule.Action fetchISCNByTx!: (
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
-
-  created() {
-    const { iscnId } = this.$route.params
-    if (iscnId.startsWith(ISCN_PREFIX)) {
-      this.iscnId = iscnId
-    }
-  }
-
-  async mounted() {
-    this.txHash = await this.fetchTxHash()
-    if (!this.iscnId) {
-      const param = this.$route.params.iscnId
-      if (!isCosmosTransactionHash(param)) {
-        this.$nuxt.error({
-          statusCode: 400,
-          message: ErrorMessage.statusCode400,
-        })
-        return
-      }
-      const res = await this.fetchISCNByTx(param)
-      if (!res) {
-        this.$nuxt.error({
-          statusCode: 400,
-          message: ErrorMessage.statusCode400,
-        })
-        return
-      }
-      this.iscnId = res.records[0].id
-      this.$router.replace({ params: { iscnId: this.iscnId } })
-    }
-    if (!this.getISCNById(this.iscnId) || !this.owner) {
-      const res = await this.fetchISCNById(this.iscnId)
-      if (res) this.owner = res.owner
-    }
-    if (!this.getISCNById(this.iscnId)) {
-      this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
-    }
-  }
 
   get record() {
     return this.getISCNById(this.iscnId)
@@ -421,27 +395,103 @@ export default class ViewIscnIdPage extends Vue {
     return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
   }
 
+  created() {
+    const { iscnId } = this.$route.params
+    if (iscnId.startsWith(ISCN_PREFIX)) {
+      this.iscnId = iscnId
+    }
+  }
+
+  async mounted() {
+    this.txHash = await this.fetchTxHash()
+    if (!this.iscnId) {
+      const param = this.$route.params.iscnId
+      if (!isCosmosTransactionHash(param)) {
+        this.$nuxt.error({
+          statusCode: 400,
+          message: ErrorMessage.statusCode400,
+        })
+        return
+      }
+      const res = await this.fetchISCNByTx(param)
+      if (!res) {
+        this.$nuxt.error({
+          statusCode: 400,
+          message: ErrorMessage.statusCode400,
+        })
+        return
+      }
+      this.iscnId = res.records[0].id
+      this.$router.replace({ params: { iscnId: this.iscnId } })
+    }
+    if (!this.getISCNById(this.iscnId) || !this.owner) {
+      const res = await this.fetchISCNById(this.iscnId)
+      if (res) this.owner = res.owner
+    }
+    if (!this.getISCNById(this.iscnId)) {
+      this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
+    }
+    this.exifInfo = this.showExifInfo()
+  }
+
   async fetchTxHash() {
-    const res = await this.$axios.get(`${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`)
+    const res = await this.$axios.get(
+      `${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`,
+    )
     const txHash = this.getTxHash(res.data.txs)
     return txHash
   }
 
+  showExifInfo() {
+    const { exifInfo } = this.metadata
+    let exif
+    if (exifInfo) {
+      exif = {
+        [ExifList.format]: exifInfo.Format,
+        [ExifList.artist]: exifInfo.Artist,
+        [ExifList.camera]:
+          exifInfo.Make && exifInfo.Model
+            ? `${exifInfo.Make} ${exifInfo.Model}`
+            : undefined,
+        [ExifList.lens]:
+          exifInfo.LensMake && exifInfo.LensModel
+            ? `${exifInfo.LensMake} ${exifInfo.LensModel}`
+            : undefined,
+        [ExifList.exposure]:
+          exifInfo.ExposureProgram &&
+          exifInfo.ExposureTime &&
+          exifInfo.FNumber &&
+          exifInfo.ISO
+            ? `${exifInfo.ExposureProgram}, 1/${(
+                1 / exifInfo.ExposureTime
+              ).toFixed(0)} s, f/${exifInfo.FNumber.toFixed(1)}, ISO ${
+                exifInfo.ISO
+              }`
+            : undefined,
+        [ExifList.flash]: exifInfo.Flash,
+        [ExifList.date]: exifInfo.CreateDate,
+        [ExifList.size]: exifInfo.Size,
+      }
+      exif = JSON.parse(JSON.stringify(exif))
+    }
+    return exif
+  }
+
   // eslint-disable-next-line class-methods-use-this
   getTxHash(items: any) {
-      const targetItem = items.find((item: any) =>
-        item.logs.find((log: any) =>
-          log.events.find((event: any) =>
-            event.attributes.some(
-              (attribute: any) =>
-                attribute.key === 'action' &&
-                attribute.value === 'create_iscn_record',
-            ),
+    const targetItem = items.find((item: any) =>
+      item.logs.find((log: any) =>
+        log.events.find((event: any) =>
+          event.attributes.some(
+            (attribute: any) =>
+              attribute.key === 'action' &&
+              attribute.value === 'create_iscn_record',
           ),
         ),
-      )
-      return targetItem.txhash
-    }
+      ),
+    )
+    return targetItem.txhash
+  }
 
   showStakeholder(index: number) {
     this.isOpenAuthorDialog = true
@@ -515,6 +565,5 @@ export default class ViewIscnIdPage extends Vue {
     selection!.removeAllRanges()
     document.body.removeChild(copyText)
   }
-
 }
 </script>

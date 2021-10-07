@@ -5,6 +5,7 @@
       tag="div"
       preset="p5"
       valign="middle"
+      :class="[{ 'mb-[12px]': !imgSrc }]"
       content-class="font-semibold whitespace-nowrap text-like-green"
       prepend-class="text-like-green"
     >
@@ -22,9 +23,9 @@
     </template>
     <FormField
       v-for="(item, name) in exifInfo"
-      :key="item.key"
+      :key="isFromData ? $t(`iscn.exif.label.${name}`) : name"
       class="mb-[8px]"
-      :label="name"
+      :label="isFromData ? $t(`iscn.exif.label.${name}`) : name"
       direction="row"
       label-classes="min-w-[98px]"
     >
@@ -45,19 +46,8 @@ export default class MetadataCard extends Vue {
 
   exifInfo: Object = {}
 
-  created() {
-    if (this.data) this.exifInfo = this.data
-  }
-
-  async extractEXIFInfo() {
-    const imgElement = this.$refs.iscnImg
-    if (imgElement) {
-      this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
-    }
-  }
-
-  mounted() {
-    this.extractEXIFInfo()
+  get isFromData() {
+    return !!this.data
   }
 
   @Watch('imgSrc')
@@ -67,7 +57,20 @@ export default class MetadataCard extends Vue {
 
   @Watch('data')
   onDataChange() {
-    if (this.data) this.exifInfo = this.data
+    if (this.isFromData) this.exifInfo = this.data
+  }
+
+  mounted() {
+    if (this.isFromData) {
+      this.exifInfo = this.data
+    } else this.extractEXIFInfo()
+  }
+
+  async extractEXIFInfo() {
+    const imgElement = this.$refs.iscnImg
+    if (imgElement) {
+      this.exifInfo = await exifr.parse(imgElement as HTMLImageElement)
+    }
   }
 }
 </script>
