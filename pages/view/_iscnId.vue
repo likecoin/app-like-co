@@ -32,9 +32,13 @@
           />
         </ClientOnly>
         <MetadataCard
+          v-if="metadata.exifInfo"
           :img-src="imgSrc"
           :data="exifInfo"
-          class="w-[280px] mt-[16px]"
+          :class="[
+            'w-[280px]',
+            'mt-[16px]',
+          ]"
         />
       </div>
       <div>
