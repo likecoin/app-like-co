@@ -79,7 +79,7 @@
           ]"
           preset="secondary"
           :text="$t('IscnUploaded.button.new')"
-          :to="localeLocation({ name: 'new' })"
+          :to="localeLocation({ name: 'index' })"
         >
           <template #prepend>
             <IconAddToISCN class="w-[20px]" />
@@ -265,7 +265,7 @@ export default class IscnUploadedInfo extends Vue {
   }
 
   get keywords() {
-    return this.record ? this.record.data.contentMetadata.keywords : ''
+    return this.record ? this.record.data.contentMetadata.keywords.split(',') : []
   }
 
   get owner() {
