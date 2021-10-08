@@ -69,7 +69,12 @@
             <Label :text="owner" tag="div" preset="p6" />
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
-            <Link class="text-[14px]" :href="transactionsURL">
+            <Link
+              :class="[
+                'text-[14px]',
+                'break-all',
+              ]"
+              :href="transactionsURL">
               {{ txHash }}
             </Link>
           </FormField>
@@ -93,7 +98,11 @@
             />
           </FormField>
           <Divider class="my-[12px]" />
-          <FormField :label="$t('iscn.meta.tags.title')" class="mb-[12px]">
+          <FormField
+            v-if="keywords.length"
+            :label="$t('iscn.meta.tags.title')"
+            class="mb-[12px]"
+          >
             <Tag
               v-for="item in keywords"
               :key="item.key"
@@ -136,7 +145,13 @@
             :label="$t('iscn.meta.url')"
             class="mb-[12px]"
           >
-            <Link class="text-[14px]" :href="metadata.url">
+            <Link
+              :class="[
+                'text-[14px]',
+                'break-all',
+              ]"
+              :href="metadata.url"
+            >
               {{ metadata.url }}
             </Link>
           </FormField>
@@ -145,7 +160,13 @@
             :label="$t('iscn.meta.usage.info')"
             class="mb-[12px]"
           >
-            <Link class="text-[14px]" :href="metadata.usageInfo">
+            <Link
+              :class="[
+                'text-[14px]',
+                'break-all',
+              ]"
+              :href="metadata.usageInfo"
+            >
               {{ metadata.usageInfo }}
             </Link>
           </FormField>
@@ -229,6 +250,7 @@
                 v-for="url in stakeholderInfo.authorUrls"
                 :key="url"
                 :href="url"
+                class="break-all"
                 >{{ url }}</Link
               >
             </FormField>
