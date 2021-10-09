@@ -1,8 +1,14 @@
 import Arweave from 'arweave/node';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { getIPFSHash, uploadToIPFS } from '../ipfs';
+import stringify from 'fast-json-stable-stringify';
+import {
+  getFileIPFSHash,
+  getFolderIPFSHash,
+  uploadFileToIPFS,
+} from '../ipfs';
 import { COINGECKO_PRICE_API } from '../constant';
+import { ArweaveFile, Manifest, ArweavePrice, ArweavePriceWithLIKE } from './types';
 
 const IPFS_KEY = 'IPFS-Add'
 
@@ -31,35 +37,110 @@ export async function getArIdFromHashes(ipfsHash: string) {
   return res[0] || null;
 }
 
-export async function estimateARPrice(data: { mimetype: string; buffer: Buffer; }) {
-  const { buffer } = data;
-  const ipfsHash = await getIPFSHash(buffer);
-  const id = await getArIdFromHashes(ipfsHash)
+function generateManifest(files: ArweaveFile[]) {
+  const isIndexExists = !!files.find(f => f.key === 'index.html');
+  const filePaths = files.filter(p => p.key && p.arweaveId).map(p => ({
+    [p.key]: {
+      id: p.arweaveId as string,
+    },
+  }));
+  const manifest: Manifest = {
+    manifest: 'arweave/paths',
+    version: '0.1.0',
+    index: isIndexExists ? {
+      path: 'index.html',
+    } : undefined,
+    paths: filePaths,
+  };
+  return manifest;
+}
+
+function generateManifestFile(files: ArweaveFile[]): ArweaveFile {
+  const manifest = generateManifest(files);
+  return {
+    key: 'manifest',
+    mimetype: 'application/x.arweave-manifest+json',
+    buffer: Buffer.from(stringify(manifest), 'utf-8'),
+  };
+}
+
+export async function estimateARPrice(data: ArweaveFile) {
+  const { buffer, key } = data;
+  const ipfsHash = await getFileIPFSHash(data);
+  const id = await getArIdFromHashes(ipfsHash);
   if (id) return {
+    key,
     arweaveId: id,
     AR: '0',
   }
   const transaction = await arweave.createTransaction({ data: buffer }, jwk)
   const { reward } = transaction;
   return {
+    key,
     AR: arweave.ar.winstonToAr(reward),
   };
 }
 
-export async function convertARPriceToLIKE(ar: string, { margin = 0.05, decimal = 0 } = {}) {
-  const { data } = await axios.get(COINGECKO_PRICE_API);
-  const { likecoin, arweave: arweavePrice } = data;
-  let priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd);
-  // At least 1 LIKE for 1 AR
-  priceRatio = BigNumber.max(priceRatio, 1);
-  const res = new BigNumber(ar).multipliedBy(priceRatio).multipliedBy(1 + margin).toFixed(decimal, BigNumber.ROUND_UP);
-  return res;
+export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePrice> {
+  if (files.length === 1) {
+    return estimateARPrice(files[0]);
+  }
+  const prices = await Promise.all(files.map(f => estimateARPrice(f)));
+  const manifest = generateManifestFile(files);
+  const manifestPrice = await estimateARPrice(manifest);
+  prices.unshift(manifestPrice);
+  const totalAR = prices.reduce((acc, cur) => acc.plus(cur.AR), new BigNumber(0));
+  return {
+    AR: totalAR.toFixed(),
+    arweaveId: manifestPrice.arweaveId,
+    list: prices,
+  }
 }
 
-export async function submitToArweave(data: { mimetype: string; buffer: Buffer; }, ipfsHash: string) {
+export async function convertARPriceToLIKE(ar: ArweavePrice, {
+  priceRatio: inputPriceRatio = '', margin = 0.05, decimal = 0,
+} = {}): Promise<ArweavePriceWithLIKE> {
+  let priceRatio = inputPriceRatio;
+  if (!priceRatio) {
+    const { data } = await axios.get(COINGECKO_PRICE_API);
+    const { likecoin, arweave: arweavePrice } = data;
+    priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
+  }
+  // At least 1 LIKE for 1 AR
+  const priceRatioBigNumber = BigNumber.max(priceRatio, 1);
+  const res = new BigNumber(ar.AR)
+    .multipliedBy(priceRatioBigNumber)
+    .multipliedBy(1 + margin)
+    .toFixed(decimal, BigNumber.ROUND_UP);
+  // list should be empty, but make ts happy
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { list, ...payload } = ar;
+  return {
+    ...payload,
+    LIKE: res,
+  };
+}
+
+export async function convertARPricesToLIKE(ar: ArweavePrice,
+  { margin = 0.05, decimal = 0 } = {},
+): Promise<ArweavePriceWithLIKE> {
+  if (!(ar.list && ar.list.length)) {
+    return convertARPriceToLIKE(ar, { margin, decimal });
+  }
+  const newList = await Promise.all(ar.list.map(a => convertARPriceToLIKE(a, { margin, decimal })));
+  const totalLIKE = newList.reduce((acc, cur) => acc.plus(cur.LIKE), new BigNumber(0));
+  return {
+    ...ar,
+    LIKE: totalLIKE.toFixed(),
+    list: newList,
+  }
+}
+
+export async function submitToArweave(data: ArweaveFile, ipfsHash: string) {
   const anchorId = (await arweave.api.get('/tx_anchor')).data
   const { mimetype, buffer } = data;
   const transaction = await arweave.createTransaction({ data: buffer, last_tx: anchorId }, jwk)
+  transaction.addTag('User-Agent', 'app.like.co');
   transaction.addTag(IPFS_KEY, ipfsHash)
   transaction.addTag(IPFS_CONSTRAINT_KEY, IPFS_CONSTRAINT)
   transaction.addTag('Content-Type', mimetype)
@@ -73,20 +154,76 @@ export async function submitToArweave(data: { mimetype: string; buffer: Buffer; 
   return transaction.id;
 }
 
-export async function uploadFileToArweave(data: { mimetype: string; buffer: Buffer; }) {
-  const { buffer } = data
-  const ipfsHash = await getIPFSHash(buffer)
+export async function uploadFileToArweave(data: ArweaveFile) {
+  const ipfsHash = await getFileIPFSHash(data)
   const id = await getArIdFromHashes(ipfsHash)
   if (id) return {
     arweaveId: id,
     ipfsHash,
+    list: undefined,
   }
   const [res] = await Promise.all([
     submitToArweave(data, ipfsHash),
-    uploadToIPFS(data.buffer),
+    uploadFileToIPFS(data.buffer),
   ])
   return {
     arweaveId: res,
     ipfsHash,
+    list: undefined,
   }
 }
+
+export async function uploadFilesToArweave(files: ArweaveFile[]) {
+  if (files.length === 1) {
+    return uploadFileToArweave(files[0]);
+  }
+  const manifest = generateManifestFile(files);
+  const filesWithManifest = [manifest].concat(files);
+
+  const [
+    folderIpfsHash,
+    ipfsHashes,
+  ] = await Promise.all([
+    getFolderIPFSHash(filesWithManifest),
+    Promise.all(filesWithManifest.map(f => getFileIPFSHash(f))),
+  ]);
+  const arweaveIds = await Promise.all(ipfsHashes.map(h => getArIdFromHashes(h)));
+  console.log(arweaveIds);
+  if (!arweaveIds.some(id => !id)) {
+    const list = filesWithManifest.map((f, index) => ({
+      key: f.key,
+      arweaveId: arweaveIds[index],
+      ipfsHash: ipfsHashes[index],
+    }));
+    return {
+      arweaveId: arweaveIds[0],
+      ipfsHash: folderIpfsHash,
+      list,
+    }
+  }
+
+  const list = [];
+  for (let i = 0; i < filesWithManifest.length; i += 1) {
+    /* eslint-disable no-await-in-loop */
+    const f = filesWithManifest[i];
+    const { buffer } = f;
+    const ipfsHash = await getFileIPFSHash(f);
+    const [arweaveId] = await Promise.all([
+      submitToArweave(f, ipfsHash),
+      uploadFileToIPFS(buffer),
+    ])
+    list.push({
+      key: f.key,
+      arweaveId,
+      ipfsHash,
+    })
+    /* eslint-enable no-await-in-loop */
+  }
+
+  return {
+    arweaveId: list[0].arweaveId,
+    ipfsHash: folderIpfsHash,
+    list,
+  }
+}
+
