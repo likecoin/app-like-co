@@ -24,7 +24,7 @@ export async function uploadFileToIPFS(fileBlob: Buffer) {
 
 export async function uploadFilesToIPFS(files: ArweaveFile[], { onlyHash = false } = {}) {
   const client = getInstance()
-  const directoryName = '/tmp';
+  const directoryName = 'tmp';
   const promises = client.addAll(
     files.map(f => ({
       content: f.buffer,

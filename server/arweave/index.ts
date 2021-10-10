@@ -34,16 +34,26 @@ export async function getArIdFromHashes(ipfsHash: string) {
       expr2: IPFS_CONSTRAINT,
     },
   });
-  return res[0] || null;
+  return res[0] || undefined;
 }
 
-function generateManifest(files: ArweaveFile[]) {
+function generateManifest(files: ArweaveFile[], { stub = false } = {}) {
   const isIndexExists = !!files.find(f => f.key === 'index.html');
-  const filePaths = files.filter(p => p.key && p.arweaveId).map(p => ({
-    [p.key]: {
-      id: p.arweaveId as string,
-    },
-  }));
+  let list = files;
+  if (stub) {
+    list = list.map(p => ({
+      arweaveId: p.arweaveId || 'fzassxeg7cCmOp6-sVkvDV3l5GVfDqL_pF_VOQHHBGo',
+      ...p,
+    }));
+  }
+  const filePaths = list
+    .filter(p => p.key && p.arweaveId)
+    .reduce((acc, p) => {
+      acc[p.key] = {
+        id: p.arweaveId as string,
+      };
+      return acc;
+    }, {} as { [key: string]: { id: string } });
   const manifest: Manifest = {
     manifest: 'arweave/paths',
     version: '0.1.0',
@@ -55,13 +65,26 @@ function generateManifest(files: ArweaveFile[]) {
   return manifest;
 }
 
-function generateManifestFile(files: ArweaveFile[]): ArweaveFile {
-  const manifest = generateManifest(files);
+function generateManifestFile(files: ArweaveFile[], { stub = false } = {}): ArweaveFile {
+  const manifest = generateManifest(files, { stub });
   return {
     key: 'manifest',
     mimetype: 'application/x.arweave-manifest+json',
     buffer: Buffer.from(stringify(manifest), 'utf-8'),
   };
+}
+async function uploadManifestFile(filesWithId: ArweaveFile[]) {
+  const manifest = generateManifestFile(filesWithId);
+  const manifestIPFSHash = await getFileIPFSHash(manifest);
+  let arweaveId = await getArIdFromHashes(manifestIPFSHash);
+  if (!arweaveId) {
+    [arweaveId] = await Promise.all([
+      submitToArweave(manifest, manifestIPFSHash),
+      uploadFileToIPFS(manifest.buffer),
+    ])
+  }
+  manifest.arweaveId = arweaveId;
+  return { manifest, ipfsHash: manifestIPFSHash, arweaveId };
 }
 
 export async function estimateARPrice(data: ArweaveFile) {
@@ -86,13 +109,14 @@ export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePri
     return estimateARPrice(files[0]);
   }
   const prices = await Promise.all(files.map(f => estimateARPrice(f)));
-  const manifest = generateManifestFile(files);
+  const filesWithPrice = files.map((f, i) => ({ ...f, arweaveId: prices[i].arweaveId }));
+  const manifest = generateManifestFile(filesWithPrice, { stub: true });
   const manifestPrice = await estimateARPrice(manifest);
+
   prices.unshift(manifestPrice);
   const totalAR = prices.reduce((acc, cur) => acc.plus(cur.AR), new BigNumber(0));
   return {
     AR: totalAR.toFixed(),
-    arweaveId: manifestPrice.arweaveId,
     list: prices,
   }
 }
@@ -177,35 +201,40 @@ export async function uploadFilesToArweave(files: ArweaveFile[]) {
   if (files.length === 1) {
     return uploadFileToArweave(files[0]);
   }
-  const manifest = generateManifestFile(files);
-  const filesWithManifest = [manifest].concat(files);
 
   const [
     folderIpfsHash,
     ipfsHashes,
   ] = await Promise.all([
-    getFolderIPFSHash(filesWithManifest),
-    Promise.all(filesWithManifest.map(f => getFileIPFSHash(f))),
+    getFolderIPFSHash(files),
+    Promise.all(files.map(f => getFileIPFSHash(f))),
   ]);
   const arweaveIds = await Promise.all(ipfsHashes.map(h => getArIdFromHashes(h)));
-  console.log(arweaveIds);
   if (!arweaveIds.some(id => !id)) {
-    const list = filesWithManifest.map((f, index) => ({
+    const filesWithId = files.map((f, i) => ({ ...f, arweaveId: arweaveIds[i] }))
+    const { manifest, ipfsHash: manifestIPFSHash } = await uploadManifestFile(filesWithId);
+    const list = filesWithId.map((f, index) => ({
       key: f.key,
       arweaveId: arweaveIds[index],
       ipfsHash: ipfsHashes[index],
     }));
+    list.unshift({
+      key: manifest.key,
+      arweaveId: manifest.arweaveId,
+      ipfsHash: manifestIPFSHash,
+    });
     return {
-      arweaveId: arweaveIds[0],
+      arweaveId: manifest.arweaveId,
       ipfsHash: folderIpfsHash,
       list,
     }
   }
 
   const list = [];
-  for (let i = 0; i < filesWithManifest.length; i += 1) {
+  const filesWithId = [];
+  for (let i = 0; i < files.length; i += 1) {
     /* eslint-disable no-await-in-loop */
-    const f = filesWithManifest[i];
+    const f = files[i];
     const { buffer } = f;
     const ipfsHash = await getFileIPFSHash(f);
     const [arweaveId] = await Promise.all([
@@ -217,11 +246,17 @@ export async function uploadFilesToArweave(files: ArweaveFile[]) {
       arweaveId,
       ipfsHash,
     })
+    filesWithId.push({ ...f, arweaveId });
     /* eslint-enable no-await-in-loop */
   }
-
+  const { manifest, ipfsHash } = await uploadManifestFile(filesWithId);
+  list.unshift({
+    key: manifest.key,
+    arweaveId: manifest.arweaveId,
+    ipfsHash,
+  })
   return {
-    arweaveId: list[0].arweaveId,
+    arweaveId: manifest.arweaveId,
     ipfsHash: folderIpfsHash,
     list,
   }
