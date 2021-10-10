@@ -15,7 +15,7 @@ interface Manifest {
     [key: string]: {
       id: string;
     }
-  }[],
+  },
 }
 
 export type ArweavePrice = {
