@@ -582,22 +582,24 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get exif() {
-    if (this.exifInfo) {
-      const extension = this.fileType!.split('/')
-      return {
-        ...this.exifInfo,
-        Format: this.fileType,
-        Size:
-          this.type === 'Photo' || this.type === 'Image'
-            ? `${this.exifInfo.ExifImageHeight} x ${
-                this.exifInfo.ExifImageWidth
-              } ${extension[extension.length - 1].toUpperCase()} (${
-                this.fileSize
-              })`
-            : this.fileSize,
-      }
-    }
-    return undefined
+    const extension = this.fileType!.split('/')
+    return this.exifInfo
+      ? {
+          ...this.exifInfo,
+          Format: this.fileType,
+          Size:
+            this.type === 'Photo' || this.type === 'Image'
+              ? `${this.exifInfo.ExifImageHeight} x ${
+                  this.exifInfo.ExifImageWidth
+                } ${extension[extension.length - 1].toUpperCase()} (${
+                  this.fileSize
+                })`
+              : this.fileSize,
+        }
+      : {
+          Format: this.fileType,
+          Size: this.fileSize,
+        }
   }
 
   get payload() {
