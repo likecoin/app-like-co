@@ -1,17 +1,33 @@
 <template>
   <div>
-    <div class="flex flex-col mx-auto mt-[40px] w-min">
-      <Button
-        :to="localeLocation({ name: 'index' })"
-        preset="plain"
-        tag="div"
-        :text="$t('UploadForm.button.back')"
-        class="text-dark-gray"
+    <div
+      :class="[
+        'mx-auto',
+        'mt-[40px]',
+        'w-min',
+        'mb-[100px]',
+      ]"
+    >
+      <div
+        :class="[
+          'flex',
+          'justify-between',
+          'items-center',
+          'mb-[4px]',
+        ]"
       >
-        <template #prepend>
-          <IconArrowLeft />
-        </template>
-      </Button>
+        <Button
+          class="text-dark-gray"
+          :to="localeLocation({ name: 'index' })"
+          preset="plain"
+          tag="div"
+          :text="$t('UploadForm.button.back')"
+        >
+          <template #prepend>
+            <IconArrowLeft />
+          </template>
+        </Button>
+      </div>
       <Card class="p-[32px]" :has-padding="false">
         <!-- header -->
         <div class="flex flex-row items-start justify-between">

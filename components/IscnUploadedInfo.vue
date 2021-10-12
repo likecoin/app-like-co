@@ -1,16 +1,12 @@
 <template>
-  <div class="flex flex-col mx-auto mt-[40px] w-min mb-[100px]">
-    <Button
-      :to="localeLocation({ name: 'index' })"
-      preset="plain"
-      tag="div"
-      :text="$t('UploadForm.button.back')"
-      class="text-dark-gray"
-    >
-      <template #prepend>
-        <IconArrowLeft />
-      </template>
-    </Button>
+  <div
+    :class="[
+      'mx-auto',
+      'mt-[40px]',
+      'w-min',
+      'mb-[100px]',
+    ]"
+  >
     <Card
       :class="[
         'p-[32px]',
