@@ -17,7 +17,7 @@
       @submit.prevent="onSearch"
     >
       <Label
-        v-t="'HomePage.search.title'"
+        :text="$t('HomePage.search.title')"
         class="mb-[16px]"
         preset="h3"
         align="center"
