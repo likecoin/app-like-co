@@ -3,3 +3,17 @@ html {
   font-size: 16px;
   font-family: 'Open Sans', sans-serif;
 }
+
+.layout-enter-active,
+.layout-leave-active,
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s;
+}
+
+.layout-enter,
+.layout-leave-active,
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
