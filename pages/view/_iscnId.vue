@@ -516,7 +516,7 @@ export default class ViewIscnIdPage extends Vue {
         ),
       ),
     )
-    return targetItem.txhash
+    return targetItem ? targetItem.txhash : undefined
   }
 
   showStakeholder(index: number) {
