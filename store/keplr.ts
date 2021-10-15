@@ -4,7 +4,6 @@ import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
 
 import { timeout } from '~/utils/misc';
 import { configToKeplrCoin } from '~/utils/cosmos';
-import { DEFAULT_GAS_PRICE_NUMBER } from '~/constant';
 import network from '~/constant/network';
 
 @Module({
@@ -75,10 +74,14 @@ export default class Keplr extends VuexModule {
           feeCurrencies: network.coinLookup.map(({ viewDenom }) => configToKeplrCoin(viewDenom)),
           coinType: 118,
           gasPriceStep: {
-            low: DEFAULT_GAS_PRICE_NUMBER,
-            average: DEFAULT_GAS_PRICE_NUMBER,
-            high: DEFAULT_GAS_PRICE_NUMBER,
+            low: 0.01,
+            average: 10,
+            high: 1000,
           },
+          features: [
+            'stargate',
+            'ibc-transfer',
+          ],
         });
         await window.keplr.enable(network.id);
 
