@@ -588,7 +588,7 @@ export default class IscnRegisterForm extends Vue {
           ...this.exifInfo,
           Format: this.fileType,
           Size:
-            this.type === 'Photo' || this.type === 'Image'
+            this.exifInfo.ExifImageHeight && this.exifInfo.ExifImageWidth
               ? `${this.exifInfo.ExifImageHeight} x ${
                   this.exifInfo.ExifImageWidth
                 } ${extension[extension.length - 1].toUpperCase()} (${
