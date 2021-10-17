@@ -34,7 +34,7 @@
         <MetadataCard
           v-if="metadata.exifInfo"
           :img-src="imgSrc"
-          :data="exifInfo"
+          :filtered-exif="exifInfo"
           :class="[
             'w-[280px]',
             'mt-[16px]',
