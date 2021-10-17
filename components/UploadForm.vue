@@ -168,7 +168,7 @@
               'scrollbar-hidden',
             ]"
             :img-src="fileData"
-            :data="exifInfo"
+            :all-exif="exifInfo"
           />
         </Dialog>
       </Card>

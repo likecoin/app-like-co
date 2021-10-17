@@ -23,9 +23,9 @@
     </template>
     <FormField
       v-for="(item, name) in exifInfo"
-      :key="isFromData ? $t(`iscn.exif.label.${name}`) : name"
+      :key="isFromFilterEXif ? $t(`iscn.exif.label.${name}`) : name"
       class="mb-[8px]"
-      :label="isFromData ? $t(`iscn.exif.label.${name}`) : name"
+      :label="isFromFilterEXif ? $t(`iscn.exif.label.${name}`) : name"
       direction="row"
       label-classes="min-w-[98px]"
     >
@@ -41,28 +41,48 @@ import exifr from 'exifr'
 
 @Component
 export default class MetadataCard extends Vue {
+  /**
+   * Specifies the path to the image
+   */
   @Prop(String) readonly imgSrc: String | undefined
-  @Prop(Object) readonly data!: Object
+
+  /**
+   * The Filtered EXIF, show on the _iscnId page
+   */
+  @Prop(Object) readonly filteredExif!: Object
+
+  /**
+   * All EXIF, which will be displayed on 'view file info'
+   */
+  @Prop(Object) readonly allExif!: Object
 
   exifInfo: Object = {}
 
-  get isFromData() {
-    return !!this.data
+  get isFromFilterEXif() {
+    return !!this.filteredExif
+  }
+
+  get isFromAllExif() {
+    return !!this.allExif
   }
 
   @Watch('imgSrc')
   onImgSrcChanged() {
-    this.$nuxt.$nextTick(this.extractEXIFInfo)
+    if (!this.isFromFilterEXif && !this.isFromAllExif) {
+      this.$nuxt.$nextTick(this.extractEXIFInfo)
+    }
   }
 
-  @Watch('data')
-  onDataChange() {
-    if (this.isFromData) this.exifInfo = this.data
+  @Watch('filteredExif')
+  onFilteredExifChange() {
+    this.exifInfo = this.filteredExif
   }
 
   mounted() {
-    if (this.isFromData) {
-      this.exifInfo = this.data
+    if (this.isFromFilterEXif) {
+      this.exifInfo = this.filteredExif
+    } else if (this.isFromAllExif) {
+      this.exifInfo = this.allExif
     } else this.extractEXIFInfo()
   }
 
