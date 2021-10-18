@@ -23,9 +23,9 @@
     </template>
     <FormField
       v-for="(item, name) in exifInfo"
-      :key="isFromFilterEXif ? $t(`iscn.exif.label.${name}`) : name"
+      :key="isFromFilterEXIF ? $t(`iscn.exif.label.${name}`) : name"
       class="mb-[8px]"
-      :label="isFromFilterEXif ? $t(`iscn.exif.label.${name}`) : name"
+      :label="isFromFilterEXIF ? $t(`iscn.exif.label.${name}`) : name"
       direction="row"
       label-classes="min-w-[98px]"
     >
@@ -58,17 +58,17 @@ export default class MetadataCard extends Vue {
 
   exifInfo: Object = {}
 
-  get isFromFilterEXif() {
+  get isFromFilterEXIF() {
     return !!this.filteredExif
   }
 
-  get isFromAllExif() {
+  get isFromAllEXIF() {
     return !!this.allExif
   }
 
   @Watch('imgSrc')
   onImgSrcChanged() {
-    if (!this.isFromFilterEXif && !this.isFromAllExif) {
+    if (!this.isFromFilterEXIF && !this.isFromAllEXIF) {
       this.$nuxt.$nextTick(this.extractEXIFInfo)
     }
   }
@@ -79,9 +79,9 @@ export default class MetadataCard extends Vue {
   }
 
   mounted() {
-    if (this.isFromFilterEXif) {
+    if (this.isFromFilterEXIF) {
       this.exifInfo = this.filteredExif
-    } else if (this.isFromAllExif) {
+    } else if (this.isFromAllEXIF) {
       this.exifInfo = this.allExif
     } else this.extractEXIFInfo()
   }
