@@ -1,17 +1,26 @@
 <template>
   <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px] mb-[166px]">
     <!-- Back btn -->
-    <Button
-      :to="localeLocation({ name: 'index' })"
-      preset="plain"
-      tag="div"
-      :text="$t('UploadForm.button.back')"
-      class="text-dark-gray"
+    <div
+      :class="[
+        'flex',
+        'justify-between',
+        'items-center',
+        'mb-[4px]',
+      ]"
     >
-      <template #prepend>
-        <IconArrowLeft />
-      </template>
-    </Button>
+      <Button
+        class="text-dark-gray"
+        :to="localeLocation({ name: 'index' })"
+        preset="plain"
+        tag="div"
+        :text="$t('UploadForm.button.back')"
+      >
+        <template #prepend>
+          <IconArrowLeft />
+        </template>
+      </Button>
+    </div>
     <!-- ////// Review Card /////// -->
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
