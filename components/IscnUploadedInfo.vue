@@ -31,8 +31,12 @@
           </template>
         </Label>
         <div class="flex flex-col items-end">
-          <Stepper :step=4 />
-          <Label preset="p6" text="Step 4/4" class="text-medium-gray" />
+          <Stepper :step="step" />
+          <Label
+            preset="p6"
+            :text="$t('Registration.step.4')"
+            class="text-medium-gray"
+          />
         </div>
       </div>
       <!-- guide title -->
@@ -229,6 +233,11 @@ export default class IscnUploadedInfo extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   records: ISCNRecordWithID[] | null = null
+
+  // eslint-disable-next-line class-methods-use-this
+  get step() {
+    return 4
+  }
 
   get record() {
     return this.records ? this.records[this.records.length - 1] : null

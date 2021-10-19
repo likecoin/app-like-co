@@ -45,8 +45,12 @@
             </template>
           </Label>
           <div class="flex flex-col items-end">
-            <Stepper :step="stepNum" />
-            <Label preset="p6" :text="stepText" class="text-medium-gray" />
+            <Stepper :step="step" />
+            <Label
+              preset="p6"
+              :text="$t('Registration.step.1')"
+              class="text-medium-gray"
+            />
           </div>
         </div>
         <!-- guide text -->
@@ -242,16 +246,13 @@ export default class UploadForm extends Vue {
     ]
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get step() {
+    return 1
+  }
+
   get submitBtnClasses() {
     return this.ipfsHash ? 'secondary' : 'outline'
-  }
-
-  get stepText() {
-    return this.ipfsHash ? 'Step 2/4' : 'Step 1/4'
-  }
-
-  get stepNum() {
-    return this.ipfsHash ? 2 : 1
   }
 
   get size() {

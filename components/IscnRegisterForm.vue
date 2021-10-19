@@ -39,8 +39,12 @@
           </template>
         </Label>
         <div class="flex flex-col items-end">
-          <Stepper :step=3 />
-          <Label preset="p6" text="Step 3/4" class="text-medium-gray" />
+          <Stepper :step="step" />
+          <Label
+            preset="p6"
+            :text="registrationStep"
+            class="text-medium-gray"
+          />
         </div>
       </div>
       <!-- guide text -->
@@ -512,6 +516,9 @@ export default class IscnRegisterForm extends Vue {
   checkedAuthorInfo = false
   checkedRegisterInfo = false
 
+  registrationStep = this.$t('Registration.step.2')
+  step: number = 2
+
   get tagsString(): string {
     return this.tags.join(',')
   }
@@ -786,6 +793,8 @@ export default class IscnRegisterForm extends Vue {
 
   handleQuitAlertDialogClose() {
     this.isOpenQuitAlertDialog = false
+    this.registrationStep = this.$t('Registration.step.2')
+    this.step = 2
   }
 
   onRetry(): Promise<void> {
@@ -793,6 +802,8 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
+    this.registrationStep = this.$t('Registration.step.3')
+    this.step = 3
     this.checkedRegisterInfo = true
     if (!this.name || !this.description) {
       return
