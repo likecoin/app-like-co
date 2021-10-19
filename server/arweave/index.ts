@@ -19,7 +19,7 @@ const jwk = require('../config/arweave-key.json')
 
 const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
 
-export async function getArIdFromHashes(ipfsHash: string) {
+export async function getArweaveIdFromHashes(ipfsHash: string) {
   const res = await arweave.arql(
   {
     op: "and",
@@ -73,10 +73,11 @@ function generateManifestFile(files: ArweaveFile[], { stub = false } = {}): Arwe
     buffer: Buffer.from(stringify(manifest), 'utf-8'),
   };
 }
+
 async function uploadManifestFile(filesWithId: ArweaveFile[]) {
   const manifest = generateManifestFile(filesWithId);
   const manifestIPFSHash = await getFileIPFSHash(manifest);
-  let arweaveId = await getArIdFromHashes(manifestIPFSHash);
+  let arweaveId = await getArweaveIdFromHashes(manifestIPFSHash);
   if (!arweaveId) {
     [arweaveId] = await Promise.all([
       submitToArweave(manifest, manifestIPFSHash),
@@ -90,7 +91,7 @@ async function uploadManifestFile(filesWithId: ArweaveFile[]) {
 export async function estimateARPrice(data: ArweaveFile) {
   const { buffer, key } = data;
   const ipfsHash = await getFileIPFSHash(data);
-  const id = await getArIdFromHashes(ipfsHash);
+  const id = await getArweaveIdFromHashes(ipfsHash);
   if (id) return {
     key,
     arweaveId: id,
@@ -180,7 +181,7 @@ export async function submitToArweave(data: ArweaveFile, ipfsHash: string) {
 
 export async function uploadFileToArweave(data: ArweaveFile) {
   const ipfsHash = await getFileIPFSHash(data)
-  const id = await getArIdFromHashes(ipfsHash)
+  const id = await getArweaveIdFromHashes(ipfsHash)
   if (id) return {
     arweaveId: id,
     ipfsHash,
@@ -209,7 +210,7 @@ export async function uploadFilesToArweave(files: ArweaveFile[]) {
     getFolderIPFSHash(files),
     Promise.all(files.map(f => getFileIPFSHash(f))),
   ]);
-  const arweaveIds = await Promise.all(ipfsHashes.map(h => getArIdFromHashes(h)));
+  const arweaveIds = await Promise.all(ipfsHashes.map(h => getArweaveIdFromHashes(h)));
   if (!arweaveIds.some(id => !id)) {
     const filesWithId = files.map((f, i) => ({ ...f, arweaveId: arweaveIds[i] }))
     const { manifest, ipfsHash: manifestIPFSHash } = await uploadManifestFile(filesWithId);
