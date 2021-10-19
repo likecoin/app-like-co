@@ -1,10 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import multer from 'multer';
-import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
 import { getIPFSHash } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 import { ArweaveFile } from './types';
+import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
 
 const { LIKE_TARGET_ADDRESS } = require('../config/config');
 
