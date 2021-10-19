@@ -58,7 +58,6 @@
             </template>
           </MenuButton>
         </div>
-
         <div
           :class="[
             'flex',
@@ -81,6 +80,17 @@
         </div>
       </nav>
     </div>
+    <div 
+      :v-if="isTestnet"
+      :class="[
+        'fixed',
+        'top-[0px]',
+        'w-full',
+        'z-50',
+      ]"
+    >
+      <IconDangerStripe />
+    </div>
   </header>
 </template>
 
@@ -89,6 +99,7 @@
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { IS_TESTNET } from '~/constant'
 
 const signerModule = namespace('signer')
 const keplrModule = namespace('keplr')
@@ -96,10 +107,19 @@ const keplrModule = namespace('keplr')
 @Component
 export default class AppHeader extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action updateSignerInfo!: (arg0: { signer: OfflineSigner|null; address: string }) => void
+  @signerModule.Action updateSignerInfo!: (arg0: {
+    signer: OfflineSigner | null
+    address: string
+  }) => void
+
   @keplrModule.Getter('getWalletAddress') keplrWallet!: string
   @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
   @keplrModule.Action initKeplr!: () => Promise<boolean>
+
+  // eslint-disable-next-line class-methods-use-this
+  get isTestnet() {
+    return !!IS_TESTNET
+  }
 
   async onClickLoginKeplr() {
     await this.initKeplr()
