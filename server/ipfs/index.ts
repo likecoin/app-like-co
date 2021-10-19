@@ -28,7 +28,7 @@ export async function uploadFilesToIPFS(files: ArweaveFile[], { onlyHash = false
   const promises = client.addAll(
     files.map(f => ({
       content: f.buffer,
-      path: `${directoryName}/${f.key}`,
+      path: `/${directoryName}/${f.key}`,
     })), { onlyHash },
   );
   const results = [];
