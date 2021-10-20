@@ -1,12 +1,4 @@
 <template>
-  <div
-    :class="[
-      'mx-auto',
-      'mt-[40px]',
-      'w-min',
-      'mb-[100px]',
-    ]"
-  >
     <Card
       :class="[
         'p-[32px]',
@@ -16,29 +8,7 @@
       :has-padding="false"
     >
       <!-- header -->
-      <div class="flex flex-row items-start justify-between">
-        <Label
-          class="w-min"
-          :text="$t('IscnUploaded.title')"
-          tag="div"
-          preset="p5"
-          valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green"
-          prepend-class="text-like-green"
-        >
-          <template #prepend>
-            <IconDone />
-          </template>
-        </Label>
-        <div class="flex flex-col items-end">
-          <Stepper :step="step" />
-          <Label
-            preset="p6"
-            :text="$t('Registration.step.4')"
-            class="text-medium-gray"
-          />
-        </div>
-      </div>
+      <IscnFormHeader :step="step" />
       <!-- guide title -->
       <Label
         :text="$t('IscnUploaded.guide.title')"
@@ -206,7 +176,6 @@
         />
       </FormField>
     </Card>
-  </div>
 </template>
 
 <script lang="ts">
@@ -226,6 +195,7 @@ export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
   @Prop(String) readonly arweaveId!: string
+  @Prop(Number) readonly step: number | undefined
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
@@ -233,11 +203,6 @@ export default class IscnUploadedInfo extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   records: ISCNRecordWithID[] | null = null
-
-  // eslint-disable-next-line class-methods-use-this
-  get step() {
-    return 4
-  }
 
   get record() {
     return this.records ? this.records[this.records.length - 1] : null

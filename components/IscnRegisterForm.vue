@@ -1,52 +1,13 @@
 <template>
-  <div class="flex flex-col w-min max-w-[648px] mx-auto mt-[40px] mb-[166px]">
-    <!-- Back btn -->
-    <div
-      :class="[
-        'flex',
-        'justify-between',
-        'items-center',
-        'mb-[4px]',
-      ]"
-    >
-      <Button
-        class="text-dark-gray"
-        :to="localeLocation({ name: 'index' })"
-        preset="plain"
-        tag="div"
-        :text="$t('UploadForm.button.back')"
-      >
-        <template #prepend>
-          <IconArrowLeft />
-        </template>
-      </Button>
-    </div>
-    <!-- ////// Review Card /////// -->
+  <div
+    :class="[
+      'flex',
+      'flex-col',
+    ]"
+  >
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
-      <div class="flex flex-row items-start justify-between">
-        <Label
-          class="w-min"
-          :text="$t('UploadForm.title.registerISCN')"
-          tag="div"
-          preset="p5"
-          valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green"
-          prepend-class="text-like-green"
-        >
-          <template #prepend>
-            <IconRegister />
-          </template>
-        </Label>
-        <div class="flex flex-col items-end">
-          <Stepper :step="step" />
-          <Label
-            preset="p6"
-            :text="registrationStep"
-            class="text-medium-gray"
-          />
-        </div>
-      </div>
+      <IscnFormHeader :step="step" />
       <!-- guide text -->
       <Label
         :text="$t('IscnRegisterForm.guide.review')"
@@ -477,6 +438,7 @@ export default class IscnRegisterForm extends Vue {
   @Prop({ default: false }) readonly isIPFSLink!: boolean
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
+  @Prop(Number) readonly step: number | undefined
 
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
@@ -515,9 +477,6 @@ export default class IscnRegisterForm extends Vue {
 
   checkedAuthorInfo = false
   checkedRegisterInfo = false
-
-  registrationStep = this.$t('Registration.step.2')
-  step: number = 2
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -793,8 +752,7 @@ export default class IscnRegisterForm extends Vue {
 
   handleQuitAlertDialogClose() {
     this.isOpenQuitAlertDialog = false
-    this.registrationStep = this.$t('Registration.step.2')
-    this.step = 2
+    this.$emit('handleContinue')
   }
 
   onRetry(): Promise<void> {
@@ -802,8 +760,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
-    this.registrationStep = this.$t('Registration.step.3')
-    this.step = 3
+    this.$emit('handleSubmit')
     this.checkedRegisterInfo = true
     if (!this.name || !this.description) {
       return
