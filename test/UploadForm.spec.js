@@ -1,6 +1,6 @@
 import './stub'
 import { mount } from '@vue/test-utils'
-import UploadForm from '@/components/UploadForm.vue'
+import UploadForm from '~/components/IscnUploadForm.vue'
 
 describe('UploadForm', () => {
   test('is a Vue instance', () => {

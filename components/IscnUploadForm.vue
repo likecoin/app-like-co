@@ -1,54 +1,8 @@
 <template>
   <div>
-    <div
-      :class="[
-        'mx-auto',
-        'mt-[40px]',
-        'w-min',
-        'mb-[100px]',
-      ]"
-    >
-      <div
-        :class="[
-          'flex',
-          'justify-between',
-          'items-center',
-          'mb-[4px]',
-        ]"
-      >
-        <Button
-          class="text-dark-gray"
-          :to="localeLocation({ name: 'index' })"
-          preset="plain"
-          tag="div"
-          :text="$t('UploadForm.button.back')"
-        >
-          <template #prepend>
-            <IconArrowLeft />
-          </template>
-        </Button>
-      </div>
       <Card class="p-[32px]" :has-padding="false">
         <!-- header -->
-        <div class="flex flex-row items-start justify-between">
-          <Label
-            class="w-min"
-            :text="$t('UploadForm.title.registerISCN')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconRegister />
-            </template>
-          </Label>
-          <div class="flex flex-col items-end">
-            <Stepper :step="stepNum" />
-            <Label preset="p6" :text="stepText" class="text-medium-gray" />
-          </div>
-        </div>
+        <IscnFormHeader :step="step" />
         <!-- guide text -->
         <Label
           :text="$t('UploadForm.guide.selectFile')"
@@ -172,7 +126,6 @@
           />
         </Dialog>
       </Card>
-    </div>
     <div
       :class="[
         'min-w-[648px]',
@@ -198,7 +151,7 @@
 <script lang="ts">
 import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import {
   fileToArrayBuffer,
@@ -208,6 +161,8 @@ import {
 
 @Component
 export default class UploadForm extends Vue {
+  @Prop(Number) readonly step: number | undefined
+
   isImage: boolean = false
   ipfsURL: string = ''
   ipfsHash: string = ''
@@ -242,16 +197,10 @@ export default class UploadForm extends Vue {
     ]
   }
 
+  // eslint-disable-next-line class-methods-use-this
+
   get submitBtnClasses() {
     return this.ipfsHash ? 'secondary' : 'outline'
-  }
-
-  get stepText() {
-    return this.ipfsHash ? 'Step 2/4' : 'Step 1/4'
-  }
-
-  get stepNum() {
-    return this.ipfsHash ? 2 : 1
   }
 
   get size() {

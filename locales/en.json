@@ -109,6 +109,7 @@
   "IscnUploaded.button.new": "Register Another ISCN",
   "IscnUploaded.guide.title": "Completed! Here is your ISCN",
   "IscnUploaded.title": "ISCN Registed",
+  "Registration.step":"Step {step}/{total}",
   "SearchPage.empty.label": "No record",
   "UploadForm.attention":"Do not connect to Ledger hardware wallets for signing.\n Ledger service temporarily unavailable.",
   "UploadForm.button.back": "Back",

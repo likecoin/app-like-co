@@ -1,37 +1,71 @@
 <template>
-  <Page>
-    <UploadForm
-      v-if="state === 'init'"
-      @submit="onSubmitUpload"
-    />
-    <IscnRegisterForm
-      v-else-if="state === 'iscn'"
-      :ipfs-hash="ipfsHash"
-      :arweave-id="arweaveId"
-      :file-data="fileData"
-      :file-type="fileType"
-      :file-size="fileSize"
-      :file-s-h-a256="fileSHA256"
-      :file-blob="fileBlob"
-      :is-image="isImage"
-      :exif-info="exifInfo"
-      @arweaveUploaded="onArweaveIdUpdate"
-      @txBroadcasted="onISCNTxInfo"
-      @quit="handleQuitRegistration"
-    />
-    <IscnUploadedInfo
-      v-else-if="state === 'done'"
-      :is-image="isImage"
-      :ipfs-hash="ipfsHash"
-      :arweave-id="arweaveId"
-      :file-data="fileData"
-      :file-s-h-a256="fileSHA256"
-      :iscn-id="iscnId"
-      :iscn-hash="iscnTxHash"
-      :exif-info="exifInfo"
-      :iscn-timestamp="iscnTimestamp"
-    />
-  </Page>
+  <div
+    :class="[
+      'mx-auto',
+      'mt-[40px]',
+      'w-min',
+      'mb-[100px]',
+    ]"
+  >
+    <div
+      :class="[
+        'flex',
+        'justify-between',
+        'items-center',
+        'mb-[4px]',
+      ]"
+    >
+      <Button
+        class="text-dark-gray"
+        :to="localeLocation({ name: 'index' })"
+        preset="plain"
+        tag="div"
+        :text="$t('UploadForm.button.back')"
+      >
+        <template #prepend>
+          <IconArrowLeft />
+        </template>
+      </Button>
+    </div>
+    <Page>
+      <IscnUploadForm
+        v-if="state === 'init'"
+        :step="step"
+        @submit="onSubmitUpload"
+      />
+      <IscnRegisterForm
+        v-else-if="state === 'iscn'"
+        :ipfs-hash="ipfsHash"
+        :arweave-id="arweaveId"
+        :file-data="fileData"
+        :file-type="fileType"
+        :file-size="fileSize"
+        :file-s-h-a256="fileSHA256"
+        :file-blob="fileBlob"
+        :is-image="isImage"
+        :exif-info="exifInfo"
+        :step="step"
+        @arweaveUploaded="onArweaveIdUpdate"
+        @txBroadcasted="onISCNTxInfo"
+        @quit="handleQuitRegistration"
+        @handleSubmit="isSubmit = true"
+        @handleContinue="isSubmit = false"
+      />
+      <IscnUploadedInfo
+        v-else-if="state === 'done'"
+        :is-image="isImage"
+        :ipfs-hash="ipfsHash"
+        :arweave-id="arweaveId"
+        :file-data="fileData"
+        :file-s-h-a256="fileSHA256"
+        :iscn-id="iscnId"
+        :iscn-hash="iscnTxHash"
+        :exif-info="exifInfo"
+        :iscn-timestamp="iscnTimestamp"
+        :step="step"
+      />
+    </Page>
+  </div>
 </template>
 
 <script lang="ts">
@@ -40,13 +74,21 @@ import { namespace } from 'vuex-class'
 
 const signerModule = namespace('signer')
 
+export enum State {
+  init = 'init',
+  iscn = 'iscn',
+  done = 'done',
+}
+
 @Component({
   layout: 'wallet',
 })
 export default class NewIndexPage extends Vue {
+  @signerModule.Getter('getAddress') currentAddress!: string
+
   state = 'init'
   ipfsHash = ''
-  arweaveId = '';
+  arweaveId = ''
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -57,8 +99,23 @@ export default class NewIndexPage extends Vue {
   isImage = false
   fileBlob: Blob | null = null
   exifInfo: any = null
+  isSubmit: boolean = false
 
-  @signerModule.Getter('getAddress') currentAddress!: string
+  get step(): any {
+    switch (this.state) {
+      case State.init:
+        return 1
+
+      case State.iscn:
+        return this.isSubmit ? 3 : 2
+
+      case State.done:
+        return 4
+
+      default:
+        return undefined
+    }
+  }
 
   onSubmitUpload({
     ipfsHash,
@@ -72,7 +129,7 @@ export default class NewIndexPage extends Vue {
     fileSize,
   }: {
     ipfsHash: string
-    arweaveId: string;
+    arweaveId: string
     fileData: string
     fileSHA256: string
     isImage: boolean
@@ -82,7 +139,7 @@ export default class NewIndexPage extends Vue {
     fileSize: string
   }) {
     this.ipfsHash = ipfsHash
-    this.arweaveId = arweaveId;
+    this.arweaveId = arweaveId
     this.fileData = fileData
     this.fileSHA256 = fileSHA256
     this.isImage = isImage
@@ -94,21 +151,21 @@ export default class NewIndexPage extends Vue {
   }
 
   handleQuitRegistration() {
-    this.state = 'init';
-    this.ipfsHash = '';
-    this.arweaveId = '';
-    this.fileSHA256 = '';
-    this.fileData = '';
-    this.iscnId = '';
-    this.iscnTxHash = '';
-    this.iscnTimestamp = '';
-    this.isImage = false;
-    this.fileBlob = null;
-    this.exifInfo = null;
+    this.state = 'init'
+    this.ipfsHash = ''
+    this.arweaveId = ''
+    this.fileSHA256 = ''
+    this.fileData = ''
+    this.iscnId = ''
+    this.iscnTxHash = ''
+    this.iscnTimestamp = ''
+    this.isImage = false
+    this.fileBlob = null
+    this.exifInfo = null
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
-    this.arweaveId = arweaveId;
+    this.arweaveId = arweaveId
   }
 
   onISCNTxInfo({
