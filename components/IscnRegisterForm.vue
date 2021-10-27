@@ -738,7 +738,7 @@ export default class IscnRegisterForm extends Vue {
     this.balance = new BigNumber(balance);
     const { iscnFee, gas: iscnGasEstimation } = estimation;
     const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
-    const iscnFeeNanolike = iscnFee.amount[0]
+    const iscnFeeNanolike = iscnFee.amount
     this.iscnFee =  new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9);
