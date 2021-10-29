@@ -145,6 +145,12 @@
         >{{ $t('UploadForm.attention') }}
       </div>
     </div>
+    <Snackbar
+      v-model="isTooLargeFile"
+      :text="$t('UploadForm.warning')"
+      preset="warn"
+      :timeout="2000"
+    />
   </div>
 </template>
 
@@ -173,9 +179,10 @@ export default class UploadForm extends Vue {
   fileName: string = ''
   fileSize: number = 0
   fileType: string = ''
-  uploadStatus: string = '';
+  uploadStatus: string = ''
 
   isOpenFileInfoDialog = false
+  isTooLargeFile = false
 
   get formClasses() {
     return [
@@ -184,6 +191,7 @@ export default class UploadForm extends Vue {
       {
         'flex-row justify-start': this.ipfsHash,
         'h-[196px] flex-col justify-center': !this.ipfsHash,
+        'bg-transparent' : this.isTooLargeFile,
       },
       'items-center',
       'justify-between',
@@ -217,40 +225,45 @@ export default class UploadForm extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
-      this.fileName = files[0].name
-      this.fileSize = files[0].size
-      this.fileType = `${files[0].type}`
-      reader.onload = (e) => {
-        if (!e.target) return
-        this.fileData = e.target.result as string
-      }
-      reader.readAsDataURL(files[0])
-      const fileBytes = (await fileToArrayBuffer(files[0])) as ArrayBuffer
-      if (fileBytes) {
-        const [
-          fileSHA256,
-          imageType,
-          ipfsHash,
-        ] = await Promise.all([
-          digestFileSHA256(fileBytes),
-          readImageType(fileBytes),
-          Hash.of(Buffer.from(fileBytes)),
-        ])
-        this.ipfsHash = ipfsHash
-        this.fileSHA256 = fileSHA256
-        this.isImage = !!imageType
-        // eslint-disable-next-line prefer-destructuring
-        this.fileBlob = files[0]
-        if (this.isImage) {
-          try {
-            this.exifInfo = await exifr.parse(files[0])
-          } catch (err) {
-            console.error(err)
+      if (files[0].size < 20000000) {
+        this.fileName = files[0].name
+        this.fileSize = files[0].size
+        this.fileType = `${files[0].type}`
+        reader.onload = (e) => {
+          if (!e.target) return
+          this.fileData = e.target.result as string
+        }
+        reader.readAsDataURL(files[0])
+        const fileBytes = (await fileToArrayBuffer(files[0])) as ArrayBuffer
+        if (fileBytes) {
+          const [
+            fileSHA256,
+            imageType,
+            ipfsHash,
+          ] = await Promise.all([
+            digestFileSHA256(fileBytes),
+            readImageType(fileBytes),
+            Hash.of(Buffer.from(fileBytes)),
+          ])
+          this.ipfsHash = ipfsHash
+          this.fileSHA256 = fileSHA256
+          this.isImage = !!imageType
+          // eslint-disable-next-line prefer-destructuring
+          this.fileBlob = files[0]
+          if (this.isImage) {
+            try {
+              this.exifInfo = await exifr.parse(files[0])
+            } catch (err) {
+              console.error(err)
+              this.exifInfo = null
+            }
+          } else {
             this.exifInfo = null
           }
-        } else {
-          this.exifInfo = null
         }
+      } else {
+        this.isTooLargeFile = true
+        this.handleInitFile()
       }
     }
   }
