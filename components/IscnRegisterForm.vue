@@ -31,10 +31,33 @@
         ]"
       >
         <Previewer :is-image="isImage" :file-data="fileData" />
-        <div class="flex flex-col justify-start">
+        <div 
+          :class="[
+            'flex',
+            'flex-col',
+          ]"
+        >
+          <div
+            v-if="uploadStatus === 'Loading'"
+            :class="[
+              'flex',
+              'items-center',
+              'mb-[24px]',
+            ]"
+          >
+            <ProgressIndicator />
+            <div
+              class="ml-[12px]"
+              v-text="$t('IscnRegisterForm.label.uploading')"
+            />
+          </div>
           <Label
-            class="w-min mb-[16px]"
-            :text="$t('IscnRegisterForm.title.published')"
+            v-else
+            :class="[
+              'w-min',
+              'mb-[16px]',
+            ]"
+            :text="$t('IscnRegisterForm.title.ready')"
             tag="div"
             preset="p5"
             valign="middle"
@@ -47,6 +70,7 @@
           </Label>
           <Button
             v-if="exifInfo"
+            class="w-min"
             type="button"
             :text="$t('UploadForm.view.file.button')"
             preset="outline"
@@ -201,12 +225,34 @@
           </FormField>
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
+            <div v-if="uploadStatus === 'Loading'">
+              <Button
+                :text="$t('IscnRegisterForm.button.loading')"
+                preset="outline"
+                is-disabled=true
+              >
+                <template #append>
+                  <IconArrowRight />
+                </template>
+              </Button>
+            </div>
             <div
-              v-if="uploadStatus"
-              class="flex flex-col items-end"
+              v-else-if="uploadStatus"
+              :class="[
+                'flex',
+                'flex-col',
+                'items-end',
+              ]"
             >
               <ProgressIndicator />
-              <div class="text-[12px] mt-[4px]">{{ formattedUploadStatus }}</div>
+              <div
+                :class="[
+                  'text-[12px]',
+                  'mt-[4px]',
+                ]"
+              >
+                {{ formattedUploadStatus }}
+              </div>
             </div>
             <Button
               v-else
