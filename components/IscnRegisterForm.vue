@@ -459,10 +459,9 @@
       </Dialog>
     </Card>
     <Snackbar
-      v-model="isTimeout"
-      :text="$t('IscnRegisterForm.error.timeout')"
+      v-model="isError"
+      :text="errorMessage"
       preset="warn"
-      :timeout="2000"
     />
   </div>
 </template>
@@ -533,7 +532,8 @@ export default class IscnRegisterForm extends Vue {
   isOpenQuitAlertDialog = false
   isUploadingArweave = false
   signDialogError = ''
-  isTimeout = false
+  isError = false
+  errorMessage = ''
 
   checkedAuthorInfo = false
   checkedRegisterInfo = false
@@ -829,6 +829,11 @@ export default class IscnRegisterForm extends Vue {
     this.error = ''
     await this.submitToArweave();
     if (this.uploadArweaveId) await this.submitToISCN()
+    else {
+      this.isError = true
+      this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+      this.$emit('handleContinue')
+    }
   }
 
   async estimateArweaveFee(): Promise<void> {
@@ -898,7 +903,8 @@ export default class IscnRegisterForm extends Vue {
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
-      this.isTimeout = true
+      this.isError = true
+      this.errorMessage = this.$t('IscnRegisterForm.error.timeout') as string
       console.error(err.response)
     } finally {
       this.isUploadingArweave = false;

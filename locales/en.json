@@ -69,6 +69,7 @@
   "IscnRegisterForm.button.signing": "Waiting for signature",
   "IscnRegisterForm.button.success": "Success",
   "IscnRegisterForm.button.uploading": "Uploading",
+  "IscnRegisterForm.error.arweave": "Oops. Something went wrong. Please try again later.",
   "IscnRegisterForm.error.authorNameIsEmpty": "Please enter the author name",
   "IscnRegisterForm.error.descriptionIsEmpty": "Please enter the ISCN description",
   "IscnRegisterForm.error.insufficient": "Insufficient Balance",
