@@ -149,7 +149,6 @@
       v-model="isSizeExceeded"
       :text="$t('UploadForm.warning')"
       preset="warn"
-      :timeout="2000"
     />
   </div>
 </template>

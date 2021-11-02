@@ -459,7 +459,7 @@
       </Dialog>
     </Card>
     <Snackbar
-      v-model="isError"
+      v-model="shouldShowAlert"
       :text="errorMessage"
       preset="warn"
     />
@@ -532,7 +532,7 @@ export default class IscnRegisterForm extends Vue {
   isOpenQuitAlertDialog = false
   isUploadingArweave = false
   signDialogError = ''
-  isError = false
+  shouldShowAlert = false
   errorMessage = ''
 
   checkedAuthorInfo = false
@@ -817,6 +817,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   onRetry(): Promise<void> {
+    this.shouldShowAlert = false
     return this.onSubmit();
   }
 
@@ -829,11 +830,6 @@ export default class IscnRegisterForm extends Vue {
     this.error = ''
     await this.submitToArweave();
     if (this.uploadArweaveId) await this.submitToISCN()
-    else {
-      this.isError = true
-      this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
-      this.$emit('handleContinue')
-    }
   }
 
   async estimateArweaveFee(): Promise<void> {
@@ -897,15 +893,20 @@ export default class IscnRegisterForm extends Vue {
           },
         },
       )
-      this.uploadArweaveId = arweaveId;
-      this.$emit('arweaveUploaded', { arweaveId })
-      this.isOpenSignDialog = false;
+      if (arweaveId) {
+        this.uploadArweaveId = arweaveId
+        this.$emit('arweaveUploaded', { arweaveId })
+        this.isOpenSignDialog = false
+      } else {
+        this.shouldShowAlert = true
+        this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+        this.$emit('handleContinue')
+      }
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
-      this.isError = true
-      this.errorMessage = this.$t('IscnRegisterForm.error.timeout') as string
-      console.error(err.response)
+      this.shouldShowAlert = true
+      this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
     } finally {
       this.isUploadingArweave = false;
       this.uploadStatus = '';
