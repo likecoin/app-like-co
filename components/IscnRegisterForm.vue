@@ -274,7 +274,12 @@
         preset="warn"
       />
       <!-- Dialog -->
-      <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
+      <Dialog
+        v-model="isOpenAuthorDialog"
+        :has-padding="false"
+        preset="custom"
+        :is-click-to-close="false"
+      >
         <Card
           :class="[
             'flex',
@@ -378,6 +383,8 @@
       <Dialog
         v-model="isOpenSignDialog"
         :header-text="signDialogHeaderText"
+        :is-click-to-close="false"
+        :has-close-button="!isUploadingArweave"
         @close="handleSignDialogClose"
       >
         <template #header-prepend>
@@ -433,7 +440,8 @@
       <Dialog
         v-model="isOpenQuitAlertDialog"
         :header-text="$t('IscnRegisterForm.quitAlertDialog.title')"
-        @close="handleQuitAlertDialogClose"
+        :is-click-to-close="false"
+        :has-close-button="false"
       >
         <div
           v-t="'IscnRegisterForm.quitAlertDialog.content'"
@@ -444,16 +452,16 @@
             preset="outline"
             class="text-red border-red hover:bg-red active:bg-red hover:bg-opacity-20 active:bg-opacity-30"
             :text="$t('IscnRegisterForm.quitAlertDialog.confirm')"
-            @click="$emit('quit')"
+            @click="handleQuit"
           >
             <template #prepend>
-              <IconBin class="w-[20px]" />
+              <IconBin v-if="isOpenQuitAlertDialog" class="w-[20px]" />
             </template>
           </Button>
           <Button
             preset="outline"
-            :text="$t('IscnRegisterForm.quitAlertDialog.cancel')"
-            @click="handleQuitAlertDialogClose"
+            :text="$t('IscnRegisterForm.quitAlertDialog.continue')"
+            @click="handleContinue"
           />
         </div>
       </Dialog>
@@ -806,18 +814,24 @@ export default class IscnRegisterForm extends Vue {
   }
 
   handleSignDialogClose() {
-    if (this.uploadArweaveId) {
-      this.isOpenQuitAlertDialog = true
-    }
+    this.isOpenQuitAlertDialog = true
   }
 
-  handleQuitAlertDialogClose() {
+  handleContinue() {
     this.isOpenQuitAlertDialog = false
-    this.$emit('handleContinue')
+    this.isOpenSignDialog = true
+    this.onRetry()
+  }
+
+  handleQuit() {
+    this.isOpenQuitAlertDialog = false
+    this.uploadStatus = ''
+    this.$emit('handleQuit')
   }
 
   onRetry(): Promise<void> {
     this.shouldShowAlert = false
+    this.signDialogError = ''
     return this.onSubmit();
   }
 
@@ -828,6 +842,7 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     this.error = ''
+    this.signDialogError = ''
     await this.submitToArweave();
     if (this.uploadArweaveId) await this.submitToISCN()
   }
@@ -864,7 +879,7 @@ export default class IscnRegisterForm extends Vue {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
     } catch (err) {
-      this.signDialogError = err;
+      this.signDialogError = 'TX_NO_SUCCESS';
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err);
@@ -878,11 +893,9 @@ export default class IscnRegisterForm extends Vue {
     if (this.uploadArweaveId) return;
     this.isOpenSignDialog = true;
     const transactionHash = await this.sendArweaveFeeTx();
-    if (!transactionHash) throw new Error('TX_NO_SUCCESS');
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
     this.isUploadingArweave = true;
-    this.uploadStatus = 'uploading';
     try {
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
@@ -927,14 +940,13 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    this.uploadStatus = 'signing';
     try {
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
       this.isOpenSignDialog = false;
     } catch (err) {
-      this.signDialogError = err;
+      this.signDialogError = err as string;
       this.uploadStatus = '';
       // TODO: Handle error
       // eslint-disable-next-line no-console

@@ -13,7 +13,7 @@
           'backdrop-filter',
           'backdrop-blur-lg',
         ]"
-        @click="close"
+        @click="handleClickToClose"
       />
       <div
         :class="[
@@ -22,6 +22,7 @@
         ]"
       >
         <Button
+          v-if="hasCloseButton"
           :class="[
             'absolute',
             'z-1',
@@ -90,6 +91,12 @@ export default class Dialog extends Vue {
   // Content text.
   @Prop({ default: '' }) readonly text!: string
 
+  // Close the dialog by clicking outside
+  @Prop({ default: true }) readonly isClickToClose!: boolean
+
+  // Set to false to hide the close button
+  @Prop({ default: true }) readonly hasCloseButton!: boolean
+
   // Show/Hide dialog.
   @ModelSync('open', 'toggle', { type: Boolean, default: false }) isOpen!: boolean
 
@@ -119,6 +126,13 @@ export default class Dialog extends Vue {
   close() {
     this.$emit('close')
     this.isOpen = false
+  }
+
+  handleClickToClose() {
+    if (this.isClickToClose) {
+      this.$emit('close')
+      this.isOpen = false
+    }
   }
 }
 </script>

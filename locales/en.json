@@ -97,7 +97,7 @@
   "IscnRegisterForm.placeholder.name": "Name",
   "IscnRegisterForm.placeholder.url": "URL",
   "IscnRegisterForm.placeholder.wallet": "Wallet Address",
-  "IscnRegisterForm.quitAlertDialog.cancel": "Continue",
+  "IscnRegisterForm.quitAlertDialog.continue": "Continue",
   "IscnRegisterForm.quitAlertDialog.confirm": "Cancel Registration",
   "IscnRegisterForm.quitAlertDialog.content": "Your registration will be cancelled if you leave this page, and the paid fee cannot be refunded.",
   "IscnRegisterForm.quitAlertDialog.title": "Are you sure to quit your registration?",
