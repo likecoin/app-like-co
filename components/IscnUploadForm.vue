@@ -101,7 +101,7 @@
               type="submit"
               :preset="submitBtnClasses"
               :is-disabled="!ipfsHash"
-              >{{ uploadStatus || $t('UploadForm.button') }}
+              >{{ $t('UploadForm.button') }}
               <template #append>
                 <IconArrowRight />
               </template>
@@ -146,7 +146,7 @@
       </div>
     </div>
     <Snackbar
-      v-model="isTooLargeFile"
+      v-model="isSizeExceeded"
       :text="$t('UploadForm.warning')"
       preset="warn"
       :timeout="2000"
@@ -179,10 +179,9 @@ export default class UploadForm extends Vue {
   fileName: string = ''
   fileSize: number = 0
   fileType: string = ''
-  uploadStatus: string = ''
 
   isOpenFileInfoDialog = false
-  isTooLargeFile = false
+  isSizeExceeded = false
 
   get formClasses() {
     return [
@@ -191,7 +190,7 @@ export default class UploadForm extends Vue {
       {
         'flex-row justify-start': this.ipfsHash,
         'h-[196px] flex-col justify-center': !this.ipfsHash,
-        'bg-transparent' : this.isTooLargeFile,
+        'bg-transparent' : this.isSizeExceeded,
       },
       'items-center',
       'justify-between',
@@ -262,7 +261,7 @@ export default class UploadForm extends Vue {
           }
         }
       } else {
-        this.isTooLargeFile = true
+        this.isSizeExceeded = true
         this.handleInitFile()
       }
     }
