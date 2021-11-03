@@ -17,7 +17,12 @@ const IPFS_CONSTRAINT = 'v0.1'
 
 const jwk = require('../config/arweave-key.json')
 
-const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
+const arweave = Arweave.init({
+  host: 'arweave.net',
+  port: 443,
+  protocol: 'https',
+  timeout: 600000,
+})
 
 export async function getArweaveIdFromHashes(ipfsHash: string) {
   const res = await arweave.arql(

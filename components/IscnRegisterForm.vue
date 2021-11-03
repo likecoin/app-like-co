@@ -401,6 +401,13 @@
             'font-400',
           ]"
         >{{ signDialogError }}</pre>
+        <div v-if="isUploadingArweave">
+          <Divider class="mt-[12px] mb-[8px]" />
+          <span
+            v-t="'IscnRegisterForm.signDialog.sign.arweave.uploading'"
+            class="whitespace-pre-line"
+          />
+        </div>
         <template v-if="!isUploadingArweave">
           <Divider class="my-[12px]" />
           <Label
@@ -451,6 +458,11 @@
         </div>
       </Dialog>
     </Card>
+    <Snackbar
+      v-model="shouldShowAlert"
+      :text="errorMessage"
+      preset="warn"
+    />
   </div>
 </template>
 
@@ -520,6 +532,8 @@ export default class IscnRegisterForm extends Vue {
   isOpenQuitAlertDialog = false
   isUploadingArweave = false
   signDialogError = ''
+  shouldShowAlert = false
+  errorMessage = ''
 
   checkedAuthorInfo = false
   checkedRegisterInfo = false
@@ -684,7 +698,8 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get signDialogHeaderText() {
-    return `Sign (${this.currentSignStep}/${ this.totalSignStep})`;
+    if (this.isUploadingArweave) return this.$t('IscnRegisterForm.button.uploading')
+    return `Sign (${this.currentSignStep}/${ this.totalSignStep})`
   }
 
   get signDialogMessage() {
@@ -802,6 +817,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   onRetry(): Promise<void> {
+    this.shouldShowAlert = false
     return this.onSubmit();
   }
 
@@ -876,14 +892,21 @@ export default class IscnRegisterForm extends Vue {
             'Content-Type': 'multipart/form-data',
           },
         },
-      );
-      this.uploadArweaveId = arweaveId;
-      this.$emit('arweaveUploaded', { arweaveId })
-      this.isOpenSignDialog = false;
+      )
+      if (arweaveId) {
+        this.uploadArweaveId = arweaveId
+        this.$emit('arweaveUploaded', { arweaveId })
+        this.isOpenSignDialog = false
+      } else {
+        this.shouldShowAlert = true
+        this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+        this.$emit('handleContinue')
+      }
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
-      console.error(err);
+      this.shouldShowAlert = true
+      this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
     } finally {
       this.isUploadingArweave = false;
       this.uploadStatus = '';
@@ -904,7 +927,7 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    this.uploadStatus = this.$t('IscnRegister Form.button.signing') as string;
+    this.uploadStatus = 'signing';
     try {
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
       this.uploadStatus = 'success'
