@@ -13,7 +13,7 @@
           'backdrop-filter',
           'backdrop-blur-lg',
         ]"
-        @click="handleClickToClose"
+        @click="handleBackdropClick"
       />
       <div
         :class="[
@@ -91,8 +91,8 @@ export default class Dialog extends Vue {
   // Content text.
   @Prop({ default: '' }) readonly text!: string
 
-  // Close the dialog by clicking outside
-  @Prop({ default: true }) readonly isClickToClose!: boolean
+  // Set to true to disable close by backdrop click
+  @Prop({ default: false }) readonly isDisabledBackdropClick!: boolean
 
   // Set to false to hide the close button
   @Prop({ default: true }) readonly hasCloseButton!: boolean
@@ -128,10 +128,9 @@ export default class Dialog extends Vue {
     this.isOpen = false
   }
 
-  handleClickToClose() {
-    if (this.isClickToClose) {
-      this.$emit('close')
-      this.isOpen = false
+  handleBackdropClick() {
+    if (!this.isDisabledBackdropClick) {
+      this.close()
     }
   }
 }

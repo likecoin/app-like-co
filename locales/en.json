@@ -104,6 +104,7 @@
   "IscnRegisterForm.register.fee": "Fee: {fee} LIKE",
   "IscnRegisterForm.signDialog.closeWarning": "Please don't close the window...",
   "IscnRegisterForm.signDialog.fee": "Fee",
+  "IscnRegisterForm.signDialog.keplr": "Opening Keplr ...",
   "IscnRegisterForm.signDialog.retry": "Retry",
   "IscnRegisterForm.signDialog.sign.arweave.upload": "Please sign to upload to Arweave",
   "IscnRegisterForm.signDialog.sign.arweave.uploading": "Depending on the file size, it may take several minutes.\n You will be requested to sign again before finishing.",

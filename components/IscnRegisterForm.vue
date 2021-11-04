@@ -278,7 +278,7 @@
         v-model="isOpenAuthorDialog"
         :has-padding="false"
         preset="custom"
-        :is-click-to-close="false"
+        :is-disabled-backdrop-click="true"
       >
         <Card
           :class="[
@@ -383,7 +383,7 @@
       <Dialog
         v-model="isOpenSignDialog"
         :header-text="signDialogHeaderText"
-        :is-click-to-close="false"
+        :is-disabled-backdrop-click="true"
         :has-close-button="!isUploadingArweave"
         @close="handleSignDialogClose"
       >
@@ -430,8 +430,9 @@
           </Label>
           <div class="flex justify-center mt-[24px]">
             <Button
-              preset="outline"
-              :text="$t('IscnRegisterForm.signDialog.retry')"
+              :preset="buttonState.preset"
+              :text="buttonState.text"
+              :is-disabled="buttonState.isDisable"
               @click="onRetry"
             />
           </div>
@@ -440,7 +441,7 @@
       <Dialog
         v-model="isOpenQuitAlertDialog"
         :header-text="$t('IscnRegisterForm.quitAlertDialog.title')"
-        :is-click-to-close="false"
+        :is-disabled-backdrop-click="true"
         :has-close-button="false"
       >
         <div
@@ -534,6 +535,7 @@ export default class IscnRegisterForm extends Vue {
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
+  isOpenKeplr = true
   activeEditingAuthorIndex = -1
 
   isOpenSignDialog = false
@@ -665,24 +667,6 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  @Watch('payload', { immediate: true, deep: true })
-  change() {
-    this.debouncedCalculateISCNFee()
-  }
-
-  @Watch('error')
-  showWarning(errormsg: any) {
-    if (errormsg) this.isOpenWarningSnackbar = true
-  }
-
-  async mounted() {
-    this.uploadStatus = 'Loading'
-    await this.estimateArweaveFee();
-    // ISCN Fee needs Arweave fee to calculate
-    await this.calculateISCNFee()
-    this.uploadStatus = ''
-  }
-
   get arweaveFeePlusGas() {
     if (this.arweaveFee.lte(0)) return this.arweaveFee;
     const gasAmount = new BigNumber(DEFAULT_TRANSFER_FEE.amount[0].amount).shiftedBy(-9);
@@ -723,6 +707,34 @@ export default class IscnRegisterForm extends Vue {
   get signDialogFee() {
     if (this.uploadArweaveId) return this.iscnFee;
     return this.arweaveFeePlusGas;
+  }
+
+  get buttonState() {
+    return {
+      preset:this.isOpenKeplr ? 'tertiary' : 'outline',
+      text: this.isOpenKeplr
+      ? this.$t('IscnRegisterForm.signDialog.keplr')
+      : this.$t('IscnRegisterForm.signDialog.retry'),
+      isDisable: this.isOpenKeplr,
+    }
+  }
+
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateISCNFee()
+  }
+
+  @Watch('error')
+  showWarning(errormsg: any) {
+    if (errormsg) this.isOpenWarningSnackbar = true
+  }
+
+  async mounted() {
+    this.uploadStatus = 'Loading'
+    await this.estimateArweaveFee();
+    // ISCN Fee needs Arweave fee to calculate
+    await this.calculateISCNFee()
+    this.uploadStatus = ''
   }
 
   handleOpenAuthorDialog() {
@@ -832,7 +844,15 @@ export default class IscnRegisterForm extends Vue {
   onRetry(): Promise<void> {
     this.shouldShowAlert = false
     this.signDialogError = ''
+    this.onOpenKeplr()
     return this.onSubmit();
+  }
+
+  onOpenKeplr() {
+    this.isOpenKeplr = true
+    setTimeout(() => {
+      this.isOpenKeplr = false
+    }, 5000)
   }
 
   async onSubmit(): Promise<void> {
@@ -892,6 +912,7 @@ export default class IscnRegisterForm extends Vue {
   async submitToArweave(): Promise<void> {
     if (this.uploadArweaveId) return;
     this.isOpenSignDialog = true;
+    this.onOpenKeplr();
     const transactionHash = await this.sendArweaveFeeTx();
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
@@ -929,6 +950,7 @@ export default class IscnRegisterForm extends Vue {
   async submitToISCN(): Promise<void> {
     this.isOpenSignDialog = true;
     this.uploadStatus = 'loading'
+    this.onOpenKeplr()
     await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
