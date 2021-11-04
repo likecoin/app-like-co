@@ -274,7 +274,12 @@
         preset="warn"
       />
       <!-- Dialog -->
-      <Dialog v-model="isOpenAuthorDialog" :has-padding="false" preset="custom">
+      <Dialog
+        v-model="isOpenAuthorDialog"
+        :has-padding="false"
+        preset="custom"
+        :is-disabled-backdrop-click="true"
+      >
         <Card
           :class="[
             'flex',
@@ -378,6 +383,8 @@
       <Dialog
         v-model="isOpenSignDialog"
         :header-text="signDialogHeaderText"
+        :is-disabled-backdrop-click="true"
+        :has-close-button="!isUploadingArweave"
         @close="handleSignDialogClose"
       >
         <template #header-prepend>
@@ -423,8 +430,9 @@
           </Label>
           <div class="flex justify-center mt-[24px]">
             <Button
-              preset="outline"
-              :text="$t('IscnRegisterForm.signDialog.retry')"
+              :preset="buttonState.preset"
+              :text="buttonState.text"
+              :is-disabled="buttonState.isDisable"
               @click="onRetry"
             />
           </div>
@@ -433,7 +441,8 @@
       <Dialog
         v-model="isOpenQuitAlertDialog"
         :header-text="$t('IscnRegisterForm.quitAlertDialog.title')"
-        @close="handleQuitAlertDialogClose"
+        :is-disabled-backdrop-click="true"
+        :has-close-button="false"
       >
         <div
           v-t="'IscnRegisterForm.quitAlertDialog.content'"
@@ -444,16 +453,16 @@
             preset="outline"
             class="text-red border-red hover:bg-red active:bg-red hover:bg-opacity-20 active:bg-opacity-30"
             :text="$t('IscnRegisterForm.quitAlertDialog.confirm')"
-            @click="$emit('quit')"
+            @click="handleQuit"
           >
             <template #prepend>
-              <IconBin class="w-[20px]" />
+              <IconBin v-if="isOpenQuitAlertDialog" class="w-[20px]" />
             </template>
           </Button>
           <Button
             preset="outline"
-            :text="$t('IscnRegisterForm.quitAlertDialog.cancel')"
-            @click="handleQuitAlertDialogClose"
+            :text="$t('IscnRegisterForm.quitAlertDialog.continue')"
+            @click="handleContinue"
           />
         </div>
       </Dialog>
@@ -526,6 +535,7 @@ export default class IscnRegisterForm extends Vue {
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
+  isOpenKeplr = true
   activeEditingAuthorIndex = -1
 
   isOpenSignDialog = false
@@ -657,24 +667,6 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  @Watch('payload', { immediate: true, deep: true })
-  change() {
-    this.debouncedCalculateISCNFee()
-  }
-
-  @Watch('error')
-  showWarning(errormsg: any) {
-    if (errormsg) this.isOpenWarningSnackbar = true
-  }
-
-  async mounted() {
-    this.uploadStatus = 'Loading'
-    await this.estimateArweaveFee();
-    // ISCN Fee needs Arweave fee to calculate
-    await this.calculateISCNFee()
-    this.uploadStatus = ''
-  }
-
   get arweaveFeePlusGas() {
     if (this.arweaveFee.lte(0)) return this.arweaveFee;
     const gasAmount = new BigNumber(DEFAULT_TRANSFER_FEE.amount[0].amount).shiftedBy(-9);
@@ -715,6 +707,34 @@ export default class IscnRegisterForm extends Vue {
   get signDialogFee() {
     if (this.uploadArweaveId) return this.iscnFee;
     return this.arweaveFeePlusGas;
+  }
+
+  get buttonState() {
+    return {
+      preset:this.isOpenKeplr ? 'tertiary' : 'outline',
+      text: this.isOpenKeplr
+      ? this.$t('IscnRegisterForm.signDialog.keplr')
+      : this.$t('IscnRegisterForm.signDialog.retry'),
+      isDisable: this.isOpenKeplr,
+    }
+  }
+
+  @Watch('payload', { immediate: true, deep: true })
+  change() {
+    this.debouncedCalculateISCNFee()
+  }
+
+  @Watch('error')
+  showWarning(errormsg: any) {
+    if (errormsg) this.isOpenWarningSnackbar = true
+  }
+
+  async mounted() {
+    this.uploadStatus = 'Loading'
+    await this.estimateArweaveFee();
+    // ISCN Fee needs Arweave fee to calculate
+    await this.calculateISCNFee()
+    this.uploadStatus = ''
   }
 
   handleOpenAuthorDialog() {
@@ -806,19 +826,33 @@ export default class IscnRegisterForm extends Vue {
   }
 
   handleSignDialogClose() {
-    if (this.uploadArweaveId) {
-      this.isOpenQuitAlertDialog = true
-    }
+    this.isOpenQuitAlertDialog = true
   }
 
-  handleQuitAlertDialogClose() {
+  handleContinue() {
     this.isOpenQuitAlertDialog = false
-    this.$emit('handleContinue')
+    this.isOpenSignDialog = true
+    this.onRetry()
+  }
+
+  handleQuit() {
+    this.isOpenQuitAlertDialog = false
+    this.uploadStatus = ''
+    this.$emit('handleQuit')
   }
 
   onRetry(): Promise<void> {
     this.shouldShowAlert = false
+    this.signDialogError = ''
+    this.onOpenKeplr()
     return this.onSubmit();
+  }
+
+  onOpenKeplr() {
+    this.isOpenKeplr = true
+    setTimeout(() => {
+      this.isOpenKeplr = false
+    }, 5000)
   }
 
   async onSubmit(): Promise<void> {
@@ -828,6 +862,7 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     this.error = ''
+    this.signDialogError = ''
     await this.submitToArweave();
     if (this.uploadArweaveId) await this.submitToISCN()
   }
@@ -864,7 +899,7 @@ export default class IscnRegisterForm extends Vue {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
     } catch (err) {
-      this.signDialogError = err;
+      this.signDialogError = 'TX_NO_SUCCESS';
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err);
@@ -877,12 +912,11 @@ export default class IscnRegisterForm extends Vue {
   async submitToArweave(): Promise<void> {
     if (this.uploadArweaveId) return;
     this.isOpenSignDialog = true;
+    this.onOpenKeplr();
     const transactionHash = await this.sendArweaveFeeTx();
-    if (!transactionHash) throw new Error('TX_NO_SUCCESS');
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
     this.isUploadingArweave = true;
-    this.uploadStatus = 'uploading';
     try {
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
@@ -916,6 +950,7 @@ export default class IscnRegisterForm extends Vue {
   async submitToISCN(): Promise<void> {
     this.isOpenSignDialog = true;
     this.uploadStatus = 'loading'
+    this.onOpenKeplr()
     await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
@@ -927,14 +962,13 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    this.uploadStatus = 'signing';
     try {
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
       this.isOpenSignDialog = false;
     } catch (err) {
-      this.signDialogError = err;
+      this.signDialogError = err as string;
       this.uploadStatus = '';
       // TODO: Handle error
       // eslint-disable-next-line no-console

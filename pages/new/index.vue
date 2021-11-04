@@ -47,9 +47,8 @@
         :step="step"
         @arweaveUploaded="onArweaveIdUpdate"
         @txBroadcasted="onISCNTxInfo"
-        @quit="handleQuitRegistration"
         @handleSubmit="isSubmit = true"
-        @handleContinue="isSubmit = false"
+        @handleQuit="isSubmit = false"
       />
       <IscnUploadedInfo
         v-else-if="state === 'done'"
@@ -148,20 +147,6 @@ export default class NewIndexPage extends Vue {
     this.fileType = fileType
     this.fileSize = fileSize
     this.state = 'iscn'
-  }
-
-  handleQuitRegistration() {
-    this.state = 'init'
-    this.ipfsHash = ''
-    this.arweaveId = ''
-    this.fileSHA256 = ''
-    this.fileData = ''
-    this.iscnId = ''
-    this.iscnTxHash = ''
-    this.iscnTimestamp = ''
-    this.isImage = false
-    this.fileBlob = null
-    this.exifInfo = null
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
