@@ -81,7 +81,7 @@
       </nav>
     </div>
     <div 
-      :v-if="isTestnet"
+      v-if="isTestnet"
       :class="[
         'fixed',
         'top-[0px]',
