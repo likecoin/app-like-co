@@ -136,9 +136,7 @@
           >
             <TextField
               v-model="name"
-              :error-message=" !checkedRegisterInfo || name
-                ? undefined
-                : $t('IscnRegisterForm.error.titleIsEmpty')"
+              :error-message="wordCounter(name,wordLimit.name,true)"
               :placeholder="$t('IscnRegisterForm.placeholder.iscn')"
             />
           </FormField>
@@ -149,9 +147,7 @@
             <TextField
               v-model="description"
               :is-textarea="true"
-              :error-message=" !checkedRegisterInfo || description
-                ? undefined
-                : $t('IscnRegisterForm.error.descriptionIsEmpty')"
+              :error-message="wordCounter(description,wordLimit.description,true)"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
@@ -192,7 +188,11 @@
             :label="$t('IscnRegisterForm.label.tags')"
             content-classes="flex flex-row flex-wrap"
           >
-            <EditableTagList v-model="tags" />
+            <EditableTagList
+              v-model="tags"
+              :word-limit="wordLimit.tagContent"
+              :tags-limit="wordLimit.tagNumber"
+            />
           </FormField>
           <Divider class="my-[12px]" />
           <FormField
@@ -210,6 +210,7 @@
           >
             <TextField
               v-model="license"
+              :error-message="wordCounter(license,wordLimit.license)"
               :placeholder="$t('IscnRegisterForm.placeholder.license')"
             />
           </FormField>
@@ -320,9 +321,7 @@
           >
             <TextField
               v-model="authorName"
-              :error-message="!checkedAuthorInfo || authorName
-                ? undefined
-                : $t('IscnRegisterForm.error.authorNameIsEmpty')"
+              :error-message="wordCounter(authorName,wordLimit.authorName,true)"
               :size="40"
               class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
@@ -337,6 +336,7 @@
             <TextField
               v-model="likerId"
               :size="40"
+              :error-message="wordCounter(likerId,wordLimit.likerId,false,wordLimit.likerIdLeast)"
               :placeholder="$t('IscnRegisterForm.placeholder.likerID')"
             />
           </FormField>
@@ -347,6 +347,7 @@
             <TextField
               v-model="authorDescription"
               :is-textarea="true"
+              :error-message="wordCounter(authorDescription,wordLimit.authorDescription)"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
@@ -501,6 +502,18 @@ import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
 
+export enum WordLimit {
+  name = 100,
+  description = 200,
+  tagContent = 35,
+  tagNumber = 10,
+  authorName = 40,
+  authorDescription = 200,
+  likerIdLeast = 7,
+  likerId = 20,
+  license = 200
+}
+
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: false }) readonly isImage!: boolean
@@ -554,7 +567,8 @@ export default class IscnRegisterForm extends Vue {
   errorMessage = ''
 
   checkedAuthorInfo = false
-  checkedRegisterInfo = false
+  isChecked = false
+  wordLimit = WordLimit
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -727,6 +741,16 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
+  get isMetadataReady() {
+    return (
+      this.name &&
+      this.description &&
+      this.name.length <= WordLimit.name &&
+      this.description.length <= WordLimit.description &&
+      this.license.length <= WordLimit.license
+    )
+  }
+
   @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateISCNFee()
@@ -780,9 +804,14 @@ export default class IscnRegisterForm extends Vue {
 
   confirmAuthorChange() {
     this.checkedAuthorInfo = true
-    if (!this.authorName) {
+    if (!this.authorName || this.authorName.length > WordLimit.authorName)
       return
-    }
+    if (
+      this.likerId &&
+      (this.likerId.length < WordLimit.likerIdLeast ||
+        this.likerId.length > WordLimit.likerId)
+    )
+      return
     this.authorWalletAddress.forEach((a: any, i: number) => {
       if (!a.content) {
         this.authorWalletAddress.splice(i, 1)
@@ -863,12 +892,33 @@ export default class IscnRegisterForm extends Vue {
     }, 5000)
   }
 
+  wordCounter(
+    val: any,
+    limit: number,
+    required: boolean = false,
+    least: number = 0,
+  ) {
+    if (required && !val && (this.isChecked || this.checkedAuthorInfo)) {
+      return this.$t('IscnRegisterForm.error.requiredField')
+    }
+    if (val && val.length > limit) {
+      return this.$t('IscnRegisterForm.warning.exceeded', {
+        current: val.length,
+        limit,
+      })
+    }
+    if (val && least > 0 && val.length < least) {
+      return this.$t('IscnRegisterForm.warning.shortage', {
+        least,
+      })
+    }
+    return undefined
+  }
+
   async onSubmit(): Promise<void> {
     this.$emit('handleSubmit')
-    this.checkedRegisterInfo = true
-    if (!this.name || !this.description) {
-      return
-    }
+    this.isChecked = true
+    if (!this.isMetadataReady) return
     this.error = ''
     this.signDialogError = ''
     if (this.balance.lt(this.totalFee)) {
