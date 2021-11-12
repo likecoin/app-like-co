@@ -270,9 +270,17 @@
       <!-- Snackbar -->
       <Snackbar
         v-model="isOpenWarningSnackbar"
-        :text="errorMsg"
         preset="warn"
-      />
+      >
+        {{ errorMsg }}
+        <Link
+          v-if="error === 'INSUFFICIENT_BALANCE'"
+          :class="['text-white','ml-[2px]']"
+          href="https://app.osmosis.zone/"
+        >
+          {{ $t('IscnRegisterForm.error.buy') }}
+        </Link>
+      </Snackbar>
       <!-- Dialog -->
       <Dialog
         v-model="isOpenAuthorDialog"
@@ -863,6 +871,12 @@ export default class IscnRegisterForm extends Vue {
     }
     this.error = ''
     this.signDialogError = ''
+    if (this.balance.lt(this.totalFee)) {
+      this.error = 'INSUFFICIENT_BALANCE'
+      this.isOpenWarningSnackbar = true
+      this.uploadStatus = ''
+      return
+    }
     await this.submitToArweave();
     if (this.uploadArweaveId) await this.submitToISCN()
   }

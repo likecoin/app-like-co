@@ -3,6 +3,7 @@
     :class="[
       'flex',
       'flex-col',
+      'relative',
       'items-center',
       'justify-center',
       'p-[16px]',
@@ -59,6 +60,41 @@
         <IconAddToISCN class="w-[20px]" />
       </template>
     </Button>
+    <div
+      :class="[
+        'absolute',
+        'bottom-[24px]',
+        'right-[24px]',
+        'flex',
+        'flex-nowrap',
+        'w-min',
+      ]"
+    >
+      <Label
+        :class="[
+          'whitespace-nowrap',
+          'mr-[24px]',
+        ]"
+        :text="$t('HomePage.label.getToken')"
+        preset="h6"
+      />
+      <Button
+        class="mr-[24px]"
+        preset="tertiary"
+        text-preset="h6"
+        size="mini"
+        href="https://app.osmosis.zone/"
+        :text="$t('HomePage.label.osmosis')"
+      />
+      <Button
+        class="mr-[24px]"
+        preset="tertiary"
+        text-preset="h6"
+        size="mini"
+        href="https://app.liquid.com/exchange/LIKEUSDT"
+        :text="$t('HomePage.label.liquid')"
+      />
+    </div>
   </Page>
 </template>
 
