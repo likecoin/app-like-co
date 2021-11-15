@@ -84,7 +84,7 @@
         text-preset="h6"
         size="mini"
         href="https://app.osmosis.zone/"
-        :text="$t('HomePage.label.osmosis')"
+        :text="$t('HomePage.button.osmosis')"
       />
       <Button
         class="mr-[24px]"
@@ -92,7 +92,7 @@
         text-preset="h6"
         size="mini"
         href="https://app.liquid.com/exchange/LIKEUSDT"
-        :text="$t('HomePage.label.liquid')"
+        :text="$t('HomePage.button.liquid')"
       />
     </div>
   </Page>
