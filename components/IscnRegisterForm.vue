@@ -136,7 +136,7 @@
           >
             <TextField
               v-model="name"
-              :error-message="wordCounter(name,wordLimit.name,true)"
+              :error-message="validateField(name, charactersLimit.name, true)"
               :placeholder="$t('IscnRegisterForm.placeholder.iscn')"
             />
           </FormField>
@@ -147,7 +147,7 @@
             <TextField
               v-model="description"
               :is-textarea="true"
-              :error-message="wordCounter(description,wordLimit.description,true)"
+              :error-message="validateField(description, charactersLimit.description, true)"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
@@ -190,8 +190,8 @@
           >
             <EditableTagList
               v-model="tags"
-              :word-limit="wordLimit.tagContent"
-              :tags-limit="wordLimit.tagNumber"
+              :characters-limit="charactersLimit.tagContent"
+              :tags-limit="charactersLimit.tagNumber"
             />
           </FormField>
           <Divider class="my-[12px]" />
@@ -210,7 +210,7 @@
           >
             <TextField
               v-model="license"
-              :error-message="wordCounter(license,wordLimit.license)"
+              :error-message="validateField(license, charactersLimit.license)"
               :placeholder="$t('IscnRegisterForm.placeholder.license')"
             />
           </FormField>
@@ -321,7 +321,7 @@
           >
             <TextField
               v-model="authorName"
-              :error-message="wordCounter(authorName,wordLimit.authorName,true)"
+              :error-message="validateField(authorName, charactersLimit.authorName, true)"
               :size="40"
               class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
@@ -336,7 +336,7 @@
             <TextField
               v-model="likerId"
               :size="40"
-              :error-message="wordCounter(likerId,wordLimit.likerId,false,wordLimit.likerIdLeast)"
+              :error-message="validateField(likerId, charactersLimit.likerId, false, charactersLimit.likerIdLeast)"
               :placeholder="$t('IscnRegisterForm.placeholder.likerID')"
             />
           </FormField>
@@ -347,7 +347,7 @@
             <TextField
               v-model="authorDescription"
               :is-textarea="true"
-              :error-message="wordCounter(authorDescription,wordLimit.authorDescription)"
+              :error-message="validateField(authorDescription, charactersLimit.authorDescription)"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
@@ -502,7 +502,7 @@ import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
 
-export enum WordLimit {
+export enum CharactersLimit {
   name = 100,
   description = 200,
   tagContent = 35,
@@ -568,7 +568,7 @@ export default class IscnRegisterForm extends Vue {
 
   checkedAuthorInfo = false
   isChecked = false
-  wordLimit = WordLimit
+  charactersLimit = CharactersLimit
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -745,9 +745,9 @@ export default class IscnRegisterForm extends Vue {
     return (
       this.name &&
       this.description &&
-      this.name.length <= WordLimit.name &&
-      this.description.length <= WordLimit.description &&
-      this.license.length <= WordLimit.license
+      this.name.length <= CharactersLimit.name &&
+      this.description.length <= CharactersLimit.description &&
+      this.license.length <= CharactersLimit.license
     )
   }
 
@@ -804,12 +804,12 @@ export default class IscnRegisterForm extends Vue {
 
   confirmAuthorChange() {
     this.checkedAuthorInfo = true
-    if (!this.authorName || this.authorName.length > WordLimit.authorName)
+    if (!this.authorName || this.authorName.length > CharactersLimit.authorName)
       return
     if (
       this.likerId &&
-      (this.likerId.length < WordLimit.likerIdLeast ||
-        this.likerId.length > WordLimit.likerId)
+      (this.likerId.length < CharactersLimit.likerIdLeast ||
+        this.likerId.length > CharactersLimit.likerId)
     )
       return
     this.authorWalletAddress.forEach((a: any, i: number) => {
@@ -892,7 +892,7 @@ export default class IscnRegisterForm extends Vue {
     }, 5000)
   }
 
-  wordCounter(
+  validateField(
     val: any,
     limit: number,
     required: boolean = false,

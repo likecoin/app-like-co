@@ -131,10 +131,9 @@ export default class EditableTagList extends Vue {
   @Model('change', { type: Array, default: () => [] }) value!: Array<string>
 
   // Character limit for a tag
-  @Prop(Number) readonly wordLimit!: number | undefined
+  @Prop({ default: 35 }) readonly charactersLimit!: number | undefined
 
-
-  // Maximum number of tags 
+  // Maximum number of tags
   @Prop(Number) readonly tagsLimit!: number | undefined
 
   tags: Array<string> = []
@@ -147,13 +146,15 @@ export default class EditableTagList extends Vue {
   }
 
   get errorMessage() {
-    if (this.wordLimit && this.currentInput.length > this.wordLimit)
+    if (this.charactersLimit && this.currentInput.length > this.charactersLimit) {
       return this.$t('IscnRegisterForm.warning.exceeded', {
         current: this.currentInput.length,
-        limit: this.wordLimit,
+        limit: this.charactersLimit,
       })
-    if (this.tags.includes(this.currentInput))
+    }
+    if (this.tags.includes(this.currentInput)) {
       return this.$t('IscnRegisterForm.warning.exist')
+    }
     return undefined
   }
 
