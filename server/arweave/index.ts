@@ -42,13 +42,24 @@ export async function getArweaveIdFromHashes(ipfsHash: string) {
   return res[0] || undefined;
 }
 
-function generateManifest(files: ArweaveFile[], { stub = false } = {}) {
+async function generateManifest(files: ArweaveFile[], { stub = false } = {}) {
   const isIndexExists = !!files.find(f => f.key === 'index.html');
   let list = files;
   if (stub) {
-    list = list.map(p => ({
-      arweaveId: p.arweaveId || 'fzassxeg7cCmOp6-sVkvDV3l5GVfDqL_pF_VOQHHBGo',
-      ...p,
+    // stub some string as arweave id for estimation
+    list = await Promise.all(list.map(async (p) => {
+      let { arweaveId } = p;
+      if (!arweaveId) {
+        if (p.buffer) {
+          arweaveId = await getFileIPFSHash(p);
+        } else {
+          arweaveId = 'fzassxeg7cCmOp6-sVkvDV3l5GVfDqL_pF_VOQHHBGo';
+        }
+      }
+      return {
+        ...p,
+        arweaveId,
+      };
     }));
   }
   const filePaths = list
@@ -70,8 +81,8 @@ function generateManifest(files: ArweaveFile[], { stub = false } = {}) {
   return manifest;
 }
 
-function generateManifestFile(files: ArweaveFile[], { stub = false } = {}): ArweaveFile {
-  const manifest = generateManifest(files, { stub });
+async function generateManifestFile(files: ArweaveFile[], { stub = false } = {}): Promise<ArweaveFile> {
+  const manifest = await generateManifest(files, { stub });
   return {
     key: 'manifest',
     mimetype: 'application/x.arweave-manifest+json',
@@ -80,7 +91,7 @@ function generateManifestFile(files: ArweaveFile[], { stub = false } = {}): Arwe
 }
 
 async function uploadManifestFile(filesWithId: ArweaveFile[]) {
-  const manifest = generateManifestFile(filesWithId);
+  const manifest = await generateManifestFile(filesWithId);
   const manifestIPFSHash = await getFileIPFSHash(manifest);
   let arweaveId = await getArweaveIdFromHashes(manifestIPFSHash);
   if (!arweaveId) {
@@ -116,7 +127,7 @@ export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePri
   }
   const prices = await Promise.all(files.map(f => estimateARPrice(f)));
   const filesWithPrice = files.map((f, i) => ({ ...f, arweaveId: prices[i].arweaveId }));
-  const manifest = generateManifestFile(filesWithPrice, { stub: true });
+  const manifest = await generateManifestFile(filesWithPrice, { stub: true });
   const manifestPrice = await estimateARPrice(manifest);
 
   prices.unshift(manifestPrice);
