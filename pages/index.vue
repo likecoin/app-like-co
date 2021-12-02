@@ -9,6 +9,13 @@
       'p-[16px]',
     ]"
   >
+    <AirdropInfoCard
+      :class="[
+        'absolute',
+        'top-0',
+        'right-[24px]',
+      ]"
+    />
     <Card
       tag="form"
       :class="[
@@ -60,41 +67,13 @@
         <IconAddToISCN class="w-[20px]" />
       </template>
     </Button>
-    <div
+    <TokenBar
       :class="[
         'absolute',
         'bottom-[24px]',
         'right-[24px]',
-        'flex',
-        'flex-nowrap',
-        'w-min',
       ]"
-    >
-      <Label
-        :class="[
-          'whitespace-nowrap',
-          'mr-[24px]',
-        ]"
-        :text="$t('HomePage.label.getToken')"
-        preset="h6"
-      />
-      <Button
-        class="mr-[24px]"
-        preset="tertiary"
-        text-preset="h6"
-        size="mini"
-        href="https://app.osmosis.zone/"
-        :text="$t('HomePage.button.osmosis')"
-      />
-      <Button
-        class="mr-[24px]"
-        preset="tertiary"
-        text-preset="h6"
-        size="mini"
-        href="https://app.liquid.com/exchange/LIKEUSDT"
-        :text="$t('HomePage.button.liquid')"
-      />
-    </div>
+    />
   </Page>
 </template>
 

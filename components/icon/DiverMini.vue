@@ -6,6 +6,6 @@
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <line y1="1" x2="32" y2="1" stroke="#EBEBEB" stroke-width="2" />
+    <line y1="1" x2="32" y2="1" stroke="currentColor" stroke-width="2" />
   </svg>
 </template>
