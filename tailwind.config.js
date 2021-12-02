@@ -13,10 +13,13 @@ module.exports = {
       'like-green': '#28646E',
       'like-cyan': '#50E3C2',
       'like-cyan-light': '#AAF1E7',
+      'like-cyan-extralight': '#D7ECEC',
       'dark-gray': '#4A4A4A',
       'medium-gray': '#9B9B9B',
       'shade-gray': '#EBEBEB',
       'light-gray': '#F7F7F7',
+      'airdrop-gold':'#D1AB79',
+      'twitter-blue':'#4696F1',
     },
     boxShadow: {
       popup: '2px 4px 8px rgba(0, 0, 0, 0.25)',
@@ -46,6 +49,9 @@ module.exports = {
           '&::-webkit-scrollbar': { 
             display: 'none', /* Chrome */
           },
+        },
+        '.text-stroke': {
+          '-webkit-text-stroke': '1px #AAF1E7',
         },
       }
       addUtilities(newUtilities)
