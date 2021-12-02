@@ -9,6 +9,7 @@ import {
 } from '../ipfs';
 import { COINGECKO_PRICE_API } from '../constant';
 import { ArweaveFile, Manifest, ArweavePrice, ArweavePriceWithLIKE } from './types';
+import { IS_TESTNET } from '~/constant';
 
 const IPFS_KEY = 'IPFS-Add'
 
@@ -188,8 +189,10 @@ export async function submitToArweave(data: ArweaveFile, ipfsHash: string) {
   transaction.addTag('Content-Type', mimetype)
   const { reward } = transaction;
 
-  const balance = await arweave.wallets.getBalance(await arweave.wallets.jwkToAddress(jwk));
-  if (arweave.ar.isLessThan(balance, reward)) return '';
+  if (!IS_TESTNET) {
+    const balance = await arweave.wallets.getBalance(await arweave.wallets.jwkToAddress(jwk));
+    if (arweave.ar.isLessThan(balance, reward)) throw new Error('INSUFFICIENT_AR_IN_PROXY');
+  }
 
   await arweave.transactions.sign(transaction, jwk)
   await arweave.transactions.post(transaction)
