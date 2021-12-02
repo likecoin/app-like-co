@@ -35,13 +35,13 @@
           'my-[24px]',
           'w-[240px]',
         ]"
-        text="LikeCoin airdrop are on vote. The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz"
+        :text="$t('AirDrop.content.prelaunch')"
         preset="h5"
       />
       <Button
         :to="localeLocation({ name: 'airdrop' })"
         preset="secondary"
-        text="Claim airdrop"
+        :text="$t('AirDrop.button.claim')"
       />
     </div>
   </div>

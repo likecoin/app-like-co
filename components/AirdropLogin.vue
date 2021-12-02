@@ -26,7 +26,7 @@
     >
       <Label
         :class="['font-extrabold', 'text-like-green']"
-        text="Connect your wallet"
+        :text="$t('AirDrop.label.connect.wallet')"
         preset="h2"
       />
       <Label
@@ -35,7 +35,7 @@
           'mt-[8px]',
           'w-[600px]',
         ]"
-        text="Connect or insert below your address and verify how many $LIKE have been allocated to you inside the upcoming LikeCoin airdrop"
+        :text="$t('AirDrop.guide.connect.wallet')"
         preset="p5"
       />
       <div
@@ -74,13 +74,13 @@
             <IconKeplr />
             <Label
               :class="['text-dark-gray', 'ml-[12px]']"
-              text="Keplr Wallet"
+              :text="$t('AirDrop.label.keplr')"
               preset="h4"
             />
           </div>
           <Label
             :class="['text-dark-gray', 'mt-[8px]']"
-            text="Connect cosmos/osmosis wallet with Keplr broswer extension"
+            :text="$t('AirDrop.guide.connect.keplr')"
             preset="p5"
           />
         </div>
@@ -111,13 +111,13 @@
             <IconLikerLand />
             <Label
               :class="['text-dark-gray', 'ml-[12px]']"
-              text="Liker ID"
+              :text="$t('AirDrop.label.LikerId')"
               preset="h4"
             />
           </div>
           <Label
             :class="['text-dark-gray', 'mt-[8px]']"
-            text="Connect to LikerID with the Liker Land app"
+            :text="$t('AirDrop.guide.connect.LikerId')"
             preset="p5"
           />
         </div>
@@ -139,7 +139,7 @@
           'text-medium-gray',
           'mt-[32px]',
         ]"
-        text="or insert your address"
+        :text="$t('AirDrop.label.connect.address')"
         preset="p5"
       />
       <div
@@ -159,7 +159,7 @@
         <Button
           class="ml-[16px]"
           preset="secondary"
-          text="Enter"
+          :text="$t('AirDrop.button.enter')"
           @click="handleConnectAddress"
         >
           <template #append>
@@ -175,7 +175,7 @@
           'text-dark-gray',
           'mt-[32px]',
         ]"
-        text="Continue without wallet"
+        :text="$t('AirDrop.label.noWallet')"
         preset="p5"
       >
         <template #append>

@@ -62,7 +62,7 @@
         </div>
         <Button
           :to="localeLocation({ name: 'airdrop' })"
-          text="Airdrop"
+          :text="$t('AirDrop.button')"
           preset="gradient"
           text-preset="h5"
           size="large"
