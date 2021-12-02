@@ -7,8 +7,9 @@
         'z-10',
         'top-0',
         'inset-x-0',
-        'py-[24px]',
+        'py-[26px]',
         'backdrop-blur',
+        { 'bg-none backdrop-blur-none' : $nuxt.$route.path === '/airdrop' },
       ]"
     >
       <nav
@@ -33,6 +34,7 @@
             'items-center',
             'p-[4px]',
             'mx-auto',
+            'h-[48px]',
             'bg-shade-gray',
             'rounded-[14px]',
           ]"
@@ -58,6 +60,18 @@
             </template>
           </MenuButton>
         </div>
+        <Button
+          :to="localeLocation({ name: 'airdrop' })"
+          text="Airdrop"
+          preset="gradient"
+          text-preset="h5"
+          size="large"
+          class="ml-[16px]"
+        >
+          <template #prepend>
+            <IconPlaceholder class="w-[20px]" />
+          </template>
+        </Button>
         <div
           :class="[
             'flex',
