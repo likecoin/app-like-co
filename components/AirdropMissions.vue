@@ -46,13 +46,13 @@
               ' ml-[8px]',
               'mb-[4px]',
             ]"
-            text="$LIKE"
+            :text="$t('AirDrop.label.$like')"
             preset="h2"
           />
         </div>
         <Label
           :class="['font-bold', 'text-medium-gray']"
-          text="Unclaimed Airdrop"
+          :text="$t('AirDrop.label.amount.umclaimed')"
           preset="p6"
         />
       </div>
@@ -73,7 +73,7 @@
             'items-end',
           ]"
         >
-          <Label :class="['font-bold', 'text-black']" text="0.0" preset="h1" />
+          <Label :class="['font-bold', 'text-black']" :text="decay.rate" preset="h1" />
           <Label
             :class="[
               'font-bold',
@@ -87,7 +87,7 @@
         </div>
         <Label
           :class="['font-bold', 'text-medium-gray']"
-          text="Current Decay Factor"
+          :text="$t('AirDrop.label.decay')"
           preset="p6"
         />
       </div>
@@ -102,7 +102,7 @@
       >
         <IconDiverMini class="text-airdrop-gold" />
         <div :class="['flex', 'my-[12px]', 'items-end']">
-          <Label :class="['font-bold', 'text-black']" text="30" preset="h1" />
+          <Label :class="['font-bold', 'text-black']" :text="decay.days" preset="h1" />
           <Label
             :class="[
               'font-bold',
@@ -113,7 +113,7 @@
             text="D"
             preset="h2"
           />
-          <Label :class="['font-bold', 'text-black']" text="12" preset="h1" />
+          <Label :class="['font-bold', 'text-black']" :text="decay.hours" preset="h1" />
           <Label
             :class="[
               'font-bold',
@@ -126,7 +126,7 @@
           />
           <Label
             :class="['font-bold', 'text-black']"
-            text="30"
+            :text="decay.minutes"
             preset="h1"
           />
           <Label
@@ -141,7 +141,7 @@
         </div>
         <Label
           :class="['font-bold', 'text-medium-gray']"
-          text="Time to Airdrop Decay start"
+          :text="$t('AirDrop.label.decay.start')"
           preset="p6"
         />
       </div>
@@ -166,7 +166,7 @@
           'text-like-green',
           'mb-[22px]',
         ]"
-        text="My Progress"
+        :text="$t('AirDrop.label.myProgress')"
         preset="h2"
       />
       <div
@@ -196,7 +196,7 @@
             :class="[
               'absolute',
               'top-0',
-              'w-[21%]',
+              `w-[${progress+1}%]`,
               'bg-like-cyan',
               'h-[12px]',
               'rounded-[66px]',
@@ -206,7 +206,7 @@
             :class="[
               'absolute',
               'top-0',
-              'w-[20%]',
+              `w-[${progress}%]`,
               'bg-like-green',
               'h-[12px]',
               'rounded-[66px]',
@@ -224,7 +224,7 @@
         >
           <Label
             :class="['font-bold', 'text-airdrop-gold']"
-            text="20%"
+            :text="`${progress}%`"
             preset="h2"
           />
         </div>
@@ -255,7 +255,7 @@
           'text-like-cyan-extralight',
           'mb-[16px]',
         ]"
-        text="Missions"
+        :text="$t('AirDrop.label.missions')"
         preset="h2"
       />
       <div
@@ -320,6 +320,8 @@ export default class AirdropMissions extends Vue {
   unclaimedAmount: number = 0
   amount: number = 0
   missionStatus = []
+  progress: number = 20
+  decay: any = { rate:0.0, days:30, hours:12, minutes:30 }
 
   // eslint-disable-next-line class-methods-use-this
   async mounted() {
@@ -332,43 +334,40 @@ export default class AirdropMissions extends Vue {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  get progress() {
-    let q = 0
-    this.missionStatus.forEach((element: any) => {
-      element.completed ? (q += 1) : (q += 0)
-    })
-    return (q / 5) * 100
-  }
+  // get progress() {
+  //   let q = 0
+  //   this.missionStatus.forEach((element: any) => {
+  //     element.completed ? (q += 1) : (q += 0)
+  //   })
+  //   return (q / 5) * 100
+  // }
 
   // eslint-disable-next-line class-methods-use-this
   get missions() {
     return [
       {
         no: '#1',
-        description: 'We choose to go to the Moon',
+        description: this.$t('AirDrop.mission.keplr'),
         isComplete: true,
       },
       {
         no: '#2',
-        description:
-          'We choose to go to the Moon in this decade and do the other things',
+        description: this.$t('AirDrop.mission.iscn'),
         isComplete: false,
       },
       {
         no: '#3',
-        description: 'Not because they are easy, but because they are hard',
+        description: this.$t('AirDrop.mission.stake'),
         isComplete: false,
       },
       {
         no: '#4',
-        description:
-          'Because that goal will measure the best of our energies ans skills',
+        description: this.$t('AirDrop.mission.vote'),
         isComplete: false,
       },
       {
         no: '#5',
-        description:
-          'Because that challenge is one that we are willing to accept',
+        description: this.$t('AirDrop.mission.liquidity'),
         isComplete: false,
       },
     ]

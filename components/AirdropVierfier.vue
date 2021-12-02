@@ -35,8 +35,8 @@
         'w-[489px]',
       ]"
     >
-      <TextField v-model="email" class="flex-grow" placeholder="email address" />
-      <Button class="ml-[16px]" preset="secondary" text="Get notify" @click="getNotify">
+      <TextField v-model="email" class="flex-grow" :placeholder="$t('AirDrop.placeholder.email')" />
+      <Button class="ml-[16px]" preset="secondary" :text="$t('AirDrop.button.notify')" @click="getNotify">
         <template #prepend>
           <IconPlaceholder />
         </template>
@@ -51,7 +51,7 @@
         'mb-[32px]',
       ]"
     >
-      <Label :class="['text-twitter-blue', 'mt-[8px]']" text="and" preset="h5" />
+      <Label :class="['text-twitter-blue', 'mt-[8px]']" :text="$t('AirDrop.label.and')" preset="h5" />
       <Button
         preset="outline"
         :class="[
@@ -59,7 +59,7 @@
           'border-twitter-blue',
           'text-twitter-blue',
         ]"
-        text="Follow us on Twitter"
+        :text="$t('AirDrop.label.follow.Twitter')"
         href="https://twitter.com/likecoin"
       >
         <template #prepend>
@@ -79,6 +79,7 @@
           'px-[56px]',
           'mt-[32px]',
           'mb-[56px]',
+          'mr-[100px]',
         ]"
       >
         <div
@@ -99,7 +100,7 @@
           >
             <Label
               :class="['font-extrabold','text-dark-gray']"
-              text="482"
+              :text="totalAmount"
               preset="h1"
             />
             <Label
@@ -108,13 +109,13 @@
                 'text-dark-gray',
                 'ml-[8px] mb-[4px]',
               ]"
-              text="$LIKE"
+              :text="$t('AirDrop.label.$like')"
               preset="h2"
             />
           </div>
           <Label
             :class="['font-bold', 'text-medium-gray']"
-            text="Airdrop Amount"
+            :text="$t('AirDrop.label.amount.airdrop')"
             preset="p6"
           />
         </div>
@@ -127,7 +128,7 @@
             'text-airdrop-gold',
             'mb-[24px]',
           ]"
-          text="Cosmos"
+          :text="$t('AirDrop.label.cosmos')"
           preset="h5"
         >
           <template #prepend><IconCheck /></template>
@@ -138,7 +139,7 @@
             'text-medium-gray',
             'text-airdrop-gold',
           ]"
-          text="Osmosis"
+          :text="$t('AirDrop.label.Osmosis')"
           preset="h5"
         >
           <template #prepend><IconCheck /></template>
@@ -153,6 +154,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class AirdropSubscribtion extends Vue {
   @Prop(String) readonly address: string | undefined
+  @Prop(Number) readonly totalAmount: number | undefined
 
   email:string = ''
 

@@ -55,14 +55,14 @@
         :is-airdrop-started="isAirdropStarted"
         @getAddress="verifyAmount"
       />
-      <AirdropVierfier v-if="address && !isAirdropStarted" :address="address" />
+      <AirdropVierfier v-if="address && !isAirdropStarted" :address="address" :total-amount="totalAmount" />
       <AirdropMissions
         v-if="(address && isAirdropStarted) || isNoWallet"
         :address="address"
       />
     </div>
     <!-- follow LikeCoin -->
-    <Label text="Follow LikeCoin" preset="h4" />
+    <Label :text="$t('AirDrop.label.follow.LikeCoin')" preset="h4" />
     <div
       :class="[
         'flex',
@@ -111,8 +111,8 @@ export default class AirdropPageextends extends Vue {
 
   step: string = ''
   address: string = ''
-  TotalAmount: any = ''
-  isAirdropStarted: boolean = true
+  totalAmount: number = 0
+  isAirdropStarted: boolean = false
   isNoWallet: boolean = false
 
   verifyAmount({ address }: { address: string }) {
@@ -121,6 +121,7 @@ export default class AirdropPageextends extends Vue {
     // const res:any = await this.$axios.get(
     //   `https://airdrop.rinkeby.like.co/overview?address=${address}`,
     // )
+    // this.totalAmount = res.reward.totalAmount
     // console.log(res)
   }
 }
