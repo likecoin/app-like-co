@@ -82,19 +82,30 @@
           ]"
         >
           <Button
+            v-if="currentAddress"
             preset="secondary"
-            :text="$t('AppHeader.login.button')"
-            :title="currentAddress || $t('AppHeader.login.button')"
-            @click="onClickLoginKeplr"
+            :title="currentAddress"
           >
-            <template v-if="currentAddress">
-              <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
-            </template>
+            <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
           </Button>
+          <template v-else>
+            <Button
+              preset="secondary"
+              :text="$t('AppHeader.login.button')"
+              :title="$t('AppHeader.login.button')"
+              @click="onClickLoginKeplr"
+            />
+            <Button
+              class="ml-[8px]"
+              preset="secondary"
+              text="WalletConnect"
+              @click="onClickWalletConnect"
+            />
+          </template>
         </div>
       </nav>
     </div>
-    <div 
+    <div
       v-if="isTestnet"
       :class="[
         'fixed',
@@ -129,18 +140,28 @@ export default class AppHeader extends Vue {
   @keplrModule.Getter('getWalletAddress') keplrWallet!: string
   @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
   @keplrModule.Action initKeplr!: () => Promise<boolean>
+  @keplrModule.Action initWalletConnect!: () => Promise<boolean>
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
     return !!IS_TESTNET
   }
 
-  async onClickLoginKeplr() {
-    await this.initKeplr()
-    await this.updateSignerInfo({
+  updateSigner() {
+    this.updateSignerInfo({
       signer: this.keplrSigner,
       address: this.keplrWallet,
-    })
+    });
+  }
+
+  async onClickLoginKeplr() {
+    await this.initKeplr()
+    this.updateSigner()
+  }
+
+  async onClickWalletConnect() {
+    await this.initWalletConnect();
+    this.updateSigner()
   }
 }
 </script>

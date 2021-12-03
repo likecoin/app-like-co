@@ -1,6 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
+import WalletConnect from '@walletconnect/client';
+import QRCodeModal from '@walletconnect/qrcode-modal';
+import { payloadId } from '@walletconnect/utils';
+import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { timeout } from '~/utils/misc';
 import { configToKeplrCoin } from '~/utils/cosmos';
@@ -14,6 +18,7 @@ import network from '~/constant/network';
 export default class Keplr extends VuexModule {
   isInited = false;
   signer: OfflineSigner | null = null;
+  walletConnector: WalletConnect | null = null;
   accounts: readonly AccountData[] = [];
 
   @Mutation
@@ -29,6 +34,11 @@ export default class Keplr extends VuexModule {
   @Mutation
   setAccounts(accounts: readonly AccountData[]) {
     this.accounts = accounts;
+  }
+
+  @Mutation
+  setWalletConnector(connector: WalletConnect) {
+    this.walletConnector = connector;
   }
 
   async checkIfInited() {
@@ -96,6 +106,79 @@ export default class Keplr extends VuexModule {
       }
     }
     return false;
+  }
+
+  @Action
+  handleWalletConnectDisconnect() {
+    if (this.walletConnector?.connected) {
+      this.walletConnector.killSession();
+      this.context.commit('setWalletConnector', null);
+    }
+  }
+
+  @Action({ rawError: true })
+  async initWalletConnect(): Promise<boolean> {
+    if (this.isInited) return true;
+    try {
+      const connector = new WalletConnect({
+        bridge: 'https://bridge.walletconnect.org',
+        qrcodeModal: QRCodeModal,
+      });
+      connector.on('disconnect', this.handleWalletConnectDisconnect);
+
+      // Kill any previous session until we implement session management
+      if (connector.connected) {
+        await connector.killSession()
+      }
+
+      await connector.connect();
+
+      this.context.commit('setWalletConnector', connector);
+
+      const [account] = await connector.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: '2.0',
+        method: 'cosmos_getAccounts',
+        params: ['likecoin-mainnet-2'],
+      });
+      if (!account) return false;
+
+      const {
+        bech32Address: address,
+        algo,
+        pubKey: pubKeyInHex,
+      } = account;
+      if (!address || !algo || !pubKeyInHex) return false;
+      const pubkey = new Uint8Array(Buffer.from(pubKeyInHex, "hex"));
+      const accounts: readonly AccountData[] = [{ address, pubkey, algo }];
+      const offlineSigner: OfflineSigner = {
+        getAccounts: () => Promise.resolve(accounts),
+        signDirect: async (signerAddress, signDoc) => {
+          const signDocInJSON = SignDoc.toJSON(signDoc);
+          const resInJSON = await connector.sendCustomRequest({
+            id: payloadId(),
+            jsonrpc: '2.0',
+            method: 'cosmos_signDirect',
+            params: [
+              signerAddress,
+              signDocInJSON,
+            ],
+          });
+          return {
+            signed: SignDoc.fromJSON(resInJSON.signed),
+            signature: resInJSON.signature,
+          };
+        },
+      }
+      this.context.commit('setInited', true);
+      this.context.commit('setSigner', offlineSigner);
+      this.context.commit('setAccounts', accounts);
+      return true
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+    return false
   }
 
   get getIsInited() {
