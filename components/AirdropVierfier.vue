@@ -23,7 +23,7 @@
         'w-[600px]',
         'text-center',
       ]"
-      text="Thanks for your support on the cosmos ecosystem, there are $LIKE allocated to you inside the upcoming LikeCoin airdrop. Do not miss the airdrop, subscribe to the news letters, we will notify you once the airdrop is ready to claim"
+      :text="$t('AirDrop.content.subscription')"
       preset="p5"
     />
     <div
@@ -35,8 +35,16 @@
         'w-[489px]',
       ]"
     >
-      <TextField v-model="email" class="flex-grow" :placeholder="$t('AirDrop.placeholder.email')" />
-      <Button class="ml-[16px]" preset="secondary" :text="$t('AirDrop.button.notify')" @click="getNotify">
+      <TextField
+        v-model="email"
+        class="flex-grow"
+        :placeholder="$t('AirDrop.placeholder.email')"
+      />
+      <Button 
+        class="ml-[16px]"
+        preset="secondary"
+        :text="$t('AirDrop.button.notify')"
+      >
         <template #prepend>
           <IconPlaceholder />
         </template>
@@ -152,16 +160,11 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
-export default class AirdropSubscribtion extends Vue {
+export default class AirdropVierfier extends Vue {
   @Prop(String) readonly address: string | undefined
-  @Prop(Number) readonly totalAmount: number | undefined
+  @Prop(Number) readonly totalAmount: any | undefined
 
   email:string = ''
 
-  // eslint-disable-next-line class-methods-use-this
-  getNotify(){
-    // not ready yet
-    console.log(this.email)
-  }
 }
 </script>

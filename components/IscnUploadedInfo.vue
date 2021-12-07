@@ -127,7 +127,7 @@
       <IconDiverMini
         :class="[
           'mb-[12px]',
-          'text-[#EBEBEB]',
+          'text-shade-gray',
         ]"
       />
       <FormField
