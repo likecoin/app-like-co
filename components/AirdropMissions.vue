@@ -196,21 +196,21 @@
             :class="[
               'absolute',
               'top-0',
-              `w-[${progress+1}%]`,
               'bg-like-cyan',
               'h-[12px]',
               'rounded-[66px]',
             ]"
+            :style="{ width: `${progress + 1}%` }"
           ></div>
           <div
             :class="[
               'absolute',
               'top-0',
-              `w-[${progress}%]`,
               'bg-like-green',
               'h-[12px]',
               'rounded-[66px]',
             ]"
+            :style="{ width: `${progress}%` }"
           ></div>
         </div>
         <div
@@ -306,6 +306,10 @@ import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
 
+export enum Denom {
+  Nanolike = 0.000000001
+}
+
 @Component({
   layout: 'wallet',
 })
@@ -318,31 +322,26 @@ export default class AirdropMissions extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   unclaimedAmount: number = 0
-  amount: number = 0
   missionStatus = []
-  progress: number = 20
-  decay: any = { rate:0.0, days:30, hours:12, minutes:30 }
+  decay: any = { rate:'0.0', days:'30', hours:'12', minutes:'30' }
 
   // eslint-disable-next-line class-methods-use-this
   async mounted() {
-    // not ready yet ↓
-    // const res:any = await this.$axios.get(
-    //   `https://airdrop.rinkeby.like.co/overview?address=${this.address}`,
-    // )
-    // this.amount = res.reward.unclaimedAmount
-    // this.missionStatus = res.missionStatus
+      const res:any = await this.$axios.get(
+      `https://airdrop.rinkeby.like.co/overview?address=${this.address}`,
+    )
+    this.unclaimedAmount = Math.round((res.data.reward.unclaimedAmount) * Denom.Nanolike)
+    this.missionStatus = res.data.missionStatus
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  // get progress() {
-  //   let q = 0
-  //   this.missionStatus.forEach((element: any) => {
-  //     element.completed ? (q += 1) : (q += 0)
-  //   })
-  //   return (q / 5) * 100
-  // }
+  get progress() {
+    let q = 0
+    this.missionStatus.forEach((element: any) => {
+      element.completed ? (q += 1) : (q += 0)
+    })
+    return (q / 5) * 100
+  }
 
-  // eslint-disable-next-line class-methods-use-this
   get missions() {
     return [
       {

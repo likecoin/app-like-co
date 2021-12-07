@@ -9,7 +9,7 @@
         'inset-x-0',
         'py-[26px]',
         'backdrop-blur',
-        { 'bg-none backdrop-blur-none' : $nuxt.$route.path === '/airdrop' },
+        { 'bg-none backdrop-blur-none' : $nuxt.$route.path.includes('airdrop') },
       ]"
     >
       <nav
