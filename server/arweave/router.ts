@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import multer from 'multer';
-import { getIPFSHash } from '../ipfs';
+import { getIPFSHash, uploadFilesToIPFS } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 import { ArweaveFile } from './types';
 import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
@@ -115,7 +115,10 @@ router.post('/upload',
       res.status(400).send('TX_AMOUNT_NOT_ENOUGH');
       return;
     }
-    const { arweaveId, list } = await uploadFilesToArweave(arFiles);
+    const [{ arweaveId, list }] = await Promise.all([
+      uploadFilesToArweave(arFiles),
+      uploadFilesToIPFS(arFiles),
+    ]);
     res.json({ arweaveId, ipfsHash, list });
   } catch (error) {
     next(error);
