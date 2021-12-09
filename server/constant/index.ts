@@ -1,6 +1,6 @@
 const { COSMOS_RPC_ENDPOINT: configRpc} = require('../config/config')
 
-const { IS_TESTNET } = process.env;
+export const { IS_TESTNET } = process.env;
 
 export const COINGECKO_PRICE_API = 'https://api.coingecko.com/api/v3/simple/price?ids=arweave,likecoin&vs_currencies=usd';
 
