@@ -7,9 +7,8 @@ import {
   getFolderIPFSHash,
   uploadFileToIPFS,
 } from '../ipfs';
-import { COINGECKO_PRICE_API } from '../constant';
+import { COINGECKO_PRICE_API, IS_TESTNET } from '../constant';
 import { ArweaveFile, Manifest, ArweavePrice, ArweavePriceWithLIKE } from './types';
-import { IS_TESTNET } from '~/constant';
 
 const IPFS_KEY = 'IPFS-Add'
 
