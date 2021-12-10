@@ -9,27 +9,25 @@
       'p-[16px]',
     ]"
   >
-    <AirdropInfoCard
+    <div
       :class="[
-        'absolute',
-        'top-0',
-        'right-[24px]',
+        'flex',
+        'items-stretch',
+        'h-[429px]',
       ]"
-    />
-    <Card
+    >
+      <AirdropInfoCard :class="['h-full','w-[268px]']" />
+      <IscnInfoCard :class="['h-full','w-[696px]']" />
+    </div>
+    <form
       tag="form"
       :class="[
         'w-full',
         'max-w-[600px]',
+        'my-[64px]',
       ]"
       @submit.prevent="onSearch"
     >
-      <Label
-        :text="$t('HomePage.search.title')"
-        class="mb-[16px]"
-        preset="h3"
-        align="center"
-      />
       <Label
         class="flex-wrap"
         align="center"
@@ -44,29 +42,14 @@
           :error-message="errorMessage"
         />
         <template #append>
-          <Button
-            :text="$t('HomePage.search.button')"
-            preset="secondary"
-          >
+          <Button :text="$t('HomePage.search.button')" preset="outline">
             <template #prepend>
               <IconSearch class="w-[20px]" />
             </template>
           </Button>
         </template>
       </Label>
-    </Card>
-
-    <Button
-      class="mt-[32px]"
-      preset="outline"
-      :text="$t('HomePage.register.button')"
-      :to="localeLocation({ name: 'new' })"
-      size="small"
-    >
-      <template #prepend>
-        <IconAddToISCN class="w-[20px]" />
-      </template>
-    </Button>
+    </form>
     <TokenBar
       :class="[
         'absolute',

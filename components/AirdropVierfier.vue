@@ -64,9 +64,9 @@
         preset="outline"
         :class="[
           'ml-[16px]',
-          'border-twitter-blue',
           'text-twitter-blue',
         ]"
+        :style="{ border: '2px solid #4696F1' }"
         :text="$t('AirDrop.label.follow.Twitter')"
         href="https://twitter.com/likecoin"
       >

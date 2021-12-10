@@ -3,12 +3,11 @@
     :class="[
       'flex',
       'flex-col',
+      'relative',
       'items-center',
-      'border-[3px]',
-      'border-airdrop-gold',
       'rounded-[24px]',
-      'w-[300px]',
       'p-[32px]',
+      'pb-[40px]',
       'overflow-hidden',
     ]"
   >
@@ -16,7 +15,9 @@
       :class="[
         'absolute',
         'top-0',
+        'w-full',
         'h-full',
+        'object-cover'
       ]"
       src="/images/airdrop/background_sm.png"
     />
@@ -26,23 +27,30 @@
         'flex-col',
         'items-center',
         'z-[2]',
+        'h-full',
+        'justify-between'
       ]"
     >
       <img class="w-[190px]" src="/images/airdrop/title_LikeCoin.png" />
       <Label
         :class="[
           'text-dark-gray',
-          'my-[24px]',
-          'w-[240px]',
+          'my-[34px]',
         ]"
         :text="$t('AirDrop.content.prelaunch')"
         preset="h5"
       />
       <Button
         :to="localeLocation({ name: 'airdrop' })"
-        preset="secondary"
+        preset="outline"
         :text="$t('AirDrop.button.claim')"
-      />
+        class="font-semibold text-airdrop-gold"
+        :style="{ border: '2px solid #D1AB79' }"
+      >
+        <template #prepend>
+          <IconClaim />
+        </template>
+      </Button>
     </div>
   </div>
 </template>

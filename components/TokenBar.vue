@@ -24,6 +24,14 @@
       preset="tertiary"
       text-preset="h6"
       size="mini"
+      href="https://app.emeris.com/asset/nanolike"
+      :text="$t('HomePage.button.emeris')"
+    />
+    <Button
+      class="mr-[24px]"
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
       href="https://app.liquid.com/exchange/LIKEUSDT"
       :text="$t('HomePage.button.liquid')"
     />
