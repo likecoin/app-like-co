@@ -129,7 +129,7 @@
               tag="div"
               text-preset="h6"
               type="button"
-              :text="stakeholders[index].entity.name"
+              :text="(stakeholders[index].entity || {}).name"
               @click="showStakeholder(index)"
             />
           </FormField>
@@ -523,7 +523,7 @@ export default class ViewIscnIdPage extends Vue {
     this.isOpenAuthorDialog = true
     const stakeholders = this.stakeholders[index].entity
 
-    if (this.stakeholders[index].entity.identifier) {
+    if (this.stakeholders[index].entity?.identifier) {
       const { description: authorDescription, name: authorName } = stakeholders
       const likerId = stakeholders!.url.includes('like.co')
         ? stakeholders.url.slice(16)
