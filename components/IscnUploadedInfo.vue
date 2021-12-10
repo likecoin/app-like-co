@@ -16,7 +16,7 @@
       />
       <!-- ISCN card -->
       <ClientOnly v-if="record">
-        <IscnCard
+        <LazyIscnCard
           class="mb-[16px]"
           :record="record"
           :is-animated="true"

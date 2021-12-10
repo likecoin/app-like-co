@@ -23,7 +23,7 @@
     >
       <div class="mr-[32px]">
         <ClientOnly>
-          <IscnCard
+          <LazyIscnCard
             :key="record.id"
             class="w-[280px]"
             :record="record"
