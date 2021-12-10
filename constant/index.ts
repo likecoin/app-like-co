@@ -54,3 +54,8 @@ export const WALLET_TYPES = [
 ]
 
 export const SITE_URL = IS_TESTNET ? 'https://app.rinkeby.like.co' : 'https://app.like.co';
+
+export const CONNECT_WALLET_TYPES = [
+  'keplr',
+  'likerId',
+];

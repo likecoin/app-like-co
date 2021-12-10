@@ -31,7 +31,7 @@
         ]"
       >
         <Previewer :is-image="isImage" :file-data="fileData" />
-        <div 
+        <div
           :class="[
             'flex',
             'flex-col',
@@ -433,7 +433,7 @@
             <template #prepend>
               <span
                 v-t="'IscnRegisterForm.signDialog.fee'"
-                class="min-w-[64px] mr-[8px] text-[12px] text-medium-gray font-600"
+                class="min-w-[64px] mr-[8px] text-[12px] text-medium-gray font-semibold"
               />
             </template>
           </Label>

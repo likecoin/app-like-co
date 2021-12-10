@@ -124,7 +124,7 @@ export default class Label extends Vue {
     switch (this.preset) {
       case LabelType.H1:
         return 'text-[48px]';
-      
+
       case LabelType.H2:
         return 'text-[32px]';
 
@@ -153,7 +153,7 @@ export default class Label extends Vue {
   }
 
   get fontWeightClass(): string {
-    return this.isHeader ? 'font-[600]' : ''
+    return this.isHeader ? 'font-semibold' : ''
   }
 
   get alignClass(): string {

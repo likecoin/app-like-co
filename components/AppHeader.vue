@@ -7,9 +7,8 @@
         'z-10',
         'top-0',
         'inset-x-0',
-        'py-[26px]',
+        'py-[24px]',
         'backdrop-blur',
-        { 'bg-none backdrop-blur-none' : $nuxt.$route.path.includes('airdrop') },
       ]"
     >
       <nav
@@ -34,7 +33,6 @@
             'items-center',
             'p-[4px]',
             'mx-auto',
-            'h-[48px]',
             'bg-shade-gray',
             'rounded-[14px]',
           ]"
@@ -60,18 +58,6 @@
             </template>
           </MenuButton>
         </div>
-        <Button
-          :to="localeLocation({ name: 'airdrop' })"
-          :text="$t('AirDrop.button')"
-          preset="gradient"
-          text-preset="h5"
-          size="large"
-          class="ml-[16px]"
-        >
-          <template #prepend>
-            <IconPlaceholder class="w-[20px]" />
-          </template>
-        </Button>
         <div
           :class="[
             'flex',
@@ -88,20 +74,13 @@
           >
             <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
           </Button>
-          <template v-else>
-            <Button
-              preset="secondary"
-              :text="$t('AppHeader.login.button')"
-              :title="$t('AppHeader.login.button')"
-              @click="onClickLoginKeplr"
-            />
-            <Button
-              class="ml-[8px]"
-              preset="secondary"
-              text="WalletConnect"
-              @click="onClickWalletConnect"
-            />
-          </template>
+          <Button
+            v-else
+            preset="secondary"
+            :text="$t('AppHeader.button.connectWallet')"
+            :title="$t('AppHeader.button.connectWallet')"
+            @click="isConnectWalletDialogOpened = true"
+          />
         </div>
       </nav>
     </div>
@@ -116,52 +95,66 @@
     >
       <IconDangerStripe />
     </div>
+    <Dialog
+      v-model="isConnectWalletDialogOpened"
+      preset="custom"
+    >
+      <Label
+        preset="h5"
+        class="text-like-green"
+        :text="$t('AppHeader.button.connectWallet')"
+      >
+        <template #prepend>
+          <IconSignIn />
+        </template>
+      </Label>
+      <ul class="mt-[24px]">
+        <li
+          v-for="(type, i) in connectWalletTypes"
+          :key="type"
+          :class="{
+            'mt-[8px]': i > 0,
+          }"
+        >
+          <ConnectWalletButton
+            class="w-full"
+            :type="type"
+            @click="handleConnectWalletButtonClick"
+          />
+        </li>
+      </ul>
+    </Dialog>
   </header>
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { IS_TESTNET } from '~/constant'
+import {
+  IS_TESTNET,
+  CONNECT_WALLET_TYPES,
+} from '~/constant'
 
 const signerModule = namespace('signer')
-const keplrModule = namespace('keplr')
 
 @Component
 export default class AppHeader extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
 
-  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
-  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
-  @keplrModule.Action initKeplr!: () => Promise<boolean>
-  @keplrModule.Action initWalletConnect!: () => Promise<boolean>
+  isConnectWalletDialogOpened = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
     return !!IS_TESTNET
   }
 
-  updateSigner() {
-    this.updateSignerInfo({
-      signer: this.keplrSigner,
-      address: this.keplrWallet,
-    });
+  // eslint-disable-next-line class-methods-use-this
+  get connectWalletTypes() {
+    return CONNECT_WALLET_TYPES
   }
 
-  async onClickLoginKeplr() {
-    await this.initKeplr()
-    this.updateSigner()
-  }
-
-  async onClickWalletConnect() {
-    await this.initWalletConnect();
-    this.updateSigner()
+  handleConnectWalletButtonClick() {
+    this.isConnectWalletDialogOpened = false
   }
 }
 </script>

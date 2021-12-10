@@ -38,90 +38,29 @@
         :text="$t('AirDrop.guide.connect.wallet')"
         preset="p5"
       />
-      <div
+      <ul
         :class="[
-          'flex',
-          'justify-center',
-          'px-[32px]',
-          'mt-[32px]',
           'w-full',
+          'p-[32px]',
+          'grid',
+          'grid-cols-2',
+          'gap-[24px]',
         ]"
       >
-        <!-- Keplr -->
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'items-start',
-            'bg-white',
-            'border-[4px]',
-            'border-shade-gray',
-            'rounded-[16px]',
-            'py-[26px]',
-            'px-[24px]',
-            'w-[356px]',
-            'cursor-pointer',
-          ]"
-          @click="handleConnectKeplr"
+        <li
+          v-for="type in connectWalletTypes"
+          :key="type"
         >
-          <div
+          <ConnectWalletButton
             :class="[
-              'flex',
-              'items-center',
-              'mb-[14px]',
+              'w-full',
+              'bg-white',
             ]"
-          >
-            <IconKeplr />
-            <Label
-              :class="['text-dark-gray', 'ml-[12px]']"
-              :text="$t('AirDrop.label.keplr')"
-              preset="h4"
-            />
-          </div>
-          <Label
-            :class="['text-dark-gray', 'mt-[8px]']"
-            :text="$t('AirDrop.guide.connect.keplr')"
-            preset="p5"
+            :type="type"
+            @click="handleConnectWallet"
           />
-        </div>
-        <!-- Liker ID -->
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'items-start',
-            'bg-white',
-            'border-[4px]',
-            'border-shade-gray',
-            'rounded-[16px]',
-            'py-[26px]',
-            'px-[24px]',
-            'ml-[24px]',
-            'w-[356px]',
-            'cursor-pointer',
-          ]"
-        >
-          <div
-            :class="[
-              'flex',
-              'items-center',
-              'mb-[14px]',
-            ]"
-          >
-            <IconLikerLand />
-            <Label
-              :class="['text-dark-gray', 'ml-[12px]']"
-              :text="$t('AirDrop.label.LikerId')"
-              preset="h4"
-            />
-          </div>
-          <Label
-            :class="['text-dark-gray', 'mt-[8px]']"
-            :text="$t('AirDrop.guide.connect.LikerId')"
-            preset="p5"
-          />
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
     <!-- input -->
     <div
@@ -190,6 +129,7 @@
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { CONNECT_WALLET_TYPES } from '~/constant'
 
 const signerModule = namespace('signer')
 const keplrModule = namespace('keplr')
@@ -210,6 +150,11 @@ export default class AirdropLogin extends Vue {
 
   address: string = ''
   inputValue: string = ''
+
+  // eslint-disable-next-line class-methods-use-this
+  get connectWalletTypes() {
+    return CONNECT_WALLET_TYPES
+  }
 
   async handleConnectKeplr() {
     await this.initKeplr()
