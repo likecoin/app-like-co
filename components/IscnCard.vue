@@ -550,7 +550,7 @@ export default class IscnCard extends Vue {
       }
     }
 
-    if (!this.canvas) {
+    if (!this.canvas && window) {
       this.canvas = new P5(sketch, this.$refs.canvas as HTMLElement)
     }
 

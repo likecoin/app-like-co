@@ -1,7 +1,7 @@
 <template>
   <div v-if="record">
     <ClientOnly>
-      <IscnCard v-bind="cardProps" />
+      <LazyIscnCard v-bind="cardProps" />
     </ClientOnly>
     <pre
       v-if="isShowAdjustableProps"

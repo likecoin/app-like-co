@@ -1,7 +1,7 @@
 <template>
   <div class="w-min">
     <ClientOnly>
-      <IscnCard
+      <LazyIscnCard
         class="w-[220px] mb-[16px]"
         :record="record"
         orientation="portrait"
