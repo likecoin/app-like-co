@@ -57,7 +57,6 @@
               'bg-white',
             ]"
             :type="type"
-            @click="handleConnectWallet"
           />
         </li>
       </ul>
@@ -125,28 +124,12 @@
   </div>
 </template>
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
 import { CONNECT_WALLET_TYPES } from '~/constant'
-
-const signerModule = namespace('signer')
-const keplrModule = namespace('keplr')
 
 @Component
 export default class AirdropLogin extends Vue {
   @Prop(Boolean) readonly isAirdropStarted: boolean | undefined
-
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
-
-  @keplrModule.Action initKeplr!: () => Promise<boolean>
-  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
-  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
 
   address: string = ''
   inputValue: string = ''
@@ -156,20 +139,7 @@ export default class AirdropLogin extends Vue {
     return CONNECT_WALLET_TYPES
   }
 
-  async handleConnectKeplr() {
-    await this.initKeplr()
-    await this.updateSignerInfo({
-      signer: this.keplrSigner,
-      address: this.keplrWallet,
-    })
-    this.getAddress(this.currentAddress)
-  }
-
   handleConnectAddress() {
-    this.getAddress(this.inputValue)
-  }
-
-  handleConnectLikerId() {
     this.getAddress(this.inputValue)
   }
 

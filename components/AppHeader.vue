@@ -124,6 +124,7 @@
         </li>
       </ul>
     </Dialog>
+    <ConnectLikerIdDialog />
   </header>
 </template>
 

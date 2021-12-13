@@ -2,7 +2,6 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
 import WalletConnect from '@walletconnect/client';
-import QRCodeModal from '@walletconnect/qrcode-modal';
 import { payloadId } from '@walletconnect/utils';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
@@ -19,6 +18,7 @@ export default class Keplr extends VuexModule {
   isInited = false;
   signer: OfflineSigner | null = null;
   walletConnector: WalletConnect | null = null;
+  walletConnectURI = '';
   accounts: readonly AccountData[] = [];
 
   @Mutation
@@ -39,6 +39,11 @@ export default class Keplr extends VuexModule {
   @Mutation
   setWalletConnector(connector: WalletConnect) {
     this.walletConnector = connector;
+  }
+
+  @Mutation
+  setWalletConnectURI(uri: string) {
+    this.walletConnectURI = uri;
   }
 
   async checkIfInited() {
@@ -122,7 +127,14 @@ export default class Keplr extends VuexModule {
     try {
       const connector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
-        qrcodeModal: QRCodeModal,
+        qrcodeModal: {
+          open: (uri: string) => {
+            this.context.commit('setWalletConnectURI', uri);
+          },
+          close: () => {
+            this.context.commit('setWalletConnectURI', '');
+          },
+        },
       });
       connector.on('disconnect', this.handleWalletConnectDisconnect);
 
@@ -195,6 +207,10 @@ export default class Keplr extends VuexModule {
     return wallet.address;
   }
 
+  get getWalletConnectURI() {
+    return this.walletConnectURI;
+  }
+
   @Action
   async fetchKeplrSigner() {
     await this.checkIfInited();
@@ -207,5 +223,4 @@ export default class Keplr extends VuexModule {
     const address = this.context.getters.getWalletAddress;
     return address;
   }
-
 }
