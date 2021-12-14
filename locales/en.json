@@ -1,10 +1,10 @@
 {
   "AirDrop.button.claim":"Claim airdrop",
   "AirDrop.button.enter":"Enter",
-  "AirDrop.button.notify":"Get notify",
+  "AirDrop.button.notify":"Be notified",
   "AirDrop.button":"Airdrop",
   "AirDrop.content.prelaunch":"LikeCoin airdrop is coming.  Check out the amount you can claim now!",
-  "AirDrop.content.subscription":"Thanks for your support on the cosmos ecosystem, there are $LIKE allocated to you inside the upcoming LikeCoin airdrop. Do not miss the airdrop, subscribe to the news letters, we will notify you once the airdrop is ready to claim",
+  "AirDrop.content.subscription":"Congratulation, you are eligible to claim $LIKE airdrop.  Please follow twitter and subscribe newsletter to catch up our updates.  Thanks for supporting Cosmos ecosystem.",
   "AirDrop.guide.connect.keplr":"Connect with Cosmos/Osmosis wallet by Keplr browser extension",
   "AirDrop.guide.connect.LikerId":"Connect with Liker ID by Liker Land mobile app",
   "AirDrop.guide.connect.wallet":"Connect your wallet or enter your wallet address to check your airdrop amount.",
