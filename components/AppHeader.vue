@@ -63,13 +63,14 @@
         <Button
           :to="localeLocation({ name: 'airdrop' })"
           :text="$t('AirDrop.button')"
-          preset="gradient"
+          preset="primary"
           text-preset="h5"
           size="large"
-          class="ml-[16px]"
+          :class="['ml-[16px]']"
+          :style="{ color: '#FFFFFF', backgroundColor: '#C69F67'}"
         >
           <template #prepend>
-            <IconPlaceholder class="w-[20px]" />
+            <IconClaim class="w-[20px]" />
           </template>
         </Button>
         <div

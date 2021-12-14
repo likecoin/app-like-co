@@ -14,13 +14,14 @@
       :class="[
         'absolute',
         'top-[260px]',
-        'left-[880px]',
+        'left-[60%]',
         'z-[8]',
         'w-[340px]',
       ]"
       src="/images/airdrop/planet_1.png"
     />
     <img
+      id="lg"
       :class="[
         'absolute',
         'top-[560px]',
@@ -30,6 +31,7 @@
       ]"
       src="/images/airdrop/planet_2.png"
     />
+    <div id="transparent-to-top" />
     <div
       :class="[
         'relative',
@@ -55,24 +57,7 @@
       />
     </div>
     <!-- follow LikeCoin -->
-    <Label :text="$t('AirDrop.label.follow.LikeCoin')" preset="h4" />
-    <div
-      :class="[
-        'flex',
-        'justify-center',
-        'mt-[16px]',
-      ]"
-    >
-      <Button
-        v-for="item in 4"
-        :key="item"
-        preset="tertiary"
-        circle="true"
-        class="w-[32px] h-[32px] mx-[8px]"
-      >
-        <IconCoinEthereum class="text-dark-gray" />
-      </Button>
-    </div>
+    <SubscriptionCard preset="both" />
     <!-- get tokens -->
     <TokenBar
       :class="[
@@ -105,7 +90,21 @@ export default class AirdropPageextends extends Vue {
   step: string = ''
   address: string = ''
   totalAmount: number = 0
-  isAirdropStarted: boolean = false
   isNoWallet: boolean = false
 }
 </script>
+<style>
+@media only screen and (max-width: 1140px) {
+  #lg {
+    display: none;
+  }
+}
+#transparent-to-top {
+  width: 100%;
+	height: 100%;
+  background: linear-gradient(to bottom, rgb(247, 247, 247,0) 35%, rgb(247, 247, 247,1));
+  position: absolute;
+	top: 0;
+	left: 0;
+}
+</style>

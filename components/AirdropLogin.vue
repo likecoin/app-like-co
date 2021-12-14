@@ -4,7 +4,7 @@
       'flex',
       'flex-col',
       'items-center',
-      ' w-full',
+      'w-full',
     ]"
   >
     <img
@@ -125,7 +125,6 @@
     </div>
     <!-- input -->
     <div
-      v-if="!isAirdropStarted"
       :class="[
         'flex',
         'flex-col',
@@ -167,21 +166,6 @@
           </template>
         </Button>
       </div>
-    </div>
-    <div v-else class="mb-[32px]" @click="handleNoWallet">
-      <Label
-        :class="[
-          'text-center',
-          'text-dark-gray',
-          'mt-[32px]',
-        ]"
-        :text="$t('AirDrop.label.noWallet')"
-        preset="p5"
-      >
-        <template #append>
-          <IconArrowRight />
-        </template>
-      </Label>
     </div>
   </div>
 </template>

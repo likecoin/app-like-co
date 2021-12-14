@@ -26,57 +26,7 @@
       :text="$t('AirDrop.content.subscription')"
       preset="p5"
     />
-    <div
-      :class="[
-        'flex',
-        'justify-center',
-        'mt-[8px]',
-        'p-[16px]',
-        'w-[489px]',
-      ]"
-    >
-      <TextField
-        v-model="email"
-        class="flex-grow"
-        :placeholder="$t('AirDrop.placeholder.email')"
-      />
-      <Button 
-        class="ml-[16px]"
-        preset="secondary"
-        :text="$t('AirDrop.button.notify')"
-      >
-        <template #prepend>
-          <IconPlaceholder />
-        </template>
-      </Button>
-    </div>
-    <div
-      :class="[
-        'flex',
-        'items-center',
-        'justify-center',
-        'mt-[8px]',
-        'mb-[32px]',
-      ]"
-    >
-      <Label :class="['text-twitter-blue', 'mt-[8px]']" :text="$t('AirDrop.label.and')" preset="h5" />
-      <Button
-        preset="outline"
-        :class="[
-          'ml-[16px]',
-          'text-twitter-blue',
-        ]"
-        :style="{ border: '2px solid #4696F1' }"
-        :text="$t('AirDrop.label.follow.Twitter')"
-        href="https://twitter.com/likecoin"
-      >
-        <template #prepend>
-          <IconTwitter
-            class="text-twitter-blue"
-          />
-        </template>
-      </Button>
-    </div>
+    <SubscriptionCard preset="subscription" />
     <!-- Amount -->
     <div :class="['flex', 'items-center']">
       <div
@@ -85,7 +35,7 @@
           'items-start',
           'justify-center',
           'px-[56px]',
-          'mt-[32px]',
+          'mt-[48px]',
           'mb-[56px]',
           'mr-[100px]',
         ]"
@@ -132,25 +82,27 @@
         <Label
           :class="[
             'font-bold',
-            'text-medium-gray',
             'text-airdrop-gold',
             'mb-[24px]',
           ]"
           :text="$t('AirDrop.label.cosmos')"
           preset="h5"
         >
-          <template #prepend><IconCheck /></template>
+          <template #prepend>
+            <IconCheck />
+          </template>
         </Label>
         <Label
           :class="[
             'font-bold',
-            'text-medium-gray',
             'text-airdrop-gold',
           ]"
           :text="$t('AirDrop.label.Osmosis')"
           preset="h5"
         >
-          <template #prepend><IconCheck /></template>
+          <template #prepend>
+            <IconCheck />
+          </template>
         </Label>
       </div>
     </div>

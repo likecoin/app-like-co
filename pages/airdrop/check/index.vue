@@ -14,13 +14,14 @@
       :class="[
         'absolute',
         'top-[260px]',
-        'left-[880px]',
+        'left-[60%]',
         'z-[8]',
         'w-[340px]',
       ]"
       src="/images/airdrop/planet_1.png"
     />
     <img
+      id="lg"
       :class="[
         'absolute',
         'top-[560px]',
@@ -30,6 +31,7 @@
       ]"
       src="/images/airdrop/planet_2.png"
     />
+    <div id="transparent-to-top" />
     <div
       :class="[
         'relative',
@@ -50,32 +52,15 @@
         'border-airdrop-gold',
       ]"
     >
-      <AirdropLogin
-        v-if="!address"
-        :is-airdrop-started="isAirdropStarted"
-        @getAddress="verifyAmount"
+      <AirdropLogin v-if="!address" @getAddress="verifyAmount" />
+      <AirdropVierfier
+        v-if="address"
+        :address="address"
+        :total-amount="totalAmount"
       />
-      <AirdropVierfier v-if="address && !isAirdropStarted" :address="address" :total-amount="totalAmount" />
     </div>
     <!-- follow LikeCoin -->
-    <Label :text="$t('AirDrop.label.follow.LikeCoin')" preset="h4" />
-    <div
-      :class="[
-        'flex',
-        'justify-center',
-        'mt-[16px]',
-      ]"
-    >
-      <Button
-        v-for="item in 4"
-        :key="item"
-        preset="tertiary"
-        circle="true"
-        class="w-[32px] h-[32px] mx-[8px]"
-      >
-        <IconCoinEthereum class="text-dark-gray" />
-      </Button>
-    </div>
+    <SubscriptionCard preset="community" />
     <!-- get tokens -->
     <TokenBar
       :class="[
@@ -115,11 +100,25 @@ export default class AirdropPageextends extends Vue {
 
   async verifyAmount({ address }: { address: string }) {
     this.address = address  
-    const res:any = await this.$axios.get(
+    const res: any = await this.$axios.get(
       `https://airdrop.rinkeby.like.co/preview?address=${address}`,
     )
-    this.totalAmount = Math.round((res.data.totalAmount) * Denom.Nanolike)
-    console.log(res)
+    this.totalAmount = Math.round(res.data.totalAmount * Denom.Nanolike)
   }
 }
 </script>
+<style>
+@media only screen and (max-width: 1140px) {
+  #lg {
+    display: none;
+  }
+}
+#transparent-to-top {
+  width: 100%;
+	height: 100%;
+  background: linear-gradient(to bottom, rgb(247, 247, 247,0) 35%, rgb(247, 247, 247,1));
+  position: absolute;
+	top: 0;
+	left: 0;
+}
+</style>
