@@ -55,12 +55,12 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { namespace } from 'vuex-class'
 
-const keplrModule = namespace('keplr')
+const walletModule = namespace('wallet')
 
 @Component
 export default class ConnectLikerIdDialog extends Vue {
-  @keplrModule.Getter('getWalletConnectURI') walletConnectURI!: string
-  @keplrModule.Mutation('setWalletConnectURI') setWalletConnectURI!: (uri: string) => void
+  @walletModule.Getter('getWalletConnectURI') walletConnectURI!: string
+  @walletModule.Mutation('setWalletConnectURI') setWalletConnectURI!: (uri: string) => void
 
   get steps() {
     return [

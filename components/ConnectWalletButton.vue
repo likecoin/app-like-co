@@ -42,7 +42,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const signerModule = namespace('signer')
-const keplrModule = namespace('keplr')
+const walletModule = namespace('wallet')
 
 @Component
 export default class ConnectWalletButton extends Vue {
@@ -53,10 +53,10 @@ export default class ConnectWalletButton extends Vue {
     address: string
   }) => void
 
-  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
-  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
-  @keplrModule.Action initKeplr!: () => Promise<boolean>
-  @keplrModule.Action initWalletConnect!: () => Promise<boolean>
+  @walletModule.Getter('getWalletAddress') keplrWallet!: string
+  @walletModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
+  @walletModule.Action initKeplr!: () => Promise<boolean>
+  @walletModule.Action initWalletConnect!: () => Promise<boolean>
 
   get title() {
     switch (this.type) {

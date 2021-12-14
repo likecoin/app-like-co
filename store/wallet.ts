@@ -10,11 +10,11 @@ import { configToKeplrCoin } from '~/utils/cosmos';
 import network from '~/constant/network';
 
 @Module({
-  name: 'keplr',
+  name: 'wallet',
   stateFactory: true,
   namespaced: true,
 })
-export default class Keplr extends VuexModule {
+export default class Wallet extends VuexModule {
   isInited = false;
   signer: OfflineSigner | null = null;
   walletConnector: WalletConnect | null = null;
@@ -138,14 +138,14 @@ export default class Keplr extends VuexModule {
       });
       connector.on('disconnect', this.handleWalletConnectDisconnect);
 
+      // this.context.commit('setWalletConnector', connector);
+
       // Kill any previous session until we implement session management
       if (connector.connected) {
         await connector.killSession()
       }
 
       await connector.connect();
-
-      this.context.commit('setWalletConnector', connector);
 
       const [account] = await connector.sendCustomRequest({
         id: payloadId(),
