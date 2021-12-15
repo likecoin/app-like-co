@@ -8,7 +8,7 @@
   >
     <img
       :class="['mt-[32px]', 'w-[300px]']"
-      src="/images/airdrop/title_Verifier.png"
+      src="/images/airdrop/title_Checker.png"
     />
     <!-- Subscribe -->
     <Label
@@ -23,7 +23,7 @@
         'w-[600px]',
         'text-center',
       ]"
-      :text="$t('AirDrop.content.subscription')"
+      :text="totalAmount !== 0 ? $t('AirDrop.content.subscription') : $t('AirDrop.content.0claim')"
       preset="p5"
     />
     <SubscriptionCard preset="subscription" />

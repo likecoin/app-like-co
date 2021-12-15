@@ -9,7 +9,7 @@
   >
     <img
       :class="['mt-[32px]', 'w-[300px]']"
-      src="/images/airdrop/title_Verifier.png"
+      src="/images/airdrop/title_Checker.png"
     />
     <!-- Wallet -->
     <div

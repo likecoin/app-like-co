@@ -1,78 +1,98 @@
 <template>
-  <Page :class="['justify-start', 'bg-light-gray']">
+  <Page :class="['justify-start','bg-light-gray','items-center']">
     <!-- Container -->
-    <img
-      :class="[
-        'absolute',
-        'top-0',
-        'z-0',
-        'w-full',
-      ]"
-      src="/images/airdrop/background.png"
-    />
-    <img
-      :class="[
-        'absolute',
-        'top-[260px]',
-        'left-[60%]',
-        'z-[8]',
-        'w-[340px]',
-      ]"
-      src="/images/airdrop/planet_1.png"
-    />
-    <img
-      id="lg"
-      :class="[
-        'absolute',
-        'top-[560px]',
-        'left-[20px]',
-        'z-[8]',
-        'w-[276px]',
-      ]"
-      src="/images/airdrop/planet_2.png"
-    />
-    <div id="transparent-to-top" />
     <div
       :class="[
-        'relative',
-        'z-[5]',
-        'overflow-hidden',
-        'flex flex-col',
+        'flex',
+        'flex-col',
         'items-center',
-        'justify-center',
         'mx-auto',
-        'mt-[280px]',
-        'mb-[32px]',
-        'min-w-[936px]',
-        'max-w-[970px]',
-        'box-border',
-        'bg-white',
-        'rounded-[24px]',
-        'border-[2px]',
-        'border-airdrop-gold',
+        'min-w-[1440px]',
+        'w-full',
+        'h-full',
+        'bg-gradient-to-b',
+        'from-white',
+        'to-light-gray',
+        'mt-[-100px]',
       ]"
     >
-      <AirdropLogin v-if="!address" @getAddress="getOverview" />
-      <AirdropVierfier
-        v-if="address"
-        :address="address"
-        :total-amount="totalAmount"
-        :is-qualified-for-atom="isQualifiedForAtom"
-        :is-qualified-for-osmo="isQualifiedForOsmo"
-        :is-qualified-for-civic="isQualifiedForCivic"
+      <img
+        :class="[
+          'absolute',
+          'z-[0]',
+          'min-w-[1440px]',
+          'max-w-[1440px]',
+        ]"
+        src="/images/airdrop/background.png"
       />
+      <img
+        id="planet1"
+        :class="[
+          'absolute',
+          'top-[260px]',
+          'left-[60%]',
+          'z-[8]',
+          'w-[340px]',
+        ]"
+        src="/images/airdrop/planet_1.png"
+      />
+      <img
+        id="planet2"
+        :class="[
+          'absolute',
+          'top-[560px]',
+          'left-[8%]',
+          'z-[8]',
+          'w-[276px]',
+        ]"
+        src="/images/airdrop/planet_2.png"
+      />
+      <div
+        :class="[
+          'relative',
+          'z-[5]',
+          'overflow-hidden',
+          'flex flex-col',
+          'items-center',
+          'justify-center',
+          'mx-auto',
+          'mt-[380px]',
+          'mb-[32px]',
+          'min-w-[936px]',
+          'max-w-[970px]',
+          'box-border',
+          'bg-white',
+          'rounded-[24px]',
+          'border-[2px]',
+          'border-airdrop-gold',
+        ]"
+      >
+        <AirdropLogin v-if="!address" @getAddress="getOverview" />
+        <AirdropVierfier
+          v-if="address"
+          :address="address"
+          :total-amount="totalAmount"
+          :is-qualified-for-atom="isQualifiedForAtom"
+          :is-qualified-for-osmo="isQualifiedForOsmo"
+          :is-qualified-for-civic="isQualifiedForCivic"
+        />
+      </div>
+      <!-- follow LikeCoin -->
+      <SubscriptionCard class="mb-[150px]" preset="community" />
+      <!-- get tokens -->
+      <div 
+        :class="[
+          'flex',
+          'w-full',
+          'justify-between',
+          'px-[24px]',
+          'mb-[24px]'
+        ]"
+      >
+        <InformationBar/>
+        <TokenBar/>
+      </div>
     </div>
-    <!-- follow LikeCoin -->
-    <SubscriptionCard preset="community" />
-    <!-- get tokens -->
-    <TokenBar
-      :class="[
-        'mt-[300px]',
-        'mb-[24px]',
-        'ml-auto',
-        'w-min',
-      ]"
-    />
   </Page>
 </template>
 
@@ -125,17 +145,12 @@ export default class AirdropPageextends extends Vue {
 }
 </script>
 <style>
-@media only screen and (max-width: 1140px) {
-  #lg {
-    display: none;
+@media only screen and (max-width: 1440px) {
+  #planet1 {
+    left: 880px
   }
-}
-#transparent-to-top {
-  width: 100%;
-	height: 100%;
-  background: linear-gradient(to bottom, rgb(247, 247, 247,0) 35%, rgb(247, 247, 247,1));
-  position: absolute;
-	top: 0;
-	left: 0;
+  #planet2 {
+    left: 30px
+  }
 }
 </style>
