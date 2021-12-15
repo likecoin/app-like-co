@@ -67,11 +67,14 @@
           'border-airdrop-gold',
         ]"
       >
-        <AirdropLogin v-if="!address" @getAddress="getOverview" />
-        <AirdropVierfier
-          v-if="address"
-          :address="address"
-          :total-amount="totalAmount"
+        <AirdropLogin
+          v-if="!claimmingAddress"
+          @input="handleAddressInput"
+        />
+        <AirdropVerifier
+          v-else
+          :address="claimmingAddress"
+          :claimmable-amount="claimmableAmount"
           :is-qualified-for-atom="isQualifiedForAtom"
           :is-qualified-for-osmo="isQualifiedForOsmo"
           :is-qualified-for-civic="isQualifiedForCivic"
@@ -80,7 +83,7 @@
       <!-- follow LikeCoin -->
       <SubscriptionCard class="mb-[150px]" preset="community" />
       <!-- get tokens -->
-      <div 
+      <div
         :class="[
           'flex',
           'w-full',
@@ -97,7 +100,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
@@ -111,39 +114,47 @@ export enum Denom {
 @Component({
   layout: 'default',
 })
-export default class AirdropPageextends extends Vue {
-  @signerModule.Getter('getAddress') currentAddress!: string
+export default class AirdropCheckPage extends Vue {
+  @signerModule.Getter('getAddress') walletAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  address: string = ''
-  totalAmount: any = 0
+  inputAddress: string = ''
+  claimmableAmount: any = 0
   isWithoutWallet: boolean = false
   isQualifiedForAtom: boolean = false
   isQualifiedForOsmo: boolean = false
   isQualifiedForCivic: boolean = false
 
-  async getOverview({ address }: { address: string }) {
-    this.address = address  
+  mounted() {
+    this.fetchClaimmableAmount()
+  }
+
+  get claimmingAddress() {
+    return this.walletAddress || this.inputAddress
+  }
+
+  handleAddressInput(address: string) {
+    this.inputAddress = address
+    this.fetchClaimmableAmount()
+  }
+
+  @Watch('walletAddress')
+  async fetchClaimmableAmount() {
+    if (!this.claimmingAddress) return
+    // TODO: Separate Testnet/Production endpoint
     const res: any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/api/overview?address=${address}`,
+      `https://airdrop.rinkeby.like.co/api/overview?address=${this.claimmingAddress}`,
     )
-    this.checkTotalAmount(res.data)
-    this.checkIfQualified(res.data)
-  }
-
-  checkTotalAmount(data:any) {
-    this.totalAmount = Math.round(data.totalAmount * Denom.Nanolike)
-  }
-
-  checkIfQualified(data:any) {
-    this.isQualifiedForAtom = !!data.atomAmount
-    this.isQualifiedForOsmo = !!data.osmosisAmount
-    this.isQualifiedForCivic = !!data.civicLikerAmount
+    this.claimmableAmount = Math.round(res.data.totalAmount * Denom.Nanolike)
+    this.isQualifiedForAtom = !!res.data.atomAmount
+    this.isQualifiedForOsmo = !!res.data.osmosisAmount
+    this.isQualifiedForCivic = !!res.data.civicLikerAmount
   }
 }
 </script>
+
 <style>
 @media only screen and (max-width: 1440px) {
   #planet1 {

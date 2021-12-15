@@ -4,18 +4,23 @@ import { Store } from 'vuex'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { getModule } from 'vuex-module-decorators'
 
-import keplr from '~/store/keplr'
-import signer from '~/store/signer'
-import iscn from '~/store/iscn'
+import WalletStore from '~/store/wallet'
+import SignerStore from '~/store/signer'
+import IscnStore from '~/store/iscn'
 
-let keplrStore: keplr
-let signerStore: signer
-let iscnStore: iscn
+let walletStore: WalletStore
+let signerStore: SignerStore
+let iscnStore: IscnStore
 
 function initialiseStores(store: Store<any>): void {
-  keplrStore = getModule(keplr, store)
-  signerStore = getModule(signer, store)
-  iscnStore = getModule(iscn, store)
+  walletStore = getModule(WalletStore, store)
+  signerStore = getModule(SignerStore, store)
+  iscnStore = getModule(IscnStore, store)
 }
 
-export { initialiseStores, keplrStore, signerStore, iscnStore }
+export {
+  initialiseStores,
+  walletStore,
+  signerStore,
+  iscnStore,
+}

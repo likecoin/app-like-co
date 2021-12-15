@@ -23,7 +23,7 @@
         'w-[600px]',
         'text-center',
       ]"
-      :text="totalAmount !== 0 ? $t('AirDrop.content.subscription') : $t('AirDrop.content.0claim')"
+      :text="claimmableAmount !== 0 ? $t('AirDrop.content.subscription') : $t('AirDrop.content.0claim')"
       preset="p5"
     />
     <SubscriptionCard preset="subscription" />
@@ -58,7 +58,7 @@
           >
             <Label
               :class="['font-extrabold','text-dark-gray']"
-              :text="totalAmount"
+              :text="`${claimmableAmount}`"
               preset="h1"
             />
             <Label
@@ -132,14 +132,13 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
-export default class AirdropVierfier extends Vue {
+export default class AirdropVerifier extends Vue {
   @Prop(String) readonly address: string | undefined
-  @Prop(Number) readonly totalAmount: any | undefined
-  @Prop(Boolean) readonly isQualifiedForAtom: any | false
-  @Prop(Boolean) readonly isQualifiedForOsmo: any | false
-  @Prop(Boolean) readonly isQualifiedForCivic: any | false
+  @Prop(Number) readonly claimmableAmount: number | undefined
+  @Prop(Boolean) readonly isQualifiedForAtom: boolean | undefined
+  @Prop(Boolean) readonly isQualifiedForOsmo: boolean | undefined
+  @Prop(Boolean) readonly isQualifiedForCivic: boolean | undefined
 
-  email:string = ''
-
+  email: string = ''
 }
 </script>

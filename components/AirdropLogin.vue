@@ -38,90 +38,28 @@
         :text="$t('AirDrop.guide.connect.wallet')"
         preset="p5"
       />
-      <div
+      <ul
         :class="[
-          'flex',
-          'justify-center',
-          'px-[32px]',
-          'mt-[32px]',
           'w-full',
+          'p-[32px]',
+          'grid',
+          'grid-cols-2',
+          'gap-[24px]',
         ]"
       >
-        <!-- Keplr -->
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'items-start',
-            'bg-white',
-            'border-[4px]',
-            'border-shade-gray',
-            'rounded-[16px]',
-            'py-[26px]',
-            'px-[24px]',
-            'w-[356px]',
-            'cursor-pointer',
-          ]"
-          @click="handleConnectKeplr"
+        <li
+          v-for="type in connectWalletTypes"
+          :key="type"
         >
-          <div
+          <ConnectWalletButton
             :class="[
-              'flex',
-              'items-center',
-              'mb-[14px]',
+              'w-full',
+              'bg-white',
             ]"
-          >
-            <IconKeplr />
-            <Label
-              :class="['text-dark-gray', 'ml-[12px]']"
-              :text="$t('AirDrop.label.keplr')"
-              preset="h4"
-            />
-          </div>
-          <Label
-            :class="['text-dark-gray', 'mt-[8px]']"
-            :text="$t('AirDrop.guide.connect.keplr')"
-            preset="p5"
+            :type="type"
           />
-        </div>
-        <!-- Liker ID -->
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'items-start',
-            'bg-white',
-            'border-[4px]',
-            'border-shade-gray',
-            'rounded-[16px]',
-            'py-[26px]',
-            'px-[24px]',
-            'ml-[24px]',
-            'w-[356px]',
-            'cursor-pointer',
-          ]"
-        >
-          <div
-            :class="[
-              'flex',
-              'items-center',
-              'mb-[14px]',
-            ]"
-          >
-            <IconLikerLand />
-            <Label
-              :class="['text-dark-gray', 'ml-[12px]']"
-              :text="$t('AirDrop.label.LikerId')"
-              preset="h4"
-            />
-          </div>
-          <Label
-            :class="['text-dark-gray', 'mt-[8px]']"
-            :text="$t('AirDrop.guide.connect.LikerId')"
-            preset="p5"
-          />
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
     <!-- input -->
     <div
@@ -151,7 +89,7 @@
         ]"
       >
         <TextField
-          v-model="inputValue"
+          v-model="inputAddress"
           class="flex-grow"
           placeholder="cosmos/osmosis..."
         />
@@ -159,7 +97,7 @@
           class="ml-[16px]"
           preset="secondary"
           :text="$t('AirDrop.button.enter')"
-          @click="handleConnectAddress"
+          @click="handleAddressInput"
         >
           <template #append>
             <IconArrowRight />
@@ -170,59 +108,22 @@
   </div>
 </template>
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
-
-const signerModule = namespace('signer')
-const keplrModule = namespace('keplr')
+import { CONNECT_WALLET_TYPES } from '~/constant'
 
 @Component
 export default class AirdropLogin extends Vue {
   @Prop(Boolean) readonly isAirdropStarted: boolean | undefined
 
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
+  inputAddress: string = ''
 
-  @keplrModule.Action initKeplr!: () => Promise<boolean>
-  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
-  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
-
-  address: string = ''
-  inputValue: string = ''
-
-  async handleConnectKeplr() {
-    await this.initKeplr()
-    await this.updateSignerInfo({
-      signer: this.keplrSigner,
-      address: this.keplrWallet,
-    })
-    this.getAddress(this.currentAddress)
+  // eslint-disable-next-line class-methods-use-this
+  get connectWalletTypes() {
+    return CONNECT_WALLET_TYPES
   }
 
-  handleConnectAddress() {
-    this.getAddress(this.inputValue)
-  }
-
-  handleConnectLikerId() {
-    this.getAddress(this.inputValue)
-  }
-
-  handleNoWallet() {
-    this.$emit('getAddress', {
-      address: 'none',
-    })
-  }
-
-  getAddress(address: string) {
-    this.address = address
-    this.$emit('getAddress', {
-      address: this.address,
-    })
+  handleAddressInput() {
+    this.$emit('input', this.inputAddress)
   }
 }
 </script>

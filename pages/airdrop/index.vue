@@ -1,11 +1,10 @@
-
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 
-@Component
-export default class AirdropPageextends extends Vue {
-  mounted() {
-    this.$router.push('airdrop/check')
-  }
-}
+@Component({
+  fetch(ctx) {
+    ctx.redirect(302, ctx.localeLocation({ name: 'airdrop-check' })!)
+  },
+})
+export default class AirdropPage extends Vue {}
 </script>

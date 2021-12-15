@@ -19,7 +19,6 @@
         'w-[489px]',
         'mt-[8px]',
         'p-[16px]',
-        
       ]"
     >
       <TextField
@@ -153,5 +152,7 @@ export enum Preset {
 @Component
 export default class SubscriptionCard extends Vue {
   @Prop({ default: 'both' }) readonly preset!: string | undefined
+
+  email: string = ''
 }
 </script>

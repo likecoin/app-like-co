@@ -27,7 +27,7 @@
         'items-center',
         'h-full',
         'p-[32px]',
-        'z-[50]',
+        'z-[1]',
       ]"
     >
       <div :class="['flex', 'flex-col']">

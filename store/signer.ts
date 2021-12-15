@@ -7,7 +7,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
   stateFactory: true,
   namespaced: true,
 })
-export default class Keplr extends VuexModule {
+export default class SignerStore extends VuexModule {
   address: string = '';
   signer: OfflineSigner | null = null;
 

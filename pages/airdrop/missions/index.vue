@@ -67,14 +67,12 @@
           'border-airdrop-gold',
         ]"
       >
-        <AirdropMissions
-          :address="currentAddress"
-        />
+        <AirdropMissions :address="claimmableAddress" />
       </div>
       <!-- follow LikeCoin -->
       <SubscriptionCard class="mb-[150px]" preset="both" />
       <!-- get tokens -->
-      <div 
+      <div
         :class="[
           'flex',
           'w-full',
@@ -93,26 +91,17 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
-const iscnModule = namespace('iscn')
 
 @Component({
   layout: 'wallet',
 })
-export default class AirdropPageextends extends Vue {
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @iscnModule.Action queryISCNByAddress!: (
-    arg0: string
-  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
-
-  step: string = ''
-  address: string = ''
-  totalAmount: number = 0
-  isNoWallet: boolean = false
+export default class AirdropMissionsPage extends Vue {
+  @signerModule.Getter('getAddress') claimmableAddress!: string
 }
 </script>
+
 <style>
 @media only screen and (max-width: 1440px) {
   #planet1 {

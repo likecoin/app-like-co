@@ -7,9 +7,8 @@
         'z-10',
         'top-0',
         'inset-x-0',
-        'py-[26px]',
+        'py-[24px]',
         'backdrop-blur',
-        { 'bg-none backdrop-blur-none' : $nuxt.$route.path.includes('airdrop') },
       ]"
     >
       <nav
@@ -34,7 +33,6 @@
             'items-center',
             'p-[4px]',
             'mx-auto',
-            'h-[48px]',
             'bg-shade-gray',
             'rounded-[14px]',
           ]"
@@ -83,19 +81,23 @@
           ]"
         >
           <Button
+            v-if="currentAddress"
             preset="secondary"
-            :text="$t('AppHeader.login.button')"
-            :title="currentAddress || $t('AppHeader.login.button')"
-            @click="onClickLoginKeplr"
+            :title="currentAddress"
           >
-            <template v-if="currentAddress">
-              <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
-            </template>
+            <div class="max-w-[148px] overflow-hidden overflow-ellipsis">{{ currentAddress }}</div>
           </Button>
+          <Button
+            v-else
+            preset="secondary"
+            :text="$t('AppHeader.button.connectWallet')"
+            :title="$t('AppHeader.button.connectWallet')"
+            @click="isConnectWalletDialogOpened = true"
+          />
         </div>
       </nav>
     </div>
-    <div 
+    <div
       v-if="isTestnet"
       :class="[
         'fixed',
@@ -106,42 +108,67 @@
     >
       <IconDangerStripe />
     </div>
+    <Dialog
+      v-model="isConnectWalletDialogOpened"
+      preset="custom"
+    >
+      <Label
+        preset="h5"
+        class="text-like-green"
+        :text="$t('AppHeader.button.connectWallet')"
+      >
+        <template #prepend>
+          <IconSignIn />
+        </template>
+      </Label>
+      <ul class="mt-[24px]">
+        <li
+          v-for="(type, i) in connectWalletTypes"
+          :key="type"
+          :class="{
+            'mt-[8px]': i > 0,
+          }"
+        >
+          <ConnectWalletButton
+            class="w-full"
+            :type="type"
+            @click="handleConnectWalletButtonClick"
+          />
+        </li>
+      </ul>
+    </Dialog>
+    <ConnectLikerIdDialog />
   </header>
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { IS_TESTNET } from '~/constant'
+import {
+  IS_TESTNET,
+  CONNECT_WALLET_TYPES,
+} from '~/constant'
 
 const signerModule = namespace('signer')
-const keplrModule = namespace('keplr')
 
 @Component
 export default class AppHeader extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
 
-  @keplrModule.Getter('getWalletAddress') keplrWallet!: string
-  @keplrModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
-  @keplrModule.Action initKeplr!: () => Promise<boolean>
+  isConnectWalletDialogOpened = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
     return !!IS_TESTNET
   }
 
-  async onClickLoginKeplr() {
-    await this.initKeplr()
-    await this.updateSignerInfo({
-      signer: this.keplrSigner,
-      address: this.keplrWallet,
-    })
+  // eslint-disable-next-line class-methods-use-this
+  get connectWalletTypes() {
+    return CONNECT_WALLET_TYPES
+  }
+
+  handleConnectWalletButtonClick() {
+    this.isConnectWalletDialogOpened = false
   }
 }
 </script>
