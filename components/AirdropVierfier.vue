@@ -78,30 +78,50 @@
           />
         </div>
       </div>
+      <!-- Check qualifications -->
       <div :class="['flex', 'flex-col']">
         <Label
           :class="[
             'font-bold',
-            'text-airdrop-gold',
-            'mb-[24px]',
+            {'text-airdrop-gold': isQualifiedForAtom },
+            {'text-medium-gray': !isQualifiedForAtom },
+            'mb-[20px]',
           ]"
           :text="$t('AirDrop.label.cosmos')"
           preset="h5"
         >
           <template #prepend>
-            <IconCheck />
+            <IconCheck v-if="isQualifiedForAtom" />
+            <IconClose v-else/>
           </template>
         </Label>
         <Label
           :class="[
             'font-bold',
-            'text-airdrop-gold',
+            {'text-airdrop-gold': isQualifiedForOsmo },
+            {'text-medium-gray': !isQualifiedForOsmo },
+            'mb-[20px]'
           ]"
           :text="$t('AirDrop.label.Osmosis')"
           preset="h5"
         >
           <template #prepend>
-            <IconCheck />
+            <IconCheck v-if="isQualifiedForOsmo" />
+            <IconClose v-else/>
+          </template>
+        </Label>
+        <Label
+          :class="[
+            'font-bold',
+            {'text-airdrop-gold': isQualifiedForCivic },
+            {'text-medium-gray': !isQualifiedForCivic },
+          ]"
+          :text="$t('AirDrop.label.civicLiker')"
+          preset="h5"
+        >
+          <template #prepend>
+            <IconCheck v-if="isQualifiedForCivic" />
+            <IconClose v-else/>
           </template>
         </Label>
       </div>
@@ -115,6 +135,9 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 export default class AirdropVierfier extends Vue {
   @Prop(String) readonly address: string | undefined
   @Prop(Number) readonly totalAmount: any | undefined
+  @Prop(Boolean) readonly isQualifiedForAtom: any | false
+  @Prop(Boolean) readonly isQualifiedForOsmo: any | false
+  @Prop(Boolean) readonly isQualifiedForCivic: any | false
 
   email:string = ''
 

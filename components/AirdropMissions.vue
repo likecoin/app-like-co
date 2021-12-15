@@ -328,7 +328,7 @@ export default class AirdropMissions extends Vue {
   // eslint-disable-next-line class-methods-use-this
   async mounted() {
       const res:any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/overview?address=${this.address}`,
+      `https://airdrop.rinkeby.like.co/api/claims?address=${this.address}`,
     )
     this.unclaimedAmount = Math.round((res.data.reward.unclaimedAmount) * Denom.Nanolike)
     this.missionStatus = res.data.missionStatus

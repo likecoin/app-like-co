@@ -52,11 +52,14 @@
         'border-airdrop-gold',
       ]"
     >
-      <AirdropLogin v-if="!address" @getAddress="verifyAmount" />
+      <AirdropLogin v-if="!address" @getAddress="getOverview" />
       <AirdropVierfier
         v-if="address"
         :address="address"
         :total-amount="totalAmount"
+        :is-qualified-for-atom="isQualifiedForAtom"
+        :is-qualified-for-osmo="isQualifiedForOsmo"
+        :is-qualified-for-civic="isQualifiedForCivic"
       />
     </div>
     <!-- follow LikeCoin -->
@@ -96,14 +99,28 @@ export default class AirdropPageextends extends Vue {
 
   address: string = ''
   totalAmount: any = 0
-  isNoWallet: boolean = false
+  isWithoutWallet: boolean = false
+  isQualifiedForAtom: boolean = false
+  isQualifiedForOsmo: boolean = false
+  isQualifiedForCivic: boolean = false
 
-  async verifyAmount({ address }: { address: string }) {
+  async getOverview({ address }: { address: string }) {
     this.address = address  
     const res: any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/preview?address=${address}`,
+      `https://airdrop.rinkeby.like.co/api/overview?address=${address}`,
     )
-    this.totalAmount = Math.round(res.data.totalAmount * Denom.Nanolike)
+    this.checkTotalAmount(res.data)
+    this.checkIfQualified(res.data)
+  }
+
+  checkTotalAmount(data:any) {
+    this.totalAmount = Math.round(data.totalAmount * Denom.Nanolike)
+  }
+
+  checkIfQualified(data:any) {
+    this.isQualifiedForAtom = !!data.atomAmount
+    this.isQualifiedForOsmo = !!data.osmosisAmount
+    this.isQualifiedForCivic = !!data.civicLikerAmount
   }
 }
 </script>
