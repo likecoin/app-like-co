@@ -122,6 +122,12 @@ export default class Label extends Vue {
 
   get fontSizeClass(): string {
     switch (this.preset) {
+      case LabelType.H1:
+        return 'text-[48px]';
+      
+      case LabelType.H2:
+        return 'text-[32px]';
+
       case LabelType.H3:
         return 'text-[24px]';
 

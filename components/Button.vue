@@ -43,6 +43,7 @@ export enum Preset {
   tertiary = 'tertiary',
   plain = 'plain',
   outline = 'outline',
+  gradient = 'gradient',
 }
 
 export enum Size {
@@ -63,7 +64,7 @@ export default class Button extends Vue {
   @Prop({ default: false }) readonly isDisabled!: boolean
 
   // Circle style if set to true
-  @Prop(Boolean) readonly circle!: boolean
+  @Prop({ default: false }) readonly circle!: boolean
 
   // Size of the Button
   @Prop({ default: 'large' }) readonly size!: string | undefined
@@ -141,6 +142,11 @@ export default class Button extends Vue {
           {
             'active:border-opacity-70 hover:border-opacity-50': !this.isDisabled,
           },
+        ]
+      case Preset.gradient:
+        return [
+          'bg-gradient-to-r from-[#D2F0F0] to-[#F0E6B4]',
+          'text-like-green',
         ]
 
       default:

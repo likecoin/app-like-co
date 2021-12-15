@@ -1,0 +1,39 @@
+<template>
+  <div
+    :class="[
+      'flex',
+      'flex-nowrap',
+      'w-min',
+    ]"
+  >
+    <Label
+      :class="['whitespace-nowrap', 'mr-[24px]']"
+      :text="$t('HomePage.label.getToken')"
+      preset="h6"
+    />
+    <Button
+      class="mr-[24px]"
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://app.osmosis.zone/"
+      :text="$t('HomePage.button.osmosis')"
+    />
+    <Button
+      class="mr-[24px]"
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://app.emeris.com/asset/nanolike"
+      :text="$t('HomePage.button.emeris')"
+    />
+    <Button
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://app.liquid.com/exchange/LIKEUSDT"
+      :text="$t('HomePage.button.liquid')"
+    />
+  </div>
+</template>
+

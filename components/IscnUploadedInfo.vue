@@ -124,7 +124,12 @@
           {{ iscnHash }}
         </Link>
       </FormField>
-      <IconDiverMini class="mb-[12px]" />
+      <IconDiverMini
+        :class="[
+          'mb-[12px]',
+          'text-shade-gray',
+        ]"
+      />
       <FormField
         v-if="iscnId"
         :label="$t('iscn.meta.id')"

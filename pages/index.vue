@@ -9,20 +9,25 @@
       'p-[16px]',
     ]"
   >
-    <Card
+    <div
+      :class="[
+        'flex',
+        'items-stretch',
+        'h-[429px]',
+      ]"
+    >
+      <AirdropInfoCard :class="['h-full','w-[268px]']" />
+      <IscnInfoCard :class="['h-full','w-[696px]']" />
+    </div>
+    <form
       tag="form"
       :class="[
         'w-full',
         'max-w-[600px]',
+        'my-[64px]',
       ]"
       @submit.prevent="onSearch"
     >
-      <Label
-        :text="$t('HomePage.search.title')"
-        class="mb-[16px]"
-        preset="h3"
-        align="center"
-      />
       <Label
         class="flex-wrap"
         align="center"
@@ -37,63 +42,26 @@
           :error-message="errorMessage"
         />
         <template #append>
-          <Button
-            :text="$t('HomePage.search.button')"
-            preset="secondary"
-          >
+          <Button :text="$t('HomePage.search.button')" preset="outline">
             <template #prepend>
               <IconSearch class="w-[20px]" />
             </template>
           </Button>
         </template>
       </Label>
-    </Card>
-
-    <Button
-      class="mt-[32px]"
-      preset="outline"
-      :text="$t('HomePage.register.button')"
-      :to="localeLocation({ name: 'new' })"
-      size="small"
-    >
-      <template #prepend>
-        <IconAddToISCN class="w-[20px]" />
-      </template>
-    </Button>
-    <div
+    </form>
+    <div 
       :class="[
-        'absolute',
-        'bottom-[24px]',
-        'right-[24px]',
         'flex',
-        'flex-nowrap',
-        'w-min',
+        'absolute',
+        'w-full',
+        'justify-between',
+        'bottom-[24px]',
+        'px-[24px]',
       ]"
     >
-      <Label
-        :class="[
-          'whitespace-nowrap',
-          'mr-[24px]',
-        ]"
-        :text="$t('HomePage.label.getToken')"
-        preset="h6"
-      />
-      <Button
-        class="mr-[24px]"
-        preset="tertiary"
-        text-preset="h6"
-        size="mini"
-        href="https://app.osmosis.zone/"
-        :text="$t('HomePage.button.osmosis')"
-      />
-      <Button
-        class="mr-[24px]"
-        preset="tertiary"
-        text-preset="h6"
-        size="mini"
-        href="https://app.liquid.com/exchange/LIKEUSDT"
-        :text="$t('HomePage.button.liquid')"
-      />
+      <InformationBar/>
+      <TokenBar/>
     </div>
   </Page>
 </template>
