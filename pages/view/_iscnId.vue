@@ -319,6 +319,7 @@ import {
   ISCN_TX_RAW_DATA_ENDPOINT,
   WALLET_TYPE_REPLACER,
 } from '~/constant'
+import { logTrackerEvent } from '~/utils/logger';
 
 const iscnModule = namespace('iscn')
 
@@ -469,6 +470,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   showExifInfo() {
+    logTrackerEvent(this, 'ISCNView', 'ShowExifInfo', this.iscnId, 1);
     const { exifInfo } = this.metadata
     let exif
     if (exifInfo) {
@@ -520,6 +522,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   showStakeholder(index: number) {
+    logTrackerEvent(this, 'ISCNView', 'ShowStakeholder', this.iscnId, 1);
     this.isOpenAuthorDialog = true
     const stakeholders = this.stakeholders[index].entity
 
@@ -569,6 +572,7 @@ export default class ViewIscnIdPage extends Vue {
 
   // eslint-disable-next-line class-methods-use-this
   handleCopy(address: string, type: string) {
+    logTrackerEvent(this, 'ISCNView', 'CopyWalletAddress', this.iscnId, 1);
     let text = ''
     if (type === 'cosmos') {
       text = address.replace(/(did:|:)/g, '')

@@ -499,6 +499,7 @@ import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import { API_POST_ARWEAVE_ESTIMATE, API_POST_ARWEAVE_UPLOAD } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
+import { logTrackerEvent } from '~/utils/logger'
 
 const signerModule = namespace('signer')
 
@@ -770,12 +771,14 @@ export default class IscnRegisterForm extends Vue {
   }
 
   handleOpenAuthorDialog() {
+    logTrackerEvent(this, 'ISCNCreate', 'OpenAuthorDialog', '', 1);
     this.checkedAuthorInfo = false
     this.isOpenAuthorDialog = true
     this.initAuthorInfo()
   }
 
   editAuthor(index: number) {
+    logTrackerEvent(this, 'ISCNCreate', 'EditAuthor', index.toString(), 1);
     const { name, wallet, url, likerId, authorDescription } =
       this.authors[index]
     this.authorName = name
@@ -803,6 +806,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   confirmAuthorChange() {
+    logTrackerEvent(this, 'ISCNCreate', 'ConfirmAuthorChange', '', 1);
     this.checkedAuthorInfo = true
     if (!this.authorName || this.authorName.length > CharactersLimit.authorName)
       return
@@ -863,22 +867,26 @@ export default class IscnRegisterForm extends Vue {
   }
 
   handleSignDialogClose() {
+    logTrackerEvent(this, 'ISCNCreate', 'CloseSignDialog', '', 1);
     this.isOpenQuitAlertDialog = true
   }
 
   handleContinue() {
+    logTrackerEvent(this, 'ISCNCreate', 'ContinueDialog', '', 1);
     this.isOpenQuitAlertDialog = false
     this.isOpenSignDialog = true
     this.onRetry()
   }
 
   handleQuit() {
+    logTrackerEvent(this, 'ISCNCreate', 'QuitDialog', '', 1);
     this.isOpenQuitAlertDialog = false
     this.uploadStatus = ''
     this.$emit('handleQuit')
   }
 
   onRetry(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'RetryDialog', '', 1);
     this.shouldShowAlert = false
     this.signDialogError = ''
     this.onOpenKeplr()
@@ -886,6 +894,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   onOpenKeplr() {
+    logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1);
     this.isOpenKeplr = true
     setTimeout(() => {
       this.isOpenKeplr = false
@@ -916,6 +925,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
     this.$emit('handleSubmit')
     this.isChecked = true
     if (!this.isMetadataReady) return
@@ -955,6 +965,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async sendArweaveFeeTx(): Promise<string> {
+    logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = 'signing';
@@ -974,6 +985,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async submitToArweave(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
     if (this.uploadArweaveId) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
@@ -1012,6 +1024,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async submitToISCN(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToISCN', '', 1);
     this.isOpenSignDialog = true;
     this.uploadStatus = 'loading'
     this.onOpenKeplr()

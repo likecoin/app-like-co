@@ -70,6 +70,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { logTrackerEvent } from '~/utils/logger';
 
 const signerModule = namespace('signer')
 
@@ -147,10 +148,12 @@ export default class NewIndexPage extends Vue {
     this.fileType = fileType
     this.fileSize = fileSize
     this.state = 'iscn'
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', this.fileType, 1);
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
     this.arweaveId = arweaveId
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNFileUploadToARSuccess', arweaveId, 1);
   }
 
   onISCNTxInfo({
@@ -166,6 +169,7 @@ export default class NewIndexPage extends Vue {
     this.iscnId = iscnId
     this.iscnTimestamp = timestamp
     this.state = 'done'
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1);
   }
 }
 </script>

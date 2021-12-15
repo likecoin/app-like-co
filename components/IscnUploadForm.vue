@@ -157,6 +157,7 @@
 import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { logTrackerEvent } from '~/utils/logger'
 
 import {
   fileToArrayBuffer,
@@ -214,6 +215,7 @@ export default class UploadForm extends Vue {
   }
 
   async onFileUpload(event: DragEvent) {
+    logTrackerEvent(this, 'ISCNCreate', 'SelectFile', '', 1);
     let files = null
     if (event.dataTransfer) {
       ;({ files } = event.dataTransfer)
