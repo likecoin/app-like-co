@@ -57,5 +57,5 @@ export const SITE_URL = IS_TESTNET ? 'https://app.rinkeby.like.co' : 'https://ap
 
 export const CONNECT_WALLET_TYPES = [
   'keplr',
-  'likerId',
+  'likerland_app',
 ];
