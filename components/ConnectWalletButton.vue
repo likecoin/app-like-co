@@ -25,7 +25,7 @@
     >
       <template #prepend>
         <IconKeplr v-if="type === 'keplr'" />
-        <IconLikerLand v-else-if="type === 'likerId'" />
+        <IconLikerLand v-else-if="type === 'likerland_app'" />
       </template>
     </Label>
     <Label
@@ -63,8 +63,8 @@ export default class ConnectWalletButton extends Vue {
       case 'keplr':
         return this.$t('ConnectWalletButton.keplr.title');
 
-      case 'likerId':
-        return this.$t('ConnectWalletButton.likerId.title');
+      case 'likerland_app':
+        return this.$t('ConnectWalletButton.likerland_app.title');
 
       default:
         return '';
@@ -76,8 +76,8 @@ export default class ConnectWalletButton extends Vue {
       case 'keplr':
         return this.$t('ConnectWalletButton.keplr.description');
 
-      case 'likerId':
-        return this.$t('ConnectWalletButton.likerId.description');
+      case 'likerland_app':
+        return this.$t('ConnectWalletButton.likerland_app.description');
 
       default:
         return '';
@@ -90,7 +90,7 @@ export default class ConnectWalletButton extends Vue {
       case 'keplr':
         await this.initKeplr();
         break;
-      case 'likerId':
+      case 'likerland_app':
         await this.initWalletConnect();
         break;
       default:
