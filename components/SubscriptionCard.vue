@@ -32,7 +32,7 @@
         :text="$t('AirDrop.button.notify')"
       >
         <template #prepend>
-          <IconPlaceholder />
+          <IconSensors />
         </template>
       </Button>
     </div>
@@ -67,7 +67,7 @@
       :class="[
         'flex',
         'justify-center',
-        'mt-[24px]',
+        'mt-[32px]',
       ]"
     >
       <div

@@ -47,53 +47,55 @@
         ]"
         src="/images/airdrop/planet_2.png"
       />
-      <div
-        :class="[
-          'relative',
-          'z-[5]',
-          'overflow-hidden',
-          'flex flex-col',
-          'items-center',
-          'justify-center',
-          'mx-auto',
-          'mt-[380px]',
-          'mb-[32px]',
-          'min-w-[936px]',
-          'max-w-[970px]',
-          'box-border',
-          'bg-white',
-          'rounded-[24px]',
-          'border-[2px]',
-          'border-airdrop-gold',
-        ]"
-      >
-        <AirdropLogin
-          v-if="!claimmingAddress"
-          @input="handleAddressInput"
-        />
-        <AirdropVerifier
-          v-else
-          :address="claimmingAddress"
-          :claimmable-amount="claimmableAmount"
-          :is-qualified-for-atom="isQualifiedForAtom"
-          :is-qualified-for-osmo="isQualifiedForOsmo"
-          :is-qualified-for-civic="isQualifiedForCivic"
-        />
-      </div>
-      <!-- follow LikeCoin -->
-      <SubscriptionCard class="mb-[150px]" preset="community" />
-      <!-- get tokens -->
-      <div
-        :class="[
-          'flex',
-          'w-full',
-          'justify-between',
-          'px-[24px]',
-          'mb-[24px]'
-        ]"
-      >
-        <InformationBar/>
-        <TokenBar/>
+      <div id="cross-bg" :class="['w-full','h-full']">
+        <div
+          :class="[
+            'relative',
+            'z-[5]',
+            'overflow-hidden',
+            'flex flex-col',
+            'items-center',
+            'justify-center',
+            'mx-auto',
+            'mt-[380px]',
+            'mb-[32px]',
+            'min-w-[936px]',
+            'max-w-[970px]',
+            'box-border',
+            'bg-white',
+            'rounded-[24px]',
+            'border-[2px]',
+            'border-airdrop-gold',
+          ]"
+        >
+          <AirdropLogin
+            v-if="!claimmingAddress"
+            @input="handleAddressInput"
+          />
+          <AirdropVerifier
+            v-else
+            :address="claimmingAddress"
+            :claimmable-amount="claimmableAmount"
+            :is-qualified-for-atom="isQualifiedForAtom"
+            :is-qualified-for-osmo="isQualifiedForOsmo"
+            :is-qualified-for-civic="isQualifiedForCivic"
+          />
+        </div>
+        <!-- follow LikeCoin -->
+        <SubscriptionCard class="mb-[150px]" preset="community" />
+        <!-- get tokens -->
+        <div
+          :class="[
+            'flex',
+            'w-full',
+            'justify-between',
+            'px-[24px]',
+            'mb-[24px]'
+          ]"
+        >
+          <InformationBar/>
+          <TokenBar/>
+        </div>
       </div>
     </div>
   </Page>
@@ -164,4 +166,8 @@ export default class AirdropCheckPage extends Vue {
     left: 30px
   }
 }
+#cross-bg {
+    background-image:url('/images/airdrop/background_cross.svg') ;
+    background-repeat: repeat;
+  }
 </style>
