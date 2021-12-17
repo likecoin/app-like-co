@@ -1,15 +1,22 @@
 <template>
-  <Page :class="['justify-start','bg-light-gray','items-center']">
+  <Page
+    :class="[
+      'relative',
+      'justify-start',
+      'bg-light-gray',
+      'items-center',
+      'min-w-[1440px]',
+    ]"
+  >
     <!-- Container -->
     <div
       :class="[
         'flex',
         'flex-col',
+        'flex-grow',
         'items-center',
         'mx-auto',
-        'min-w-[1440px]',
         'w-full',
-        'h-full',
         'bg-gradient-to-b',
         'from-white',
         'to-light-gray',
@@ -47,10 +54,9 @@
         ]"
         src="/images/airdrop/planet_2.png"
       />
-      <div id="cross-bg" :class="['w-full','h-full']">
+      <div id="cross-bg" :class="['z-[5]','w-full','h-full']">
         <div
           :class="[
-            'relative',
             'z-[5]',
             'overflow-hidden',
             'flex flex-col',
@@ -87,10 +93,11 @@
         <div
           :class="[
             'flex',
+            'absolute',
+            'bottom-[24px]',
             'w-full',
             'justify-between',
             'px-[24px]',
-            'mb-[24px]'
           ]"
         >
           <InformationBar/>
@@ -113,9 +120,7 @@ export enum Denom {
   Nanolike = 0.000000001
 }
 
-@Component({
-  layout: 'default',
-})
+@Component
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') walletAddress!: string
   @iscnModule.Action queryISCNByAddress!: (

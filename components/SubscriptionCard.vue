@@ -67,7 +67,7 @@
       :class="[
         'flex',
         'justify-center',
-        'mt-[32px]',
+        'mt-[24px]',
       ]"
     >
       <div
@@ -80,11 +80,14 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
           href="https://github.com/likecoin"
         >
-          <IconGithub class="text-dark-gray" />
+          <IconTwitter class="text-dark-gray" />
         </Button>
       </div>
       <div
@@ -97,8 +100,11 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
         >
           <IconDiscord class="text-dark-gray" />
         </Button>
@@ -113,11 +119,14 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
           href="https://medium.com/likecoin"
         >
-          <IconMedium class="text-dark-gray" />
+          <IconGithub class="text-dark-gray" />
         </Button>
       </div>
       <div
@@ -130,11 +139,14 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
           href="https://about.like.co/"
         >
-          <IconLikeIcon class="text-dark-gray" />
+          <IconMedium class="text-dark-gray" />
         </Button>
       </div>
     </div>
