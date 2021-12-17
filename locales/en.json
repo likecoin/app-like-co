@@ -36,6 +36,7 @@
   "AirDrop.placeholder.email": "email address",
   "AirDrop.successMessage.subscribed": "Thank you for subscribing!",
   "AppHeader.button.connectWallet": "Connect Wallet",
+  "AppHeader.button.signOut": "Sign Out",
   "AppHeader.tabBar.button.depub": "#DePub",
   "AppHeader.tabBar.button.publishing": "Your Publishing",
   "AppHeader.tabBar.button.stake": "Delegate and Vote",
