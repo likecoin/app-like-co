@@ -11,6 +11,7 @@ env:
   GKE_ZONE: ${{ secrets.GKE_ZONE }}
   DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
   IMAGE: ${{ secrets.GCR_IMAGE }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   IS_TESTNET: 'TRUE'
 
 jobs:
