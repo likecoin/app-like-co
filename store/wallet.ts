@@ -9,21 +9,23 @@ import { timeout } from '~/utils/misc';
 import { configToKeplrCoin } from '~/utils/cosmos';
 import network from '~/constant/network';
 
+const KEY_CONNECTED_WALLET_TYPE = 'KEY_CONNECTED_WALLET_TYPE';
+const KEY_WALLET_CONNECT = 'walletconnect';
+const KEY_WALLET_CONNECT_ACCOUNT_PREFIX = 'KEY_WALLET_CONNECT_ACCOUNT_PREFIX';
 @Module({
   name: 'wallet',
   stateFactory: true,
   namespaced: true,
 })
 export default class Wallet extends VuexModule {
-  isInited = false;
+  type = '';
   signer: OfflineSigner | null = null;
-  walletConnector: WalletConnect | null = null;
   walletConnectURI = '';
   accounts: readonly AccountData[] = [];
 
   @Mutation
-  setInited(isInited: boolean) {
-    this.isInited = isInited;
+  setType(type: string) {
+    this.type = type;
   }
 
   @Mutation
@@ -37,25 +39,38 @@ export default class Wallet extends VuexModule {
   }
 
   @Mutation
-  setWalletConnector(connector: WalletConnect) {
-    this.walletConnector = connector;
-  }
-
-  @Mutation
   setWalletConnectURI(uri: string) {
     this.walletConnectURI = uri;
   }
 
-  async checkIfInited() {
-    if (!this.isInited) {
-      const res = await this.initKeplr();
-      if (!res) throw new Error('CANNOT_INIT_KEPLR');
+  @Action
+  async initIfNecessary() {
+    const connectedWalletType = window.localStorage?.getItem(KEY_CONNECTED_WALLET_TYPE);
+    let res = false;
+    if (!this.type && connectedWalletType) {
+      switch (connectedWalletType) {
+        case 'keplr':
+          res = await this.initKeplr();
+          break;
+
+        case 'likerland_app':
+          res = await this.initWalletConnect();
+          break;
+
+        default:
+          break;
+      }
+      if (!res) {
+        window.localStorage?.removeItem(KEY_CONNECTED_WALLET_TYPE);
+        throw new Error('CANNOT_INIT_WALLET');
+      }
     }
+    return res;
   }
 
   @Action
   async initKeplr(): Promise<boolean> {
-    if (this.isInited) return true;
+    if (this.type === 'keplr') return true;
     if (!window.keplr) {
       let tries = 0;
       const TRY_COUNT = 3;
@@ -102,9 +117,10 @@ export default class Wallet extends VuexModule {
 
         const offlineSigner = window.getOfflineSigner(network.id);
         const accounts = await offlineSigner.getAccounts();
-        this.context.commit('setInited', true)
+        this.context.commit('setType', 'keplr')
         this.context.commit('setSigner', offlineSigner)
         this.context.commit('setAccounts', accounts)
+        window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'keplr')
         return true;
       } catch (error) {
         console.error(error);
@@ -113,17 +129,9 @@ export default class Wallet extends VuexModule {
     return false;
   }
 
-  @Action
-  handleWalletConnectDisconnect() {
-    if (this.walletConnector?.connected) {
-      this.walletConnector.killSession();
-      this.context.commit('setWalletConnector', null);
-    }
-  }
-
   @Action({ rawError: true })
   async initWalletConnect(): Promise<boolean> {
-    if (this.isInited) return true;
+    if (this.type === 'likerland_app') return true;
     try {
       const connector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
@@ -136,23 +144,28 @@ export default class Wallet extends VuexModule {
           },
         },
       });
-      connector.on('disconnect', this.handleWalletConnectDisconnect);
-
-      // this.context.commit('setWalletConnector', connector);
-
-      // Kill any previous session until we implement session management
-      if (connector.connected) {
-        await connector.killSession()
-      }
-
-      await connector.connect();
-
-      const [account] = await connector.sendCustomRequest({
-        id: payloadId(),
-        jsonrpc: '2.0',
-        method: 'cosmos_getAccounts',
-        params: ['likecoin-mainnet-2'],
+      connector.on('disconnect', () => {
+        window.localStorage?.removeItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`);
+        connector.killSession();
+        this.reset();
       });
+
+      let account: any
+      if (!connector.connected) {
+        await connector.connect();
+        ([account] = await connector.sendCustomRequest({
+          id: payloadId(),
+          jsonrpc: '2.0',
+          method: 'cosmos_getAccounts',
+          params: ['likecoin-mainnet-2'],
+        }));
+        window.localStorage?.setItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`, JSON.stringify(account));
+      } else {
+        const serializedAccount = window.localStorage?.getItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`);
+        if (serializedAccount) {
+          account = JSON.parse(serializedAccount);
+        }
+      }
       if (!account) return false;
 
       const {
@@ -182,9 +195,11 @@ export default class Wallet extends VuexModule {
           };
         },
       }
-      this.context.commit('setInited', true);
+      this.context.commit('setType', 'likerland_app');
       this.context.commit('setSigner', offlineSigner);
       this.context.commit('setAccounts', accounts);
+      this.context.commit('setWalletConnector', connector);
+      window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'likerland_app');
       return true
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -193,8 +208,18 @@ export default class Wallet extends VuexModule {
     return false
   }
 
-  get getIsInited() {
-    return this.isInited;
+  @Action
+  reset() {
+    this.context.commit('setType', '');
+    this.context.commit('setSigner', null);
+    this.context.commit('setAccounts', []);
+    window.localStorage?.removeItem(KEY_CONNECTED_WALLET_TYPE);
+    // HACK: Force remove WalletConnect session
+    window.localStorage?.removeItem(KEY_WALLET_CONNECT);
+  }
+
+  get getType() {
+    return this.type;
   }
 
   get getSigner() {
@@ -209,18 +234,5 @@ export default class Wallet extends VuexModule {
 
   get getWalletConnectURI() {
     return this.walletConnectURI;
-  }
-
-  @Action
-  async fetchKeplrSigner() {
-    await this.checkIfInited();
-    return this.signer;
-  }
-
-  @Action
-  async fetchWalletAddress() {
-    await this.checkIfInited();
-    const address = this.context.getters.getWalletAddress;
-    return address;
   }
 }

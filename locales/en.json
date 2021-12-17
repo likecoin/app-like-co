@@ -34,6 +34,7 @@
   "AirDrop.mission.vote": "Because that goal will measure the best of our energies ans skills",
   "AirDrop.placeholder.email": "email address",
   "AppHeader.button.connectWallet": "Connect Wallet",
+  "AppHeader.button.signOut": "Sign Out",
   "AppHeader.tabBar.button.depub": "#DePub",
   "AppHeader.tabBar.button.publishing": "Your Publishing",
   "AppHeader.tabBar.button.stake": "Delegate and Vote",

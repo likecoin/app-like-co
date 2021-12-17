@@ -53,8 +53,8 @@ export default class ConnectWalletButton extends Vue {
     address: string
   }) => void
 
-  @walletModule.Getter('getWalletAddress') keplrWallet!: string
-  @walletModule.Getter('getSigner') keplrSigner!: OfflineSigner | null
+  @walletModule.Getter('getWalletAddress') walletAddress!: string
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action initKeplr!: () => Promise<boolean>
   @walletModule.Action initWalletConnect!: () => Promise<boolean>
 
@@ -97,8 +97,8 @@ export default class ConnectWalletButton extends Vue {
         return;
     }
     this.updateSignerInfo({
-      signer: this.keplrSigner,
-      address: this.keplrWallet,
+      signer: this.signer,
+      address: this.walletAddress,
     });
   }
 }

@@ -27,6 +27,12 @@ export default class SignerStore extends VuexModule {
     this.context.commit('setAddress', address)
   }
 
+  @Action
+  reset() {
+    this.context.commit('setAddress', '')
+    this.context.commit('setSigner', null)
+  }
+
   get getAddress() {
     return this.address;
   }
