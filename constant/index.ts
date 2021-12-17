@@ -59,3 +59,12 @@ export const CONNECT_WALLET_TYPES = [
   'keplr',
   'likerland_app',
 ];
+
+export const EMAIL_REGEX = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/
+
+export const AIRDROP_CLAIM = 'https://airdrop.rinkeby.like.co/api/claims?address=';
+
+export const AIRDROP_OVERVIEW = 'https://airdrop.rinkeby.like.co/api/overview?address=';
+
+export const AIRDROP_SUBSCRIBE = 'https://airdrop.rinkeby.like.co/api/subscribe';
+

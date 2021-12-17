@@ -166,6 +166,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { EMAIL_REGEX, AIRDROP_SUBSCRIBE } from '~/constant'
 
 export enum Preset {
   both = 'both',
@@ -180,18 +181,18 @@ export default class SubscriptionCard extends Vue {
   email: string = ''
   errorMessage: string = ''
   isOpenAlert: boolean = false
-
   
-  async handleSubmit(){
+  async handleSubmit() {
     this.errorMessage = ''
-    const reg = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/;
-    if (!reg.test(this.email)) { this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string; return }
-
-    const body = { email:this.email}
+    if (!EMAIL_REGEX.test(this.email)) {
+      this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string
+      return
+    }
+    const body = { email: this.email, language: navigator.language }
     try {
       await this.$axios.post(
-      `https://airdrop.rinkeby.like.co/api/subscribe`,
-      body,
+        AIRDROP_SUBSCRIBE,
+        body,
       )
     } catch (err) {
       this.errorMessage = this.$t('AirDrop.errorMessage.alreadySubscriibed') as string;
@@ -199,6 +200,5 @@ export default class SubscriptionCard extends Vue {
       if (!this.errorMessage) this.isOpenAlert = true
     }
   }
-
 }
 </script>

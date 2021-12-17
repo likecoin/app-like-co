@@ -302,6 +302,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { AIRDROP_CLAIM } from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -327,8 +328,8 @@ export default class AirdropMissions extends Vue {
 
   // eslint-disable-next-line class-methods-use-this
   async mounted() {
-      const res:any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/api/claims?address=${this.address}`,
+    const res:any = await this.$axios.get(
+      `${AIRDROP_CLAIM}${this.address}`,
     )
     this.unclaimedAmount = Math.round((res.data.reward.unclaimedAmount) * Denom.Nanolike)
     this.missionStatus = res.data.missionStatus

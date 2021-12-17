@@ -36,7 +36,7 @@
         id="planet1"
         :class="[
           'absolute',
-          'top-[260px]',
+          'top-[160px]',
           'left-[60%]',
           'z-[8]',
           'w-[340px]',
@@ -47,14 +47,24 @@
         id="planet2"
         :class="[
           'absolute',
-          'top-[560px]',
+          'top-[460px]',
           'left-[8%]',
           'z-[8]',
           'w-[276px]',
         ]"
         src="/images/airdrop/planet_2.png"
       />
-      <div id="cross-bg" :class="['z-[5]','w-full','h-full']">
+      <div 
+        :class="[
+          'z-[5]',
+          'w-full',
+          'h-full',
+          'bg-repeat'
+        ]"
+        :style="{
+          backgroundImage: 'url(' + crossImage + ')',
+        }"
+      >
         <div
           :class="[
             'z-[5]',
@@ -112,6 +122,7 @@
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { AIRDROP_OVERVIEW } from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -133,6 +144,7 @@ export default class AirdropCheckPage extends Vue {
   isQualifiedForAtom: boolean = false
   isQualifiedForOsmo: boolean = false
   isQualifiedForCivic: boolean = false
+  crossImage = "'/images/airdrop/background_cross.svg'"
 
   mounted() {
     this.fetchClaimmableAmount()
@@ -152,7 +164,7 @@ export default class AirdropCheckPage extends Vue {
     if (!this.claimmingAddress) return
     // TODO: Separate Testnet/Production endpoint
     const res: any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/api/overview?address=${this.claimmingAddress}`,
+      `${AIRDROP_OVERVIEW}${this.claimmingAddress}`,
     )
     this.claimmableAmount = Math.round(res.data.totalAmount * Denom.Nanolike)
     this.isQualifiedForAtom = !!res.data.atomAmount
@@ -171,8 +183,4 @@ export default class AirdropCheckPage extends Vue {
     left: 30px
   }
 }
-#cross-bg {
-    background-image:url('/images/airdrop/background_cross.svg') ;
-    background-repeat: repeat;
-  }
 </style>
