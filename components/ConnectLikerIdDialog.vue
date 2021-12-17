@@ -20,11 +20,32 @@
         ]"
       >
         <li
-          v-for="(step, i) in steps"
+          v-for="(i18nKey, i) in stepI18nKeys"
           :key="i"
           :class="{ 'mt-[16px]': i > 0 }"
         >
-          <Label preset="p5">{{ step }}</Label>
+          <Label preset="p5">
+            <i18n :path="i18nKey" tag="div">
+              <template #likerlandAppLogo>
+                <IconLikerLandApp
+                  :class="[
+                    'inline',
+                    'w-[32px]',
+                    'h-[32px]',
+                  ]"
+                />
+              </template>
+              <template #likerlandAppQRCodeIcon>
+                <IconLikerLandAppQRCode
+                  :class="[
+                    'inline',
+                    'w-[24px]',
+                    'h-[24px]',
+                  ]"
+                />
+              </template>
+            </i18n>
+          </Label>
         </li>
       </ol>
       <div
@@ -62,11 +83,12 @@ export default class ConnectLikerIdDialog extends Vue {
   @walletModule.Getter('getWalletConnectURI') walletConnectURI!: string
   @walletModule.Mutation('setWalletConnectURI') setWalletConnectURI!: (uri: string) => void
 
-  get steps() {
+  // eslint-disable-next-line class-methods-use-this
+  get stepI18nKeys() {
     return [
-      this.$t('ConnectLikerIdDialog.step.1'),
-      this.$t('ConnectLikerIdDialog.step.2'),
-      this.$t('ConnectLikerIdDialog.step.3'),
+      'ConnectLikerIdDialog.step.1',
+      'ConnectLikerIdDialog.step.2',
+      'ConnectLikerIdDialog.step.3',
     ]
   }
 
