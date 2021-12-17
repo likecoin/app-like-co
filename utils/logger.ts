@@ -26,6 +26,17 @@ export async function setTrackerUser(vue: Vue, { wallet } : { wallet?: string } 
   }
 }
 
+export function updateSentryUser(vue: Vue, { wallet } : { wallet?: string } = {}) {
+  if (vue.$sentry && wallet) {
+    const opt = {
+     id: wallet,
+    };
+    vue.$sentry.configureScope((scope: any) => {
+      scope.setUser(opt);
+    });
+  }
+}
+
 export function logTrackerEvent(
   vue: Vue,
   category: string,

@@ -5,6 +5,7 @@ const {
   IS_TESTNET,
   CI,
   GA_TRACKING_ID,
+  SENTRY_DSN,
 } = process.env;
 
 export default {
@@ -36,6 +37,7 @@ export default {
     IS_TESTNET,
     CI,
     GA_TRACKING_ID,
+    SENTRY_DSN,
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/global.css'],

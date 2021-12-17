@@ -12,6 +12,7 @@ env:
   DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
   IMAGE: ${{ secrets.GCR_IMAGE }}
   GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 jobs:
   setup-build-publish-deploy:
@@ -48,6 +49,7 @@ jobs:
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" \
           --build-arg GA_TRACKING_ID="$GA_TRACKING_ID" \
+          --build-arg SENTRY_DSN="$SENTRY_DSN" \
           .
 
     # Push the Docker image to Google Container Registry
