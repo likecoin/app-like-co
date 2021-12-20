@@ -36,7 +36,7 @@
         >
           <Label
             :class="['font-extrabold', 'text-black']"
-            :text="unclaimedAmount"
+            :text="`${unclaimedAmount}`"
             preset="h1"
           />
           <Label
@@ -73,7 +73,14 @@
             'items-end',
           ]"
         >
-          <Label :class="['font-bold', 'text-black']" :text="decay.rate" preset="h1" />
+          <Label
+            :class="[
+              'font-bold',
+              'text-black',
+            ]"
+            :text="`${decay.rate}`"
+            preset="h1"
+          />
           <Label
             :class="[
               'font-bold',
@@ -126,7 +133,7 @@
           />
           <Label
             :class="['font-bold', 'text-black']"
-            :text="decay.minutes"
+            :text="`${decay.minutes}`"
             preset="h1"
           />
           <Label

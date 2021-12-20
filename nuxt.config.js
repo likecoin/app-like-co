@@ -18,7 +18,7 @@ export default {
       { hid: 'description', name: 'description', content: siteDefaultDescription },
       { hid: 'og:site_name', name: 'og:site_name', content: 'ISCN App'},
       { hid: 'og:title', property: 'og:title', content: 'ISCN App' },
-      { hid: 'og:image', property: 'og:image', content: 'https://app.like.co/og.png' },
+      { hid: 'og:image', property: 'og:image', content: 'https://app.like.co/images/og/default.png' },
       { hid: 'og:description', property: 'og:description', content: siteDefaultDescription },
       { hid: 'og:image_alt', property: 'og:image:alt', content: '#DePub' },
       { hid: 'og:image_width', property: 'og:image:width', content: '1200' },
