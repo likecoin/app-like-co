@@ -5,6 +5,7 @@ const {
   IS_TESTNET,
   CI,
   GA_TRACKING_ID,
+  SENTRY_DSN,
 } = process.env;
 
 export default {
@@ -36,6 +37,7 @@ export default {
     IS_TESTNET,
     CI,
     GA_TRACKING_ID,
+    SENTRY_DSN,
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/global.css'],
@@ -96,6 +98,9 @@ export default {
     // https://i18n.nuxtjs.org
     '@nuxtjs/i18n',
 
+    // https://sentry.nuxtjs.org
+    '@nuxtjs/sentry',
+
     // https://portal-vue.linusb.org/guide/installation.html#nuxt-module
     'portal-vue/nuxt',
   ],
@@ -121,6 +126,13 @@ export default {
     defaultLocale: 'en',
     langDir: '~/locales/',
     vuex: false,
+  },
+
+  sentry: {
+    clientIntegrations: {
+      /* default integrations will still be added due to deep-merge */
+      ReportingObserver: false, // reporting is very noisy on CSP violation.
+    },
   },
 
   serverMiddleware: [

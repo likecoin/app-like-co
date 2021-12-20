@@ -30,6 +30,7 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@nuxtjs/i18n",
+      "@nuxtjs/sentry",
       "@types/node",
       "types/*.d.ts"
     ]
