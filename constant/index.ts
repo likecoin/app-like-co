@@ -39,6 +39,7 @@ export const RAWDATA_TX_URL = {
 export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_URL.testnet
   : RAWDATA_URL.production
+
 export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_TX_URL.testnet
   : RAWDATA_TX_URL.production
@@ -62,9 +63,29 @@ export const CONNECT_WALLET_TYPES = [
 
 export const EMAIL_REGEX = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/
 
-export const AIRDROP_CLAIM = 'https://airdrop.rinkeby.like.co/api/claims?address=';
+export const AIRDROP_CLAIM_URL = {
+  testnet: 'https://airdrop.rinkeby.like.co/api/claims?address=',
+  production: 'https://airdrop.like.co/api/claims?address=',
+}
 
-export const AIRDROP_OVERVIEW = 'https://airdrop.rinkeby.like.co/api/overview?address=';
+export const AIRDROP_OVERVIEW_URL = {
+  testnet: 'https://airdrop.rinkeby.like.co/api/overview?address=',
+  production: 'https://airdrop.like.co/api/overview?address=',
+}
 
-export const AIRDROP_SUBSCRIBE = 'https://airdrop.rinkeby.like.co/api/subscribe';
+export const AIRDROP_SUBSCRIBE_URL = {
+  testnet: 'https://airdrop.rinkeby.like.co/api/subscribe',
+  production: 'https://airdrop.like.co/api/subscribe',
+}
 
+export const AIRDROP_CLAIM = IS_TESTNET
+  ? AIRDROP_CLAIM_URL.testnet
+  : AIRDROP_CLAIM_URL.production
+
+export const AIRDROP_OVERVIEW = IS_TESTNET
+  ? AIRDROP_OVERVIEW_URL.testnet
+  : AIRDROP_OVERVIEW_URL.production
+
+export const AIRDROP_SUBSCRIBE = IS_TESTNET
+  ? AIRDROP_SUBSCRIBE_URL.testnet
+  : AIRDROP_SUBSCRIBE_URL.production
