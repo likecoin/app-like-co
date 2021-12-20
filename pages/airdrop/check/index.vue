@@ -1,15 +1,22 @@
 <template>
-  <Page :class="['justify-start','bg-light-gray','items-center']">
+  <Page
+    :class="[
+      'relative',
+      'justify-start',
+      'bg-light-gray',
+      'items-center',
+      'min-w-[1440px]',
+    ]"
+  >
     <!-- Container -->
     <div
       :class="[
         'flex',
         'flex-col',
+        'flex-grow',
         'items-center',
         'mx-auto',
-        'min-w-[1440px]',
         'w-full',
-        'h-full',
         'bg-gradient-to-b',
         'from-white',
         'to-light-gray',
@@ -29,7 +36,7 @@
         id="planet1"
         :class="[
           'absolute',
-          'top-[260px]',
+          'top-[160px]',
           'left-[60%]',
           'z-[8]',
           'w-[340px]',
@@ -40,60 +47,72 @@
         id="planet2"
         :class="[
           'absolute',
-          'top-[560px]',
+          'top-[460px]',
           'left-[8%]',
           'z-[8]',
           'w-[276px]',
         ]"
         src="/images/airdrop/planet_2.png"
       />
-      <div
+      <div 
         :class="[
-          'relative',
           'z-[5]',
-          'overflow-hidden',
-          'flex flex-col',
-          'items-center',
-          'justify-center',
-          'mx-auto',
-          'mt-[380px]',
-          'mb-[32px]',
-          'min-w-[936px]',
-          'max-w-[970px]',
-          'box-border',
-          'bg-white',
-          'rounded-[24px]',
-          'border-[2px]',
-          'border-airdrop-gold',
-        ]"
-      >
-        <AirdropLogin
-          v-if="!claimmingAddress"
-          @input="handleAddressInput"
-        />
-        <AirdropVerifier
-          v-else
-          :address="claimmingAddress"
-          :claimmable-amount="claimmableAmount"
-          :is-qualified-for-atom="isQualifiedForAtom"
-          :is-qualified-for-osmo="isQualifiedForOsmo"
-          :is-qualified-for-civic="isQualifiedForCivic"
-        />
-      </div>
-      <!-- follow LikeCoin -->
-      <SubscriptionCard class="mb-[150px]" preset="community" />
-      <!-- get tokens -->
-      <div
-        :class="[
-          'flex',
           'w-full',
-          'justify-between',
-          'px-[24px]',
-          'mb-[24px]'
+          'h-full',
+          'bg-repeat'
         ]"
+        :style="{
+          backgroundImage: 'url(' + crossImage + ')',
+        }"
       >
-        <InformationBar/>
-        <TokenBar/>
+        <div
+          :class="[
+            'z-[5]',
+            'overflow-hidden',
+            'flex flex-col',
+            'items-center',
+            'justify-center',
+            'mx-auto',
+            'mt-[380px]',
+            'mb-[32px]',
+            'min-w-[936px]',
+            'max-w-[970px]',
+            'box-border',
+            'bg-white',
+            'rounded-[24px]',
+            'border-[2px]',
+            'border-airdrop-gold',
+          ]"
+        >
+          <AirdropLogin
+            v-if="!claimmingAddress"
+            @input="handleAddressInput"
+          />
+          <AirdropVerifier
+            v-else
+            :address="claimmingAddress"
+            :claimmable-amount="claimmableAmount"
+            :is-qualified-for-atom="isQualifiedForAtom"
+            :is-qualified-for-osmo="isQualifiedForOsmo"
+            :is-qualified-for-civic="isQualifiedForCivic"
+          />
+        </div>
+        <!-- follow LikeCoin -->
+        <SubscriptionCard class="mb-[150px]" preset="community" />
+        <!-- get tokens -->
+        <div
+          :class="[
+            'flex',
+            'absolute',
+            'bottom-[24px]',
+            'w-full',
+            'justify-between',
+            'px-[24px]',
+          ]"
+        >
+          <InformationBar/>
+          <TokenBar/>
+        </div>
       </div>
     </div>
   </Page>
@@ -103,6 +122,7 @@
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { AIRDROP_OVERVIEW } from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -111,9 +131,7 @@ export enum Denom {
   Nanolike = 0.000000001
 }
 
-@Component({
-  layout: 'default',
-})
+@Component
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') walletAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
@@ -126,6 +144,7 @@ export default class AirdropCheckPage extends Vue {
   isQualifiedForAtom: boolean = false
   isQualifiedForOsmo: boolean = false
   isQualifiedForCivic: boolean = false
+  crossImage = "'/images/airdrop/background_cross.svg'"
 
   mounted() {
     this.fetchClaimmableAmount()
@@ -145,7 +164,7 @@ export default class AirdropCheckPage extends Vue {
     if (!this.claimmingAddress) return
     // TODO: Separate Testnet/Production endpoint
     const res: any = await this.$axios.get(
-      `https://airdrop.rinkeby.like.co/api/overview?address=${this.claimmingAddress}`,
+      `${AIRDROP_OVERVIEW}${this.claimmingAddress}`,
     )
     this.claimmableAmount = Math.round(res.data.totalAmount * Denom.Nanolike)
     this.isQualifiedForAtom = !!res.data.atomAmount

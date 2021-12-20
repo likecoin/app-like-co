@@ -16,23 +16,23 @@
       :class="[
         'flex',
         'justify-center',
-        'w-[489px]',
         'mt-[8px]',
         'p-[16px]',
       ]"
     >
       <TextField
         v-model="email"
-        class="flex-grow"
         :placeholder="$t('AirDrop.placeholder.email')"
+        :error-message="errorMessage"
       />
       <Button
         class="ml-[16px]"
         preset="secondary"
         :text="$t('AirDrop.button.notify')"
+        @click="handleSubmit"
       >
         <template #prepend>
-          <IconPlaceholder />
+          <IconSensors />
         </template>
       </Button>
     </div>
@@ -80,8 +80,51 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
+          href="https://twitter.com/likecoin"
+        >
+          <IconTwitter class="text-dark-gray" />
+        </Button>
+      </div>
+      <div
+        :class="[
+          'flex',
+          'flex-col',
+          'items-center',
+        ]"
+      >
+        <Button
+          preset="tertiary"
+          circle="true"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
+          href="https://discord.com/invite/W4DQ6peZZZ"
+        >
+          <IconDiscord class="text-dark-gray" />
+        </Button>
+      </div>
+      <div
+        :class="[
+          'flex',
+          'flex-col',
+          'items-center',
+        ]"
+      >
+        <Button
+          preset="tertiary"
+          circle="true"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
           href="https://github.com/likecoin"
         >
           <IconGithub class="text-dark-gray" />
@@ -97,51 +140,33 @@
         <Button
           preset="tertiary"
           circle="true"
-          size="small"
-          class="mx-[8px]"
-        >
-          <IconDiscord class="text-dark-gray" />
-        </Button>
-      </div>
-      <div
-        :class="[
-          'flex',
-          'flex-col',
-          'items-center',
-        ]"
-      >
-        <Button
-          preset="tertiary"
-          circle="true"
-          size="small"
-          class="mx-[8px]"
+          :class="[
+            'w-[32px]',
+            'h-[32px]',
+            'mx-[8px]'
+          ]"
           href="https://medium.com/likecoin"
         >
           <IconMedium class="text-dark-gray" />
         </Button>
       </div>
-      <div
-        :class="[
-          'flex',
-          'flex-col',
-          'items-center',
-        ]"
-      >
-        <Button
-          preset="tertiary"
-          circle="true"
-          size="small"
-          class="mx-[8px]"
-          href="https://about.like.co/"
-        >
-          <IconLikeIcon class="text-dark-gray" />
-        </Button>
-      </div>
     </div>
+    <Snackbar
+      v-model="isOpenAlert"
+      class="mx-auto"
+      :text="$t('AirDrop.successMessage.subscribed')"
+      preset="success"
+      :timeout="2000"
+    >
+      <template #prepend>
+        <IconDone/>
+      </template>
+    </Snackbar>
   </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { EMAIL_REGEX, AIRDROP_SUBSCRIBE } from '~/constant'
 
 export enum Preset {
   both = 'both',
@@ -154,5 +179,26 @@ export default class SubscriptionCard extends Vue {
   @Prop({ default: 'both' }) readonly preset!: string | undefined
 
   email: string = ''
+  errorMessage: string = ''
+  isOpenAlert: boolean = false
+  
+  async handleSubmit() {
+    this.errorMessage = ''
+    if (!EMAIL_REGEX.test(this.email)) {
+      this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string
+      return
+    }
+    const body = { email: this.email, language: navigator.language }
+    try {
+      await this.$axios.post(
+        AIRDROP_SUBSCRIBE,
+        body,
+      )
+    } catch (err) {
+      this.errorMessage = this.$t('AirDrop.errorMessage.alreadySubscriibed') as string;
+    } finally {
+      if (!this.errorMessage) this.isOpenAlert = true
+    }
+  }
 }
 </script>
