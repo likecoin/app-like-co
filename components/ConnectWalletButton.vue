@@ -40,6 +40,7 @@
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { logTrackerEvent, setTrackerUser } from '~/utils/logger'
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
@@ -88,9 +89,11 @@ export default class ConnectWalletButton extends Vue {
     this.$emit('click', this.type)
     switch (this.type) {
       case 'keplr':
+        logTrackerEvent(this, 'General', 'ConnectKeplr', '', 1);
         await this.initKeplr();
         break;
       case 'likerland_app':
+        logTrackerEvent(this, 'General', 'ConnectLikerLandApp', '', 1);
         await this.initWalletConnect();
         break;
       default:
@@ -100,6 +103,8 @@ export default class ConnectWalletButton extends Vue {
       signer: this.keplrSigner,
       address: this.keplrWallet,
     });
+    setTrackerUser(this, { wallet: this.keplrWallet });
+    logTrackerEvent(this, 'General', 'ConnectWalletSuccess', this.keplrWallet, 1);
   }
 }
 </script>

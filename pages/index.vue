@@ -70,6 +70,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
+import { logTrackerEvent } from '~/utils/logger';
 
 const iscnModule = namespace('iscn')
 
@@ -87,11 +88,14 @@ export default class IndexPage extends Vue {
   async onSearch() {
     this.state = 'loading';
     const { keyword } = this
+    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearch', keyword, 1);
     const res: ISCNRecordWithID[] = await this.queryISCNByKeyword(keyword);
     if (!res.length) {
       this.state = 'not-found';
+      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchNotFound', keyword, 1);
     } else {
       this.state = 'loaded';
+      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', keyword, 1);
       if (res.length > 1) {
         const iscnIds = res.map((r) => r.id);
         this.$router.push(this.localeLocation({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }})!);
