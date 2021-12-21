@@ -86,6 +86,7 @@
             'mx-[8px]'
           ]"
           href="https://twitter.com/likecoin"
+          @click="onClickTwitter"
         >
           <IconTwitter class="text-dark-gray" />
         </Button>
@@ -167,6 +168,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { EMAIL_REGEX, AIRDROP_SUBSCRIBE } from '~/constant'
+import { logTrackerEvent } from '~/utils/logger'
 
 export enum Preset {
   both = 'both',
@@ -181,8 +183,13 @@ export default class SubscriptionCard extends Vue {
   email: string = ''
   errorMessage: string = ''
   isOpenAlert: boolean = false
-  
+
+  onClickTwitter() {
+    logTrackerEvent(this, 'AirdropCheck', 'SubscribeTwitter', '', 1);
+  }
+
   async handleSubmit() {
+    logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterStart', '', 1);
     this.errorMessage = ''
     if (!EMAIL_REGEX.test(this.email)) {
       this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string
@@ -194,7 +201,9 @@ export default class SubscriptionCard extends Vue {
         AIRDROP_SUBSCRIBE,
         body,
       )
+      logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterSuccess', '', 1);
     } catch (err) {
+      logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterFail', '', 1);
       this.errorMessage = this.$t('AirDrop.errorMessage.alreadySubscriibed') as string;
     } finally {
       if (!this.errorMessage) this.isOpenAlert = true
