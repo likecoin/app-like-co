@@ -91,7 +91,8 @@
         <TextField
           v-model="inputAddress"
           class="flex-grow"
-          placeholder="cosmos/osmosis..."
+          :placeholder="$t('AirDrop.placeholder.address')"
+          :error-message="errorMessage"
         />
         <Button
           class="ml-[16px]"
@@ -108,22 +109,46 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { CONNECT_WALLET_TYPES } from '~/constant'
+
+export enum CosmosArrdessFormat {
+  head = 'cosmos1',
+  length = 45
+}
+export enum OsmoArrdessFormat {
+  head = 'osmo1',
+  length = 43
+}
 
 @Component
 export default class AirdropLogin extends Vue {
   @Prop(Boolean) readonly isAirdropStarted: boolean | undefined
 
   inputAddress: string = ''
+  errorMessage: string = ''
 
   // eslint-disable-next-line class-methods-use-this
   get connectWalletTypes() {
     return CONNECT_WALLET_TYPES
   }
 
+  @Watch('inputAddress')
+  onValueChange() {
+    this.errorMessage = ''
+  }
+
   handleAddressInput() {
-    this.$emit('input', this.inputAddress)
+    this.errorMessage = ''
+    if (
+      (this.inputAddress.slice(0, 7) === CosmosArrdessFormat.head &&
+        this.inputAddress.length === CosmosArrdessFormat.length) ||
+      (this.inputAddress.slice(0, 5) === OsmoArrdessFormat.head &&
+        this.inputAddress.length === OsmoArrdessFormat.length)
+    ){
+      this.$emit('input', this.inputAddress)
+    }
+    this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
   }
 }
 </script>
