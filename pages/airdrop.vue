@@ -93,8 +93,20 @@
         </div>
 
         <SubscriptionCard
-          class="mb-[150px]"
+          class="mb-[48px]"
           :preset="subscriptionCardPreset"
+        />
+        <Label
+          v-if="!!shouldShowTentative"
+          :class="[
+            'text-center',
+            'mb-[220px]',
+            'w-[800px]',
+            'mx-auto',
+            'text-medium-gray'
+          ]"
+          :text="$t('AirDrop.content.tentative')"
+          preset="p5"
         />
 
         <footer
@@ -119,6 +131,9 @@
 import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
+import { namespace } from 'vuex-class'
+
+const signerModule = namespace('signer')
 
 @Component({
   head() {
@@ -136,10 +151,19 @@ import { MetaInfo } from 'vue-meta'
   },
 })
 export default class AirdropCheckPage extends Vue {
+  @signerModule.Getter('getAddress') currentAddress!: string
+  
   get subscriptionCardPreset() {
     return this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
       ? 'community'
       : 'both'
+  }
+
+  get shouldShowTentative() {
+    return (
+      this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name &&
+      this.currentAddress
+    )
   }
 }
 </script>
