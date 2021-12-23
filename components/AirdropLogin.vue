@@ -110,7 +110,11 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-import { CONNECT_WALLET_TYPES } from '~/constant'
+import {
+  CONNECT_WALLET_TYPES,
+  COSMOS_ADDRESS_REGEX,
+  OSMO_ADDRESS_REGEX,
+} from '~/constant'
 
 export enum CosmosArrdessFormat {
   head = 'cosmos1',
@@ -141,11 +145,9 @@ export default class AirdropLogin extends Vue {
   handleAddressInput() {
     this.errorMessage = ''
     if (
-      (this.inputAddress.slice(0, 7) === CosmosArrdessFormat.head &&
-        this.inputAddress.length === CosmosArrdessFormat.length) ||
-      (this.inputAddress.slice(0, 5) === OsmoArrdessFormat.head &&
-        this.inputAddress.length === OsmoArrdessFormat.length)
-    ){
+      COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
+      OSMO_ADDRESS_REGEX.test(this.inputAddress)
+    ) {
       this.$emit('input', this.inputAddress)
     }
     this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
