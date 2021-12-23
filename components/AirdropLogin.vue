@@ -116,15 +116,6 @@ import {
   OSMO_ADDRESS_REGEX,
 } from '~/constant'
 
-export enum CosmosArrdessFormat {
-  head = 'cosmos1',
-  length = 45
-}
-export enum OsmoArrdessFormat {
-  head = 'osmo1',
-  length = 43
-}
-
 @Component
 export default class AirdropLogin extends Vue {
   @Prop(Boolean) readonly isAirdropStarted: boolean | undefined
