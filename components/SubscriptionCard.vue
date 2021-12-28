@@ -56,6 +56,7 @@
         :style="{ border: '2px solid #4696F1' }"
         :text="$t('AirDrop.label.follow.Twitter')"
         href="https://twitter.com/likecoin"
+        @click="onClickSocial('Twitter')"
       >
         <template #prepend>
           <IconTwitter class="text-twitter-blue" />
@@ -86,7 +87,7 @@
             'mx-[8px]'
           ]"
           href="https://twitter.com/likecoin"
-          @click="onClickTwitter"
+          @click="onClickSocial('Twitter')"
         >
           <IconTwitter class="text-dark-gray" />
         </Button>
@@ -107,6 +108,7 @@
             'mx-[8px]'
           ]"
           href="https://discord.com/invite/W4DQ6peZZZ"
+          @click="onClickSocial('Discord')"
         >
           <IconDiscord class="text-dark-gray" />
         </Button>
@@ -127,6 +129,7 @@
             'mx-[8px]'
           ]"
           href="https://github.com/likecoin"
+          @click="onClickSocial('Github')"
         >
           <IconGithub class="text-dark-gray" />
         </Button>
@@ -147,6 +150,7 @@
             'mx-[8px]'
           ]"
           href="https://medium.com/likecoin"
+          @click="onClickSocial('Medium')"
         >
           <IconMedium class="text-dark-gray" />
         </Button>
@@ -184,8 +188,8 @@ export default class SubscriptionCard extends Vue {
   errorMessage: string = ''
   isOpenAlert: boolean = false
 
-  onClickTwitter() {
-    logTrackerEvent(this, 'AirdropCheck', 'SubscribeTwitter', '', 1);
+  onClickSocial(platform: string) {
+    logTrackerEvent(this, 'AirdropCheck', `Subscribe${platform}`, '', 1);
   }
 
   async handleSubmit() {
