@@ -114,20 +114,6 @@
           :text="$t('AirDrop.content.tentative')"
           preset="p5"
         />
-
-        <footer
-          :class="[
-            'absolute',
-            'bottom-[24px]',
-            'flex',
-            'justify-between',
-            'w-full',
-            'px-[24px]',
-          ]"
-        >
-          <InformationBar />
-          <TokenBar />
-        </footer>
       </div>
     </div>
   </Page>

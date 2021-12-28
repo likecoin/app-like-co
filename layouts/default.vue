@@ -1,7 +1,8 @@
 <template>
   <RootLayout>
     <AppHeader />
-    <Nuxt />
+    <Nuxt class="min-h-full" />
+    <AppFooter/>
   </RootLayout>
 </template>
 
