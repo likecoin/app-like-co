@@ -318,9 +318,7 @@ export enum Denom {
   Nanolike = 0.000000001
 }
 
-@Component({
-  layout: 'wallet',
-})
+@Component
 export default class AirdropMissions extends Vue {
   @Prop(String) readonly address: string | undefined
 
