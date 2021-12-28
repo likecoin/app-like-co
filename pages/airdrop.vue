@@ -27,33 +27,38 @@
         :class="[
           'absolute',
           'z-[0]',
-          'max-w-[1440px]',
+          'top-[-50px]',
+          'max-w-[1280px]',
+          '2xl:top-0',
+          '2xl:max-w-[1440px]',
         ]"
         src="/images/airdrop/background.png"
       />
       <img
         id="planet1"
         :class="[
+          'hidden',
           'absolute',
-          'top-[260px]',
-          'right-[6%]',
+          'top-[210px]',
+          'right-[6%]', 
           'z-[8]',
           'w-[340px]',
-          'hidden',
-          'lg:block'
+          'md:block',
+          '2xl:top-[260px]',
         ]"
         src="/images/airdrop/planet_1.png"
       />
       <img
         id="planet2"
         :class="[
+          'hidden',
           'absolute',
-          'top-[560px]',
-          'left-[8%]',
+          'top-[510px]',
+          'left-[3%]',
           'z-[8]',
           'w-[276px]',
-          'hidden',
-          'lg:block'
+          'xl:block',
+          '2xl:top-[560px]'
         ]"
         src="/images/airdrop/planet_2.png"
       />
@@ -77,7 +82,7 @@
             'items-center',
             'justify-center',
             'mx-auto',
-            'mt-[380px]',
+            'mt-[300px]',
             'mb-[32px]',
             'min-w-[936px]',
             'max-w-[970px]',
@@ -87,6 +92,7 @@
             'rounded-[24px]',
             'border-[2px]',
             'border-airdrop-gold',
+            '2xl:mt-[380px]',
           ]"
         >
           <nuxt />
