@@ -1,5 +1,5 @@
 <template>
-  <div
+  <Page
     :class="[
       'mx-auto',
       'mt-[40px]',
@@ -10,9 +10,9 @@
     <div
       :class="[
         'flex',
-        'justify-between',
-        'items-center',
+        'justify-start',
         'mb-[4px]',
+        'w-full'
       ]"
     >
       <Button
@@ -27,44 +27,42 @@
         </template>
       </Button>
     </div>
-    <Page>
-      <IscnUploadForm
-        v-if="state === 'init'"
-        :step="step"
-        @submit="onSubmitUpload"
-      />
-      <IscnRegisterForm
-        v-else-if="state === 'iscn'"
-        :ipfs-hash="ipfsHash"
-        :arweave-id="arweaveId"
-        :file-data="fileData"
-        :file-type="fileType"
-        :file-size="fileSize"
-        :file-s-h-a256="fileSHA256"
-        :file-blob="fileBlob"
-        :is-image="isImage"
-        :exif-info="exifInfo"
-        :step="step"
-        @arweaveUploaded="onArweaveIdUpdate"
-        @txBroadcasted="onISCNTxInfo"
-        @handleSubmit="isSubmit = true"
-        @handleQuit="isSubmit = false"
-      />
-      <IscnUploadedInfo
-        v-else-if="state === 'done'"
-        :is-image="isImage"
-        :ipfs-hash="ipfsHash"
-        :arweave-id="arweaveId"
-        :file-data="fileData"
-        :file-s-h-a256="fileSHA256"
-        :iscn-id="iscnId"
-        :iscn-hash="iscnTxHash"
-        :exif-info="exifInfo"
-        :iscn-timestamp="iscnTimestamp"
-        :step="step"
-      />
-    </Page>
-  </div>
+    <IscnUploadForm
+      v-if="state === 'init'"
+      :step="step"
+      @submit="onSubmitUpload"
+    />
+    <IscnRegisterForm
+      v-else-if="state === 'iscn'"
+      :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
+      :file-data="fileData"
+      :file-type="fileType"
+      :file-size="fileSize"
+      :file-s-h-a256="fileSHA256"
+      :file-blob="fileBlob"
+      :is-image="isImage"
+      :exif-info="exifInfo"
+      :step="step"
+      @arweaveUploaded="onArweaveIdUpdate"
+      @txBroadcasted="onISCNTxInfo"
+      @handleSubmit="isSubmit = true"
+      @handleQuit="isSubmit = false"
+    />
+    <IscnUploadedInfo
+      v-else-if="state === 'done'"
+      :is-image="isImage"
+      :ipfs-hash="ipfsHash"
+      :arweave-id="arweaveId"
+      :file-data="fileData"
+      :file-s-h-a256="fileSHA256"
+      :iscn-id="iscnId"
+      :iscn-hash="iscnTxHash"
+      :exif-info="exifInfo"
+      :iscn-timestamp="iscnTimestamp"
+      :step="step"
+    />
+  </Page>
 </template>
 
 <script lang="ts">

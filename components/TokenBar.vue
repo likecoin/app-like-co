@@ -3,11 +3,16 @@
     :class="[
       'flex',
       'flex-nowrap',
+      'items-center',
       'w-min',
     ]"
   >
     <Label
-      :class="['whitespace-nowrap', 'mr-[24px]']"
+      :class="[
+        'whitespace-nowrap',
+        'mr-[24px]',
+        'text-medium-gray',
+      ]"
       :text="$t('HomePage.label.getToken')"
       preset="h6"
     />
@@ -28,11 +33,21 @@
       :text="$t('HomePage.button.emeris')"
     />
     <Button
+      class="mr-[24px]"
       preset="tertiary"
       text-preset="h6"
       size="mini"
       href="https://app.liquid.com/exchange/LIKEUSDT"
       :text="$t('HomePage.button.liquid')"
+    />
+    <!-- help button -->
+    <IconDot class="mr-[24px]"/>
+    <Button
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7"
+      :text="$t('HomePage.button.help')"
     />
   </div>
 </template>
