@@ -13,7 +13,8 @@
       </Card>
     </Page>
     <template v-else>
-      <Nuxt />
+      <Nuxt class="min-h-full" />
+      <AppFooter/>
     </template>
   </RootLayout>
 </template>

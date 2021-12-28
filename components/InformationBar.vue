@@ -7,7 +7,11 @@
     ]"
   >
     <Label
-      :class="['whitespace-nowrap', 'mr-[24px]']"
+      :class="[
+        'whitespace-nowrap',
+        'mr-[24px]',
+        'text-medium-gray',
+      ]"
       :text="$t('HomePage.label.about')"
       preset="h6"
     />

@@ -50,19 +50,6 @@
         </template>
       </Label>
     </form>
-    <div 
-      :class="[
-        'flex',
-        'absolute',
-        'w-full',
-        'justify-between',
-        'bottom-[24px]',
-        'px-[24px]',
-      ]"
-    >
-      <InformationBar/>
-      <TokenBar/>
-    </div>
   </Page>
 </template>
 
