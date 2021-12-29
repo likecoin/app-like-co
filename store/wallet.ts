@@ -104,7 +104,7 @@ export default class Wallet extends VuexModule {
           feeCurrencies: network.coinLookup.map(({ viewDenom }) => configToKeplrCoin(viewDenom)),
           coinType: 118,
           gasPriceStep: {
-            low: 0.01,
+            low: 1,
             average: 10,
             high: 1000,
           },
