@@ -94,7 +94,7 @@
 
         <SubscriptionCard
           class="mb-[150px]"
-          :preset="subscriptionCardPreset"
+          preset="both"
         />
 
         <footer
@@ -136,10 +136,5 @@ import { MetaInfo } from 'vue-meta'
   },
 })
 export default class AirdropCheckPage extends Vue {
-  get subscriptionCardPreset() {
-    return this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
-      ? 'community'
-      : 'both'
-  }
 }
 </script>
