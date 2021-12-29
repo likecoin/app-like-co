@@ -17,9 +17,7 @@ import { namespace } from 'vuex-class'
 
 const signerModule = namespace('signer')
 
-@Component({
-  layout: 'wallet',
-})
+@Component
 export default class AirdropMissionsPage extends Vue {
   @signerModule.Getter('getAddress') claimmableAddress!: string
 }
