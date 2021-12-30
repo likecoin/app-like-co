@@ -146,8 +146,8 @@
     </div>
     <ConnectWalletDialog
       :is-opened="isConnectWalletDialogOpened"
-      @quit="handleConnectWalletButtonClose()"
-      @close="handleConnectWalletButtonClose()"
+      @quit="handleConnectWalletButtonClose"
+      @close="handleConnectWalletButtonClose"
     />
     <ConnectLikerIdDialog />
   </header>
