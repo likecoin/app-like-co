@@ -40,7 +40,7 @@
           'hidden',
           'absolute',
           'top-[210px]',
-          'right-[6%]', 
+          'right-[6%]',
           'z-[8]',
           'w-[340px]',
           'md:block',

@@ -5,12 +5,11 @@
       v-if="!currentAddress"
       class="justify-center"
     >
-      <Card>
-        <Label
-          :text="$t('error.not.connect.wallet')"
-          align="center"
-        />
-      </Card>
+      <ConnectWalletDialog
+        :is-opened="true"
+        @quit="$router.go(-1)"
+      />
+      <ConnectLikerIdDialog />
     </Page>
     <template v-else>
       <Nuxt class="min-h-full" />
