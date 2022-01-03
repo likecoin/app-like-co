@@ -1,10 +1,10 @@
 {
-  "AirDrop.button.claim": "Claim airdrop",
+  "AirDrop.button.claim": "View airdrop",
   "AirDrop.button.enter": "Enter",
   "AirDrop.button.notify": "Be notified",
   "AirDrop.button": "Airdrop",
   "AirDrop.content.0claim": "You are not eligible for the airdrop.  Thanks for your interest in LikeCoin.",
-  "AirDrop.content.prelaunch": "LikeCoin airdrop is coming. Check out the amount you can claim now!",
+  "AirDrop.content.prelaunch": "LikeCoin airdrop is coming. Subscribe and follow our news now!",
   "AirDrop.content.subscription": "Congratulation, you are eligible to claim $LIKE airdrop. Get notified when the claim begins, follow us on Twitter and subscribe to newsletter. Thanks for supporting the Cosmos ecosystem.",
   "AirDrop.errorMessage.alreadySubscriibed": "This email address has already subscribed",
   "AirDrop.errorMessage.invalidEmail": "You have entered an invalid e-mail address. Please try again.",
