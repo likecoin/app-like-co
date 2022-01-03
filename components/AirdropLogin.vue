@@ -109,7 +109,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import {
   CONNECT_WALLET_TYPES,
   COSMOS_ADDRESS_REGEX,
@@ -128,20 +128,16 @@ export default class AirdropLogin extends Vue {
     return CONNECT_WALLET_TYPES
   }
 
-  @Watch('inputAddress')
-  onValueChange() {
-    this.errorMessage = ''
-  }
-
   handleAddressInput() {
     this.errorMessage = ''
     if (
-      COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
-      OSMO_ADDRESS_REGEX.test(this.inputAddress)
+      !COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
+      !OSMO_ADDRESS_REGEX.test(this.inputAddress)
     ) {
-      this.$emit('input', this.inputAddress)
+      this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
+      return;
     }
-    this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
+    this.$emit('input', this.inputAddress)
   }
 }
 </script>
