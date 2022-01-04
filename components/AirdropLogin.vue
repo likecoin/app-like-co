@@ -113,7 +113,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import {
   CONNECT_WALLET_TYPES,
   COSMOS_ADDRESS_REGEX,
-  OSMO_ADDRESS_REGEX,
+  OSMOSIS_ADDRESS_REGEX,
 } from '~/constant'
 
 @Component
@@ -132,7 +132,7 @@ export default class AirdropLogin extends Vue {
     this.errorMessage = ''
     if (
       !COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
-      !OSMO_ADDRESS_REGEX.test(this.inputAddress)
+      !OSMOSIS_ADDRESS_REGEX.test(this.inputAddress)
     ) {
       this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
       return;
