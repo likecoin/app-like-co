@@ -56,7 +56,7 @@
             'grid-cols-2',
             'gap-x-[24px]',
             'gap-y-[24px]',
-            'my-[32px]',
+            'my-[44px]',
           ]"
         >
           <div v-for="item in contentTypes" :key="item">

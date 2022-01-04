@@ -144,35 +144,11 @@
     >
       <IconDangerStripe />
     </div>
-    <Dialog
-      v-model="isConnectWalletDialogOpened"
-      preset="custom"
-    >
-      <Label
-        preset="h5"
-        class="text-like-green"
-        :text="$t('AppHeader.button.connectWallet')"
-      >
-        <template #prepend>
-          <IconSignIn />
-        </template>
-      </Label>
-      <ul class="mt-[24px]">
-        <li
-          v-for="(type, i) in connectWalletTypes"
-          :key="type"
-          :class="{
-            'mt-[8px]': i > 0,
-          }"
-        >
-          <ConnectWalletButton
-            class="w-full"
-            :type="type"
-            @click="handleConnectWalletButtonClick"
-          />
-        </li>
-      </ul>
-    </Dialog>
+    <ConnectWalletDialog
+      :is-opened="isConnectWalletDialogOpened"
+      @quit="handleConnectWalletButtonClose"
+      @close="handleConnectWalletButtonClose"
+    />
     <ConnectLikerIdDialog />
   </header>
 </template>
@@ -232,7 +208,7 @@ export default class AppHeader extends Vue {
     }
   }
 
-  handleConnectWalletButtonClick() {
+  handleConnectWalletButtonClose() {
     this.isConnectWalletDialogOpened = false
   }
 

@@ -27,33 +27,38 @@
         :class="[
           'absolute',
           'z-[0]',
-          'max-w-[1440px]',
+          'top-[-50px]',
+          'max-w-[1280px]',
+          '2xl:top-0',
+          '2xl:max-w-[1440px]',
         ]"
         src="/images/airdrop/background.png"
       />
       <img
         id="planet1"
         :class="[
+          'hidden',
           'absolute',
-          'top-[260px]',
+          'top-[210px]',
           'right-[6%]',
           'z-[8]',
           'w-[340px]',
-          'hidden',
-          'lg:block'
+          'md:block',
+          '2xl:top-[260px]',
         ]"
         src="/images/airdrop/planet_1.png"
       />
       <img
         id="planet2"
         :class="[
+          'hidden',
           'absolute',
-          'top-[560px]',
-          'left-[8%]',
+          'top-[510px]',
+          'left-[3%]',
           'z-[8]',
           'w-[276px]',
-          'hidden',
-          'lg:block'
+          'xl:block',
+          '2xl:top-[560px]'
         ]"
         src="/images/airdrop/planet_2.png"
       />
@@ -77,7 +82,7 @@
             'items-center',
             'justify-center',
             'mx-auto',
-            'mt-[380px]',
+            'mt-[300px]',
             'mb-[32px]',
             'min-w-[936px]',
             'max-w-[970px]',
@@ -87,29 +92,28 @@
             'rounded-[24px]',
             'border-[2px]',
             'border-airdrop-gold',
+            '2xl:mt-[380px]',
           ]"
         >
           <nuxt />
         </div>
 
         <SubscriptionCard
-          class="mb-[150px]"
+          class="mb-[48px]"
           :preset="subscriptionCardPreset"
         />
-
-        <footer
+        <Label
+          v-if="!!shouldShowTentative"
           :class="[
-            'absolute',
-            'bottom-[24px]',
-            'flex',
-            'justify-between',
-            'w-full',
-            'px-[24px]',
+            'text-center',
+            'mb-[220px]',
+            'w-[800px]',
+            'mx-auto',
+            'text-medium-gray'
           ]"
-        >
-          <InformationBar />
-          <TokenBar />
-        </footer>
+          :text="$t('AirDrop.content.tentative')"
+          preset="p5"
+        />
       </div>
     </div>
   </Page>
@@ -119,6 +123,9 @@
 import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
+import { namespace } from 'vuex-class'
+
+const signerModule = namespace('signer')
 
 @Component({
   head() {
@@ -136,10 +143,19 @@ import { MetaInfo } from 'vue-meta'
   },
 })
 export default class AirdropCheckPage extends Vue {
+  @signerModule.Getter('getAddress') currentAddress!: string
+  
   get subscriptionCardPreset() {
     return this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
       ? 'community'
       : 'both'
+  }
+
+  get shouldShowTentative() {
+    return (
+      this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name &&
+      this.currentAddress
+    )
   }
 }
 </script>
