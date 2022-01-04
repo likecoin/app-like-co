@@ -91,7 +91,8 @@
         <TextField
           v-model="inputAddress"
           class="flex-grow"
-          placeholder="cosmos/osmosis..."
+          :placeholder="$t('AirDrop.placeholder.address')"
+          :error-message="errorMessage"
         />
         <Button
           class="ml-[16px]"
@@ -109,13 +110,18 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { CONNECT_WALLET_TYPES } from '~/constant'
+import {
+  CONNECT_WALLET_TYPES,
+  COSMOS_ADDRESS_REGEX,
+  OSMOSIS_ADDRESS_REGEX,
+} from '~/constant'
 
 @Component
 export default class AirdropLogin extends Vue {
   @Prop(Boolean) readonly isAirdropStarted: boolean | undefined
 
   inputAddress: string = ''
+  errorMessage: string = ''
 
   // eslint-disable-next-line class-methods-use-this
   get connectWalletTypes() {
@@ -123,6 +129,14 @@ export default class AirdropLogin extends Vue {
   }
 
   handleAddressInput() {
+    this.errorMessage = ''
+    if (
+      !COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
+      !OSMOSIS_ADDRESS_REGEX.test(this.inputAddress)
+    ) {
+      this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
+      return;
+    }
     this.$emit('input', this.inputAddress)
   }
 }

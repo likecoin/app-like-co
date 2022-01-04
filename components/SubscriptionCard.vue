@@ -199,7 +199,7 @@ export default class SubscriptionCard extends Vue {
       this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string
       return
     }
-    const body = { email: this.email, language: navigator.language }
+    const body = { email: this.email, locale: navigator.language }
     try {
       await this.$axios.post(
         AIRDROP_SUBSCRIBE,
