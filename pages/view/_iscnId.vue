@@ -7,300 +7,320 @@
       <Label :text="$t('general.loading')" />
     </Card>
   </Page>
-  <Page v-else>
-    <div
-      :class="[
-        'container',
-        'flex',
-        'flex-row',
-        'flex-nowrap',
-        'items-start',
-        'w-min',
-        'mx-auto',
-        'mt-[16px]',
-        'mb-[30px]',
-      ]"
+  <Page v-else-if="isPopupLayout">
+    <IscnUploadedInfo
+      :iscn-id="iscnId"
+      :exif-info="exifInfo"
+      :is-show-new-button="false"
     >
-      <div class="mr-[32px]">
-        <ClientOnly>
-          <LazyIscnCard
-            :key="record.id"
-            class="w-[280px]"
-            :record="record"
-            orientation="portrait"
-            :is-animated="true"
-          />
-        </ClientOnly>
-        <MetadataCard
-          v-if="metadata.exifInfo"
-          :img-src="imgSrc"
-          :filtered-exif="exifInfo"
+      <template #footer>
+        <div
           :class="[
-            'w-[280px]',
-            'mt-[16px]',
+            'flex',
+            'justify-end',
           ]"
+        >
+          <Button
+            preset="secondary"
+            :text="$t('general.closeWindow')"
+            @click="closeWindow"
+          />
+        </div>
+      </template>
+    </IscnUploadedInfo>
+  </Page>
+  <Page
+    v-else
+    :class="[
+      'w-min',
+      'mt-[16px]',
+      'mx-auto',
+      'mb-[32px]',
+    ]"
+    :flex-layout-class="[
+      'flex-nowrap',
+      'items-start',
+    ]"
+  >
+    <div class="mr-[32px]">
+      <ClientOnly>
+        <LazyIscnCard
+          :key="record.id"
+          class="w-[280px]"
+          :record="record"
+          orientation="portrait"
+          :is-animated="true"
         />
-      </div>
-      <div>
-        <InfoCard :label-text="type" :time-stamp="recordData.recordTimestamp">
-          <template #icon>
-            <ISCNTypeIcon :type="type" />
+      </ClientOnly>
+      <MetadataCard
+        v-if="metadata.exifInfo"
+        :img-src="imgSrc"
+        :filtered-exif="exifInfo"
+        :class="[
+          'w-[280px]',
+          'mt-[16px]',
+        ]"
+      />
+    </div>
+    <div>
+      <InfoCard :label-text="type" :time-stamp="recordData.recordTimestamp">
+        <template #icon>
+          <ISCNTypeIcon :type="type" />
+        </template>
+        <FormField
+          v-if="name"
+          :label="$t('iscn.meta.name')"
+          content-type="strong"
+          class="mb-[12px]"
+        >
+          {{ name }}
+        </FormField>
+        <FormField
+          v-if="metadata.description"
+          :label="$t('iscn.meta.description')"
+          class="mb-[12px]"
+        >
+          {{ metadata.description }}
+        </FormField>
+        <FormField
+          v-if="owner"
+          :label="$t('iscn.meta.owner')"
+          class="mb-[12px]"
+        >
+          <Label :text="owner" tag="div" preset="p6" />
+        </FormField>
+        <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
+          <Link
+            :class="[
+              'text-[14px]',
+              'break-all',
+            ]"
+            :href="transactionsURL">
+            {{ txHash }}
+          </Link>
+        </FormField>
+        <Divider class="my-[12px]" />
+        <FormField
+          v-if="iscnId"
+          :label="$t('iscn.meta.id')"
+          class="mb-[12px]"
+        >
+          <Label :text="iscnId" tag="div" preset="p6" />
+        </FormField>
+        <FormField
+          :label="$t('iscn.meta.content.fingerprints')"
+          class="mb-[12px]"
+        >
+          <ContentFingerprintLink
+            v-for="item in recordData.contentFingerprints"
+            :key="item.key"
+            :item="item"
+            class="mb-[8px] break-all text-[14px]"
+          />
+        </FormField>
+        <Divider class="my-[12px]" />
+        <FormField
+          v-if="keywords.length"
+          :label="$t('iscn.meta.tags.title')"
+          class="mb-[12px]"
+        >
+          <Tag
+            v-for="item in keywords"
+            :key="item.key"
+            :text="item"
+            class="mr-[8px] mb-[4px]"
+          />
+        </FormField>
+      </InfoCard>
+      <InfoCard :label-text="$t('iscn.meta.metadata.title')">
+        <template #icon>
+          <IconMetadata />
+        </template>
+        <FormField
+          :label="$t('iscn.meta.stakeholders')"
+          class="mb-[12px]"
+          content-classes="flex flex-row items-center"
+        >
+          <Button
+            v-for="(stakeholder, index) in stakeholders"
+            :key="stakeholder.key"
+            class="mr-[8px]"
+            size="mini"
+            preset="secondary"
+            tag="div"
+            text-preset="h6"
+            type="button"
+            :text="(stakeholders[index].entity || {}).name"
+            @click="showStakeholder(index)"
+          />
+        </FormField>
+        <FormField
+          v-if="metadata.version"
+          :label="$t('iscn.meta.version')"
+          class="mb-[12px]"
+        >
+          {{ metadata.version }}
+        </FormField>
+        <FormField
+          v-if="metadata.url"
+          :label="$t('iscn.meta.url')"
+          class="mb-[12px]"
+        >
+          <Link
+            :class="[
+              'text-[14px]',
+              'break-all',
+            ]"
+            :href="metadata.url"
+          >
+            {{ metadata.url }}
+          </Link>
+        </FormField>
+        <FormField
+          v-if="metadata.usageInfo"
+          :label="$t('iscn.meta.usage.info')"
+          class="mb-[12px]"
+        >
+          <Link
+            :class="[
+              'text-[14px]',
+              'break-all',
+            ]"
+            :href="metadata.usageInfo"
+          >
+            {{ metadata.usageInfo }}
+          </Link>
+        </FormField>
+        <Button
+          class="w-min"
+          preset="outline"
+          tag="a"
+          text-preset="h5"
+          type="button"
+          content-class="font-medium ml-[-4px]"
+          prepend-class="font-bold"
+          :href="rawDataURL"
+        >
+          <template #prepend>
+            <IconInfo />
           </template>
-          <FormField
-            v-if="name"
-            :label="$t('iscn.meta.name')"
-            content-type="strong"
-            class="mb-[12px]"
+          {{ $t('iscn.meta.rawData') }}
+        </Button>
+      </InfoCard>
+      <!-- Dialog -->
+      <Dialog
+        v-model="isOpenAuthorDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <Card class="flex flex-col w-[616px]">
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('iscn.meta.stakeholders')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
           >
-            {{ name }}
-          </FormField>
+            <template #prepend>
+              <IconMetadata />
+            </template>
+          </Label>
+          <!-- name -->
+          <div class="flex flex-row items-center justify-between flex-nowrap">
+            <FormField
+              v-if="stakeholderInfo.authorName"
+              content-type="strong"
+              :label="$t('iscn.meta.creator.name')"
+              class="w-[50%] my-[12px]"
+            >
+              <Label :text="stakeholderInfo.authorName" tag="div" preset="p4" />
+            </FormField>
+            <FormField
+              v-if="stakeholderInfo.likerId"
+              :label="$t('iscn.meta.stakeholders.likerId')"
+              class="w-[50%] my-[12px]"
+            >
+              <Link :href="stakeholderInfo.likerId">{{
+                stakeholderInfo.likerId
+              }}</Link>
+            </FormField>
+          </div>
           <FormField
-            v-if="metadata.description"
-            :label="$t('iscn.meta.description')"
-            class="mb-[12px]"
+            v-if="stakeholderInfo.authorDescription"
+            :label="$t('iscn.meta.stakeholders.description')"
+            class="w-[50%] my-[12px]"
           >
-            {{ metadata.description }}
+            <Label
+              :text="stakeholderInfo.authorDescription"
+              tag="div"
+              preset="p5"
+            />
           </FormField>
+          <Divider
+            v-if="stakeholderInfo.authorUrls.length"
+            class="my-[12px]"
+          />
+          <!-- url -->
           <FormField
-            v-if="owner"
-            :label="$t('iscn.meta.owner')"
-            class="mb-[12px]"
+            v-if="stakeholderInfo.authorUrls.length"
+            :label="$t('iscn.meta.stakeholders.url')"
           >
-            <Label :text="owner" tag="div" preset="p6" />
-          </FormField>
-          <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
             <Link
-              :class="[
-                'text-[14px]',
-                'break-all',
-              ]"
-              :href="transactionsURL">
-              {{ txHash }}
-            </Link>
+              v-for="url in stakeholderInfo.authorUrls"
+              :key="url"
+              :href="url"
+              class="break-all"
+              >{{ url }}</Link
+            >
           </FormField>
-          <Divider class="my-[12px]" />
+          <Divider
+            v-if="stakeholderInfo.authorWalletAddresses.length"
+            class="my-[12px]"
+          />
+          <!-- wallet address -->
           <FormField
-            v-if="iscnId"
-            :label="$t('iscn.meta.id')"
-            class="mb-[12px]"
-          >
-            <Label :text="iscnId" tag="div" preset="p6" />
-          </FormField>
-          <FormField
-            :label="$t('iscn.meta.content.fingerprints')"
-            class="mb-[12px]"
-          >
-            <ContentFingerprintLink
-              v-for="item in recordData.contentFingerprints"
-              :key="item.key"
-              :item="item"
-              class="mb-[8px] break-all text-[14px]"
-            />
-          </FormField>
-          <Divider class="my-[12px]" />
-          <FormField
-            v-if="keywords.length"
-            :label="$t('iscn.meta.tags.title')"
-            class="mb-[12px]"
-          >
-            <Tag
-              v-for="item in keywords"
-              :key="item.key"
-              :text="item"
-              class="mr-[8px] mb-[4px]"
-            />
-          </FormField>
-        </InfoCard>
-        <InfoCard :label-text="$t('iscn.meta.metadata.title')">
-          <template #icon>
-            <IconMetadata />
-          </template>
-          <FormField
-            :label="$t('iscn.meta.stakeholders')"
-            class="mb-[12px]"
-            content-classes="flex flex-row items-center"
+            v-if="stakeholderInfo.authorWalletAddresses.length"
+            :label="$t('iscn.meta.stakeholders.wallet')"
+            content-classes="flex flex-row"
           >
             <Button
-              v-for="(stakeholder, index) in stakeholders"
-              :key="stakeholder.key"
-              class="mr-[8px]"
+              v-for="wallet in stakeholderInfo.authorWalletAddresses"
+              :key="wallet.address"
+              class="mr-[8px] mb-[4px]"
               size="mini"
-              preset="secondary"
+              preset="tertiary"
               tag="div"
               text-preset="h6"
               type="button"
-              :text="(stakeholders[index].entity || {}).name"
-              @click="showStakeholder(index)"
-            />
-          </FormField>
-          <FormField
-            v-if="metadata.version"
-            :label="$t('iscn.meta.version')"
-            class="mb-[12px]"
-          >
-            {{ metadata.version }}
-          </FormField>
-          <FormField
-            v-if="metadata.url"
-            :label="$t('iscn.meta.url')"
-            class="mb-[12px]"
-          >
-            <Link
-              :class="[
-                'text-[14px]',
-                'break-all',
-              ]"
-              :href="metadata.url"
+              content-class="font-medium ml-[-4px]"
+              prepend-class="font-bold"
+              @click="handleCopy(wallet.address, wallet.type)"
             >
-              {{ metadata.url }}
-            </Link>
-          </FormField>
-          <FormField
-            v-if="metadata.usageInfo"
-            :label="$t('iscn.meta.usage.info')"
-            class="mb-[12px]"
-          >
-            <Link
-              :class="[
-                'text-[14px]',
-                'break-all',
-              ]"
-              :href="metadata.usageInfo"
-            >
-              {{ metadata.usageInfo }}
-            </Link>
-          </FormField>
-          <Button
-            class="w-min"
-            preset="outline"
-            tag="a"
-            text-preset="h5"
-            type="button"
-            content-class="font-medium ml-[-4px]"
-            prepend-class="font-bold"
-            :href="rawDataURL"
-          >
-            <template #prepend>
-              <IconInfo />
-            </template>
-            {{ $t('iscn.meta.rawData') }}
-          </Button>
-        </InfoCard>
-        <!-- Dialog -->
-        <Dialog
-          v-model="isOpenAuthorDialog"
-          :has-padding="false"
-          preset="custom"
-        >
-          <Card class="flex flex-col w-[616px]">
-            <Label
-              class="w-min mb-[16px]"
-              :text="$t('iscn.meta.stakeholders')"
-              tag="div"
-              preset="p5"
-              valign="middle"
-              content-class="font-semibold whitespace-nowrap text-like-green"
-              prepend-class="text-like-green"
-            >
-              <template #prepend>
-                <IconMetadata />
-              </template>
-            </Label>
-            <!-- name -->
-            <div class="flex flex-row items-center justify-between flex-nowrap">
-              <FormField
-                v-if="stakeholderInfo.authorName"
-                content-type="strong"
-                :label="$t('iscn.meta.creator.name')"
-                class="w-[50%] my-[12px]"
-              >
-                <Label :text="stakeholderInfo.authorName" tag="div" preset="p4" />
-              </FormField>
-              <FormField
-                v-if="stakeholderInfo.likerId"
-                :label="$t('iscn.meta.stakeholders.likerId')"
-                class="w-[50%] my-[12px]"
-              >
-                <Link :href="stakeholderInfo.likerId">{{
-                  stakeholderInfo.likerId
-                }}</Link>
-              </FormField>
-            </div>
-            <FormField
-              v-if="stakeholderInfo.authorDescription"
-              :label="$t('iscn.meta.stakeholders.description')"
-              class="w-[50%] my-[12px]"
-            >
-              <Label
-                :text="stakeholderInfo.authorDescription"
-                tag="div"
-                preset="p5"
+              <IconCoin
+                class="mr-[4px]"
+                :type="wallet.type"
               />
-            </FormField>
-            <Divider
-              v-if="stakeholderInfo.authorUrls.length"
-              class="my-[12px]"
-            />
-            <!-- url -->
-            <FormField
-              v-if="stakeholderInfo.authorUrls.length"
-              :label="$t('iscn.meta.stakeholders.url')"
-            >
-              <Link
-                v-for="url in stakeholderInfo.authorUrls"
-                :key="url"
-                :href="url"
-                class="break-all"
-                >{{ url }}</Link
-              >
-            </FormField>
-            <Divider
-              v-if="stakeholderInfo.authorWalletAddresses.length"
-              class="my-[12px]"
-            />
-            <!-- wallet address -->
-            <FormField
-              v-if="stakeholderInfo.authorWalletAddresses.length"
-              :label="$t('iscn.meta.stakeholders.wallet')"
-              content-classes="flex flex-row"
-            >
-              <Button
-                v-for="wallet in stakeholderInfo.authorWalletAddresses"
-                :key="wallet.address"
-                class="mr-[8px] mb-[4px]"
-                size="mini"
-                preset="tertiary"
-                tag="div"
-                text-preset="h6"
-                type="button"
-                content-class="font-medium ml-[-4px]"
-                prepend-class="font-bold"
-                @click="handleCopy(wallet.address, wallet.type)"
-              >
-                <IconCoin
-                  class="mr-[4px]"
-                  :type="wallet.type"
-                />
-                {{
-                  wallet.type === 'cosmos'
-                    ? wallet.address.replace(/(did:|:)/g, '')
-                    : wallet.address.split(`did:${wallet.type}:`).join('') | ellipsis
-                }}
-              </Button>
-            </FormField>
-          </Card>
-        </Dialog>
-        <Snackbar
-          v-model="isOpenCopiedAlert"
-          :text="$t('iscn.meta.stakeholders.wallet.copied')"
-          preset="success"
-          :timeout="2000"
-        >
-          <template #prepend>
-            <IconDone/>
-          </template>
-        </Snackbar>
-      </div>
+              {{
+                wallet.type === 'cosmos'
+                  ? wallet.address.replace(/(did:|:)/g, '')
+                  : wallet.address.split(`did:${wallet.type}:`).join('') | ellipsis
+              }}
+            </Button>
+          </FormField>
+        </Card>
+      </Dialog>
+      <Snackbar
+        v-model="isOpenCopiedAlert"
+        :text="$t('iscn.meta.stakeholders.wallet.copied')"
+        preset="success"
+        :timeout="2000"
+      >
+        <template #prepend>
+          <IconDone/>
+        </template>
+      </Snackbar>
     </div>
   </Page>
 </template>
@@ -351,6 +371,15 @@ export enum ExifList {
       return value
     },
   },
+  layout({ query }) {
+    switch (query.layout) {
+      case 'popup':
+        return query.layout
+
+      default:
+        return 'default'
+    }
+  },
 })
 export default class ViewIscnIdPage extends Vue {
   owner = ''
@@ -378,6 +407,10 @@ export default class ViewIscnIdPage extends Vue {
   @iscnModule.Action fetchISCNByTx!: (
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
+
+  get isPopupLayout() {
+    return this.$route.query.layout === 'popup'
+  }
 
   get record() {
     return this.getISCNById(this.iscnId)
@@ -594,6 +627,11 @@ export default class ViewIscnIdPage extends Vue {
 
     selection!.removeAllRanges()
     document.body.removeChild(copyText)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  closeWindow() {
+    window.close()
   }
 }
 </script>
