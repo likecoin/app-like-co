@@ -62,7 +62,30 @@
         :exif-info="exifInfo"
         :iscn-timestamp="iscnTimestamp"
         :step="step"
-      />
+      >
+        <template #card-footer>
+          <div
+            :class="[
+              'flex',
+              'justify-center',
+            ]"
+          >
+            <Button
+              :class="[
+                'mt-[16px]',
+                'mb-[28px]',
+              ]"
+              preset="secondary"
+              :text="$t('IscnUploaded.button.new')"
+              :to="localeLocation({ name: 'index' })"
+            >
+              <template #prepend>
+                <IconAddToISCN class="w-[20px]" />
+              </template>
+            </Button>
+          </div>
+        </template>
+      </IscnUploadedInfo>
     </Page>
   </div>
 </template>

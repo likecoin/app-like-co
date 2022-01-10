@@ -52,6 +52,7 @@
   "ConnectWalletButton.likerland_app.title": "Liker ID",
   "error.not.connect.wallet": "Please connect to your wallet first",
   "general.loading": "Loading",
+  "general.closeWindow": "Close Window",
   "HomePage.button.airdrop": "Airdrop",
   "HomePage.button.emeris": "Emeris",
   "HomePage.button.learnmore": "Learn more",

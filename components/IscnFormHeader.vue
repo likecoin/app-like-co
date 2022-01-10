@@ -20,7 +20,14 @@
         <IconRegister />
       </template>
     </Label>
-    <div class="flex flex-col items-end">
+    <div
+      v-if="step"
+      :class="[
+        'flex',
+        'flex-col',
+        'items-end',
+      ]"
+    >
       <Stepper :step="step" />
       <Label
         preset="p6"
