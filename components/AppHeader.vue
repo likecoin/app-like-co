@@ -128,7 +128,7 @@
             preset="secondary"
             :text="$t('AppHeader.button.connectWallet')"
             :title="$t('AppHeader.button.connectWallet')"
-            @click="isConnectWalletDialogOpened = true"
+            @click="handleConnectWalletButtonClick"
           />
         </div>
       </nav>
@@ -144,77 +144,43 @@
     >
       <IconDangerStripe />
     </div>
-    <ConnectWalletDialog
-      :is-opened="isConnectWalletDialogOpened"
-      @quit="handleConnectWalletButtonClose"
-      @close="handleConnectWalletButtonClose"
-    />
-    <ConnectLikerIdDialog />
   </header>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 
-import {
-  IS_TESTNET,
-  CONNECT_WALLET_TYPES,
-} from '~/constant'
+import { IS_TESTNET } from '~/constant'
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 @Component
 export default class AppHeader extends Vue {
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action('reset') resetSigner!: () => void
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
-
   @walletModule.Getter('getType') walletType!: string | null
-  @walletModule.Getter('getWalletAddress') walletAddress!: string
-  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
-  @walletModule.Action initIfNecessary!: () => Promise<boolean>
+  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (isShow: boolean) => void
   @walletModule.Action('reset') resetWallet!: () => void
 
-  isConnectWalletDialogOpened = false
+  @signerModule.Getter('getAddress') currentAddress!: string
+  @signerModule.Action('reset') resetSigner!: () => void
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
     return !!IS_TESTNET
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  get connectWalletTypes() {
-    return CONNECT_WALLET_TYPES
-  }
-
   get isWalletFromLikerLikerApp() {
     return this.walletType === 'likerland_app';
-  }
-
-  async mounted() {
-    const isInited = await this.initIfNecessary();
-    if (isInited) {
-      this.updateSignerInfo({
-        address: this.walletAddress,
-        signer: this.signer,
-      })
-    }
-  }
-
-  handleConnectWalletButtonClose() {
-    this.isConnectWalletDialogOpened = false
   }
 
   handleClickSignOutButton() {
     this.resetWallet();
     this.resetSigner();
+  }
+
+  handleConnectWalletButtonClick() {
+    this.toggleConnectWalletDialog(true)
   }
 }
 </script>

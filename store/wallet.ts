@@ -22,6 +22,7 @@ export default class Wallet extends VuexModule {
   signer: OfflineSigner | null = null;
   walletConnectURI = '';
   accounts: readonly AccountData[] = [];
+  isShowConnectDialog = false;
 
   @Mutation
   setType(type: string) {
@@ -41,6 +42,16 @@ export default class Wallet extends VuexModule {
   @Mutation
   setWalletConnectURI(uri: string) {
     this.walletConnectURI = uri;
+  }
+
+  @Mutation
+  setIsShowConnectDialog(isShow: boolean) {
+    this.isShowConnectDialog = isShow;
+  }
+
+  @Action
+  toggleConnectDialog(isShow: boolean) {
+    this.setIsShowConnectDialog(isShow);
   }
 
   @Action

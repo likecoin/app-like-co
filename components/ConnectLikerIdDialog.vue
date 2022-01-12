@@ -3,6 +3,7 @@
     :header-text="$t('ConnectLikerIdDialog.title')"
     :open="!!walletConnectURI"
     @toggle="handleDialogToggle"
+    @close="$emit('quit')"
   >
     <template #header-prepend>
       <IconSignIn />

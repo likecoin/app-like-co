@@ -15,7 +15,6 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import SearchResults from '~/components/SearchResults.vue'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
@@ -23,7 +22,6 @@ const iscnModule = namespace('iscn')
 
 @Component({
   layout: 'wallet',
-  components: { SearchResults },
 })
 export default class WorksIndexPageextends extends Vue {
   records: ISCNRecordWithID[] | null = null
