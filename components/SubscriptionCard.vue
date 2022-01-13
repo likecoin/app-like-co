@@ -50,13 +50,20 @@
       v-if="preset !== 'community'"
       :class="[
         'flex',
+        'flex-col',
         'items-center',
         'justify-center',
-        'mt-[8px]',
+        'sm:mt-[8px]',
+        'sm:flex-row',
       ]"
     >
       <Label
-        :class="['text-twitter-blue', 'mt-[8px]']"
+        :class="[
+          'text-twitter-blue',
+          'mt-[8px]',
+          'mb-[8px]',
+          'sm:mb-0',
+        ]"
         :text="$t('AirDrop.label.and')"
         preset="h5"
       />

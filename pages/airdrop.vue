@@ -154,13 +154,22 @@
             'max-w-[800px]',
             'mx-auto',
             'text-medium-gray',
-            'sm:mb-[180px]',
+            'sm:mb-[120px]',
           ]"
           :text="$t('AirDrop.content.tentative')"
           preset="p5"
         />
       </div>
-      <div class="z-10 lg:hidden">
+      <div
+        :class="[
+          'flex',
+          'flex-col',
+          'items-center',
+          'justify-center',
+          'z-10',
+          'lg:hidden',
+        ]"
+      >
         <Button
           :class="[
             'mt-[16px]',
@@ -168,7 +177,7 @@
             'decoration-1',
           ]"
           preset="plain"
-          text-preset="h7"
+          text-preset="h5"
           :text="$t('AirDrop.button.homepage')"
           :to="localeLocation({ name: 'index' })"
         >

@@ -26,8 +26,7 @@
         :class="[
           'h-full',
           'w-full',
-          'max-w-[334px]',
-          'lg:max-w-[304px]',
+          'max-w-[304px]',
         ]"
       />
       <IscnInfoCard

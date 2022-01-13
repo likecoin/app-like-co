@@ -3,32 +3,11 @@
     :class="[
       'flex',
       'flex-col',
+      'w-full',
       'items-center',
       'justify-center',
-      'px-[24px]',
     ]"
   >
-    <img
-      :class="[
-        'hidden',
-        'my-[32px]',
-        'w-[300px]',
-        'lg:block',
-      ]"
-      src="/images/airdrop/title_Checker.png"
-    />
-    <Label
-      :class="[
-        'my-[24px]',
-        'text-center',
-        'font-extrabold',
-        'text-like-green',
-        'lg:hidden',
-      ]"
-      :text="$t('AirDrop.label.checker')"
-      preset="h2"
-      align="center"
-    />
     <Label
       :class="[
         'mt-[8px]',
@@ -67,10 +46,11 @@
           :class="[
             'flex',
             'flex-col',
-            'items-start',
+            'items-center',
             'justify-between',
             'flex-grow',
             'my-[24px]',
+            'sm:items-start',
             'sm:px-[56px]',
             'sm:mr-[100px]',
             'sm:mt-[48px]',
@@ -81,8 +61,10 @@
           <div
             :class="[
               'flex',
-              'my-[12px]',
-              'items-end',
+              'mt-[24px]',
+              'mb-[12px]',
+              'sm:items-end',
+              'sm:my-[12px]',
             ]"
           >
             <Label
@@ -111,72 +93,40 @@
         <div
           :class="[
             'flex',
-            'flex-wrap',
-            'sm:flex-col',
+            'flex-col',
+            'sm:flex-wrap',
           ]"
         >
           <Label
+            v-for="item in qualifications"
+            :key="item.type"
             :class="[
-              'w-[45%]',
               'font-bold',
-              { 'text-airdrop-gold': isQualifiedForAtom },
-              { 'text-medium-gray': !isQualifiedForAtom },
-              'mb-[20px]',
-              'sm:w-min',
-            ]"
-            :text="$t('AirDrop.label.cosmos')"
-            preset="h5"
-          >
-            <template #prepend>
-              <IconCheck v-if="isQualifiedForAtom" />
-              <IconClose v-else />
-            </template>
-          </Label>
-          <Label
-            :class="[
-              'w-[45%]',
-              'font-bold',
-              { 'text-airdrop-gold': isQualifiedForOsmo },
-              { 'text-medium-gray': !isQualifiedForOsmo },
-              'mb-[20px]',
-              'sm:w-min',
-            ]"
-            :text="$t('AirDrop.label.Osmosis')"
-            preset="h5"
-          >
-            <template #prepend>
-              <IconCheck v-if="isQualifiedForOsmo" />
-              <IconClose v-else />
-            </template>
-          </Label>
-          <Label
-            :class="[
-              'w-[45%]',
+              { 'text-airdrop-gold': item.isQualified },
+              { 'text-medium-gray': !item.isQualified },
               'whitespace-nowrap',
-              'font-bold',
-              { 'text-airdrop-gold': isQualifiedForCivic },
-              { 'text-medium-gray': !isQualifiedForCivic },
+              'mb-[20px]',
               'sm:w-min',
             ]"
-            :text="$t('AirDrop.label.civicLiker')"
+            :text="$t(`AirDrop.label.${item.type}`)"
             preset="h5"
           >
             <template #prepend>
-              <IconCheck v-if="isQualifiedForCivic" />
+              <IconCheck v-if="item.isQualified" />
               <IconClose v-else />
             </template>
           </Label>
         </div>
-        <div
-          :class="[
-            'w-full',
-            'h-[2px]',
-            'my-[24px]',
-            'bg-light-gray',
-            'sm:hidden',
-          ]"
-        />
       </div>
+      <div
+        :class="[
+          'w-full',
+          'h-[2px]',
+          'my-[24px]',
+          'bg-light-gray',
+          'sm:hidden',
+        ]"
+        />
       <!-- Subscribe -->
       <div>
         <Label
@@ -184,8 +134,8 @@
             'mt-[8px]',
             'w-full',
             'max-w-[600px]',
-            'text-left',
             'text-dark-gray',
+            'text-center',
           ]"
           :text="
             claimmableAmount !== 0
@@ -210,5 +160,13 @@ export default class AirdropVerifier extends Vue {
   @Prop(Boolean) readonly isQualifiedForCivic: boolean | undefined
 
   email: string = ''
+  
+  get qualifications() {
+    return [
+      { type: 'cosmos', isQualified: this.isQualifiedForAtom },
+      { type: 'osmosis', isQualified: this.isQualifiedForOsmo },
+      { type: 'civicLiker', isQualified: this.isQualifiedForCivic },
+    ]
+  }
 }
 </script>

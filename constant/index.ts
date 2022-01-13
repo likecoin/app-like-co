@@ -63,9 +63,9 @@ export const CONNECT_WALLET_TYPES = [
 
 export const EMAIL_REGEX = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/
 
-export const COSMOS_ADDRESS_REGEX = /cosmos1[ac-hj-np-z02-9]{38}$/
+export const COSMOS_ADDRESS_REGEX = /^cosmos1[ac-hj-np-z02-9]{38}$/
 
-export const OSMOSIS_ADDRESS_REGEX = /osmo1[ac-hj-np-z02-9]{38}$/
+export const OSMOSIS_ADDRESS_REGEX = /^osmo1[ac-hj-np-z02-9]{38}$/
 
 export const AIRDROP_CLAIM_URL = {
   testnet: 'https://airdrop.rinkeby.like.co/api/claims?address=',

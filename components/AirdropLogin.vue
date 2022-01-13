@@ -1,35 +1,5 @@
 <template>
-  <div
-    :class="[
-      'flex',
-      'flex-col',
-      'w-full',
-      'items-center',
-      'justify-center',
-      'px-[24px]',
-    ]"
-  >
-    <img
-      :class="[
-        'hidden',
-        'my-[32px]',
-        'w-[300px]',
-        'lg:block',
-      ]"
-      src="/images/airdrop/title_Checker.png"
-    />
-    <Label
-      :class="[
-        'my-[24px]',
-        'font-extrabold',
-        'text-like-green',
-        'lg:hidden',
-        'text-center',
-      ]"
-      :text="$t('AirDrop.label.checker')"
-      preset="h2"
-      align="center"
-    />
+  <div class="w-full">
     <!-- Wallet -->
     <div
       :class="[
@@ -41,7 +11,6 @@
         'pt-[24px]',
         'pb-[56px]',
         'px-[56px]',
-        'w-full',
       ]"
     >
       <Label
@@ -109,6 +78,7 @@
         :class="[
           'text-dark-gray',
           'mt-[8px]',
+          'text-center',
           'lg:hidden',
         ]"
         :text="$t('AirDrop.guide.connect.wallet')"
