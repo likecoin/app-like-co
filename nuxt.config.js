@@ -14,7 +14,7 @@ export default {
     title: 'ISCN App',
     meta: [
       { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=1024' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1, minimum-scale=1' },
       { hid: 'description', name: 'description', content: siteDefaultDescription },
       { hid: 'og:site_name', name: 'og:site_name', content: 'ISCN App'},
       { hid: 'og:title', property: 'og:title', content: 'ISCN App' },

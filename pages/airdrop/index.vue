@@ -1,40 +1,10 @@
-<template>
-  <div
-    :class="[
-      'flex',
-      'flex-col',
-      'items-center',
-      'w-full',
-    ]"
-  >
-    <img
-      :class="['my-[32px]', 'w-[300px]']"
-      src="/images/airdrop/title_Checker.png"
-    />
-    <div
-      :class="[
-        'flex',
-        'flex-col',
-        'items-center',
-        'bg-light-gray',
-        'pt-[24px]',
-        'pb-[56px]',
-        'px-[56px]',
-        'w-full',
-      ]"
-    >
-      <Label
-        :class="['font-extrabold', 'text-like-green']"
-        :text="$t('AirDrop.label.Comingsoon')"
-        preset="h2"
-      />
-    </div>
-  </div>
-</template>
-
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 
-@Component
+@Component({
+  fetch(ctx) {
+    ctx.redirect(302, ctx.localeLocation({ name: 'airdrop-check' })!)
+  },
+})
 export default class AirdropPage extends Vue {}
 </script>

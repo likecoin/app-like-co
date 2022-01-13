@@ -1,127 +1,136 @@
 <!-- Please remove this file from your project -->
 <template>
-  <header class="mb-[100px]">
-    <div
+  <div>
+    <header
       :class="[
-        'fixed',
-        'z-10',
-        'top-0',
-        'inset-x-0',
-        'py-[24px]',
-        'backdrop-blur',
+        'hidden',
+        'mb-[100px]',
+        'lg:block',
       ]"
     >
-      <nav
+      <div
         :class="[
-          'flex',
-          'flex-1',
-          'items-center',
-          'justify-center',
+          'fixed',
+          'z-10',
+          'top-0',
+          'inset-x-0',
+          'py-[24px]',
+          'bg-gradient-to-b',
+          'from-white',
+          'to-transparent'
         ]"
       >
-        <div
-          :class="[
-            'flex-grow',
-            'mx-[24px]',
-          ]"
-        />
-        <div
-          :class="[
-            'flex',
-            'flex-shrink',
-            'justify-center',
-            'items-center',
-            'p-[4px]',
-            'mx-auto',
-            'bg-shade-gray',
-            'rounded-[14px]',
-          ]"
-        >
-          <MenuButton
-            :text="$t('AppHeader.tabBar.button.depub')"
-            :to="localeLocation({ name: 'index' })"
-          />
-          <MenuButtonDivider />
-          <MenuButton
-            :text="$t('AppHeader.tabBar.button.publishing')"
-            :to="localeLocation({ name: 'works' })"
-          />
-          <MenuButtonDivider />
-          <MenuButton
-            :text="$t('AppHeader.tabBar.button.stake')"
-            target="_blank"
-            rel="noopener"
-            href="https://stake.like.co"
-          >
-            <template #append>
-              <IconOpenInNew class="w-[12px]" />
-            </template>
-          </MenuButton>
-        </div>
-        <Button
-          :to="localeLocation({ name: 'airdrop' })"
-          :text="$t('AirDrop.button')"
-          preset="primary"
-          text-preset="h5"
-          size="large"
-          :class="['ml-[16px]']"
-          :style="{ color: '#FFFFFF', backgroundColor: '#C69F67'}"
-        >
-          <template #prepend>
-            <IconClaim class="w-[20px]" />
-          </template>
-        </Button>
-        <div
+        <nav
           :class="[
             'flex',
             'flex-1',
-            'justify-end',
-            'flex-grow',
-            'mx-[24px]',
+            'items-center',
+            'justify-center',
           ]"
         >
           <div
-            v-if="currentAddress"
             :class="[
-              'relative',
-              'w-[180px]',
+              'flex-grow',
+              'mx-[24px]',
+            ]"
+          />
+          <div
+            :class="[
+              'flex',
+              'flex-shrink',
+              'justify-center',
+              'items-center',
+              'p-[4px]',
+              'mx-auto',
+              'bg-shade-gray',
+              'rounded-[14px]',
             ]"
           >
-            <Button
-              preset="secondary"
-              :title="currentAddress"
+            <MenuButton
+              :text="$t('AppHeader.tabBar.button.depub')"
+              :to="localeLocation({ name: 'index' })"
+            />
+            <MenuButtonDivider />
+            <MenuButton
+              :text="$t('AppHeader.tabBar.button.publishing')"
+              :to="localeLocation({ name: 'works' })"
+            />
+            <MenuButtonDivider />
+            <MenuButton
+              :text="$t('AppHeader.tabBar.button.stake')"
+              target="_blank"
+              rel="noopener"
+              href="https://stake.like.co"
             >
-              <template
-                v-if="isWalletFromLikerLikerApp"
-                #prepend
-              >
-                <IconWalletConnectLogo />
+              <template #append>
+                <IconOpenInNew class="w-[12px]" />
               </template>
-              <div
-                :class="[
-                  isWalletFromLikerLikerApp ? 'w-[116px]' : 'w-[148px]',
-                  'overflow-hidden',
-                  'overflow-ellipsis',
-                ]"
-              >{{ currentAddress }}</div>
-            </Button>
-            <Button
+            </MenuButton>
+          </div>
+          <Button
+            :to="localeLocation({ name: 'airdrop' })"
+            :text="$t('AirDrop.button')"
+            preset="primary"
+            text-preset="h5"
+            size="large"
+            :class="['ml-[16px]']"
+            :style="{ color: '#FFFFFF', backgroundColor: '#C69F67'}"
+          >
+            <template #prepend>
+              <IconClaim class="w-[20px]" />
+            </template>
+          </Button>
+          <div
+            :class="[
+              'flex',
+              'flex-1',
+              'justify-end',
+              'flex-grow',
+              'mx-[24px]',
+            ]"
+          >
+            <div
+              v-if="currentAddress"
               :class="[
-                'absolute',
-                'inset-0',
-                'hover:opacity-100',
-                'opacity-0',
-                'w-full',
+                'relative',
+                'w-[180px]',
               ]"
-              preset="secondary"
-              :text="$t('AppHeader.button.signOut')"
-              :title="$t('AppHeader.button.signOut')"
-              @click="handleClickSignOutButton"
             >
-              <template #prepend>
-                <IconSignOut />
-              </template>
-            </Button>
+              <Button
+                preset="secondary"
+                :title="currentAddress"
+              >
+                <template
+                  v-if="isWalletFromLikerLikerApp"
+                  #prepend
+                >
+                  <IconWalletConnectLogo />
+                </template>
+                <div
+                  :class="[
+                    isWalletFromLikerLikerApp ? 'w-[116px]' : 'w-[148px]',
+                    'overflow-hidden',
+                    'overflow-ellipsis',
+                  ]"
+                >{{ currentAddress }}</div>
+              </Button>
+              <Button
+                :class="[
+                  'absolute',
+                  'inset-0',
+                  'hover:opacity-100',
+                  'opacity-0',
+                  'w-full',
+                ]"
+                preset="secondary"
+                :text="$t('AppHeader.button.signOut')"
+                :title="$t('AppHeader.button.signOut')"
+                @click="handleClickSignOutButton"
+              >
+                <template #prepend>
+                  <IconSignOut />
+                </template>
+              </Button>
           </div>
           <Button
             v-else
@@ -130,9 +139,10 @@
             :title="$t('AppHeader.button.connectWallet')"
             @click="handleConnectWalletButtonClick"
           />
-        </div>
-      </nav>
-    </div>
+          </div>
+        </nav>
+      </div>
+    </header>
     <div
       v-if="isTestnet"
       :class="[
@@ -144,7 +154,7 @@
     >
       <IconDangerStripe />
     </div>
-  </header>
+  </div>
 </template>
 
 <script lang="ts">

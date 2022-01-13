@@ -4,48 +4,77 @@
       'flex',
       'flex-col',
       'items-center',
+      'justify-center',
+      'px-[24px]',
     ]"
   >
     <img
-      :class="['my-[32px]', 'w-[300px]']"
+      :class="[
+        'hidden',
+        'my-[32px]',
+        'w-[300px]',
+        'lg:block',
+      ]"
       src="/images/airdrop/title_Checker.png"
-    />
-    <!-- Subscribe -->
-    <Label
-      :class="['text-medium-gray', 'my-[8px]']"
-      :text="address"
-      preset="p5"
     />
     <Label
       :class="[
-        'text-dark-gray',
-        'mt-[8px]',
-        'w-[600px]',
+        'my-[24px]',
         'text-center',
+        'font-extrabold',
+        'text-like-green',
+        'lg:hidden',
       ]"
-      :text="claimmableAmount !== 0 ? $t('AirDrop.content.subscription') : $t('AirDrop.content.0claim')"
-      preset="p5"
+      :text="$t('AirDrop.label.checker')"
+      preset="h2"
+      align="center"
     />
-    <SubscriptionCard preset="subscription" />
+    <Label
+      :class="[
+        'mt-[8px]',
+        'w-full',
+        'max-w-[600px]',
+        'text-center',
+        'break-all',
+        'text-medium-gray',
+      ]"
+      :text="address"
+      preset="p5"
+      align="center"
+    /> 
+    <div
+      :class="[
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center',
+        'mb-[28px]',
+        'sm:flex-col-reverse',
+        'sm:mb-0',
+      ]"
+    >
     <!-- Amount -->
-    <div :class="['flex', 'items-center']">
       <div
         :class="[
           'flex',
-          'items-start',
+          'flex-col',
           'justify-center',
-          'px-[56px]',
-          'mt-[48px]',
-          'mb-[56px]',
-          'mr-[100px]',
+          'items-center',
+          'sm:flex-row',
         ]"
       >
         <div
           :class="[
             'flex',
             'flex-col',
+            'items-start',
             'justify-between',
             'flex-grow',
+            'my-[24px]',
+            'sm:px-[56px]',
+            'sm:mr-[100px]',
+            'sm:mt-[48px]',
+            'sm:mb-[56px]',
           ]"
         >
           <IconDiverMini class="text-airdrop-gold" />
@@ -57,7 +86,7 @@
             ]"
           >
             <Label
-              :class="['font-extrabold','text-dark-gray']"
+              :class="['font-extrabold', 'text-dark-gray']"
               :text="`${claimmableAmount}`"
               preset="h1"
             />
@@ -65,7 +94,8 @@
               :class="[
                 'font-bold',
                 'text-dark-gray',
-                'ml-[8px] mb-[4px]',
+                'ml-[8px]',
+                'mb-[4px]',
               ]"
               :text="$t('AirDrop.label.$like')"
               preset="h2"
@@ -77,53 +107,93 @@
             preset="p6"
           />
         </div>
+        <!-- Check qualifications -->
+        <div
+          :class="[
+            'flex',
+            'flex-wrap',
+            'sm:flex-col',
+          ]"
+        >
+          <Label
+            :class="[
+              'w-[45%]',
+              'font-bold',
+              { 'text-airdrop-gold': isQualifiedForAtom },
+              { 'text-medium-gray': !isQualifiedForAtom },
+              'mb-[20px]',
+              'sm:w-min',
+            ]"
+            :text="$t('AirDrop.label.cosmos')"
+            preset="h5"
+          >
+            <template #prepend>
+              <IconCheck v-if="isQualifiedForAtom" />
+              <IconClose v-else />
+            </template>
+          </Label>
+          <Label
+            :class="[
+              'w-[45%]',
+              'font-bold',
+              { 'text-airdrop-gold': isQualifiedForOsmo },
+              { 'text-medium-gray': !isQualifiedForOsmo },
+              'mb-[20px]',
+              'sm:w-min',
+            ]"
+            :text="$t('AirDrop.label.Osmosis')"
+            preset="h5"
+          >
+            <template #prepend>
+              <IconCheck v-if="isQualifiedForOsmo" />
+              <IconClose v-else />
+            </template>
+          </Label>
+          <Label
+            :class="[
+              'w-[45%]',
+              'whitespace-nowrap',
+              'font-bold',
+              { 'text-airdrop-gold': isQualifiedForCivic },
+              { 'text-medium-gray': !isQualifiedForCivic },
+              'sm:w-min',
+            ]"
+            :text="$t('AirDrop.label.civicLiker')"
+            preset="h5"
+          >
+            <template #prepend>
+              <IconCheck v-if="isQualifiedForCivic" />
+              <IconClose v-else />
+            </template>
+          </Label>
+        </div>
+        <div
+          :class="[
+            'w-full',
+            'h-[2px]',
+            'my-[24px]',
+            'bg-light-gray',
+            'sm:hidden',
+          ]"
+        />
       </div>
-      <!-- Check qualifications -->
-      <div :class="['flex', 'flex-col']">
+      <!-- Subscribe -->
+      <div>
         <Label
           :class="[
-            'font-bold',
-            {'text-airdrop-gold': isQualifiedForAtom },
-            {'text-medium-gray': !isQualifiedForAtom },
-            'mb-[20px]',
+            'mt-[8px]',
+            'w-full',
+            'max-w-[600px]',
+            'text-left',
+            'text-dark-gray',
           ]"
-          :text="$t('AirDrop.label.cosmos')"
-          preset="h5"
-        >
-          <template #prepend>
-            <IconCheck v-if="isQualifiedForAtom" />
-            <IconClose v-else/>
-          </template>
-        </Label>
-        <Label
-          :class="[
-            'font-bold',
-            {'text-airdrop-gold': isQualifiedForOsmo },
-            {'text-medium-gray': !isQualifiedForOsmo },
-            'mb-[20px]'
-          ]"
-          :text="$t('AirDrop.label.Osmosis')"
-          preset="h5"
-        >
-          <template #prepend>
-            <IconCheck v-if="isQualifiedForOsmo" />
-            <IconClose v-else/>
-          </template>
-        </Label>
-        <Label
-          :class="[
-            'font-bold',
-            {'text-airdrop-gold': isQualifiedForCivic },
-            {'text-medium-gray': !isQualifiedForCivic },
-          ]"
-          :text="$t('AirDrop.label.civicLiker')"
-          preset="h5"
-        >
-          <template #prepend>
-            <IconCheck v-if="isQualifiedForCivic" />
-            <IconClose v-else/>
-          </template>
-        </Label>
+          :text="
+            claimmableAmount !== 0
+              ? $t('AirDrop.content.subscription')
+              : $t('AirDrop.content.0claim')"
+          preset="p5"
+        />
+        <SubscriptionCard preset="subscription" />
       </div>
     </div>
   </div>
