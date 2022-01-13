@@ -17,6 +17,7 @@
         'top-0',
         'w-full',
         'h-full',
+        'z-0',
         'object-cover',
       ]"
       src="/images/airdrop/image.png"
@@ -27,7 +28,6 @@
         'items-center',
         'h-full',
         'p-[32px]',
-        'z-[1]',
       ]"
     >
       <div :class="['flex', 'flex-col']">
@@ -74,7 +74,7 @@
         <Button
           :text="$t('HomePage.button.learnmore')"
           preset="outline"
-          :class="['text-like-cyan-light', 'w-max']"
+          :class="['text-like-cyan-light', 'w-max','z-10',]"
           :style="{ border: '2px solid #AAF1E7' }"
           href="https://docs.like.co/developer/international-standard-content-number-iscn"
         >
@@ -83,7 +83,7 @@
           </template>
         </Button>
       </div>
-      <div class="ml-[76px]">
+      <div class="ml-[76px] z-10">
         <div
           :class="[
             'p-[8px]',

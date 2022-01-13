@@ -220,7 +220,7 @@ export default class Button extends Vue {
       'duration-200',
       this.activeClassesForPreset,
       {
-        'px-[20px]': this.isMini,
+        'px-[12px] sm:px-[20px]': this.isMini,
         'py-[6px]': this.isMini,
         'font-semibold':this.isMini,
       },

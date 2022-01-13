@@ -15,18 +15,28 @@
       v-if="preset !== 'community'"
       :class="[
         'flex',
+        'flex-col',
+        'w-full',
+        'items-center',
         'justify-center',
         'mt-[8px]',
         'p-[16px]',
+        'sm:flex-row',
+        'sm:w-min',
       ]"
     >
       <TextField
         v-model="email"
+        :class="['w-full', 'sm:w-min']"
         :placeholder="$t('AirDrop.placeholder.email')"
         :error-message="errorMessage"
       />
       <Button
-        class="ml-[16px]"
+        :class="[
+          'mt-[16px]',
+          'sm:ml-[16px]',
+          'sm:mt-0',
+        ]"
         preset="secondary"
         :text="$t('AirDrop.button.notify')"
         @click="handleSubmit"
@@ -40,13 +50,20 @@
       v-if="preset !== 'community'"
       :class="[
         'flex',
+        'flex-col',
         'items-center',
         'justify-center',
-        'mt-[8px]',
+        'sm:mt-[8px]',
+        'sm:flex-row',
       ]"
     >
       <Label
-        :class="['text-twitter-blue', 'mt-[8px]']"
+        :class="[
+          'text-twitter-blue',
+          'mt-[8px]',
+          'mb-[8px]',
+          'sm:mb-0',
+        ]"
         :text="$t('AirDrop.label.and')"
         preset="h5"
       />

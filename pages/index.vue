@@ -6,25 +6,92 @@
       'relative',
       'items-center',
       'justify-center',
-      'p-[16px]',
+      'px-[20px]',
+      'pt-[38px]',
+      'lg:p-[16px]',
     ]"
   >
     <div
       :class="[
         'flex',
-        'items-stretch',
-        'h-[429px]',
+        'flex-col',
+        'items-center',
+        'justify-start',
+        'lg:flex-row',
+        'lg:items-stretch',
+        'lg:h-[429px]',
       ]"
     >
-      <AirdropInfoCard :class="['h-full','w-[268px]']" />
-      <IscnInfoCard :class="['h-full','w-[696px]']" />
+      <AirdropInfoCard
+        :class="[
+          'h-full',
+          'w-full',
+          'max-w-[304px]',
+        ]"
+      />
+      <IscnInfoCard
+        :class="[
+          'hidden',
+          'h-full',
+          'w-[696px]',
+          'lg:block',
+        ]"
+      />
+      <!-- phone version search bar -->
+      <form
+        tag="form"
+        :class="[
+          'flex',
+          'flex-col',
+          'items-center',
+          'w-full',
+          'max-w-[334px]',
+          'mt-[18px]',
+          'p-[16px]',
+          'bg-white',
+          'rounded-[24px]',
+          'lg:hidden',
+        ]"
+        @submit.prevent="onSearch"
+      >
+        <Label :text="$t('HomePage.search.title')" preset="h3" />
+        <TextField
+          v-model="keyword"
+          :class="[
+            'w-full',
+            'mt-[24px]',
+            'mb-[16px]',
+          ]"
+          :placeholder="$t('HomePage.search.placeholder_sm')"
+          :error-message="errorMessage"
+        />
+        <Button preset="secondary" :text="$t('HomePage.search.button')">
+          <template #prepend>
+            <IconSearch class="w-[20px]" />
+          </template>
+        </Button>
+      </form>
+
     </div>
+    <Button
+      :class="[
+        'mt-[26px]',
+        'text-medium-gray',
+        'lg:hidden',
+      ]"
+      preset="outline"
+      text-preset="h7"
+      size="mini"
+      :text="$t('HomePage.button.desktop')"
+    />
     <form
       tag="form"
       :class="[
+        'hidden',
         'w-full',
         'max-w-[600px]',
         'my-[64px]',
+        'lg:block',
       ]"
       @submit.prevent="onSearch"
     >
@@ -56,8 +123,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
-import { logTrackerEvent } from '~/utils/logger';
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { logTrackerEvent } from '~/utils/logger'
 
 const iscnModule = namespace('iscn')
 

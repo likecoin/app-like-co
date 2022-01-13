@@ -3,20 +3,26 @@
     :class="[
       'flex',
       'flex-nowrap',
-      'w-min',
+      'items-center',
+      'justify-evenly',
+      'w-full',
+      'mt-[48px]',
+      'md:w-min',
+      'md:justify-start',
+      'lg:mt-0',
     ]"
   >
     <Label
       :class="[
         'whitespace-nowrap',
-        'mr-[24px]',
         'text-medium-gray',
+        'md:mr-[24px]',
       ]"
       :text="$t('HomePage.label.about')"
       preset="h6"
     />
     <Button
-      class="mr-[24px]"
+      class="md:mr-[24px]"
       preset="tertiary"
       text-preset="h6"
       size="mini"
@@ -24,12 +30,21 @@
       :text="$t('HomePage.button.likecoin')"
     />
     <Button
-      class="mr-[24px]"
+      class="md:mr-[24px]"
       preset="tertiary"
       text-preset="h6"
       size="mini"
       href="https://medium.com/likecoin/proposal-to-fairdrop-likecoin-to-the-cosmos-community-and-civic-likers-d64d841287d8"
       :text="$t('HomePage.button.airdrop')"
+    />
+    <IconDot class="md:mr-[24px] lg:hidden"/>
+    <Button
+      class="lg:hidden"
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7"
+      :text="$t('HomePage.button.help')"
     />
   </div>
 </template>

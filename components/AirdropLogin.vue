@@ -1,31 +1,23 @@
 <template>
-  <div
-    :class="[
-      'flex',
-      'flex-col',
-      'items-center',
-      'w-full',
-    ]"
-  >
-    <img
-      :class="['my-[32px]', 'w-[300px]']"
-      src="/images/airdrop/title_Checker.png"
-    />
+  <div class="w-full">
     <!-- Wallet -->
     <div
       :class="[
-        'flex',
+        'hidden',
+        'lg:flex',
         'flex-col',
         'items-start',
         'bg-light-gray',
         'pt-[24px]',
         'pb-[56px]',
         'px-[56px]',
-        'w-full',
       ]"
     >
       <Label
-        :class="['font-extrabold', 'text-like-green']"
+        :class="[
+          'font-extrabold',
+          'text-like-green',
+        ]"
         :text="$t('AirDrop.label.connect.wallet')"
         preset="h2"
       />
@@ -68,10 +60,13 @@
         'flex-col',
         'items-center',
         'mb-[32px]',
+        'px-[24px]',
       ]"
     >
       <Label
         :class="[
+          'hidden',
+          'lg:block',
           'text-center',
           'text-medium-gray',
           'mt-[32px]',
@@ -79,13 +74,27 @@
         :text="$t('AirDrop.label.connect.address')"
         preset="p5"
       />
+      <Label
+        :class="[
+          'text-dark-gray',
+          'mt-[8px]',
+          'text-center',
+          'lg:hidden',
+        ]"
+        :text="$t('AirDrop.guide.connect.wallet')"
+        preset="p5"
+      />
       <div
         :class="[
           'flex',
+          'flex-col',
+          'items-center',
           'justify-center',
           'mt-[24px]',
           'p-[16px]',
-          'w-[450px]',
+          'w-full',
+          'max-w-[450px]',
+          'sm:flex-row',
         ]"
       >
         <TextField
@@ -95,13 +104,17 @@
           :error-message="errorMessage"
         />
         <Button
-          class="ml-[16px]"
+          :class="[
+            'mt-[16px]',
+            'sm:ml-[16px]',
+            'sm:mt-0',
+          ]"
           preset="secondary"
-          :text="$t('AirDrop.button.enter')"
+          :text="$t('AirDrop.button.check')"
           @click="handleAddressInput"
         >
-          <template #append>
-            <IconArrowRight />
+          <template #prepend>
+            <IconSearch class="w-[20px]" />
           </template>
         </Button>
       </div>
@@ -131,7 +144,7 @@ export default class AirdropLogin extends Vue {
   handleAddressInput() {
     this.errorMessage = ''
     if (
-      !COSMOS_ADDRESS_REGEX.test(this.inputAddress) ||
+      !COSMOS_ADDRESS_REGEX.test(this.inputAddress) &&
       !OSMOSIS_ADDRESS_REGEX.test(this.inputAddress)
     ) {
       this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
