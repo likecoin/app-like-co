@@ -7,6 +7,7 @@
       <div
         ref="canvas"
         :class="canvasWrapperClasses"
+        :style="rootStyle"
         @resize="handleResize"
       />
       <svg
@@ -210,19 +211,22 @@ export default class IscnCard extends Vue {
     return !this.isAnimated && this.isQRCodeRendering
   }
 
+  get rootStyle() {
+    return {
+      borderRadius: `${this.borderRadius}px`,
+    }
+  }
+
   get rootProps() {
     return {
       class: [
         'relative',
-        'overflow-hidden',
         'bg-shade-gray',
         {
           'animate-pulse': this.isShowLoadingIndicator,
         },
       ],
-      style: {
-        borderRadius: `${this.borderRadius}px`,
-      },
+      style: this.rootStyle,
     }
   }
 
@@ -292,6 +296,7 @@ export default class IscnCard extends Vue {
   get canvasWrapperClasses() {
     return [
       'absolute',
+      'overflow-hidden',
       'inset-0',
       'transition',
       'transition-opacity',
