@@ -31,6 +31,9 @@ const signerModule = namespace('signer')
 
 @Component({
   head() {
+    const isDesktopViewMode = this.$store.getters['ui/isDesktopViewMode']
+    console.log(isDesktopViewMode)
+    // TODO: Inject proper viewport
     return {
       htmlAttrs: {
         class: this.$props.bgClass,

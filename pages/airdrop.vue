@@ -193,7 +193,8 @@
           preset="outline"
           text-preset="h7"
           size="mini"
-          :text="$t('HomePage.button.desktop')"
+          :text="viewModeButtonText"
+          @click="handleChangeViewModeButtonClick"
         />
       </div>
     </div>
@@ -207,6 +208,7 @@ import { MetaInfo } from 'vue-meta'
 import { namespace } from 'vuex-class'
 
 const signerModule = namespace('signer')
+const uiModule = namespace('ui')
 
 @Component({
   head() {
@@ -226,6 +228,10 @@ const signerModule = namespace('signer')
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
 
+  @uiModule.Getter isDesktopViewMode!: boolean
+  @uiModule.Action enableDesktopViewMode!: () => void
+  @uiModule.Action enableMobileViewMode!: () => void
+
   get subscriptionCardPreset() {
     return this.$route.name ===
       this.localeRoute({ name: 'airdrop-check' })?.name ||
@@ -238,6 +244,21 @@ export default class AirdropCheckPage extends Vue {
     return (
       this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
     )
+  }
+
+  get viewModeButtonText() {
+    if (this.isDesktopViewMode) {
+      return this.$t('HomePage.button.viewMode.mobile')
+    }
+    return this.$t('HomePage.button.viewMode.desktop')
+  }
+
+  handleChangeViewModeButtonClick() {
+    if (this.isDesktopViewMode) {
+      this.enableMobileViewMode()
+    } else {
+      this.enableDesktopViewMode()
+    }
   }
 }
 </script>
