@@ -28,16 +28,22 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 
 const walletModule = namespace('wallet')
 const signerModule = namespace('signer')
+const uiModule = namespace('ui')
+
 
 @Component({
   head() {
-    const isDesktopViewMode = this.$store.getters['ui/isDesktopViewMode']
-    console.log(isDesktopViewMode)
-    // TODO: Inject proper viewport
+    const isDesktopViewMode:boolean = this.$store.getters['ui/isDesktopViewMode']
+    const contentWidth = isDesktopViewMode ? 'width=1024' : 'width=device-width'
+
     return {
       htmlAttrs: {
         class: this.$props.bgClass,
       },
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: contentWidth },
+      ],
     }
   },
 })
@@ -54,9 +60,12 @@ export default class RootLayout extends Vue {
     address: string
   }) => void
 
+  @uiModule.Action init!: () => void
+
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
   async mounted() {
+    this.init();
     const isInited = await this.initIfNecessary();
     if (isInited) {
       this.updateSignerInfo({

@@ -160,43 +160,6 @@
           preset="p5"
         />
       </div>
-      <div
-        :class="[
-          'flex',
-          'flex-col',
-          'items-center',
-          'justify-center',
-          'z-10',
-          'lg:hidden',
-        ]"
-      >
-        <Button
-          :class="[
-            'mt-[16px]',
-            'underline',
-            'decoration-1',
-          ]"
-          preset="plain"
-          text-preset="h5"
-          :text="$t('AirDrop.button.homepage')"
-          :to="localeLocation({ name: 'index' })"
-        >
-          <template #prepend>
-            <IconArrowLeft class="w-[20px]" />
-          </template>
-        </Button>
-        <Button
-          :class="[
-            'mt-[26px]',
-            'text-medium-gray',
-          ]"
-          preset="outline"
-          text-preset="h7"
-          size="mini"
-          :text="viewModeButtonText"
-          @click="handleChangeViewModeButtonClick"
-        />
-      </div>
     </div>
   </Page>
 </template>
@@ -208,7 +171,6 @@ import { MetaInfo } from 'vue-meta'
 import { namespace } from 'vuex-class'
 
 const signerModule = namespace('signer')
-const uiModule = namespace('ui')
 
 @Component({
   head() {
@@ -228,10 +190,6 @@ const uiModule = namespace('ui')
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
 
-  @uiModule.Getter isDesktopViewMode!: boolean
-  @uiModule.Action enableDesktopViewMode!: () => void
-  @uiModule.Action enableMobileViewMode!: () => void
-
   get subscriptionCardPreset() {
     return this.$route.name ===
       this.localeRoute({ name: 'airdrop-check' })?.name ||
@@ -244,21 +202,6 @@ export default class AirdropCheckPage extends Vue {
     return (
       this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
     )
-  }
-
-  get viewModeButtonText() {
-    if (this.isDesktopViewMode) {
-      return this.$t('HomePage.button.viewMode.mobile')
-    }
-    return this.$t('HomePage.button.viewMode.desktop')
-  }
-
-  handleChangeViewModeButtonClick() {
-    if (this.isDesktopViewMode) {
-      this.enableMobileViewMode()
-    } else {
-      this.enableDesktopViewMode()
-    }
   }
 }
 </script>

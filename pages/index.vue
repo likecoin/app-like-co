@@ -71,19 +71,7 @@
           </template>
         </Button>
       </form>
-
     </div>
-    <Button
-      :class="[
-        'mt-[26px]',
-        'text-medium-gray',
-        'lg:hidden',
-      ]"
-      preset="outline"
-      text-preset="h7"
-      size="mini"
-      :text="$t('HomePage.button.desktop')"
-    />
     <form
       tag="form"
       :class="[

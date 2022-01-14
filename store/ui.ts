@@ -1,6 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 
+const CURRENT_VIEW_MODE = 'CURRENT_VIEW_MODE';
+
 export enum ViewMode {
   Desktop = 'desktop',
   Mobile = 'mobile'
@@ -29,13 +31,13 @@ export default class UIStore extends VuexModule {
 
   @Action
   init() {
-    const mode = ViewMode.Mobile // TODO: Read mode from Local Storage
-    this.viewMode = mode
+    const mode = window.localStorage?.getItem(CURRENT_VIEW_MODE) || ViewMode.Mobile
+    this.context.commit('setViewMode', mode)
   }
 
   @Action
   changeViewMode(mode: ViewMode) {
-    // TODO: Save mode to Local Storage
+    window.localStorage?.setItem(CURRENT_VIEW_MODE, mode)
     this.setViewMode(mode)
   }
 

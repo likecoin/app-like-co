@@ -8,6 +8,7 @@
       'pb-[24px]',
       { 'bg-white' : $nuxt.$route.path.includes('airdrop') },
       'lg:bg-light-gray',
+      'lg:mt-[30px]',
     ]"
   >
     <InformationBar />
