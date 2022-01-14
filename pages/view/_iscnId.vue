@@ -32,24 +32,58 @@
   <Page
     v-else
     :class="[
-      'w-min',
+      'w-full',
+      'max-w-[960px]',
       'mt-[16px]',
       'mx-auto',
       'mb-[32px]',
     ]"
     :flex-layout-class="[
       'flex-nowrap',
+      'flex-col',
       'items-start',
+      'lg:flex-row',
     ]"
   >
-    <div class="mr-[32px]">
+    <div
+      :class="[
+        'flex',
+        'lg:block',
+
+        'flex-col',
+        'sm:flex-row',
+
+        'items-center',
+        'sm:items-stretch',
+
+        'max-w-full',
+        'lg:max-w-[280px]',
+        'lg:mr-[32px]',
+      ]">
       <ClientOnly>
         <LazyIscnCard
           :key="record.id"
-          class="w-[280px]"
+          :class="[
+            'hidden',
+            'sm:block',
+            'flex-shrink-0',
+            'w-[280px]',
+          ]"
           :record="record"
           orientation="portrait"
           :is-animated="true"
+        />
+        <LazyIscnCard
+          :key="record.id"
+          :class="[
+            'w-full',
+            'sm:absolute',
+            'sm:opacity-0',
+            'sm:pointer-events-none',
+          ]"
+          :record="record"
+          :is-animated="true"
+          orientation="landscape"
         />
       </ClientOnly>
       <MetadataCard
@@ -57,12 +91,19 @@
         :img-src="imgSrc"
         :filtered-exif="exifInfo"
         :class="[
-          'w-[280px]',
           'mt-[16px]',
+          'sm:mt-0',
+          'lg:mt-[16px]',
+          'sm:ml-[16px]',
+          'lg:ml-0',
         ]"
       />
     </div>
-    <div>
+    <div :class="[
+      'w-full',
+      'mt-[16px]',
+      'lg:mt-0',
+    ]">
       <InfoCard :label-text="type" :time-stamp="recordData.recordTimestamp">
         <template #icon>
           <ISCNTypeIcon :type="type" />

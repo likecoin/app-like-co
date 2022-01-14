@@ -128,7 +128,8 @@
       </Card>
     <div
       :class="[
-        'min-w-[648px]',
+        'w-full',
+        'max-w-[648px]',
         'flex',
         'items-center',
         'justify-between',

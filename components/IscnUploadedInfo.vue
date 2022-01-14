@@ -40,16 +40,13 @@
       <Divider class="mb-[24px]" />
       <div
         :class="[
-          'flex',
+          'sm:flex',
           'items-start',
           'justify-between',
+          'mb-[28px]',
         ]"
       >
         <Label
-          :class="[
-            'w-min',
-            'mb-[28px]',
-          ]"
           :text="type"
           tag="div"
           preset="p5"
@@ -62,6 +59,10 @@
         </Label>
         <Label
           :text="recordTimestamp"
+          :class="[
+            'mt-[8px]',
+            'sm:mt-0',
+          ]"
           tag="div"
           preset="p6"
           content-class="text-medium-gray"
