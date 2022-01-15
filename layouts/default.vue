@@ -53,7 +53,6 @@ export default class DefaultLayout extends Vue {
   @uiModule.Getter isDesktopViewMode!: boolean
   @uiModule.Action enableDesktopViewMode!: () => void
   @uiModule.Action enableMobileViewMode!: () => void
-  @uiModule.Action init!: () => void
 
   get viewModeButtonText() {
     if (this.isDesktopViewMode) {

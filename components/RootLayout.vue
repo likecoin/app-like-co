@@ -33,7 +33,7 @@ const uiModule = namespace('ui')
 
 @Component({
   head() {
-    const isDesktopViewMode:boolean = this.$store.getters['ui/isDesktopViewMode']
+    const isDesktopViewMode: boolean = this.$store.getters['ui/isDesktopViewMode']
     const contentWidth = isDesktopViewMode ? 'width=1024' : 'width=device-width'
 
     return {
@@ -60,12 +60,12 @@ export default class RootLayout extends Vue {
     address: string
   }) => void
 
-  @uiModule.Action init!: () => void
+  @uiModule.Action('init') initUIStore!: () => void
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
   async mounted() {
-    this.init();
+    this.initUIStore();
     const isInited = await this.initIfNecessary();
     if (isInited) {
       this.updateSignerInfo({
