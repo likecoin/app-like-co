@@ -160,42 +160,6 @@
           preset="p5"
         />
       </div>
-      <div
-        :class="[
-          'flex',
-          'flex-col',
-          'items-center',
-          'justify-center',
-          'z-10',
-          'lg:hidden',
-        ]"
-      >
-        <Button
-          :class="[
-            'mt-[16px]',
-            'underline',
-            'decoration-1',
-          ]"
-          preset="plain"
-          text-preset="h5"
-          :text="$t('AirDrop.button.homepage')"
-          :to="localeLocation({ name: 'index' })"
-        >
-          <template #prepend>
-            <IconArrowLeft class="w-[20px]" />
-          </template>
-        </Button>
-        <Button
-          :class="[
-            'mt-[26px]',
-            'text-medium-gray',
-          ]"
-          preset="outline"
-          text-preset="h7"
-          size="mini"
-          :text="$t('HomePage.button.desktop')"
-        />
-      </div>
     </div>
   </Page>
 </template>
