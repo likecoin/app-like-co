@@ -28,7 +28,6 @@
         'items-center',
         'justify-center',
         'mb-[28px]',
-        'sm:flex-col-reverse',
         'sm:mb-0',
       ]"
     >
@@ -40,6 +39,8 @@
           'justify-center',
           'items-center',
           'sm:flex-row',
+          'sm:mt-[32px]',
+          'sm:mb-[16px]',
         ]"
       >
         <div
@@ -53,8 +54,6 @@
             'sm:items-start',
             'sm:px-[56px]',
             'sm:mr-[100px]',
-            'sm:mt-[48px]',
-            'sm:mb-[56px]',
           ]"
         >
           <IconDiverMini class="text-airdrop-gold" />
@@ -62,20 +61,19 @@
             :class="[
               'flex',
               'mt-[24px]',
-              'mb-[12px]',
+              'my-[6px]',
               'sm:items-end',
-              'sm:my-[12px]',
             ]"
           >
             <Label
-              :class="['font-extrabold', 'text-dark-gray']"
+              :class="['font-extrabold', 'text-like-green']"
               :text="`${claimmableAmount}`"
               preset="h1"
             />
             <Label
               :class="[
                 'font-bold',
-                'text-dark-gray',
+                'text-like-green',
                 'ml-[8px]',
                 'mb-[4px]',
               ]"
@@ -124,11 +122,10 @@
           'h-[2px]',
           'my-[24px]',
           'bg-light-gray',
-          'sm:hidden',
         ]"
         />
       <!-- Subscribe -->
-      <div>
+      <div class="sm:mb-[56px]">
         <Label
           :class="[
             'mt-[8px]',
