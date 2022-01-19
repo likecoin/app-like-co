@@ -62,7 +62,30 @@
       :exif-info="exifInfo"
       :iscn-timestamp="iscnTimestamp"
       :step="step"
-    />
+    >
+      <template #card-footer>
+        <div
+          :class="[
+            'flex',
+            'justify-center',
+          ]"
+        >
+          <Button
+            :class="[
+              'mt-[16px]',
+              'mb-[28px]',
+            ]"
+            preset="secondary"
+            :text="$t('IscnUploaded.button.new')"
+            @click="handleCreateAnotherButtonClick"
+          >
+            <template #prepend>
+              <IconAddToISCN class="w-[20px]" />
+            </template>
+          </Button>
+        </div>
+      </template>
+    </IscnUploadedInfo>
   </Page>
 </template>
 
@@ -97,8 +120,8 @@ export default class NewIndexPage extends Vue {
   iscnTimestamp = ''
   isImage = false
   fileBlob: Blob | null = null
-  exifInfo: any = null
-  isSubmit: boolean = false
+  exifInfo: any | null = null
+  isSubmit = false
 
   get step(): any {
     switch (this.state) {
@@ -169,6 +192,24 @@ export default class NewIndexPage extends Vue {
     this.iscnTimestamp = timestamp
     this.state = 'done'
     logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1);
+  }
+
+  handleCreateAnotherButtonClick() {
+    this.state = 'init'
+    this.ipfsHash = ''
+    this.arweaveId = ''
+    this.fileSHA256 = ''
+    this.fileData = ''
+    this.fileType = ''
+    this.fileSize = ''
+    this.iscnId = ''
+    this.iscnTxHash = ''
+    this.iscnTimestamp = ''
+    this.isImage = false
+    this.fileBlob = null
+    this.exifInfo = null
+    this.isSubmit = false
+    logTrackerEvent(this, 'ISCNCreate', 'CreateAnother', this.currentAddress, 1);
   }
 }
 </script>
