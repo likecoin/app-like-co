@@ -1,9 +1,10 @@
 <template>
   <Page
     :class="[
-      'mx-auto',
+      'w-full',
+      'max-w-[640px]',
       'mt-[40px]',
-      'w-min',
+      'mx-auto',
       'mb-[100px]',
     ]"
   >
