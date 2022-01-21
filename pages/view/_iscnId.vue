@@ -9,6 +9,10 @@
   </Page>
   <Page v-else-if="isPopupLayout">
     <IscnUploadedInfo
+      :class="[
+        'w-full',
+        'max-w-[640px]',
+      ]"
       :owner="owner"
       :iscn-id="iscnId"
       :iscn-hash="txHash"
