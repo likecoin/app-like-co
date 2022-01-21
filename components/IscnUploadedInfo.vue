@@ -168,82 +168,53 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
+
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
 
-const signerModule = namespace('signer')
-const iscnModule = namespace('iscn')
-
 @Component
 export default class IscnUploadedInfo extends Vue {
-  @Prop({ default: false }) readonly isImage!: boolean
-  @Prop({ default: null }) readonly exifInfo: any | null | undefined
-  @Prop(String) readonly ipfsHash!: string
+  @Prop(String) readonly owner!: string
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
-  @Prop(String) readonly arweaveId!: string
+  @Prop({ default: null }) readonly record: ISCNRecordWithID | null | undefined
+  @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop(Number) readonly step: number | undefined
 
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @iscnModule.Action queryISCNByAddress!: (
-    arg0: string
-  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
-
-  records: ISCNRecordWithID[] | null = null
-
-  get record() {
-    return this.records ? this.records[this.records.length - 1] : null
+  get recordData() {
+    return this.record?.data
   }
 
-  get name() {
-    return this.record ? this.record.data.contentMetadata.name : ''
-  }
-
-  get description() {
-    return this.record ? this.record.data.contentMetadata.description : ''
-  }
-
-  get isPhoto() {
-    return this.exifInfo && this.exifInfo.ExifImageWidth
+  get metadata() {
+    return this.recordData?.contentMetadata
   }
 
   get type() {
-    if (this.isPhoto) return 'Photo'
-    if (this.isImage) return 'Image'
-    return 'CreativeWork'
+    return this.metadata && this.metadata['@type']
   }
 
-  get ipfs() {
-    return `ipfs://${this.ipfsHash}`
+  get name() {
+    return this.metadata?.name || this.metadata?.title
+  }
+
+  get description() {
+    return this.metadata?.description || ''
   }
 
   get transactionsURL() {
     return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
   }
 
-  get keywords() {
-    return this.record ? this.record.data.contentMetadata.keywords.split(',') : []
-  }
-
-  get owner() {
-    return this.currentAddress
+  get keywords(): Array<string> {
+    return this.metadata?.keywords.split(',') || []
   }
 
   get contentFingerprints() {
-    return this.record ? this.record.data.contentFingerprints : ''
+    return this.recordData?.contentFingerprints || ''
   }
 
   get recordTimestamp() {
-    return this.record ? this.record.data.recordTimestamp : ''
-  }
-
-  get arweaveURI() {
-    return `ar://${this.arweaveId}`;
-  }
-
-  async mounted() {
-    this.records = await this.queryISCNByAddress(this.currentAddress)
+    return this.recordData?.recordTimestamp || ''
   }
 }
 </script>

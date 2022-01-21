@@ -9,9 +9,11 @@
   </Page>
   <Page v-else-if="isPopupLayout">
     <IscnUploadedInfo
+      :owner="owner"
       :iscn-id="iscnId"
+      :iscn-hash="txHash"
+      :record="record"
       :exif-info="exifInfo"
-      :is-show-new-button="false"
     >
       <template #footer>
         <div

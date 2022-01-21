@@ -52,15 +52,11 @@
     />
     <IscnUploadedInfo
       v-else-if="state === 'done'"
-      :is-image="isImage"
-      :ipfs-hash="ipfsHash"
-      :arweave-id="arweaveId"
-      :file-data="fileData"
-      :file-s-h-a256="fileSHA256"
+      :owner="currentAddress"
       :iscn-id="iscnId"
       :iscn-hash="iscnTxHash"
+      :record="record"
       :exif-info="exifInfo"
-      :iscn-timestamp="iscnTimestamp"
       :step="step"
     >
       <template #card-footer>
@@ -92,9 +88,12 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger';
 
 const signerModule = namespace('signer')
+const iscnModule = namespace('iscn')
 
 export enum State {
   init = 'init',
@@ -107,6 +106,9 @@ export enum State {
 })
 export default class NewIndexPage extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
+  @iscnModule.Action queryISCNByAddress!: (
+    arg0: string
+  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   state = 'init'
   ipfsHash = ''
@@ -122,6 +124,7 @@ export default class NewIndexPage extends Vue {
   fileBlob: Blob | null = null
   exifInfo: any | null = null
   isSubmit = false
+  record: ISCNRecordWithID | null = null
 
   get step(): any {
     switch (this.state) {
@@ -178,7 +181,7 @@ export default class NewIndexPage extends Vue {
     logTrackerEvent(this, 'ISCNCreate', 'ISCNFileUploadToARSuccess', arweaveId, 1);
   }
 
-  onISCNTxInfo({
+  async onISCNTxInfo({
     txHash,
     iscnId,
     timestamp,
@@ -191,6 +194,8 @@ export default class NewIndexPage extends Vue {
     this.iscnId = iscnId
     this.iscnTimestamp = timestamp
     this.state = 'done'
+    const records = await this.queryISCNByAddress(this.currentAddress)
+    this.record = records ? records[records.length - 1] : null
     logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1);
   }
 
