@@ -46,6 +46,8 @@ export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
 
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
+export const TESTNET_TX_BASE_URL = 'https://node.iscn-dev-2.like.co/txs/';
+
 export const WALLET_TYPE_REPLACER: any = { cosmos: 'Cosmos Wallet', eth: 'Ethereum Wallet' }
 
 export const WALLET_TYPES = [
@@ -82,6 +84,16 @@ export const AIRDROP_SUBSCRIBE_URL = {
   production: 'https://airdrop.like.co/api/subscribe',
 }
 
+export const AIRDROP_MISSION_URL = {
+  testnet: 'https://airdrop.rinkeby.like.co/api/claims/',
+  production: 'https://airdrop.like.co/api/claims/',
+}
+
+export const AIRDROP_DECAY_URL = {
+  testnet: 'https://airdrop.rinkeby.like.co/api/decay',
+  production: 'https://airdrop.like.co/api/decay',
+}
+
 export const AIRDROP_CLAIM = IS_TESTNET
   ? AIRDROP_CLAIM_URL.testnet
   : AIRDROP_CLAIM_URL.production
@@ -93,3 +105,11 @@ export const AIRDROP_OVERVIEW = IS_TESTNET
 export const AIRDROP_SUBSCRIBE = IS_TESTNET
   ? AIRDROP_SUBSCRIBE_URL.testnet
   : AIRDROP_SUBSCRIBE_URL.production
+
+export const AIRDROP_MISSION = IS_TESTNET
+? AIRDROP_MISSION_URL.testnet
+: AIRDROP_MISSION_URL.production
+
+export const AIRDROP_DECAY = IS_TESTNET
+? AIRDROP_DECAY_URL.testnet
+: AIRDROP_DECAY_URL.production
