@@ -1,0 +1,197 @@
+<template>
+  <div
+    :class="[
+      'flex',
+      'items-start',
+      'justify-center',
+      'px-[56px]',
+      'mt-[32px]',
+    ]"
+  >
+    <div
+      :class="[
+        'flex',
+        'flex-col',
+        'justify-between',
+        'flex-grow',
+      ]"
+    >
+      <IconDiverMini class="text-airdrop-gold" />
+      <div
+        :class="[
+          'flex',
+          'my-[12px]',
+          'items-end',
+        ]"
+      >
+        <Label
+          :class="[
+            'font-extrabold',
+            'text-airdrop-gold',
+          ]"
+          :text="`${totalClaimedAmount}/${totalAirdrop}`"
+          preset="h1"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-airdrop-gold',
+            ' ml-[8px]',
+            'mb-[4px]',
+          ]"
+          :text="$t('AirDrop.label.$like')"
+          preset="h2"
+        />
+      </div>
+      <Label
+        :class="[
+          'font-bold',
+          'text-medium-gray',
+        ]"
+        :text="$t('AirDrop.label.amount.umclaimed')"
+        preset="p6"
+      />
+    </div>
+    <div
+      :class="[
+        'flex',
+        'flex-col',
+        'justify-between',
+        'flex-grow',
+        'mx-[80px]',
+      ]"
+    >
+      <IconDiverMini class="text-airdrop-gold" />
+      <div
+        :class="[
+          'flex',
+          'my-[12px]',
+          'items-end',
+        ]"
+      >
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+          ]"
+          :text="`${decay.factor}`"
+          preset="h1"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+            'ml-[8px]',
+            'mb-[4px]',
+          ]"
+          text="%"
+          preset="h2"
+        />
+      </div>
+      <Label
+        :class="[
+          'font-bold',
+          'text-medium-gray',
+        ]"
+        :text="$t('AirDrop.label.decay')"
+        preset="p6"
+      />
+    </div>
+    <div
+      :class="[
+        'flex',
+        'flex-col',
+        'items-start',
+        'justify-between',
+        'flex-grow',
+      ]"
+    >
+      <IconDiverMini class="text-airdrop-gold" />
+      <div
+        :class="[
+          'flex',
+          'my-[12px]',
+          'items-end',
+        ]"
+      >
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+          ]"
+          :text="decay.days"
+          preset="h1"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+            'mr-[8px]',
+            'mb-[4px]',
+          ]"
+          :text="$t('AirDrop.mission.decay.days')"
+          preset="h2"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+          ]"
+          :text="decay.hours"
+          preset="h1"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+            'mr-[8px]',
+            'mb-[4px]',
+          ]"
+          :text="$t('AirDrop.mission.decay.hours')"
+          preset="h2"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+          ]"
+          :text="`${decay.minutes}`"
+          preset="h1"
+        />
+        <Label
+          :class="[
+            'font-bold',
+            'text-black',
+            'mb-[4px]',
+          ]"
+          :text="$t('AirDrop.mission.decay.minutes')"
+          preset="h2"
+        />
+      </div>
+      <Label
+        :class="[
+          'font-bold',
+          'text-medium-gray',
+        ]"
+        :text="$t('AirDrop.label.decay.start')"
+        preset="p6"
+      />
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator'
+
+@Component
+export default class AirdropMission extends Vue {
+
+  // The total claimable amount of airdrop
+  @Prop(Number) readonly totalAirdrop!: number | undefined
+
+  // The total claimed amount of airdrop
+  @Prop(Number) readonly totalClaimedAmount!: number | undefined
+
+  // Contains the time information about decay
+  @Prop(Object) readonly decay!: object | undefined
+}
+</script>
