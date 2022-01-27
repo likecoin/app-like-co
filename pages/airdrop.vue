@@ -134,17 +134,37 @@
               'overflow-hidden',
               'h-full',
               'w-full',
-              'rounded-[24px]'
+              'rounded-[24px]',
             ]"
           >
             <nuxt />
           </div>
         </div>
-
+        <!-- SubscriptionCard -->
         <SubscriptionCard
+          v-if="!shouldShowSubscriptionCar"
           class="mb-[48px]"
           :preset="subscriptionCardPreset"
         />
+        <div
+          v-else
+          :class="[
+            'flex',
+            'justify-center',
+            'mb-[48px]',
+          ]"
+        >
+          <Button
+            preset="outline"
+            :style="{ border: '2px solid #D1AB79', color: '#D1AB79' }"
+            :text="$t('AirDrop.button.checker')"
+            :to="localeLocation({ name: 'airdrop-check' })"
+          >
+            <template #prepend>
+              <IconMissionButtonMini />
+            </template>
+          </Button>
+        </div>
         <Label
           v-if="!!shouldShowTentative"
           :class="[
@@ -174,14 +194,14 @@ const signerModule = namespace('signer')
 
 @Component({
   head() {
-    const title = this.$t('page.airdrop.checker.title')
+    const title = this.$t('page.airdrop.title')
     return {
       title,
       meta: [
         {
           hid: 'og:image',
           property: 'og:image',
-          content: 'https://app.like.co/images/og/airdrop.png',
+          content: 'https://app.like.co/images/og/airdrop_launch.png',
         },
       ],
     } as MetaInfo
@@ -190,10 +210,13 @@ const signerModule = namespace('signer')
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
 
+  get shouldShowSubscriptionCar() {
+    return this.$route.name === this.localeRoute({ name: 'airdrop' })?.name
+  }
+
   get subscriptionCardPreset() {
     return this.$route.name ===
-      this.localeRoute({ name: 'airdrop-check' })?.name ||
-      this.$route.name === this.localeRoute({ name: 'airdrop' })?.name
+      this.localeRoute({ name: 'airdrop-check' })?.name
       ? 'community'
       : 'both'
   }

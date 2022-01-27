@@ -1,14 +1,14 @@
 <template>
-  <div 
+  <Page
     :class="[
-        'flex',
-        'flex-col',
-        'w-full',
-        'items-center',
-        'justify-center',
-        'px-[12px]',
-        'md:px-0',
-      ]"
+      'flex',
+      'flex-col',
+      'w-full',
+      'items-center',
+      'justify-center',
+      'px-[12px]',
+      'md:px-0',
+    ]"
   >
     <img
       :class="[
@@ -31,19 +31,16 @@
       preset="h2"
       align="center"
     />
-    <AirdropLogin
-      v-if="!claimmingAddress"
-      @input="handleAddressInput"
-    />
     <AirdropVerifier
-      v-else
+      v-if="claimmingAddress"
       :address="claimmingAddress"
       :claimmable-amount="claimmableAmount"
       :is-qualified-for-atom="isQualifiedForAtom"
       :is-qualified-for-osmo="isQualifiedForOsmo"
       :is-qualified-for-civic="isQualifiedForCivic"
     />
-  </div>
+    <Label v-else :text="errorMessage" />
+  </Page>
 </template>
 
 <script lang="ts">
@@ -94,39 +91,41 @@ export default class AirdropCheckPage extends Vue {
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  inputAddress: string = ''
   claimmableAmount: any = 0
   isQualifiedForAtom: boolean = false
   isQualifiedForOsmo: boolean = false
   isQualifiedForCivic: boolean = false
 
-  mounted() {
-    this.fetchClaimmableAmount()
-  }
+  errorMessage: string = ''
 
   get claimmingAddress() {
-    return this.walletAddress || this.inputAddress
+    return this.walletAddress
   }
 
-  handleAddressInput(address: string) {
-    this.inputAddress = address
-    this.fetchClaimmableAmount()
+  mounted() {
+    if (this.claimmingAddress) {
+      this.fetchClaimmableAmount()
+    } else {
+      this.errorMessage = this.$t('error.not.connect.wallet') as string
+    }
   }
 
   @Watch('walletAddress')
   async fetchClaimmableAmount() {
-    if (!this.claimmingAddress) return
-    // TODO: Separate Testnet/Production endpoint
-    const res: any = await this.$axios.get(
-      `${AIRDROP_OVERVIEW}${this.claimmingAddress}`,
-    )
-    this.$emit('claimmingAddress')
-    this.claimmableAmount = Math.round(
-      res.data.allocatedAmount * Denom.Nanolike,
-    )
-    this.isQualifiedForAtom = !!res.data.atomAmount
-    this.isQualifiedForOsmo = !!res.data.osmosisAmount
-    this.isQualifiedForCivic = !!res.data.civicLikerAmount
+    if (this.claimmingAddress) {
+      const res: any = await this.$axios.get(
+        `${AIRDROP_OVERVIEW}${this.claimmingAddress}`,
+      )
+      this.$emit('claimmingAddress')
+      this.claimmableAmount = Math.round(
+        res.data.allocatedAmount * Denom.Nanolike,
+      )
+      this.isQualifiedForAtom = !!res.data.atomAmount
+      this.isQualifiedForOsmo = !!res.data.osmosisAmount
+      this.isQualifiedForCivic = !!res.data.civicLikerAmount
+    } else {
+      this.$router.push(this.localeLocation({ name: 'airdrop' })!)
+    }
   }
 }
 </script>
