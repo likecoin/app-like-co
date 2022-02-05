@@ -94,6 +94,11 @@ export const AIRDROP_DECAY_URL = {
   production: 'https://airdrop.like.co/api/decay',
 }
 
+export const AIRDROP_OG_URL = {
+  testnet: 'https://app.rinkeby.like.co/images/og/',
+  production: 'https://app.like.co/images/og/',
+}
+
 export const AIRDROP_CLAIM = IS_TESTNET
   ? AIRDROP_CLAIM_URL.testnet
   : AIRDROP_CLAIM_URL.production
@@ -113,3 +118,7 @@ export const AIRDROP_MISSION = IS_TESTNET
 export const AIRDROP_DECAY = IS_TESTNET
 ? AIRDROP_DECAY_URL.testnet
 : AIRDROP_DECAY_URL.production
+
+export const AIRDROP_OG = IS_TESTNET
+? AIRDROP_OG_URL.testnet
+: AIRDROP_OG_URL.production
