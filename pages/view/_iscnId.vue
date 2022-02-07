@@ -53,6 +53,8 @@
   >
     <div
       :class="[
+        'relative',
+
         'flex',
         'lg:block',
 
@@ -65,7 +67,8 @@
         'max-w-full',
         'lg:max-w-[280px]',
         'lg:mr-[32px]',
-      ]">
+      ]"
+    >
       <ClientOnly>
         <LazyIscnCard
           :key="record.id"
