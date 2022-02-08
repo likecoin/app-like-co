@@ -354,11 +354,12 @@ export default class AirdropMissionDialog extends Vue {
   buttonText: string = this.$t('AirDrop.mission.button.completed') as string
 
   changeText(status: string) {
-    if (status === 'in')
+    if (status === 'in') {
       this.buttonText = this.$t(
         'AirDrop.mission.button.seeTransaction',
       ) as string
-    else this.buttonText = this.$t('AirDrop.mission.button.completed') as string
+    } else
+      this.buttonText = this.$t('AirDrop.mission.button.completed') as string
   }
 }
 </script>

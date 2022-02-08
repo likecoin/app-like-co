@@ -18,7 +18,7 @@
       ]"
       src="/images/airdrop/title_Claim.png"
     />
-    <AirdropDashborad
+    <AirdropDashboard
       :total-airdrop="totalAirdrop"
       :total-claimed-amount="totalClaimedAmount"
       :decay="decay"
@@ -51,6 +51,7 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import BigNumber from 'bignumber.js'
 import {
   AIRDROP_CLAIM,
   AIRDROP_MISSION,
@@ -60,10 +61,6 @@ import {
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
-
-export enum Denom {
-  Nanolike = 0.000000001,
-}
 
 @Component
 export default class AirdropClaimPage extends Vue {
@@ -86,9 +83,9 @@ export default class AirdropClaimPage extends Vue {
   decay: any = { factor: 0, days: '0', hours: '0', minutes: '0' }
   intervalID: any
 
-  unclaimedAmount: number = 0
-  totalAirdrop: number = 0
-  totalClaimedAmount: number = 0
+  unclaimedAmount = new BigNumber(0)
+  totalAirdrop = new BigNumber(0)
+  totalClaimedAmount = new BigNumber(0)
   claimData: any = []
   missionsOverview = [
     {
@@ -96,28 +93,28 @@ export default class AirdropClaimPage extends Vue {
       isCompleted: false,
       isClaimed: false,
       txHash: '',
-      claimedAmount: 0,
+      claimedAmount: new BigNumber(0),
     },
     {
       name: this.$t('AirDrop.mission.name.iscn'),
       isCompleted: false,
       isClaimed: false,
       txHash: '',
-      claimedAmount: 0,
+      claimedAmount: new BigNumber(0),
     },
     {
       name: this.$t('AirDrop.mission.name.stake'),
       isCompleted: false,
       isClaimed: false,
       txHash: '',
-      claimedAmount: 0,
+      claimedAmount: new BigNumber(0),
     },
     {
       name: this.$t('AirDrop.mission.name.vote'),
       isCompleted: false,
       isClaimed: false,
       txHash: '',
-      claimedAmount: 0,
+      claimedAmount: new BigNumber(0),
     },
   ]
 
@@ -158,19 +155,14 @@ export default class AirdropClaimPage extends Vue {
       try {
         const res: any = await this.$axios
           .get(`${AIRDROP_CLAIM}${this.currentAddress}`)
-          .catch((err) => {
-            if (err.response)
-              this.errorMessage = this.$t(
-                'AirDrop.errorMessage.noAddress',
-              ) as string
-          })
-        this.totalAirdrop = Math.round(
-          (res.data.reward.unclaimedAmount + res.data.reward.claimedAmount) *
-            Denom.Nanolike,
-        )
-        this.totalClaimedAmount = Math.round(
-          res.data.reward.claimedAmount * Denom.Nanolike,
-        )
+
+        this.totalAirdrop = new BigNumber(
+          res.data.reward.unclaimedAmount + res.data.reward.claimedAmount,
+        ).shiftedBy(-9).integerValue() 
+        this.totalClaimedAmount = new BigNumber(
+          res.data.reward.claimedAmount,
+        ).shiftedBy(-9).integerValue() 
+
         this.errorMessage = ''
         this.claimData = res.data.missionStatus
         this.missionsOverview.forEach((mission: any, i) => {
@@ -183,7 +175,10 @@ export default class AirdropClaimPage extends Vue {
           })
         })
       } catch (error) {
-        console.log(error)
+        console.error(error)
+        this.errorMessage = this.$t(
+          'AirDrop.errorMessage.noAddress',
+        ) as string
         this.initClaimStatus()
       }
     } else {
@@ -235,7 +230,7 @@ export default class AirdropClaimPage extends Vue {
   }
   
   initClaimStatus() {
-    this.unclaimedAmount = 0
+    this.unclaimedAmount = new BigNumber(0)
     this.claimData = []
     this.step = 1
     this.missionsOverview.forEach((mission) => {
@@ -261,16 +256,13 @@ export default class AirdropClaimPage extends Vue {
         .post(
           `${AIRDROP_MISSION}${this.currentMission.name}?address=${this.currentAddress}`,
         )
-        .catch((err) => {
-          console.log(err.response)
-        })
-      this.currentMission.claimedAmount = Math.round(
-        res.data.claimedAmount * Denom.Nanolike,
-      )
+      this.currentMission.claimedAmount = new BigNumber(res.data.claimedAmount)
+        .shiftedBy(-9)
+        .integerValue()
       this.currentMission.isCompleted = true
       this.currentMission.txHash = res.data.txHash
     } catch (error) {
-      console.log(error)
+      console.error(error)
     } finally {
       this.step = 3
       this.loadingStatus = ''

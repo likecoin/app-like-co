@@ -48,7 +48,7 @@
           'font-bold',
           'text-medium-gray',
         ]"
-        :text="$t('AirDrop.label.amount.umclaimed')"
+        :text="$t('AirDrop.label.amount.claimed')"
         preset="p6"
       />
     </div>
@@ -183,13 +183,13 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
-export default class AirdropMission extends Vue {
+export default class AirdropDashboard extends Vue {
 
   // The total claimable amount of airdrop
-  @Prop(Number) readonly totalAirdrop!: number | undefined
+  @Prop(Object) readonly totalAirdrop!: object | undefined
 
   // The total claimed amount of airdrop
-  @Prop(Number) readonly totalClaimedAmount!: number | undefined
+  @Prop(Object) readonly totalClaimedAmount!: object | undefined
 
   // Contains the time information about decay
   @Prop(Object) readonly decay!: object | undefined
