@@ -26,6 +26,7 @@
     <AirdropProgress
       :error-message="errorMessage"
       :progress="progress"
+      :should-close-airdrop="shouldCloseAirdrop"
       @handleConnectWallet="handleConnectWalletButtonClick"
     />
     <AirdropMission
@@ -62,6 +63,14 @@ import {
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
+export enum ClaimStatus {
+  claimed = 'claimed',
+  unclaimed = 'unclaimed',
+  unable = 'unable',
+  unableAll = 'unableAll',
+  withoutWallet = 'withoutWallet',
+}
+
 @Component
 export default class AirdropClaimPage extends Vue {
   @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
@@ -78,6 +87,7 @@ export default class AirdropClaimPage extends Vue {
   step = 1
   errorMessage: string = ''
   loadingStatus: string = ''
+  shouldCloseAirdrop: boolean = false
 
   deadline = ''
   decay: any = { factor: 0, days: '0', hours: '0', minutes: '0' }
@@ -92,29 +102,33 @@ export default class AirdropClaimPage extends Vue {
       name: this.$t('AirDrop.mission.name.keplr'),
       isCompleted: false,
       isClaimed: false,
+      isEnabled:true,
       txHash: '',
-      claimedAmount: new BigNumber(0),
+      claimedAmount: '0',
     },
     {
       name: this.$t('AirDrop.mission.name.iscn'),
       isCompleted: false,
       isClaimed: false,
+      isEnabled:true,
       txHash: '',
-      claimedAmount: new BigNumber(0),
+      claimedAmount: '0',
     },
     {
       name: this.$t('AirDrop.mission.name.stake'),
       isCompleted: false,
       isClaimed: false,
+      isEnabled:true,
       txHash: '',
-      claimedAmount: new BigNumber(0),
+      claimedAmount: '0',
     },
     {
       name: this.$t('AirDrop.mission.name.vote'),
       isCompleted: false,
       isClaimed: false,
+      isEnabled:true,
       txHash: '',
-      claimedAmount: new BigNumber(0),
+      claimedAmount: '0',
     },
   ]
 
@@ -127,12 +141,16 @@ export default class AirdropClaimPage extends Vue {
   }
 
   get claimStatus() {
+    if (this.shouldCloseAirdrop) return ClaimStatus.unableAll
     // eslint-disable-next-line no-nested-ternary
     return this.currentMission.isClaimed
-      ? 'claimed'
+      ? ClaimStatus.claimed
+      : // eslint-disable-next-line no-nested-ternary
+      !this.currentMission.isEnabled
+      ? ClaimStatus.unable
       : this.errorMessage
-      ? 'withoutWallet'
-      : 'unclaimed'
+      ? ClaimStatus.withoutWallet
+      : ClaimStatus.unclaimed
   }
 
   get txhash() {
@@ -152,38 +170,61 @@ export default class AirdropClaimPage extends Vue {
   @Watch('currentAddress')
   async fetchMissionStauts() {
     if (this.currentAddress) {
-      try {
-        const res: any = await this.$axios
-          .get(`${AIRDROP_CLAIM}${this.currentAddress}`)
-
-        this.totalAirdrop = new BigNumber(
-          res.data.reward.unclaimedAmount + res.data.reward.claimedAmount,
-        ).shiftedBy(-9).integerValue() 
-        this.totalClaimedAmount = new BigNumber(
-          res.data.reward.claimedAmount,
-        ).shiftedBy(-9).integerValue() 
-
-        this.errorMessage = ''
-        this.claimData = res.data.missionStatus
-        this.missionsOverview.forEach((mission: any, i) => {
-          this.claimData.forEach((element: any) => {
-            if (mission.name === element.mission) {
-              this.missionsOverview[i].isCompleted = element.completed
-              this.missionsOverview[i].isClaimed = element.claimed
-              this.missionsOverview[i].txHash = element.txHash
-            }
-          })
+      const res: any = await this.$axios
+        .get(`${AIRDROP_CLAIM}${this.currentAddress}`)
+        .catch((err) => {
+          console.error(err)
+          if (err.response.status === 403) {
+            this.errorMessage = this.$t(
+              'AirDrop.errorMessage.noAddress',
+            ) as string
+          } else {
+            this.closeAirdrop()
+          }
+          this.initClaimStatus()
         })
-      } catch (error) {
-        console.error(error)
-        this.errorMessage = this.$t(
-          'AirDrop.errorMessage.noAddress',
-        ) as string
-        this.initClaimStatus()
+
+      if (res) {
+        this.claimData = res.data.missionStatus
+        if (this.checkIfAirdropAvailable(this.claimData)) {
+          this.totalAirdrop = new BigNumber(
+            res.data.reward.unclaimedAmount + res.data.reward.claimedAmount,
+          )
+            .shiftedBy(-9)
+            .integerValue()
+          this.totalClaimedAmount = new BigNumber(res.data.reward.claimedAmount)
+            .shiftedBy(-9)
+            .integerValue()
+
+          this.errorMessage = ''
+          this.missionsOverview.forEach((mission: any, i) => {
+            this.claimData.forEach((element: any) => {
+              if (mission.name === element.mission) {
+                this.missionsOverview[i].isCompleted = element.completed
+                this.missionsOverview[i].isClaimed = element.claimed
+                this.missionsOverview[i].isEnabled = element.enabled
+                this.missionsOverview[i].txHash = element.txHash
+              }
+            })
+          })
+        } else {
+          this.closeAirdrop()
+        }
       }
     } else {
       this.$router.push(this.localeLocation({ name: 'airdrop' })!)
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  checkIfAirdropAvailable(claimData:any) {
+    // Must have at least one enabled mission.
+    return claimData.some((element: any) => element.enabled)
+  }
+
+  closeAirdrop() {
+    this.errorMessage = this.$t('AirDrop.errorMessage.technicalError') as string
+    this.shouldCloseAirdrop = true
   }
 
   changeStep(step: number) {
@@ -251,22 +292,27 @@ export default class AirdropClaimPage extends Vue {
 
   async handleMissionDone() {
     this.loadingStatus = 'Loading'
-    try {
-      const res: any = await this.$axios
-        .post(
-          `${AIRDROP_MISSION}${this.currentMission.name}?address=${this.currentAddress}`,
-        )
+    const res: any = await this.$axios
+      .post(
+        `${AIRDROP_MISSION}${this.currentMission.name}?address=${this.currentAddress}`
+      )
+      .catch((err) => {
+        console.error(err)
+        if (err.response.status === 500 || err.response.status === 503) {
+          this.currentMission.isEnabled = false
+        }
+      })
+
+    if (res) {
       this.currentMission.claimedAmount = new BigNumber(res.data.claimedAmount)
         .shiftedBy(-9)
-        .integerValue()
+        .toFixed(2)
       this.currentMission.isCompleted = true
       this.currentMission.txHash = res.data.txHash
-    } catch (error) {
-      console.error(error)
-    } finally {
-      this.step = 3
-      this.loadingStatus = ''
     }
+
+    this.step = 3
+    this.loadingStatus = ''
   }
 }
 </script>

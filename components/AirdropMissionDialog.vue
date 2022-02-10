@@ -164,7 +164,7 @@
           </Button>
           <div v-if="step === 2">
             <Button
-              v-if="claimStatus === 'unclaimed' && !loadingStatus"
+              v-if="(claimStatus === 'unclaimed' || claimStatus === 'unable') && !loadingStatus"
               preset="secondary"
               :text="$t('AirDrop.button.done')"
               @click="$emit('done')"
@@ -174,7 +174,7 @@
               </template>
             </Button>
             <ProgressIndicator
-              v-if="claimStatus === 'unclaimed' && loadingStatus"
+              v-if="(claimStatus === 'unclaimed' || claimStatus === 'unable') && loadingStatus"
             />
             <Button
               v-if="claimStatus === 'claimed' && !errorMessage"
@@ -198,12 +198,94 @@
                 <IconClose />
               </template>
             </Button>
+            <Button
+              v-if="claimStatus === 'unableAll'"
+              is-disabled="true"
+              preset="tertiary"
+              :text="$t('AirDrop.mission.button.technicalError')"
+            >
+              <template #prepend>
+                <IconClose />
+              </template>
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- result -->
+      <div
+        v-if="
+          step === 3 &&
+          (claimStatus === 'unable' ||
+            (claimStatus !== 'unable' && !mission.isCompleted))"
+        :class="[
+          'w-full',
+          'max-w-[400px]',
+        ]"
+      >
+        <Label
+          preset="h2"
+          align="center"
+          :class="[
+            'text-center',
+            'text-airdrop-gold',
+          ]"
+          :text="claimStatus === 'unable'
+          ? $t('AirDrop.label.technicalError')
+          : $t('AirDrop.mission.discription.notCompleted.title')"
+        />
+        <div
+          :class="[
+            'flex',
+            'flex-col',
+            'items-center',
+            'justify-center',
+            'mt-[48px]',
+          ]"
+        >
+          <IconError v-if="claimStatus === 'unable'" class="w-[56px]" />
+          <IconMissionNotCompleted v-else class="w-[48px]" />
+          <Label
+            preset="p5"
+            align="center"
+            :class="['mt-[24px]','whitespace-pre-line','text-center']"
+            :text="claimStatus === 'unable'
+            ? $t('AirDrop.errorMessage.technicalError')
+            : $t('AirDrop.mission.discription.notCompleted')"
+          />
+          <div
+            :class="[
+              'flex',
+              'w-full',
+              'justify-between',
+              'items-center',
+              'mt-[62px]',
+            ]"
+          >
+            <Button
+              preset="plain"
+              :text="$t('AirDrop.mission.button.pervious')"
+              @click="$emit('step', 2)"
+            >
+              <template #prepend>
+                <IconArrowLeft class="w-[20px]" />
+              </template>
+            </Button>
+            <Button
+              v-if="!loadingStatus"
+              size="large"
+              preset="outline"
+              class="mr-[12px]"
+              :text="$t('AirDrop.mission.button.retry')"
+              @click="$emit('done')"
+            />
+            <ProgressIndicator v-else />
           </div>
         </div>
       </div>
 
       <div
-        v-if="step === 3 && mission.isCompleted"
+        v-else-if="step === 3 && claimStatus !== 'unable' && mission.isCompleted"
         :class="[
           'w-full',
           'max-w-[400px]',
@@ -259,66 +341,6 @@
             :text="$t('AirDrop.mission.button.seeTransaction')"
             :href="txhash"
           />
-        </div>
-      </div>
-      <div
-        v-else-if="step === 3 && !mission.isCompleted"
-        :class="[
-          'w-full',
-          'max-w-[400px]',
-        ]"
-      >
-        <Label
-          preset="h2"
-          :class="[
-            'text-center',
-            'text-airdrop-gold',
-          ]"
-          :text="$t('AirDrop.mission.discription.notCompleted.title')"
-        />
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'items-center',
-            'justify-center',
-            'mt-[32px]',
-          ]"
-        >
-          <IconMissionNotCompleted class="w-[48px]" />
-          <Label
-            preset="p5"
-            class="mt-[24px]"
-            :text="$t('AirDrop.mission.discription.notCompleted')"
-          />
-          <div
-            :class="[
-              'flex',
-              'w-full',
-              'justify-between',
-              'items-center',
-              'mt-[62px]',
-            ]"
-          >
-            <Button
-              preset="plain"
-              :text="$t('AirDrop.mission.button.pervious')"
-              @click="$emit('step', 2)"
-            >
-              <template #prepend>
-                <IconArrowLeft class="w-[20px]" />
-              </template>
-            </Button>
-            <Button
-              v-if="!loadingStatus"
-              size="large"
-              preset="outline"
-              class="mr-[12px]"
-              :text="$t('AirDrop.mission.button.retry')"
-              @click="$emit('done')"
-            />
-            <ProgressIndicator v-else />
-          </div>
         </div>
       </div>
     </div>

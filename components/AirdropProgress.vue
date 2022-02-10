@@ -99,8 +99,20 @@
       'mt-[56px]',
     ]"
   >
-    <Label :text="errorMessage" />
+    <Label
+      :class="[
+        'whitespace-pre-line',
+        'text-red',
+      ]"
+      preset="p5"
+      :text="errorMessage"
+    />
     <Button
+      v-if="!shouldCloseAirdrop"
+      :class="[
+        'ml-[8px]',
+        'w-min',
+      ]"
       preset="secondary"
       :text="$t('AirDrop.button.otherWallet')"
       @click="$emit('handleConnectWallet')"
@@ -122,5 +134,8 @@ export default class AirdropProgress extends Vue {
   
   // Error message from empty or ineligible address
   @Prop(String) readonly errorMessage!: string | undefined
+
+  // If Airdrop is closed, the page would turn into view-only mode
+  @Prop({ default : false }) readonly shouldCloseAirdrop!: boolean | undefined
 }
 </script>
