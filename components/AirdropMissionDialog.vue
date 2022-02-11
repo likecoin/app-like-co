@@ -57,7 +57,7 @@
           :class="[
             'text-airdrop-gold',
             'mt-[6px]',
-            'mb-[12px]',
+            'mb-[24px]',
           ]"
           :text="step === 1
             ? $t(`AirDrop.mission.title.1.${mission.name}`)
@@ -69,6 +69,8 @@
           :class="[
             'whitespace-pre-line',
             'leading-[24px]',
+            'mt-[24px]',
+            'text-dark-gray',
           ]"
           :text="$t(`AirDrop.mission.discription.step.1.${mission.name}`)"
         />
@@ -78,6 +80,8 @@
           :class="[
             'whitespace-pre-line',
             'leading-[24px]',
+            'mt-[12px]',
+            'text-dark-gray',
           ]"
         >
           <i18n
@@ -92,17 +96,6 @@
                   'text-like-green',
                 ]"
                 :href="$t(`AirDrop.mission.discription.link.${mission.name}`)"
-                target="_blank"
-              />
-            </template>
-            <template #keplrGuide>
-              <a
-                v-t="$t(`AirDrop.mission.discription.link.${mission.name}`)"
-                :class="[
-                  'underline',
-                  'text-like-green',
-                ]"
-                :href="$t(`AirDrop.mission.discription.guide.link.${mission.name}`)"
                 target="_blank"
               />
             </template>
