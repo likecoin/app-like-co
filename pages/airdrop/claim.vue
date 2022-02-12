@@ -93,9 +93,8 @@ export default class AirdropClaimPage extends Vue {
   decay: any = { factor: 0, days: '0', hours: '0', minutes: '0' }
   intervalID: any
 
-  unclaimedAmount = new BigNumber(0)
-  totalAirdrop = new BigNumber(0)
-  totalClaimedAmount = new BigNumber(0)
+  totalAirdrop = '0'
+  totalClaimedAmount = '0'
   claimData: any = []
   missionsOverview = [
     {
@@ -191,10 +190,10 @@ export default class AirdropClaimPage extends Vue {
             res.data.reward.unclaimedAmount + res.data.reward.claimedAmount,
           )
             .shiftedBy(-9)
-            .integerValue()
+            .toFixed(0, BigNumber.ROUND_DOWN)
           this.totalClaimedAmount = new BigNumber(res.data.reward.claimedAmount)
             .shiftedBy(-9)
-            .integerValue()
+            .toFixed(0, BigNumber.ROUND_DOWN)
 
           this.errorMessage = ''
           this.missionsOverview.forEach((mission: any, i) => {
@@ -272,7 +271,6 @@ export default class AirdropClaimPage extends Vue {
   }
   
   initClaimStatus() {
-    this.unclaimedAmount = new BigNumber(0)
     this.claimData = []
     this.step = 1
     this.missionsOverview.forEach((mission) => {
@@ -308,7 +306,7 @@ export default class AirdropClaimPage extends Vue {
     if (res) {
       this.currentMission.claimedAmount = new BigNumber(res.data.claimedAmount)
         .shiftedBy(-9)
-        .toFixed(2)
+        .toFixed(0, BigNumber.ROUND_DOWN)
       this.currentMission.isCompleted = true
       this.currentMission.txHash = res.data.txHash
     }

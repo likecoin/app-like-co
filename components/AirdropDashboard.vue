@@ -186,12 +186,12 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 export default class AirdropDashboard extends Vue {
 
   // The total claimable amount of airdrop
-  @Prop(Object) readonly totalAirdrop!: object | undefined
+  @Prop(String) readonly totalAirdrop!: string | undefined
 
   // The total claimed amount of airdrop
-  @Prop(Object) readonly totalClaimedAmount!: object | undefined
+  @Prop(String) readonly totalClaimedAmount!: string | undefined
 
   // Contains the time information about decay
-  @Prop(Object) readonly decay!: object | undefined
+  @Prop(String) readonly decay!: string | undefined
 }
 </script>
