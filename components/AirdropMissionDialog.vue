@@ -172,7 +172,7 @@
             <Button
               v-if="claimStatus === 'claimed' && !errorMessage"
               preset="tertiary"
-              :href="txhash"
+              :href="txUrl"
               :text="buttonText"
               @mouseover="changeText('in')"
               @mouseout="changeText('out')"
@@ -207,10 +207,7 @@
       
       <!-- result -->
       <div
-        v-if="
-          step === 3 &&
-          (claimStatus === 'unable' ||
-            (claimStatus !== 'unable' && !mission.isCompleted))"
+        v-if="result === 'fail'"
         :class="[
           'w-full',
           'max-w-[400px]',
@@ -225,7 +222,7 @@
           ]"
           :text="claimStatus === 'unable'
           ? $t('AirDrop.label.technicalError')
-          : $t('AirDrop.mission.discription.notCompleted.title')"
+          : $t('AirDrop.mission.discription.incompleted.title')"
         />
         <div
           :class="[
@@ -237,14 +234,14 @@
           ]"
         >
           <IconError v-if="claimStatus === 'unable'" class="w-[56px]" />
-          <IconMissionNotCompleted v-else class="w-[48px]" />
+          <IconMissionIncompleted v-else class="w-[48px]" />
           <Label
             preset="p5"
             align="center"
             :class="['mt-[24px]','whitespace-pre-line','text-center']"
             :text="claimStatus === 'unable'
             ? $t('AirDrop.errorMessage.technicalError')
-            : $t('AirDrop.mission.discription.notCompleted')"
+            : $t('AirDrop.mission.discription.Incompleted')"
           />
           <div
             :class="[
@@ -278,7 +275,7 @@
       </div>
 
       <div
-        v-else-if="step === 3 && claimStatus !== 'unable' && mission.isCompleted"
+        v-if="result === 'success'"
         :class="[
           'w-full',
           'max-w-[400px]',
@@ -332,7 +329,7 @@
             preset="outline"
             class="mt-[42px]"
             :text="$t('AirDrop.mission.button.seeTransaction')"
-            :href="txhash"
+            :href="txUrl"
           />
         </div>
       </div>
@@ -341,6 +338,11 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+
+enum Result {
+  fail = 'fail',
+  success = 'success'
+}
 
 @Component
 export default class AirdropMissionDialog extends Vue {
@@ -360,13 +362,29 @@ export default class AirdropMissionDialog extends Vue {
   // Error message from empty or ineligible address
   @Prop(String) readonly errorMessage!: string | undefined
 
-  // Transaction hash of the claimed airdrop
-  @Prop(String) readonly txhash!: string | undefined
+  // Transaction url of the claimed airdrop
+  @Prop(String) readonly txUrl!: string | undefined
 
   // Contains all information in the current mission
-  @Prop(Object) readonly mission!: object | {}
+  @Prop(Object) readonly mission!: any | undefined
 
   buttonText: string = this.$t('AirDrop.mission.button.completed') as string
+
+  get result() {
+    if (
+      this.step === 3 &&
+      (this.claimStatus === 'unable' ||
+        (this.claimStatus !== 'unable' && !this.mission.isCompleted))
+    )
+      return Result.fail
+    if (
+      this.step === 3 &&
+      this.claimStatus !== 'unable' &&
+      this.mission.isCompleted
+    )
+      return Result.success
+    return undefined
+  }
 
   changeText(status: string) {
     if (status === 'in') {
