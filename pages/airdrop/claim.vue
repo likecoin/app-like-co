@@ -41,7 +41,7 @@
       :claim-status="claimStatus"
       :loading-status="missionLoadingStatus"
       :error-message="errorMessage"
-      :txhash="txhash"
+      :tx-url="txURL"
       @done="handleMissionDone"
       @close="handleMissionClose"
       @step="changeStep"
@@ -148,7 +148,7 @@ export default class AirdropClaimPage extends Vue {
     return ClaimStatus.unclaimed
   }
 
-  get txhash() {
+  get txURL() {
     return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
   }
 
@@ -156,14 +156,14 @@ export default class AirdropClaimPage extends Vue {
     this.fetchMissionDecay()
 
     if (this.currentAddress) {
-      this.fetchMissionStauts()
+      this.fetchMissionStatus()
     } else {
       this.errorMessage = this.$t('AirDrop.errorMessage.noAddress') as string
     }
   }
 
   @Watch('currentAddress')
-  async fetchMissionStauts() {
+  async fetchMissionStatus() {
     this.isFinishedLoading = false
     if (this.currentAddress) {
       const res: any = await this.$axios
@@ -262,7 +262,7 @@ export default class AirdropClaimPage extends Vue {
 
   handleMissionClose() {
     if (!this.errorMessage) {
-      this.fetchMissionStauts()
+      this.fetchMissionStatus()
     }
     this.isOpenMissionDialog = false
     this.step = 1

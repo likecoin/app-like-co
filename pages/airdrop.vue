@@ -142,7 +142,7 @@
         </div>
         <!-- SubscriptionCard -->
         <SubscriptionCard
-          v-if="!shouldShowSubscriptionCar"
+          v-if="!shouldShowSubscriptionCard"
           class="mb-[48px]"
           :preset="subscriptionCardPreset"
         />
@@ -211,7 +211,7 @@ const signerModule = namespace('signer')
 export default class AirdropCheckPage extends Vue {
   @signerModule.Getter('getAddress') currentAddress!: string
 
-  get shouldShowSubscriptionCar() {
+  get shouldShowSubscriptionCard() {
     return this.$route.name === this.localeRoute({ name: 'airdrop' })?.name
   }
 
