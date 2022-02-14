@@ -6,7 +6,6 @@
       'w-full',
       'items-center',
       'justify-center',
-      'px-[12px]',
       'md:px-0',
     ]"
   >
@@ -27,6 +26,7 @@
       :error-message="errorMessage"
       :progress="progress"
       :should-close-airdrop="shouldCloseAirdrop"
+      :is-finished-loading="isFinishedLoading"
       @handleConnectWallet="handleConnectWalletButtonClick"
     />
     <AirdropMission
@@ -39,7 +39,7 @@
       :step="step"
       :mission="currentMission"
       :claim-status="claimStatus"
-      :loading-status="loadingStatus"
+      :loading-status="missionLoadingStatus"
       :error-message="errorMessage"
       :txhash="txhash"
       @done="handleMissionDone"
@@ -83,10 +83,11 @@ export default class AirdropClaimPage extends Vue {
 
   isOpenMissionDialog = false
   currentMission: any = {}
+  isFinishedLoading: boolean = false
 
   step = 1
   errorMessage: string = ''
-  loadingStatus: string = ''
+  missionLoadingStatus: string = ''
   shouldCloseAirdrop: boolean = false
 
   deadline = ''
@@ -101,7 +102,7 @@ export default class AirdropClaimPage extends Vue {
       name: this.$t('AirDrop.mission.name.keplr'),
       isCompleted: false,
       isClaimed: false,
-      isEnabled:true,
+      isEnabled: true,
       txHash: '',
       claimedAmount: '0',
     },
@@ -109,7 +110,7 @@ export default class AirdropClaimPage extends Vue {
       name: this.$t('AirDrop.mission.name.iscn'),
       isCompleted: false,
       isClaimed: false,
-      isEnabled:true,
+      isEnabled: true,
       txHash: '',
       claimedAmount: '0',
     },
@@ -117,7 +118,7 @@ export default class AirdropClaimPage extends Vue {
       name: this.$t('AirDrop.mission.name.stake'),
       isCompleted: false,
       isClaimed: false,
-      isEnabled:true,
+      isEnabled: true,
       txHash: '',
       claimedAmount: '0',
     },
@@ -125,7 +126,7 @@ export default class AirdropClaimPage extends Vue {
       name: this.$t('AirDrop.mission.name.vote'),
       isCompleted: false,
       isClaimed: false,
-      isEnabled:true,
+      isEnabled: true,
       txHash: '',
       claimedAmount: '0',
     },
@@ -141,15 +142,10 @@ export default class AirdropClaimPage extends Vue {
 
   get claimStatus() {
     if (this.shouldCloseAirdrop) return ClaimStatus.unableAll
-    // eslint-disable-next-line no-nested-ternary
-    return this.currentMission.isClaimed
-      ? ClaimStatus.claimed
-      : // eslint-disable-next-line no-nested-ternary
-      !this.currentMission.isEnabled
-      ? ClaimStatus.unable
-      : this.errorMessage
-      ? ClaimStatus.withoutWallet
-      : ClaimStatus.unclaimed
+    if (this.currentMission.isClaimed) return ClaimStatus.claimed
+    if (!this.currentMission.isEnabled) return ClaimStatus.unable
+    if (this.errorMessage) return ClaimStatus.withoutWallet
+    return ClaimStatus.unclaimed
   }
 
   get txhash() {
@@ -168,6 +164,7 @@ export default class AirdropClaimPage extends Vue {
 
   @Watch('currentAddress')
   async fetchMissionStauts() {
+    this.isFinishedLoading = false
     if (this.currentAddress) {
       const res: any = await this.$axios
         .get(`${AIRDROP_CLAIM}${this.currentAddress}`)
@@ -214,6 +211,7 @@ export default class AirdropClaimPage extends Vue {
     } else {
       this.$router.push(this.localeLocation({ name: 'airdrop' })!)
     }
+    this.isFinishedLoading = true
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -290,7 +288,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async handleMissionDone() {
-    this.loadingStatus = 'Loading'
+    this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
         // for semi-production
@@ -312,7 +310,7 @@ export default class AirdropClaimPage extends Vue {
     }
 
     this.step = 3
-    this.loadingStatus = ''
+    this.missionLoadingStatus = ''
   }
 }
 </script>

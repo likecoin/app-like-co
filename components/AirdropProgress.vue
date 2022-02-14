@@ -28,7 +28,11 @@
         'w-full',
       ]"
     >
+      <ProgressIndicator
+        v-if="!isFinishedLoading"
+      />
       <div
+        v-else
         :class="[
           'relative',
           'w-full',
@@ -53,7 +57,7 @@
             'rounded-[66px]',
           ]"
           :style="{ width: `${progress + 1}%` }"
-        ></div>
+        />
         <div
           :class="[
             'absolute',
@@ -63,9 +67,10 @@
             'rounded-[66px]',
           ]"
           :style="{ width: `${progress}%` }"
-        ></div>
+        />
       </div>
       <div
+        v-if="isFinishedLoading"
         :class="[
           'px-[24px]',
           'py-[5px]',
@@ -91,7 +96,6 @@
       'flex',
       'flex-row',
       'justify-between',
-      'items-center',
       'bg-like-cyan-extralight',
       'py-[24px]',
       'px-[56px]',
@@ -137,5 +141,8 @@ export default class AirdropProgress extends Vue {
 
   // If Airdrop is closed, the page would turn into view-only mode
   @Prop({ default : false }) readonly shouldCloseAirdrop!: boolean | undefined
+
+  // True if page finished the fetch process
+  @Prop({ default : false }) readonly isFinishedLoading!: boolean | undefined
 }
 </script>
