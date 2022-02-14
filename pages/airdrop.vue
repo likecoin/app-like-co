@@ -89,9 +89,6 @@
             'mb-[32px]',
             'box-border',
             'bg-white',
-            'rounded-[24px]',
-            'border-[2px]',
-            'border-airdrop-gold',
             'sm:mt-[30%]',
             'lg:min-w-[936px]',
             'lg:max-w-[970px]',
@@ -134,6 +131,8 @@
               'overflow-hidden',
               'h-full',
               'w-full',
+              'border-[2px]',
+              'border-airdrop-gold',
               'rounded-[24px]',
             ]"
           >
