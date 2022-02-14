@@ -50,7 +50,7 @@ import { namespace } from 'vuex-class'
 import { MetaInfo } from 'vue-meta'
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { AIRDROP_OVERVIEW } from '~/constant'
+import { AIRDROP_OVERVIEW_ENDPOINT } from '~/constant'
 
 const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
@@ -114,7 +114,7 @@ export default class AirdropCheckPage extends Vue {
   async fetchClaimmableAmount() {
     if (this.claimmingAddress) {
       const res: any = await this.$axios.get(
-        `${AIRDROP_OVERVIEW}${this.claimmingAddress}`,
+        `${AIRDROP_OVERVIEW_ENDPOINT}${this.claimmingAddress}`,
       )
       this.$emit('claimmingAddress')
       this.claimmableAmount = Math.round(

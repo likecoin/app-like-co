@@ -54,10 +54,10 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import BigNumber from 'bignumber.js'
 import {
-  AIRDROP_CLAIM,
-  AIRDROP_MISSION,
-  TESTNET_TX_BASE_URL,
-  AIRDROP_DECAY,
+  AIRDROP_CLAIM_ENDPOINT,
+  AIRDROP_MISSION_ENDPOINT,
+  BIG_DIPPER_TX_BASE_URL,
+  AIRDROP_DECAY_ENDPOINT,
 } from '~/constant'
 
 const signerModule = namespace('signer')
@@ -149,7 +149,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   get txhash() {
-    return `${TESTNET_TX_BASE_URL}${this.currentMission.txHash}`
+    return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
   }
 
   mounted() {
@@ -167,7 +167,7 @@ export default class AirdropClaimPage extends Vue {
     this.isFinishedLoading = false
     if (this.currentAddress) {
       const res: any = await this.$axios
-        .get(`${AIRDROP_CLAIM}${this.currentAddress}`)
+        .get(`${AIRDROP_CLAIM_ENDPOINT}${this.currentAddress}`)
         .catch((err) => {
           console.error(err)
           if (err.response.status === 403) {
@@ -244,7 +244,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async fetchMissionDecay() {
-    const data = await this.$axios.get(AIRDROP_DECAY).then((item) => item.data)
+    const data = await this.$axios.get(AIRDROP_DECAY_ENDPOINT).then((item) => item.data)
     this.deadline = data.startingDate
     this.decay.factor = data.factor
 
@@ -292,7 +292,7 @@ export default class AirdropClaimPage extends Vue {
     const res: any = await this.$axios
       .post(
         // for semi-production
-        `${AIRDROP_MISSION}${this.currentMission.name.slice(0,3)}?address=${this.currentAddress}`
+        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name.slice(0,3)}?address=${this.currentAddress}`
       )
       .catch((err) => {
         console.error(err)

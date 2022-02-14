@@ -189,7 +189,7 @@ import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
 import { namespace } from 'vuex-class'
-import { AIRDROP_OG } from '~/constant'
+import { AIRDROP_OG_ENDPOINT } from '~/constant'
 
 const signerModule = namespace('signer')
 
@@ -202,7 +202,7 @@ const signerModule = namespace('signer')
         {
           hid: 'og:image',
           property: 'og:image',
-          content: `${AIRDROP_OG}airdrop_launch.png`,
+          content: `${AIRDROP_OG_ENDPOINT}airdrop_launch.png`,
         },
       ],
     } as MetaInfo

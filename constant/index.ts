@@ -38,15 +38,17 @@ export const RAWDATA_TX_URL = {
 
 export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_URL.testnet
-  : RAWDATA_URL.production
+  // for semi-production
+  : RAWDATA_URL.testnet
 
 export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_TX_URL.testnet
-  : RAWDATA_TX_URL.production
+  // for semi-production
+  : RAWDATA_TX_URL.testnet
 
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
-export const TESTNET_TX_BASE_URL = 'https://node.iscn-dev-2.like.co/txs/';
+export const TESTNET_TX_BASE_URL = 'https://mainnet-node.like.co/txs/';
 
 export const WALLET_TYPE_REPLACER: any = { cosmos: 'Cosmos Wallet', eth: 'Ethereum Wallet' }
 
@@ -99,26 +101,32 @@ export const AIRDROP_OG_URL = {
   production: 'https://app.like.co/images/og/',
 }
 
-export const AIRDROP_CLAIM = IS_TESTNET
+export const AIRDROP_CLAIM_ENDPOINT = IS_TESTNET
   ? AIRDROP_CLAIM_URL.testnet
-  : AIRDROP_CLAIM_URL.production
+  // for semi-production
+  : AIRDROP_CLAIM_URL.testnet
 
-export const AIRDROP_OVERVIEW = IS_TESTNET
+export const AIRDROP_OVERVIEW_ENDPOINT = IS_TESTNET
   ? AIRDROP_OVERVIEW_URL.testnet
-  : AIRDROP_OVERVIEW_URL.production
+  // for semi-production
+  : AIRDROP_OVERVIEW_URL.testnet
 
-export const AIRDROP_SUBSCRIBE = IS_TESTNET
+export const AIRDROP_SUBSCRIBE_ENDPOINT = IS_TESTNET
   ? AIRDROP_SUBSCRIBE_URL.testnet
-  : AIRDROP_SUBSCRIBE_URL.production
+  // for semi-production
+  : AIRDROP_SUBSCRIBE_URL.testnet
 
-export const AIRDROP_MISSION = IS_TESTNET
-? AIRDROP_MISSION_URL.testnet
-: AIRDROP_MISSION_URL.production
+export const AIRDROP_MISSION_ENDPOINT = IS_TESTNET
+  ? AIRDROP_MISSION_URL.testnet
+  // for semi-production
+  : AIRDROP_MISSION_URL.testnet
 
-export const AIRDROP_DECAY = IS_TESTNET
-? AIRDROP_DECAY_URL.testnet
-: AIRDROP_DECAY_URL.production
+export const AIRDROP_DECAY_ENDPOINT = IS_TESTNET
+  ? AIRDROP_DECAY_URL.testnet
+  // for semi-production
+  : AIRDROP_DECAY_URL.testnet
 
-export const AIRDROP_OG = IS_TESTNET
-? AIRDROP_OG_URL.testnet
-: AIRDROP_OG_URL.production
+export const AIRDROP_OG_ENDPOINT = IS_TESTNET
+  ? AIRDROP_OG_URL.testnet
+  // for semi-production
+  : AIRDROP_OG_URL.testnet
