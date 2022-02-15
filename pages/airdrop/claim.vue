@@ -15,7 +15,7 @@
         'w-[300px]',
         'mx-auto',
       ]"
-      src="/images/airdrop/title_Claim.png"
+      src="~assets/images/title_Claim.png"
     />
     <AirdropDashboard
       :total-airdrop="totalAirdrop"

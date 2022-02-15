@@ -2,8 +2,15 @@
   <div
     :class="[
       'flex',
-      'items-start',
+
+      'flex-col',
+      'lg:flex-row',
+      
       'justify-center',
+      
+      'items-center',
+      'lg:items-start',
+
       'px-[56px]',
       'mt-[32px]',
     ]"
@@ -12,8 +19,17 @@
       :class="[
         'flex',
         'flex-col',
-        'justify-between',
+
+        'justify-center',
+        'lg:justify-between',
+
+        'items-center',
+        'lg:items-start',
+
         'flex-grow',
+
+        'mb-[24px]',
+        'lg:mb-0',
       ]"
     >
       <IconDiverMini class="text-airdrop-gold" />
@@ -29,7 +45,7 @@
             'font-extrabold',
             'text-airdrop-gold',
           ]"
-          :text="`${totalClaimedAmount}/${totalAirdrop}`"
+          :text="airdropAmount"
           preset="h1"
         />
         <Label
@@ -56,9 +72,17 @@
       :class="[
         'flex',
         'flex-col',
-        'justify-between',
         'flex-grow',
+
+        'justify-center',
+        'lg:justify-between',
+
+        'items-center',
+        'lg:items-start',
+
         'mx-[80px]',
+        'mb-[24px]',
+        'lg:mb-0',
       ]"
     >
       <IconDiverMini class="text-airdrop-gold" />
@@ -101,9 +125,16 @@
       :class="[
         'flex',
         'flex-col',
-        'items-start',
-        'justify-between',
         'flex-grow',
+
+        'justify-center',
+        'lg:justify-between',
+
+        'items-center',
+        'lg:items-start',
+        
+        'mb-[24px]',
+        'lg:mb-0',
       ]"
     >
       <IconDiverMini class="text-airdrop-gold" />
@@ -193,5 +224,9 @@ export default class AirdropDashboard extends Vue {
 
   // Contains the time information about decay
   @Prop(String) readonly decay!: string | undefined
+
+  get airdropAmount() {
+    return `${this.totalClaimedAmount}/${this.totalAirdrop}`
+  }
 }
 </script>

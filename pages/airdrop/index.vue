@@ -17,7 +17,7 @@
         'w-[300px]',
         'lg:block',
       ]"
-      src="/images/airdrop/title_Claim.png"
+      src="~/assets/images/title_Claim.png"
     />
     <Label
       :class="[

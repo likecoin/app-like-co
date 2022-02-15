@@ -8,6 +8,8 @@
       :class="[
         'flex',
         'flex-col',
+        'max-h-[70vh]',
+        'overflow-y-scroll',
         'mt-[-24px]',
       ]"
     >
@@ -49,7 +51,8 @@
         v-if="step !== 3"
         :class="[
           'p-[16px]',
-          'w-[616px]',
+          'w-full',
+          'max-w-[616px]',
         ]"
       >
         <Label
@@ -104,6 +107,7 @@
         <div
           :class="[
             'flex',
+            'items-center',
             'justify-center',
             'mt-[24px]',
           ]"
@@ -129,6 +133,10 @@
         <div
           :class="[
             'flex',
+            
+            'flex-col',
+            'sm:flex-row',
+
             'w-full',
             'justify-end',
             { 'justify-between': step === 2 },

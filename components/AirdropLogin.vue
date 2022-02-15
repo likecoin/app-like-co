@@ -62,8 +62,6 @@
     >
       <Button
         :class="[
-          'hidden',
-          'lg:block',
           'text-center',
           'text-medium-gray',
           'mt-[32px]',
@@ -76,17 +74,6 @@
           <IconArrowRight />
         </template>
       </Button>
-      <Button
-        :class="[
-          'text-dark-gray',
-          'mt-[8px]',
-          'text-center',
-          'lg:hidden',
-        ]"
-        :text="$t('AirDrop.button.withoutWallet')"
-        :to="localeLocation({ name: 'airdrop-claim' })"
-        preset="plain"
-      />
     </div>
   </div>
 </template>

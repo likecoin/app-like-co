@@ -11,6 +11,20 @@
   >
     <Label
       :class="[
+        'sm:hidden',
+
+        'font-bold',
+        'text-like-cyan-extralight',
+        'mb-[16px]',
+      ]"
+      :text="$t('AirDrop.mission.viewOnlyOnMobile')"
+      preset="h2"
+    />
+    <Label
+      :class="[
+        'hidden',
+        'sm:block',
+
         'font-bold',
         'text-like-cyan-extralight',
         'mb-[16px]',
@@ -25,20 +39,28 @@
       :key="mission.mission"
       :class="[
         'flex',
+        'flex-col',
+        'sm:flex-row',
+
+        'text-center',
+        'sm:text-left',
+
         'items-center',
         'justify-between',
         'py-[28px]',
         'px-[32px]',
+        'mb-[16px]',
+        'rounded-[24px]',
         'border-[1px]',
         'border-like-cyan-light',
-        'rounded-[24px]',
-        'mb-[16px]',
-        'cursor-pointer',
         { 'border-opacity-50': mission.isClaimed || errorMessage },
+        
         'bg-like-green',
+        'hover:bg-like-dark-green',
+
+        'cursor-pointer',
         'transition',
         'duration-200',
-        'hover:bg-like-dark-green',
       ]"
       @click="$emit('handleMissionOpen', mission.name)"
     >
@@ -54,6 +76,9 @@
       </div>
       <Label
         :class="[
+          'hidden',
+          'sm:block',
+          
           'font-bold',
           'text-white',
           {
@@ -66,9 +91,28 @@
         :text="$t(`AirDrop.mission.title.${mission.name}`)"
         preset="h2"
       />
+      <Label
+        :class="[
+          'sm:hidden',
+          'font-bold',
+          'text-white',
+          {
+            'text-like-cyan-light text-opacity-50':
+              mission.isClaimed || errorMessage,
+          },
+          'mx-[24px]',
+          'w-[100%]',
+        ]"
+        :text="$t(`AirDrop.mission.title.${mission.name}`)"
+        preset="h2"
+        align="center"
+      />
       <IconMissionDone
         v-if="mission.isClaimed && !errorMessage"
         :class="[
+          'mt-[24px]',
+          'sm:mt-0',
+          
           'w-[56px]',
           'h-[56px]',
         ]"
@@ -76,6 +120,9 @@
       <IconMissionButton
         v-else-if="!mission.isClaimed && !errorMessage"
         :class="[
+          'mt-[24px]',
+          'sm:mt-0',
+
           'w-[56px]',
           'h-[56px]',
         ]"
@@ -83,6 +130,9 @@
       <IconMissionViewOnly
         v-else
         :class="[
+          'mt-[24px]',
+          'sm:mt-0',
+
           'w-[56px]',
           'h-[56px]',
         ]"

@@ -24,6 +24,10 @@
     <div
       :class="[
         'flex',
+
+        'flex-col',
+        'sm:flex-row',
+
         'items-center',
         'w-full',
       ]"
@@ -77,6 +81,9 @@
           'bg-white',
           'bg-opacity-[60%]',
           'rounded-[16px]',
+
+          'mt-[24px]',
+          'sm:mt-0',
         ]"
       >
         <Label
@@ -94,7 +101,12 @@
     v-else
     :class="[
       'flex',
-      'flex-row',
+
+      'flex-col',
+      'md:flex-row',
+      'md:flex-nowrap',
+
+      'items-center',
       'justify-between',
       'bg-like-cyan-extralight',
       'py-[24px]',
@@ -114,7 +126,9 @@
     <Button
       v-if="!shouldCloseAirdrop"
       :class="[
-        'ml-[8px]',
+        'mt-[12px]',
+        'md:ml-[8px]',
+
         'w-min',
       ]"
       preset="secondary"
