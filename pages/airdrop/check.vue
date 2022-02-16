@@ -38,26 +38,88 @@
       :is-qualified-for-atom="isQualifiedForAtom"
       :is-qualified-for-osmo="isQualifiedForOsmo"
       :is-qualified-for-civic="isQualifiedForCivic"
+      @quit="initChecker"
     />
-    <Label v-else :text="errorMessage" />
+    <!-- input -->
+    <div
+      v-else
+      :class="[
+        'flex',
+        'flex-col',
+        'items-center',
+        'mb-[32px]',
+        'px-[24px]',
+      ]"
+    >
+      <Label
+        :class="[
+          'hidden',
+          'lg:block',
+          'text-center',
+          'text-medium-gray',
+          'mt-[32px]',
+        ]"
+        :text="$t('AirDrop.label.checkWithWallet')"
+        preset="p5"
+      />
+      <Label
+        :class="[
+          'text-dark-gray',
+          'mt-[8px]',
+          'text-center',
+          'lg:hidden',
+        ]"
+        :text="$t('AirDrop.label.checkWithWallet')"
+        preset="p5"
+      />
+      <div
+        :class="[
+          'flex',
+          'flex-col',
+          'items-center',
+          'justify-center',
+          'mt-[24px]',
+          'p-[16px]',
+          'w-full',
+          'max-w-[450px]',
+          'sm:flex-row',
+        ]"
+      >
+        <TextField
+          v-model="inputAddress"
+          class="flex-grow"
+          :placeholder="$t('AirDrop.placeholder.address')"
+          :error-message="errorMessage"
+        />
+        <Button
+          :class="[
+            'mt-[16px]',
+            'sm:ml-[16px]',
+            'sm:mt-0',
+          ]"
+          preset="secondary"
+          :text="$t('AirDrop.button.check')"
+          @click="handleSubmitAddress"
+        >
+          <template #prepend>
+            <IconSearch class="w-[20px]" />
+          </template>
+        </Button>
+      </div>
+    </div>
   </Page>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
+import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-
-import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { AIRDROP_OVERVIEW_ENDPOINT } from '~/constant'
-
-const signerModule = namespace('signer')
-const iscnModule = namespace('iscn')
-
-export enum Denom {
-  Nanolike = 0.000000001,
-}
+import BigNumber from 'bignumber.js'
+import {
+  AIRDROP_OVERVIEW_ENDPOINT,
+  COSMOS_ADDRESS_REGEX,
+  OSMOSIS_ADDRESS_REGEX,
+} from '~/constant'
 
 @Component({
   head() {
@@ -86,46 +148,49 @@ export enum Denom {
   },
 })
 export default class AirdropCheckPage extends Vue {
-  @signerModule.Getter('getAddress') walletAddress!: string
-  @iscnModule.Action queryISCNByAddress!: (
-    arg0: string
-  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
-
-  claimmableAmount: any = 0
+  claimmableAmount: string = '0'
   isQualifiedForAtom: boolean = false
   isQualifiedForOsmo: boolean = false
   isQualifiedForCivic: boolean = false
 
+  inputAddress: string = ''
+  claimmingAddress: string = ''
   errorMessage: string = ''
 
-  get claimmingAddress() {
-    return this.walletAddress
-  }
-
-  mounted() {
-    if (this.claimmingAddress) {
-      this.fetchClaimmableAmount()
-    } else {
-      this.errorMessage = this.$t('error.not.connect.wallet') as string
-    }
-  }
-
-  @Watch('walletAddress')
-  async fetchClaimmableAmount() {
-    if (this.claimmingAddress) {
+  async fetchClaimmableAmount(address: string) {
       const res: any = await this.$axios.get(
-        `${AIRDROP_OVERVIEW_ENDPOINT}${this.claimmingAddress}`,
+        `${AIRDROP_OVERVIEW_ENDPOINT}${address}`,
       )
       this.$emit('claimmingAddress')
-      this.claimmableAmount = Math.round(
-        res.data.allocatedAmount * Denom.Nanolike,
-      )
+      this.claimmableAmount = new BigNumber(res.data.allocatedAmount)
+        .shiftedBy(-9)
+        .toFixed(0, BigNumber.ROUND_DOWN)
       this.isQualifiedForAtom = !!res.data.atomAmount
       this.isQualifiedForOsmo = !!res.data.osmosisAmount
       this.isQualifiedForCivic = !!res.data.civicLikerAmount
-    } else {
-      this.$router.push(this.localeLocation({ name: 'airdrop' })!)
     }
+
+  handleSubmitAddress() {
+    this.errorMessage = ''
+    if (
+      !COSMOS_ADDRESS_REGEX.test(this.inputAddress) &&
+      !OSMOSIS_ADDRESS_REGEX.test(this.inputAddress)
+    ) {
+      this.errorMessage = this.$t('AirDrop.errorMessage.address') as string
+      return;
+    }
+    this.claimmingAddress = this.inputAddress
+    this.fetchClaimmableAmount(this.claimmingAddress)
+  }
+
+  initChecker() {
+    this.claimmableAmount = '0'
+    this.isQualifiedForAtom = false
+    this.isQualifiedForOsmo = false
+    this.isQualifiedForCivic = false
+    this.inputAddress = ''
+    this.claimmingAddress = ''
+    this.errorMessage = ''
   }
 }
 </script>
