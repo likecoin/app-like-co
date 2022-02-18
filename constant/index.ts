@@ -38,13 +38,11 @@ export const RAWDATA_TX_URL = {
 
 export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_URL.testnet
-  // for semi-production
-  : RAWDATA_URL.testnet
+  : RAWDATA_URL.production
 
 export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_TX_URL.testnet
-  // for semi-production
-  : RAWDATA_TX_URL.testnet
+  : RAWDATA_TX_URL.production
 
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
@@ -103,30 +101,24 @@ export const AIRDROP_OG_URL = {
 
 export const AIRDROP_CLAIM_ENDPOINT = IS_TESTNET
   ? AIRDROP_CLAIM_URL.testnet
-  // for semi-production
-  : AIRDROP_CLAIM_URL.testnet
+  : AIRDROP_CLAIM_URL.production
 
 export const AIRDROP_OVERVIEW_ENDPOINT = IS_TESTNET
   ? AIRDROP_OVERVIEW_URL.testnet
-  // for semi-production
-  : AIRDROP_OVERVIEW_URL.testnet
+  : AIRDROP_OVERVIEW_URL.production
 
 export const AIRDROP_SUBSCRIBE_ENDPOINT = IS_TESTNET
   ? AIRDROP_SUBSCRIBE_URL.testnet
-  // for semi-production
-  : AIRDROP_SUBSCRIBE_URL.testnet
+  : AIRDROP_SUBSCRIBE_URL.production
 
 export const AIRDROP_MISSION_ENDPOINT = IS_TESTNET
   ? AIRDROP_MISSION_URL.testnet
-  // for semi-production
-  : AIRDROP_MISSION_URL.testnet
+  : AIRDROP_MISSION_URL.production
 
 export const AIRDROP_DECAY_ENDPOINT = IS_TESTNET
   ? AIRDROP_DECAY_URL.testnet
-  // for semi-production
-  : AIRDROP_DECAY_URL.testnet
+  : AIRDROP_DECAY_URL.production
 
 export const AIRDROP_OG_ENDPOINT = IS_TESTNET
   ? AIRDROP_OG_URL.testnet
-  // for semi-production
-  : AIRDROP_OG_URL.testnet
+  : AIRDROP_OG_URL.production

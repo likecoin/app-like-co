@@ -195,8 +195,7 @@ export default class AirdropClaimPage extends Vue {
           this.errorMessage = ''
           this.missionsOverview.forEach((mission: any, i) => {
             this.claimData.forEach((element: any) => {
-              // for semi-production
-              if (mission.name.slice(0,3) === element.mission) {
+              if (mission.name === element.mission) {
                 this.missionsOverview[i].isCompleted = element.completed
                 this.missionsOverview[i].isClaimed = element.claimed
                 this.missionsOverview[i].isEnabled = element.enabled
@@ -291,8 +290,7 @@ export default class AirdropClaimPage extends Vue {
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
-        // for semi-production
-        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name.slice(0,3)}?address=${this.currentAddress}`
+        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name}?address=${this.currentAddress}`
       )
       .catch((err) => {
         console.error(err)
