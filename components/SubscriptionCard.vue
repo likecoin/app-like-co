@@ -124,7 +124,7 @@
             'h-[32px]',
             'mx-[8px]'
           ]"
-          href="https://discord.com/invite/W4DQ6peZZZ"
+          href="https://discord.gg/likecoin"
           @click="onClickSocial('Discord')"
         >
           <IconDiscord class="text-dark-gray" />
@@ -166,7 +166,7 @@
             'h-[32px]',
             'mx-[8px]'
           ]"
-          href="https://medium.com/likecoin"
+          href="https://blog.like.co"
           @click="onClickSocial('Medium')"
         >
           <IconMedium class="text-dark-gray" />

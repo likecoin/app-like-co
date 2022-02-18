@@ -39,7 +39,11 @@
           <IconClose />
         </Button>
         <Card
-          class="shadow-popup"
+          :class="[
+            'shadow-popup',
+            'max-h-[80vh]',
+            'overflow-y-scroll',
+          ]"
           :has-padding="hasPadding"
         >
           <template v-if="isBasic">

@@ -55,7 +55,7 @@
             ' ml-[8px]',
             'mb-[4px]',
           ]"
-          :text="$t('AirDrop.label.$like')"
+          :text="$t('AirDrop.label.like')"
           preset="h2"
         />
       </div>

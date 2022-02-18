@@ -8,8 +8,6 @@
       :class="[
         'flex',
         'flex-col',
-        'max-h-[70vh]',
-        'overflow-y-scroll',
         'mt-[-24px]',
       ]"
     >
@@ -23,7 +21,7 @@
           ]"
         >
           <template #prepend>
-            <IconCheck v-if="mission.isCompleted" />
+            <IconCheck v-if="mission.isClaimed" />
             <IconMissionButtonMini v-else />
           </template>
           {{ $t(`AirDrop.mission.dialog.no.${mission.name}`) }}
@@ -50,7 +48,6 @@
       <div
         v-if="step !== 3"
         :class="[
-          'p-[16px]',
           'w-full',
           'max-w-[616px]',
         ]"
@@ -177,18 +174,23 @@
             <ProgressIndicator
               v-if="(claimStatus === 'unclaimed' || claimStatus === 'unable') && loadingStatus"
             />
-            <Button
+            <div
               v-if="claimStatus === 'claimed' && !errorMessage"
-              preset="tertiary"
-              :href="txUrl"
-              :text="buttonText"
-              @mouseover="changeText('in')"
-              @mouseout="changeText('out')"
+              class="w-[208px]"
             >
-              <template #prepend>
-                <IconCheck />
-              </template>
-            </Button>
+              <Button
+                class="w-full"
+                preset="tertiary"
+                :href="txUrl"
+                :text="buttonText"
+                @mouseover="changeText('in')"
+                @mouseout="changeText('out')"
+              >
+                <template #prepend>
+                  <IconCheck />
+                </template>
+              </Button>
+            </div>
             <Button
               v-if="claimStatus === 'withoutWallet'"
               is-disabled="true"
@@ -249,7 +251,7 @@
             :class="['mt-[24px]','whitespace-pre-line','text-center']"
             :text="claimStatus === 'unable'
             ? $t('AirDrop.errorMessage.technicalError')
-            : $t('AirDrop.mission.discription.Incompleted')"
+            : $t('AirDrop.mission.discription.incompleted.title')"
           />
           <div
             :class="[
@@ -314,24 +316,24 @@
           ]"
         >
           <IconMissionCompleted class="w-[48px]" />
-          <div
-            :class="[
-              'text-[18px]',
-              'mt-[16px]',
-              'text-center',
-            ]"
-          >
-            <span
-              :class="[
-                'font-bold',
-                'text-airdrop-gold',
-                'text-[18px]',
-              ]"
+          <Label preset="p5" align="center" class="mt-[16px] text-center">
+            <i18n
+              path="AirDrop.mission.discription.completed"
+              tag="div"
             >
-              {{ mission.claimedAmount }} $LIKE
-            </span>
-            {{ $t('AirDrop.mission.discription.completed') }}
-          </div>
+              <template #reward>
+                <span
+                  :class="[
+                    'font-bold',
+                    'text-airdrop-gold',
+                    'text-[18px]',
+                  ]"
+                >
+                  {{ mission.claimedAmount }} LIKE
+                </span>
+              </template>
+            </i18n>
+          </Label>
           <Button
             size="large"
             preset="outline"
