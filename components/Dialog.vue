@@ -43,6 +43,7 @@
             'shadow-popup',
             'max-h-[80vh]',
             'overflow-y-scroll',
+            'scrollbar-hidden',
           ]"
           :has-padding="hasPadding"
         >
