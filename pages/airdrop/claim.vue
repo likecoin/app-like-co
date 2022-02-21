@@ -295,7 +295,7 @@ export default class AirdropClaimPage extends Vue {
       )
       .catch((err) => {
         console.error(err)
-        if (err.response.status === 500 || err.response.status === 503) {
+        if (err.response.status !== 400 && err.response.status !== 401 && err.response.status !== 403) {
           this.currentMission.isEnabled = false
         }
       })
