@@ -156,7 +156,7 @@
             preset="plain"
             @click="$emit('step', 1)"
           >
-            <Label :text="$t('AirDrop.mission.button.pervious')">
+            <Label :text="$t('AirDrop.mission.button.previous')">
               <template #prepend><IconArrowLeft class="w-[20px]" /></template>
             </Label>
           </Button>
@@ -264,7 +264,7 @@
           >
             <Button
               preset="plain"
-              :text="$t('AirDrop.mission.button.pervious')"
+              :text="$t('AirDrop.mission.button.previous')"
               @click="$emit('step', 2)"
             >
               <template #prepend>
