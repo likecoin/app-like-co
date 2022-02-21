@@ -29,7 +29,7 @@
         'text-like-cyan-extralight',
         'mb-[16px]',
       ]"
-      :text="errorMessage
+      :text="errorMessage || !hasConnectedWallet
         ? $t('AirDrop.mission.viewOnly')
         : $t('AirDrop.label.missions')"
       preset="h2"
@@ -53,7 +53,7 @@
         'rounded-[24px]',
         'border-[1px]',
         'border-like-cyan-light',
-        { 'border-opacity-50': mission.isClaimed || errorMessage },
+        { 'border-opacity-50': mission.isClaimed || errorMessage || !hasConnectedWallet },
         
         'bg-like-green',
         'hover:bg-like-dark-green',
@@ -83,7 +83,7 @@
           'text-white',
           {
             'text-like-cyan-light text-opacity-50':
-              mission.isClaimed || errorMessage,
+              mission.isClaimed || errorMessage || !hasConnectedWallet,
           },
           'mx-[24px]',
           'w-[100%]',
@@ -98,7 +98,7 @@
           'text-white',
           {
             'text-like-cyan-light text-opacity-50':
-              mission.isClaimed || errorMessage,
+              mission.isClaimed || errorMessage || !hasConnectedWallet,
           },
           'mx-[24px]',
           'w-[100%]',
@@ -152,5 +152,8 @@ export default class AirdropMission extends Vue {
 
   // Contains all information in four missions
   @Prop(Array) readonly missionsOverview!: string[] | undefined
+
+  // Show connect wallet button if not connected
+  @Prop({ default: false }) readonly hasConnectedWallet!: boolean
 }
 </script>

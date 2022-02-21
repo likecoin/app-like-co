@@ -31,6 +31,7 @@
       @handleConnectWallet="handleConnectWalletButtonClick"
     />
     <AirdropMission
+      :has-connected-wallet="!!currentAddress"
       :error-message="errorMessage"
       :missions-overview="missionsOverview"
       @handleMissionOpen="handleMissionOpen"
@@ -38,6 +39,7 @@
     <AirdropMissionDialog
       :is-open="isOpenMissionDialog"
       :step="step"
+      :has-connected-wallet="!!currentAddress"
       :mission="currentMission"
       :claim-status="claimStatus"
       :loading-status="missionLoadingStatus"
@@ -145,7 +147,7 @@ export default class AirdropClaimPage extends Vue {
     if (this.shouldCloseAirdrop) return ClaimStatus.unableAll
     if (this.currentMission.isClaimed) return ClaimStatus.claimed
     if (!this.currentMission.isEnabled) return ClaimStatus.unable
-    if (this.errorMessage) return ClaimStatus.withoutWallet
+    if (!this.currentAddress || this.errorMessage) return ClaimStatus.withoutWallet
     return ClaimStatus.unclaimed
   }
 
