@@ -260,7 +260,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   handleMissionClose() {
-    if (!this.errorMessage) {
+    if (!this.errorMessage && this.step === 3) {
       this.fetchMissionStatus()
     }
     this.isOpenMissionDialog = false
