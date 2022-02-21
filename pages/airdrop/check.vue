@@ -67,6 +67,7 @@
           'text-dark-gray',
           'mt-[8px]',
           'text-center',
+          'text-medium-gray',
           'lg:hidden',
         ]"
         :text="$t('AirDrop.label.checkWithWallet')"
@@ -78,7 +79,7 @@
           'flex-col',
           'items-center',
           'justify-center',
-          'mt-[24px]',
+          'mt-[8px]',
           'p-[16px]',
           'w-full',
           'max-w-[450px]',

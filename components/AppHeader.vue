@@ -47,7 +47,7 @@
             ]"
           >
             <MenuButton
-              :text="$t('AppHeader.tabBar.button.depub')"
+              :text="$t('AppHeader.tabBar.button.publish')"
               :to="localeLocation({ name: 'index' })"
             />
             <MenuButtonDivider />
