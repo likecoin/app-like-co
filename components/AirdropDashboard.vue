@@ -5,9 +5,9 @@
 
       'flex-col',
       'lg:flex-row',
-      
+
       'justify-center',
-      
+
       'items-center',
       'lg:items-start',
 
@@ -132,7 +132,7 @@
 
         'items-center',
         'lg:items-start',
-        
+
         'mb-[24px]',
         'lg:mb-0',
       ]"
@@ -223,7 +223,7 @@ export default class AirdropDashboard extends Vue {
   @Prop(String) readonly totalClaimedAmount!: string | undefined
 
   // Contains the time information about decay
-  @Prop(String) readonly decay!: string | undefined
+  @Prop(Object) readonly decay!: object | undefined
 
   get airdropAmount() {
     return `${this.totalClaimedAmount}/${this.totalAirdrop}`
