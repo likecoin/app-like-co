@@ -23,6 +23,7 @@
       :decay="decay"
     />
     <AirdropProgress
+      :has-connected-wallet="!!currentAddress"
       :error-message="errorMessage"
       :progress="progress"
       :should-close-airdrop="shouldCloseAirdrop"
@@ -157,8 +158,6 @@ export default class AirdropClaimPage extends Vue {
 
     if (this.currentAddress) {
       this.fetchMissionStatus()
-    } else {
-      this.errorMessage = this.$t('AirDrop.errorMessage.noAddress') as string
     }
   }
 
@@ -266,7 +265,7 @@ export default class AirdropClaimPage extends Vue {
     this.isOpenMissionDialog = false
     this.step = 1
   }
-  
+
   initClaimStatus() {
     this.claimData = []
     this.step = 1

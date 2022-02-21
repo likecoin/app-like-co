@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!errorMessage"
+    v-if="hasConnectedWallet && !errorMessage"
     :class="[
       'flex',
       'flex-col',
@@ -107,7 +107,7 @@
       'md:flex-nowrap',
 
       'items-center',
-      'justify-between',
+      errorMessage ? 'justify-between' : 'justify-center',
       'bg-like-cyan-extralight',
       'py-[24px]',
       'px-[56px]',
@@ -116,7 +116,11 @@
     ]"
   >
     <Label
+      v-if="errorMessage"
       :class="[
+        'md:mr-[8px]',
+        'mb-[12px]',
+        'md:mb-[0]',
         'whitespace-pre-line',
         'text-red',
       ]"
@@ -125,12 +129,7 @@
     />
     <Button
       v-if="!shouldCloseAirdrop"
-      :class="[
-        'mt-[12px]',
-        'md:ml-[8px]',
-
-        'w-min',
-      ]"
+      class="w-min"
       preset="secondary"
       :text="$t('AirDrop.button.otherWallet')"
       @click="$emit('handleConnectWallet')"
@@ -149,7 +148,10 @@ export default class AirdropProgress extends Vue {
 
   // The percentage of the received airdrop
   @Prop(Number) readonly progress!: number | undefined
-  
+
+  // Show connect wallet button if not connected
+  @Prop({ default: false }) readonly hasConnectedWallet!: boolean
+
   // Error message from empty or ineligible address
   @Prop(String) readonly errorMessage!: string | undefined
 
