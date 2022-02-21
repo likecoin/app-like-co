@@ -124,7 +124,7 @@
             'h-[32px]',
             'mx-[8px]'
           ]"
-          href="https://discord.com/invite/W4DQ6peZZZ"
+          href="https://discord.gg/likecoin"
           @click="onClickSocial('Discord')"
         >
           <IconDiscord class="text-dark-gray" />
@@ -166,7 +166,7 @@
             'h-[32px]',
             'mx-[8px]'
           ]"
-          href="https://medium.com/likecoin"
+          href="https://blog.like.co"
           @click="onClickSocial('Medium')"
         >
           <IconMedium class="text-dark-gray" />
@@ -188,7 +188,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { EMAIL_REGEX, AIRDROP_SUBSCRIBE } from '~/constant'
+import { EMAIL_REGEX, AIRDROP_SUBSCRIBE_ENDPOINT } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 
 export enum Preset {
@@ -219,7 +219,7 @@ export default class SubscriptionCard extends Vue {
     const body = { email: this.email, locale: navigator.language }
     try {
       await this.$axios.post(
-        AIRDROP_SUBSCRIBE,
+        AIRDROP_SUBSCRIBE_ENDPOINT,
         body,
       )
       logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterSuccess', '', 1);

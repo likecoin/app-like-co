@@ -77,7 +77,7 @@
                 'ml-[8px]',
                 'mb-[4px]',
               ]"
-              :text="$t('AirDrop.label.$like')"
+              :text="$t('AirDrop.label.like')"
               preset="h2"
             />
           </div>
@@ -125,7 +125,7 @@
         ]"
         />
       <!-- Subscribe -->
-      <div class="sm:mb-[56px]">
+      <div class="mb-[24px]">
         <Label
           :class="[
             'mt-[8px]',
@@ -135,13 +135,26 @@
             'text-center',
           ]"
           :text="
-            claimmableAmount !== 0
+            claimmableAmount !== '0'
               ? $t('AirDrop.content.subscription')
               : $t('AirDrop.content.0claim')"
           preset="p5"
         />
         <SubscriptionCard preset="subscription" />
       </div>
+      <Button
+        preset="plain"
+        :class="[
+          'text-medium-gray',
+          'mb-[24px]',
+        ]"
+        :text="$t('AirDrop.button.otherAddress')"
+        @click="$emit('quit')"
+      >
+        <template #prepend>
+          <IconArrowLeft />
+        </template>
+      </Button>
     </div>
   </div>
 </template>
@@ -151,7 +164,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class AirdropVerifier extends Vue {
   @Prop(String) readonly address: string | undefined
-  @Prop(Number) readonly claimmableAmount: number | undefined
+  @Prop(String) readonly claimmableAmount: string | undefined
   @Prop(Boolean) readonly isQualifiedForAtom: boolean | undefined
   @Prop(Boolean) readonly isQualifiedForOsmo: boolean | undefined
   @Prop(Boolean) readonly isQualifiedForCivic: boolean | undefined

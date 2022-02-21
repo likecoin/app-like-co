@@ -44,8 +44,7 @@
         :to="localeLocation({ name: 'airdrop' })"
         preset="outline"
         :text="$t('AirDrop.button.claim')"
-        class="text-airdrop-gold"
-        :style="{ border: '2px solid #D1AB79' }"
+        :style="{ border: '2px solid #D1AB79', color: '#D1AB79' }"
       >
         <template #prepend>
           <IconClaim />
