@@ -112,9 +112,12 @@
           <Button
             v-if="mission.name !== 'keplr' && step === 2"
             preset="primary"
+            :is-disabled="isDisabled"
             size="large"
             :style="{ backgroundColor: '#C69F67' }"
-            :href="$t(`AirDrop.mission.discription.guide.link.${mission.name}`)"
+            :href="isDisabled
+              ? undefined
+              : $t(`AirDrop.mission.discription.guide.link.${mission.name}`)"
           >
             <Label
               class="text-white"
@@ -394,6 +397,10 @@ export default class AirdropMissionDialog extends Vue {
     )
       return Result.success
     return undefined
+  }
+
+  get isDisabled() {
+    return this.claimStatus === 'unable' || this.claimStatus === 'unableAll'
   }
 
   changeText(status: string) {
