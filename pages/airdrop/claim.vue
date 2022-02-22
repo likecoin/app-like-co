@@ -59,7 +59,7 @@ import BigNumber from 'bignumber.js'
 import {
   AIRDROP_CLAIM_ENDPOINT,
   AIRDROP_MISSION_ENDPOINT,
-  BIG_DIPPER_TX_BASE_URL,
+  TX_BASE_URL,
   AIRDROP_DECAY_ENDPOINT,
 } from '~/constant'
 
@@ -152,7 +152,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   get txURL() {
-    return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
+    return `${TX_BASE_URL}${this.currentMission.txHash}`
   }
 
   mounted() {
