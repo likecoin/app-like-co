@@ -105,6 +105,18 @@
         </template>
       </Label>
     </form>
+
+
+    <Dialog
+      :open="!!isOpenMsgDialog"
+      @close="handleMsgDialogClose"
+    >
+      <Label>Warning</Label>
+    </Dialog>
+
+
+
+
   </Page>
 </template>
 
@@ -122,6 +134,16 @@ export default class IndexPage extends Vue {
 
   keyword = '';
   state = 'idle';
+
+  isOpenMsgDialog = false
+
+  // mounted() {
+  //   this.isOpenMsgDialog = true
+  // }
+
+  handleMsgDialogClose() {
+    this.isOpenMsgDialog = false
+  }
 
   get errorMessage() {
     return this.state === 'not-found' ? this.$t('HomePage.search.results.empty') : '';
