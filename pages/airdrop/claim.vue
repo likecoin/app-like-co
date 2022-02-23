@@ -102,8 +102,8 @@ export default class AirdropClaimPage extends Vue {
   decay: any = { factor: 0, days: '0', hours: '0', minutes: '0' }
   intervalID: any
 
-  totalAirdrop = '0'
-  totalClaimedAmount = '0'
+  totalAirdrop = '-'
+  totalClaimedAmount = '-'
   claimData: any = []
   missionsOverview = [
     {
@@ -184,6 +184,8 @@ export default class AirdropClaimPage extends Vue {
             this.closeAirdrop()
           }
           this.initClaimStatus()
+          this.totalAirdrop = '0'
+          this.totalClaimedAmount = '0'
         })
 
       if (res) {
