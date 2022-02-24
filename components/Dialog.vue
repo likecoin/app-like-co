@@ -40,6 +40,7 @@
         </Button>
         <Card
           :class="[
+            'relative',
             'shadow-popup',
             'max-h-[80vh]',
             'overflow-y-scroll',
@@ -66,6 +67,17 @@
           </template>
           <slot v-else />
         </Card>
+        <div
+          v-if="$slots.footer"
+          :class="[
+            'absolute',
+            'bottom-0',
+            'left-[24px]',
+            'w-full',
+          ]"
+        >
+          <slot name="footer" />
+        </div>
       </div>
     </div>
   </Portal>
