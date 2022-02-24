@@ -209,7 +209,6 @@ export default class Wallet extends VuexModule {
       this.context.commit('setType', 'likerland_app');
       this.context.commit('setSigner', offlineSigner);
       this.context.commit('setAccounts', accounts);
-      this.context.commit('setWalletConnector', connector);
       window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'likerland_app');
       return true
     } catch (error) {
