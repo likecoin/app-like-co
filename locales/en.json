@@ -67,7 +67,7 @@
   "AirDrop.mission.dialog.no.keplr": "Airdrop mission #1",
   "AirDrop.mission.dialog.no.stake": "Airdrop mission #3",
   "AirDrop.mission.dialog.no.vote": "Airdrop mission #4",
-  "AirDrop.mission.discription.completed": "Congratulation! {reward} is on the way to your wallet, it may take a few minutes to send the reward.",
+  "AirDrop.mission.discription.completed": "Congratulations, {reward} is on the way to your wallet, it may take a few minutes to send the reward.",
   "AirDrop.mission.discription.guide.button.iscn": "Tweet now",
   "AirDrop.mission.discription.guide.button.stake": "Stake now",
   "AirDrop.mission.discription.guide.button.vote": "Vote now",
