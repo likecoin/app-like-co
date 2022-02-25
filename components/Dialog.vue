@@ -72,8 +72,9 @@
           :class="[
             'absolute',
             'bottom-0',
-            'left-[24px]',
             'w-full',
+            'rounded-b-[24px]',
+            'overflow-hidden'
           ]"
         >
           <slot name="footer" />

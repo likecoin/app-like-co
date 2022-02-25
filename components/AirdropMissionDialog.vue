@@ -3,13 +3,15 @@
     :open="!!isOpen"
     preset="custom"
     is-disabled-backdrop-click="true"
+    :has-padding="false"
     @close="$emit('close')"
   >
     <div
       :class="[
         'flex',
         'flex-col',
-        'mb-[82px]',
+        'p-[24px]',
+        'mb-[84px]',
         'w-full',
         'max-w-[616px]',
       ]"
@@ -282,6 +284,7 @@
       <div
         :class="[
           'flex',
+          'p-[24px]',
           
           'flex-col',
           'sm:flex-row',
