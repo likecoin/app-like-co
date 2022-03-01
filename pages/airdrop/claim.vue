@@ -50,10 +50,6 @@
         @close="handleMissionClose"
         @step="changeStep"
       />
-      <AirdropEntryDialog
-        :is-open="!!isOpenEntryDialog"
-        @close="handleEntryDialogClose"
-      />
     </ClientOnly>
   </Page>
 </template>
@@ -90,7 +86,6 @@ export default class AirdropClaimPage extends Vue {
   @signerModule.Action('reset') resetSigner!: () => void
   @signerModule.Getter('getAddress') currentAddress!: string
 
-  isOpenEntryDialog = true
   isOpenMissionDialog = false
   currentMission: any = {}
   isFinishedLoading: boolean = false
@@ -319,10 +314,6 @@ export default class AirdropClaimPage extends Vue {
 
     this.step = 3
     this.missionLoadingStatus = ''
-  }
-
-  handleEntryDialogClose() {
-    this.isOpenEntryDialog = false
   }
 }
 </script>
