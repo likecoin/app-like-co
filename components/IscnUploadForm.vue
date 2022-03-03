@@ -286,6 +286,9 @@ export default class UploadForm extends Vue {
   }
 
   onSubmit() {
+    console.log('fileData',this.fileData)
+    console.log('fileBlob',this.fileBlob)
+    console.log('fileSHA256',this.fileSHA256)
     this.$emit('submit', {
       ipfsHash: this.ipfsHash,
       fileData: this.fileData,

@@ -277,7 +277,7 @@
         <Link
           v-if="error === 'INSUFFICIENT_BALANCE'"
           :class="['text-white','ml-[2px]']"
-          href="https://app.osmosis.zone/"
+          href="https://app.osmosis.zone/?from=UST&to=LIKE"
         >
           {{ $t('IscnRegisterForm.error.buy') }}
         </Link>

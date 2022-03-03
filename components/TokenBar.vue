@@ -21,7 +21,7 @@
       preset="tertiary"
       text-preset="h6"
       size="mini"
-      href="https://app.osmosis.zone/"
+      href="https://app.osmosis.zone/?from=UST&to=LIKE"
       :text="$t('HomePage.button.osmosis')"
     />
     <Button
