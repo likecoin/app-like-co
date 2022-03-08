@@ -61,7 +61,7 @@ import BigNumber from 'bignumber.js'
 import {
   AIRDROP_CLAIM_ENDPOINT,
   AIRDROP_MISSION_ENDPOINT,
-  TX_BASE_URL,
+  BIG_DIPPER_TX_BASE_URL,
   AIRDROP_DECAY_ENDPOINT,
 } from '~/constant'
 
@@ -154,7 +154,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   get txURL() {
-    return `${TX_BASE_URL}${this.currentMission.txHash}`
+    return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
   }
 
   mounted() {
@@ -295,7 +295,7 @@ export default class AirdropClaimPage extends Vue {
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
-        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name}?address=${this.currentAddress}`
+        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name}?address=${this.currentAddress}`,
       )
       .catch((err) => {
         console.error(err)
