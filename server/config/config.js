@@ -6,4 +6,8 @@ config.COSMOS_RPC_ENDPOINT = '';
 config.COSMOS_DENOM = 'nanolike';
 config.LIKE_TARGET_ADDRESS = 'cosmos1rclg677y2jqt8x4ylj0kjlqjjmnn6w6304rrtc';
 
-module.exports = config
+config.NUMBERS_PROTOCOL_BASE_URL = '';
+config.NUMBERS_PROTOCOL_API_KEY = '';
+config.NUMBERS_PROTOCOL_TOKEN = '';
+
+module.exports = config;

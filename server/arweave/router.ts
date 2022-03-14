@@ -1,14 +1,16 @@
 import BigNumber from 'bignumber.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import multer from 'multer';
+
+import { UPLOAD_FILESIZE_MAX } from "../constant"
 import { getIPFSHash, uploadFilesToIPFS } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
+import { registerNUMAssets } from '../numbers-protocol';
+
 import { ArweaveFile } from './types';
 import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
 
 const { LIKE_TARGET_ADDRESS } = require('../config/config');
-
-const maxSize = 100 * 1024 * 1024; // 100 MB
 
 const router = Router();
 
@@ -27,18 +29,23 @@ function checkFileValid(req: Request, res: Response, next: NextFunction) {
 
 function convertMulterFiles(files: Express.Multer.File[]): ArweaveFile[] {
   return files.map(f => {
-    const { mimetype, buffer } = f;
+    const {
+      mimetype,
+      buffer,
+      originalname: filename,
+    } = f;
     return {
       key: f.fieldname,
       mimetype,
       buffer,
+      filename,
     };
   })
 }
 
 router.post(
   '/estimate',
-  multer({ limits: { fileSize: maxSize } }).any(),
+  multer({ limits: { fileSize: UPLOAD_FILESIZE_MAX } }).any(),
   checkFileValid,
   async (req, res, next) => {
   try {
@@ -64,7 +71,7 @@ router.post(
 });
 
 router.post('/upload',
-  multer({ limits: { fileSize: maxSize } }).any(),
+  multer({ limits: { fileSize: UPLOAD_FILESIZE_MAX } }).any(),
   checkFileValid,
   async (req, res, next) => {
   try {
@@ -81,9 +88,17 @@ router.post('/upload',
 
     // shortcut for existing file without checking tx
     if (existingArweaveId) {
+      let numAssetsIds = [];
+      if (req.body.num === '1') {
+        numAssetsIds = await registerNUMAssets(arFiles.map(file => ({
+          file: file.buffer,
+          filename: file.filename,
+        })))
+      }
       res.json({
         arweaveId: existingArweaveId,
         ipfsHash,
+        numAssetsIds,
       })
       return;
     }
@@ -115,11 +130,25 @@ router.post('/upload',
       res.status(400).send('TX_AMOUNT_NOT_ENOUGH');
       return;
     }
-    const [{ arweaveId, list }] = await Promise.all([
+    const promises: Promise<any>[] = [
       uploadFilesToArweave(arFiles),
       uploadFilesToIPFS(arFiles),
-    ]);
-    res.json({ arweaveId, ipfsHash, list });
+    ];
+    if (req.body.num === '1') {
+      promises.push(registerNUMAssets(arFiles.map(file => ({
+        file: file.buffer,
+        filename: file.filename,
+      }))))
+    }
+    const [
+      {
+        arweaveId,
+        list,
+      },
+      ,
+      numAssetIds,
+    ] = await Promise.all(promises)
+    res.json({ arweaveId, ipfsHash, list, numAssetIds });
   } catch (error) {
     next(error);
   }

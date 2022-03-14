@@ -90,6 +90,15 @@
         <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
         <ContentFingerprintLink v-if="uploadArweaveId" :item="formattedArweave" />
       </FormField>
+      <!-- Numbers Protocol -->
+      <FormField
+        :label="$t('IscnRegisterForm.label.numbersProtocol')"
+        class="mb-[12px]"
+      >
+        <CheckBox v-model="isRegisterNumbersProtocolAsset">
+          {{ $t('IscnRegisterForm.label.numbersProtocol.details') }}
+        </CheckBox>
+      </FormField>
       <!-- Dialog -->
       <Dialog
         v-model="isOpenFileInfoDialog"
@@ -554,6 +563,9 @@ export default class IscnRegisterForm extends Vue {
   balance = new BigNumber(0)
   debouncedCalculateISCNFee = debounce(this.calculateISCNFee, 400)
 
+  isRegisterNumbersProtocolAsset = false
+  numbersProtocolAssetId = ''
+
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
@@ -680,7 +692,8 @@ export default class IscnRegisterForm extends Vue {
       exifInfo: this.exif,
       license: this.license,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-      arweaveId: this.uploadArweaveId ||this.arweaveId,
+      arweaveId: this.uploadArweaveId || this.arweaveId,
+      numbersProtocolAssetId: this.numbersProtocolAssetId,
       fileSHA256: this.fileSHA256,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
@@ -992,9 +1005,15 @@ export default class IscnRegisterForm extends Vue {
     const transactionHash = await this.sendArweaveFeeTx();
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
+    if (this.isRegisterNumbersProtocolAsset) {
+      formData.append('num', '1')
+    }
     this.isUploadingArweave = true;
     try {
-      const { arweaveId } = await this.$axios.$post(
+      const {
+        arweaveId,
+        numAssetIds: [numbersProtocolAssetId],
+      } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
         formData,
         {
@@ -1005,7 +1024,8 @@ export default class IscnRegisterForm extends Vue {
       )
       if (arweaveId) {
         this.uploadArweaveId = arweaveId
-        this.$emit('arweaveUploaded', { arweaveId })
+        this.numbersProtocolAssetId = numbersProtocolAssetId
+        this.$emit('arweaveUploaded', { arweaveId, numbersProtocolAssetId })
         this.isOpenSignDialog = false
       } else {
         this.shouldShowAlert = true

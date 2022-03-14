@@ -14,6 +14,7 @@ export enum ContentFirgerprints {
   arweave = 'ar',
   ipfs = 'ipfs',
   hash = 'hash',
+  num = 'num',
 }
 
 @Component
@@ -35,6 +36,9 @@ export default class ContentFingerprintLink extends Vue {
 
       case ContentFirgerprints.hash:
         return null
+
+      case ContentFirgerprints.num:
+        return `/api/numbers-protocol/assets/${this.item.slice(6)}`
 
       default:
         return this.item

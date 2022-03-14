@@ -1,10 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
 import arweave from './arweave/router';
+import numbersProtocol from './numbers-protocol/router';
 
 const app = express();
 app.use(express.json());
 
 app.use('/arweave', arweave);
+app.use('/numbers-protocol', numbersProtocol);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);

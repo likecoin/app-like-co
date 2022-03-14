@@ -3,6 +3,7 @@ export type ArweaveFile = {
   mimetype: string;
   buffer: Buffer;
   arweaveId?: string;
+  filename?: string;
 }
 
 interface Manifest {

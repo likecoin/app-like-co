@@ -9,6 +9,7 @@ export interface ISCNRegisterPayload {
   license: string;
   ipfsHash: string;
   arweaveId: string;
+  numbersProtocolAssetId: string;
   fileSHA256: string;
   type: string;
   authorNames: string[];

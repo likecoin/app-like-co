@@ -225,6 +225,8 @@
   "IscnRegisterForm.label.license": "License",
   "IscnRegisterForm.label.likerID": "LikerID",
   "IscnRegisterForm.label.name": "Name",
+  "IscnRegisterForm.label.numbersProtocol": "Numbers Protocol",
+  "IscnRegisterForm.label.numbersProtocol.details": "Register your asset in Numbers Protocol",
   "IscnRegisterForm.label.registrant": "Registrant",
   "IscnRegisterForm.label.tags": "Tags",
   "IscnRegisterForm.label.uploading": "File uploading...",
