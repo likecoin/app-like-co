@@ -506,7 +506,11 @@ import { Author } from '~/types/author'
 import { signISCNTx } from '~/utils/cosmos/iscn';
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
-import { API_POST_ARWEAVE_ESTIMATE, API_POST_ARWEAVE_UPLOAD } from '~/constant/api';
+import {
+  API_POST_ARWEAVE_ESTIMATE,
+  API_POST_ARWEAVE_UPLOAD,
+  API_POST_NUMBERS_PROTOCOL_ASSETS,
+  } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 
@@ -951,6 +955,9 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     await this.submitToArweave();
+    if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetId) {
+      await this.submitToNumbers();
+    }
     if (this.uploadArweaveId) await this.submitToISCN()
   }
 
@@ -1005,7 +1012,9 @@ export default class IscnRegisterForm extends Vue {
     const transactionHash = await this.sendArweaveFeeTx();
     const formData = new FormData();
     if (this.fileBlob) formData.append('file', this.fileBlob);
+    // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
+      logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
       formData.append('num', '1')
     }
     this.isUploadingArweave = true;
@@ -1039,6 +1048,34 @@ export default class IscnRegisterForm extends Vue {
       this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
     } finally {
       this.isUploadingArweave = false;
+      this.uploadStatus = '';
+    }
+  }
+
+  async submitToNumbers(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
+    this.isOpenSignDialog = true;
+    try {
+      const formData = new FormData();
+      if (this.fileBlob) formData.append('file', this.fileBlob);
+      const {
+        numAssetIds: [numbersProtocolAssetId],
+      } = await this.$axios.$post(
+        `${API_POST_NUMBERS_PROTOCOL_ASSETS}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      this.numbersProtocolAssetId = numbersProtocolAssetId
+      this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
+      this.isOpenSignDialog = false;
+    } catch (error) {
+      this.shouldShowAlert = true;
+      this.errorMessage = this.$t('IscnRegisterForm.error.numbersProtocol') as string
+    } finally {
       this.uploadStatus = '';
     }
   }

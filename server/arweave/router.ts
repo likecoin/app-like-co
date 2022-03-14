@@ -1,47 +1,18 @@
 import BigNumber from 'bignumber.js';
-import { NextFunction, Request, Response, Router } from 'express';
+import { Router } from 'express';
 import multer from 'multer';
 
 import { UPLOAD_FILESIZE_MAX } from "../constant"
 import { getIPFSHash, uploadFilesToIPFS } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 import { registerNUMAssets } from '../numbers-protocol';
+import { checkFileValid, convertMulterFiles } from '../utils';
 
-import { ArweaveFile } from './types';
 import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
 
 const { LIKE_TARGET_ADDRESS } = require('../config/config');
 
 const router = Router();
-
-function checkFileValid(req: Request, res: Response, next: NextFunction) {
-  if (!(req.files && req.files.length)) {
-    res.status(400).send('MISSING_FILE');
-    return;
-  }
-  const files = req.files as Express.Multer.File[];
-  if (files.length > 1 && !files.find(f => f.fieldname === 'index.html')) {
-    res.status(400).send('MISSING_INDEX_FILE');
-    return;
-  }
-  next();
-}
-
-function convertMulterFiles(files: Express.Multer.File[]): ArweaveFile[] {
-  return files.map(f => {
-    const {
-      mimetype,
-      buffer,
-      originalname: filename,
-    } = f;
-    return {
-      key: f.fieldname,
-      mimetype,
-      buffer,
-      filename,
-    };
-  })
-}
 
 router.post(
   '/estimate',
