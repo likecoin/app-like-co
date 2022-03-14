@@ -31,6 +31,7 @@ export default class Link extends Vue {
     return null
   }
 
+  // eslint-disable-next-line class-methods-use-this
   get rootClasses() {
     return [
       'flex',
@@ -40,7 +41,6 @@ export default class Link extends Vue {
       'text-like-green',
       'leading-[22px]',
       'underline',
-      this.href || this.to,
     ]
   }
 }
