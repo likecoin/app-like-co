@@ -92,6 +92,7 @@
       </FormField>
       <!-- Numbers Protocol -->
       <FormField
+        v-if="isPhoto || isImage"
         :label="$t('IscnRegisterForm.label.numbersProtocol')"
         class="mb-[12px]"
       >
