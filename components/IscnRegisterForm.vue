@@ -97,7 +97,13 @@
         class="mb-[12px]"
       >
         <CheckBox v-model="isRegisterNumbersProtocolAsset">
-          {{ $t('IscnRegisterForm.label.numbersProtocol.details') }}
+          <i18n path="IscnRegisterForm.label.numbersProtocol.details">
+            <Link
+              place="link"
+              href="https://www.numbersprotocol.io/"
+              :is-inline="true"
+            >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
+          </i18n>
         </CheckBox>
       </FormField>
       <!-- Dialog -->

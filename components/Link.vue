@@ -20,6 +20,7 @@ export default class Link extends Vue {
   // Equivalent to `to` of `<NuxtLink/>`
   @Prop({ default: null }) readonly to: object | null | undefined
   @Prop(String) readonly href: string | undefined
+  @Prop({ default: false }) readonly isInline!: boolean
 
   get tag() {
     if (this.to) return 'NuxtLink'
@@ -31,10 +32,9 @@ export default class Link extends Vue {
     return null
   }
 
-  // eslint-disable-next-line class-methods-use-this
   get rootClasses() {
     return [
-      'flex',
+      this.isInline ? 'inline-flex' : 'flex',
       'flex-row',
       'text-[16px]',
       'font-normal',
