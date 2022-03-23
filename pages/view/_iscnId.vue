@@ -513,7 +513,6 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
-    this.txHash = await this.fetchTxHash()
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
       if (!isCosmosTransactionHash(param)) {
@@ -542,6 +541,7 @@ export default class ViewIscnIdPage extends Vue {
       this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
     }
     this.exifInfo = this.showExifInfo()
+    this.fetchTxHash().then(txHash => { this.txHash = txHash; });
   }
 
   async fetchTxHash() {
