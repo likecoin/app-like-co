@@ -27,6 +27,21 @@
           ]"
         >
           <Button
+            :class="['w-min', 'mr-[8px]']"
+            preset="outline"
+            tag="a"
+            text-preset="h5"
+            type="button"
+            content-class="font-medium ml-[-4px]"
+            prepend-class="font-bold"
+            :href="rawDataURL"
+          >
+            <template #prepend>
+              <IconInfo />
+            </template>
+            {{ $t('iscn.meta.rawData') }}
+          </Button>
+          <Button
             preset="secondary"
             :text="$t('general.closeWindow')"
             @click="closeWindow"
@@ -368,7 +383,7 @@
         :timeout="2000"
       >
         <template #prepend>
-          <IconDone/>
+          <IconDone />
         </template>
       </Snackbar>
     </div>
