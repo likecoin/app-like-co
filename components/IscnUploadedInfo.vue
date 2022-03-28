@@ -95,16 +95,24 @@
         {{ owner }}
       </FormField>
       <FormField
-        v-if="iscnHash"
         :label="$t('iscn.meta.transaction')"
         class="mb-[12px]"
       >
         <Link
-          class="text-[14px]"
+          v-if="iscnHash"
+          :class="[
+            'text-[14px]',
+            'break-all',
+          ]"
           :href="transactionsURL"
         >
           {{ iscnHash }}
         </Link>
+        <ProgressIndicator
+          v-else
+          class="my-[4px]"
+          preset="thin"
+        />
       </FormField>
       <IconDiverMini
         :class="[

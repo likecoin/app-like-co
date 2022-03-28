@@ -156,6 +156,7 @@
         </FormField>
         <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
           <Link
+            v-if="txHash"
             :class="[
               'text-[14px]',
               'break-all',
@@ -163,6 +164,11 @@
             :href="transactionsURL">
             {{ txHash }}
           </Link>
+          <ProgressIndicator
+            v-else
+            class="my-[4px]"
+            preset="thin"
+          />
         </FormField>
         <Divider class="my-[12px]" />
         <FormField

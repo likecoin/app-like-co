@@ -15,15 +15,7 @@
         />
       </clipPath>
     </defs>
-    <rect
-      :class="[
-        'fill-current',
-        'text-like-cyan-light',
-      ]"
-      :width="measurement.width"
-      :height="measurement.height"
-      :rx="rx"
-    />
+    <rect v-bind="progressContainer" />
     <g :clip-path="`url(#${clipPathID})`">
       <rect v-bind="progressProps">
         <template v-if="isIntermediate">
@@ -51,6 +43,11 @@ export enum ProgressIndicatorType {
   Intermediate = 'intermediate',
 }
 
+export enum ProgressIndicatorPreset {
+  Default = 'default',
+  Thin = 'thin',
+}
+
 @Component
 export default class ProgressIndicator extends Vue {
   /**
@@ -63,13 +60,20 @@ export default class ProgressIndicator extends Vue {
    */
   @Prop({ default: 0 }) readonly value!: number
 
+  /**
+   * The preset of progress, options: thin and default.
+   */
+  @Prop({ default: ProgressIndicatorPreset.Default }) readonly preset!: ProgressIndicatorPreset
+
   uid = uuidv4()
 
   // eslint-disable-next-line class-methods-use-this
   get measurement() {
     return {
       width: 154,
-      height: 16,
+      height: this.preset === ProgressIndicatorPreset.Thin
+        ? 4
+        : 16,
       progress: {
         maxWidth: 100,
         minWidth: 40,
@@ -152,6 +156,19 @@ export default class ProgressIndicator extends Vue {
       ],
       x: -this.measurement.height,
       width: this.progressWidth,
+      height: this.measurement.height,
+      rx: this.rx,
+    }
+  }
+
+  get progressContainer() {
+    return {
+      class: [
+        'text-like-cyan-light',
+        { 'text-shade-gray': this.preset === ProgressIndicatorPreset.Thin },
+        'fill-current',
+      ],
+      width: this.measurement.width,
       height: this.measurement.height,
       rx: this.rx,
     }
