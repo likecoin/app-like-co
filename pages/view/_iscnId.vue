@@ -96,7 +96,7 @@
         />
       </ClientOnly>
       <MetadataCard
-        v-if="metadata.exifInfo"
+        v-if="type ==='Image' || type === 'Photo'"
         :img-src="imgSrc"
         :filtered-exif="exifInfo"
         :class="[
@@ -480,7 +480,6 @@ export default class ViewIscnIdPage extends Vue {
 
   get imgSrc() {
     return (
-      (this.type === 'Image' || this.type === 'Photo') &&
       getIPFSUrlFromISCN(this.getISCNById(this.iscnId))
     )
   }
