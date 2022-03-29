@@ -205,11 +205,11 @@
           />
         </FormField>
         <FormField
-          v-if="metadata.version"
+          v-if="version"
           :label="$t('iscn.meta.version')"
           class="mb-[12px]"
         >
-          {{ metadata.version }}
+          {{ version }}
         </FormField>
         <FormField
           v-if="metadata.url"
@@ -467,7 +467,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get recordData() {
-    return this.record?.data
+    return this.record && this.record.data
   }
 
   get metadata() {
@@ -503,6 +503,10 @@ export default class ViewIscnIdPage extends Vue {
 
   get rawDataURL() {
     return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
+  }
+
+  get version() {
+    return this.recordData.recordVersion
   }
 
   created() {
