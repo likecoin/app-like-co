@@ -14,12 +14,12 @@
       </template>
     </Label>
     <template v-if="imgSrc">
-      <ProgressIndicator v-if="isLoading" class="mt-[24px]"/>
+      <ProgressIndicator v-if="!hasLoadedImage" class="mt-[24px]"/>
       <img
         ref="iscnImg"
         class="block w-full mt-[24px] rounded-[8px]"
         :src="imgSrc"
-        @load="isLoading = false"
+        @load="hasLoadedImage = true"
       />
       <FormField class="mt-[8px]" :label="$t('iscn.meta.card.preview')" />
     </template>
@@ -59,7 +59,7 @@ export default class MetadataCard extends Vue {
   @Prop(Object) readonly allExif!: Object
 
   exifInfo: Object = {}
-  isLoading: boolean = true
+  hasLoadedImage: boolean = false
 
   get isFromFilterEXIF() {
     return !!this.filteredExif

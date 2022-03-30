@@ -467,11 +467,11 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get recordData() {
-    return this.record && this.record.data
+    return this.record?.data
   }
 
   get metadata() {
-    return this.recordData && this.recordData.contentMetadata
+    return this.recordData?.contentMetadata
   }
 
   get type() {
@@ -485,7 +485,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get name() {
-    return this.metadata.name || this.metadata.title
+    return this.metadata?.name || this.metadata?.title
   }
 
   get keywords(): Array<string> {
@@ -493,7 +493,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get stakeholders() {
-    return this.recordData.stakeholders
+    return this.recordData?.stakeholders
   }
 
   get transactionsURL() {
@@ -505,7 +505,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get version() {
-    return this.recordData.recordVersion
+    return this.recordData?.recordVersion
   }
 
   created() {
