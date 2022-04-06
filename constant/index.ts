@@ -27,12 +27,12 @@ export const ISCN_PREFIX = `iscn://${ISCN_REGISTRY_NAME}`;
 export const LIKER_LAND_URL = 'https://liker.land/';
 
 export const RAWDATA_URL = {
-  testnet: 'https://likecoin-public-testnet-5.oursky.dev/iscn/records/id?iscn_id=',
+  testnet: 'https://node.testnet.like.co/iscn/records/id?iscn_id=',
   production: 'https://mainnet-node.like.co/iscn/records/id?iscn_id=',
 }
 
 export const RAWDATA_TX_URL = {
-  testnet: 'https://likecoin-public-testnet-5.oursky.dev/txs?iscn_record.iscn_id=',
+  testnet: 'https://node.testnet.like.co/txs?iscn_record.iscn_id=',
   production: 'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
 }
 
