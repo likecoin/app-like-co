@@ -569,11 +569,13 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async fetchTxHash() {
-    const res = await this.$axios.get(
+    const { data } = await this.$axios.get(
       `${ISCN_TX_RAW_DATA_ENDPOINT}'${this.iscnId}'`,
     )
-    const txHash = this.getTxHash(res.data.tx_responses)
-    return txHash
+    if(!data || !data.tx_responses || !data.tx_responses.length) {
+      return undefined
+    }
+    return data?.tx_responses[0].txhash
   }
 
   showExifInfo() {
@@ -610,22 +612,6 @@ export default class ViewIscnIdPage extends Vue {
       exif = JSON.parse(JSON.stringify(exif))
     }
     return exif
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getTxHash(items: any) {
-    const targetItem = items.find((item: any) =>
-      item.logs.find((log: any) =>
-        log.events.find((event: any) =>
-          event.attributes.some(
-            (attribute: any) =>
-              attribute.key === 'action' &&
-              attribute.value === 'create_iscn_record',
-          ),
-        ),
-      ),
-    )
-    return targetItem ? targetItem.txhash : undefined
   }
 
   showStakeholder(index: number) {
