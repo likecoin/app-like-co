@@ -2,7 +2,7 @@ export const { IS_TESTNET } = process.env;
 
 export const TEST_MODE = process.env.NODE_ENV !== 'production' || process.env.CI;
 
-export const COSMOS_DENOM = 'nanolike';
+export const COSMOS_DENOM = IS_TESTNET ? 'nanoekil' : 'nanolike';
 
 export const DEFAULT_GAS_PRICE = [{ amount: 1000, denom: COSMOS_DENOM }];
 export const DEFAULT_GAS_PRICE_NUMBER = DEFAULT_GAS_PRICE[0].amount;
@@ -27,12 +27,12 @@ export const ISCN_PREFIX = `iscn://${ISCN_REGISTRY_NAME}`;
 export const LIKER_LAND_URL = 'https://liker.land/';
 
 export const RAWDATA_URL = {
-  testnet: 'https://node.iscn-dev-2.like.co/iscn/records/id?iscn_id=',
+  testnet: 'https://node.testnet.like.co/iscn/records/id?iscn_id=',
   production: 'https://mainnet-node.like.co/iscn/records/id?iscn_id=',
 }
 
 export const RAWDATA_TX_URL = {
-  testnet: 'https://node.iscn-dev-2.like.co/txs?iscn_record.iscn_id=',
+  testnet: 'https://node.testnet.like.co/txs?iscn_record.iscn_id=',
   production: 'https://mainnet-node.like.co/txs?iscn_record.iscn_id=',
 }
 
