@@ -46,6 +46,7 @@ router.post('/upload',
   checkFileValid,
   async (req, res, next) => {
   try {
+    const shouldRegisterNUMAssets = req.body.num && req.body.num !== '0';
     const files = req.files as Express.Multer.File[];
     const arFiles = convertMulterFiles(files);
     const [
@@ -60,7 +61,7 @@ router.post('/upload',
     // shortcut for existing file without checking tx
     if (existingArweaveId) {
       let numAssetsIds = [];
-      if (req.body.num === '1') {
+      if (shouldRegisterNUMAssets) {
         numAssetsIds = await registerNUMAssets(arFiles.map(file => ({
           file: file.buffer,
           filename: file.filename,
@@ -105,7 +106,7 @@ router.post('/upload',
       uploadFilesToArweave(arFiles),
       uploadFilesToIPFS(arFiles),
     ];
-    if (req.body.num === '1') {
+    if (shouldRegisterNUMAssets) {
       promises.push(registerNUMAssets(arFiles.map(file => ({
         file: file.buffer,
         filename: file.filename,
