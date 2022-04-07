@@ -111,7 +111,7 @@
         />
       </ClientOnly>
       <MetadataCard
-        v-if="metadata.exifInfo"
+        v-if="type ==='Image' || type === 'Photo'"
         :img-src="imgSrc"
         :filtered-exif="exifInfo"
         :class="[
@@ -226,11 +226,11 @@
           />
         </FormField>
         <FormField
-          v-if="metadata.version"
+          v-if="version"
           :label="$t('iscn.meta.version')"
           class="mb-[12px]"
         >
-          {{ metadata.version }}
+          {{ version }}
         </FormField>
         <FormField
           v-if="metadata.url"
@@ -492,7 +492,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get metadata() {
-    return this.recordData && this.recordData.contentMetadata
+    return this.recordData?.contentMetadata
   }
 
   get type() {
@@ -501,13 +501,12 @@ export default class ViewIscnIdPage extends Vue {
 
   get imgSrc() {
     return (
-      (this.type === 'Image' || this.type === 'Photo') &&
       getIPFSUrlFromISCN(this.getISCNById(this.iscnId))
     )
   }
 
   get name() {
-    return this.metadata.name || this.metadata.title
+    return this.metadata?.name || this.metadata?.title
   }
 
   get keywords(): Array<string> {
@@ -515,7 +514,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get stakeholders() {
-    return this.recordData.stakeholders
+    return this.recordData?.stakeholders
   }
 
   get transactionsURL() {
@@ -524,6 +523,10 @@ export default class ViewIscnIdPage extends Vue {
 
   get rawDataURL() {
     return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
+  }
+
+  get version() {
+    return this.recordData?.recordVersion
   }
 
   created() {
