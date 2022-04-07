@@ -570,9 +570,9 @@ export default class ViewIscnIdPage extends Vue {
 
   async fetchTxHash() {
     const res = await this.$axios.get(
-      `${ISCN_TX_RAW_DATA_ENDPOINT}${this.iscnId}`,
+      `${ISCN_TX_RAW_DATA_ENDPOINT}'${this.iscnId}'`,
     )
-    const txHash = this.getTxHash(res.data.txs)
+    const txHash = this.getTxHash(res.data.tx_responses)
     return txHash
   }
 
