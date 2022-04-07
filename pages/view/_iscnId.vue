@@ -27,6 +27,21 @@
           ]"
         >
           <Button
+            :class="['w-min', 'mr-[8px]']"
+            preset="outline"
+            tag="a"
+            text-preset="h5"
+            type="button"
+            content-class="font-medium ml-[-4px]"
+            prepend-class="font-bold"
+            :href="rawDataURL"
+          >
+            <template #prepend>
+              <IconInfo />
+            </template>
+            {{ $t('iscn.meta.rawData') }}
+          </Button>
+          <Button
             preset="secondary"
             :text="$t('general.closeWindow')"
             @click="closeWindow"
@@ -96,7 +111,7 @@
         />
       </ClientOnly>
       <MetadataCard
-        v-if="metadata.exifInfo"
+        v-if="type ==='Image' || type === 'Photo'"
         :img-src="imgSrc"
         :filtered-exif="exifInfo"
         :class="[
@@ -141,6 +156,7 @@
         </FormField>
         <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
           <Link
+            v-if="txHash"
             :class="[
               'text-[14px]',
               'break-all',
@@ -148,6 +164,11 @@
             :href="transactionsURL">
             {{ txHash }}
           </Link>
+          <ProgressIndicator
+            v-else
+            class="my-[4px]"
+            preset="thin"
+          />
         </FormField>
         <Divider class="my-[12px]" />
         <FormField
@@ -205,11 +226,11 @@
           />
         </FormField>
         <FormField
-          v-if="metadata.version"
+          v-if="version"
           :label="$t('iscn.meta.version')"
           class="mb-[12px]"
         >
-          {{ metadata.version }}
+          {{ version }}
         </FormField>
         <FormField
           v-if="metadata.url"
@@ -368,7 +389,7 @@
         :timeout="2000"
       >
         <template #prepend>
-          <IconDone/>
+          <IconDone />
         </template>
       </Snackbar>
     </div>
@@ -471,7 +492,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get metadata() {
-    return this.recordData && this.recordData.contentMetadata
+    return this.recordData?.contentMetadata
   }
 
   get type() {
@@ -480,13 +501,12 @@ export default class ViewIscnIdPage extends Vue {
 
   get imgSrc() {
     return (
-      (this.type === 'Image' || this.type === 'Photo') &&
       getIPFSUrlFromISCN(this.getISCNById(this.iscnId))
     )
   }
 
   get name() {
-    return this.metadata.name || this.metadata.title
+    return this.metadata?.name || this.metadata?.title
   }
 
   get keywords(): Array<string> {
@@ -494,7 +514,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get stakeholders() {
-    return this.recordData.stakeholders
+    return this.recordData?.stakeholders
   }
 
   get transactionsURL() {
@@ -505,6 +525,10 @@ export default class ViewIscnIdPage extends Vue {
     return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
   }
 
+  get version() {
+    return this.recordData?.recordVersion
+  }
+
   created() {
     const { iscnId } = this.$route.params
     if (iscnId.startsWith(ISCN_PREFIX)) {
@@ -513,7 +537,6 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async mounted() {
-    this.txHash = await this.fetchTxHash()
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
       if (!isCosmosTransactionHash(param)) {
@@ -542,6 +565,7 @@ export default class ViewIscnIdPage extends Vue {
       this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
     }
     this.exifInfo = this.showExifInfo()
+    this.fetchTxHash().then(txHash => { this.txHash = txHash; });
   }
 
   async fetchTxHash() {

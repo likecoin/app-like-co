@@ -172,9 +172,9 @@ export default class IscnCard extends Vue {
     if (!this.record) return ''
     const {
       recordTimestamp: timestamp = '',
+      recordVersion: version = '',
       contentMetadata: {
         '@type': type = '',
-        version = '',
       } = {},
     } = this.record.data || {}
     return `${type} ${timestamp} ${version ? 'Version ' : ''}${version}`
