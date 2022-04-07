@@ -122,7 +122,8 @@ export default class WorksIndexPageextends extends Vue {
       this.pages = []
     } else {
       const records = await this.queryISCNByAddress(this.currentAddress)
-      this.pages = chunk(records, 4)
+      // sort by latest
+      this.pages = chunk(records.reverse(), 4)
     }
   }
 
