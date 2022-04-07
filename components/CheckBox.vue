@@ -32,30 +32,27 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'CheckBox',
-  props: {
-    value: {
-      type: Boolean,
-      defualt: false,
-    },
-  },
-  computed: {
-    iconClass() {
-      return [
-        'w-[20px]',
-        'w-[20px]',
-        {
-          'mr-[8px]': Object.keys(this.$slots).length > 0,
-        },
-      ]
-    },
-  },
-  methods: {
-    handleChange(event) {
-      this.$emit('input', event.target.checked)
-    },
-  },
+<script lang="ts">
+import { Vue, Component, Prop, Emit } from 'vue-property-decorator'
+
+@Component
+export default class CheckBox extends Vue {
+  @Prop({ default: false }) readonly value!: boolean
+
+  get iconClass() {
+    return [
+      'w-[20px]',
+      'w-[20px]',
+      {
+        'mr-[8px]': Object.keys(this.$slots).length > 0,
+      },
+    ]
+  }
+
+  @Emit('input')
+  // eslint-disable-next-line class-methods-use-this
+  handleChange(event: Event) {
+    return (event?.target as HTMLInputElement)?.checked
+  }
 }
 </script>
