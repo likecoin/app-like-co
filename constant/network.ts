@@ -25,6 +25,7 @@ const testnetConfig = {
   name: 'LikeCoin Taipei test chain',
   apiURL: 'https://node.testnet.like.co',
   rpcURL: 'https://node.testnet.like.co/rpc/',
+  addressPrefix: 'like',
   stakingWalletURL: 'https://likecoin-public-testnet-5.netlify.app/',
 };
 
