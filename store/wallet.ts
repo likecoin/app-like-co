@@ -23,6 +23,7 @@ export default class Wallet extends VuexModule {
   walletConnectURI = '';
   accounts: readonly AccountData[] = [];
   isShowConnectDialog = false;
+  isShowKeplrWarning = false;
 
   @Mutation
   setType(type: string) {
@@ -47,6 +48,16 @@ export default class Wallet extends VuexModule {
   @Mutation
   setIsShowConnectDialog(isShow: boolean) {
     this.isShowConnectDialog = isShow;
+  }
+
+  @Mutation
+  setKeplrWarning(isShow: boolean) {
+    this.isShowKeplrWarning = isShow;
+  }
+
+  @Action
+  toggleKeplrWarning(isShow: boolean) {
+    this.setKeplrWarning(isShow);
   }
 
   @Action
@@ -83,6 +94,7 @@ export default class Wallet extends VuexModule {
   async initKeplr(): Promise<boolean> {
     if (this.type === 'keplr') return true;
     if (!window.keplr) {
+      this.toggleKeplrWarning(true)
       let tries = 0;
       const TRY_COUNT = 3;
       while (TRY_COUNT > tries) {
