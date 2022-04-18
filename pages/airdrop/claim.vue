@@ -175,7 +175,7 @@ export default class AirdropClaimPage extends Vue {
           console.error(err)
           if (err.response.status === 403) {
             this.errorMessage = this.$t(
-              'AirDrop.errorMessage.noAddress',
+              'AirDrop.errorMessage.ineligible',
             ) as string
           } else {
             this.closeAirdrop()
