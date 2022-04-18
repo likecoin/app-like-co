@@ -125,8 +125,14 @@
         'text-red',
       ]"
       preset="p5"
-      :text="errorMessage"
-    />
+      >{{ errorMessage }}
+      <Link
+        v-if="errorMessage === $t('AirDrop.errorMessage.ineligible')"
+        :class="['ml-[4px]','text-red']"
+        :href="$t('AirDrop.errorMessage.ineligible.learnMore.link')"
+      >{{$t('AirDrop.errorMessage.ineligible.learnMore')}}
+      </Link>
+    </Label>
     <Button
       v-if="!shouldCloseAirdrop"
       class="w-min"
