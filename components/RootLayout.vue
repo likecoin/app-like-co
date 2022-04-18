@@ -17,6 +17,22 @@
       />
       <ConnectLikerIdDialog @quit="toggleConnectWalletDialog(true)" />
     </DialogContainer>
+    <Snackbar
+      :open="isShowKeplrWarning"
+      preset="warn"
+      @close="handleKeplrWarningClose"
+    >
+      <i18n path="error.not.found.keplr" tag="div">
+        <template #keplr>
+          <a
+            v-t="$t('error.not.found.keplr.name')"
+            :class="['underline', 'text-white', 'font-medium']"
+            :href="$t('error.not.found.keplr.link')"
+            target="_blank"
+          />
+        </template>
+      </i18n>
+    </Snackbar>
   </div>
 </template>
 
@@ -30,10 +46,10 @@ const walletModule = namespace('wallet')
 const signerModule = namespace('signer')
 const uiModule = namespace('ui')
 
-
 @Component({
   head() {
-    const isDesktopViewMode: boolean = this.$store.getters['ui/isDesktopViewMode']
+    const isDesktopViewMode: boolean =
+      this.$store.getters['ui/isDesktopViewMode']
     const contentWidth = isDesktopViewMode
       ? 'width=1024, initial-scale=1, minimum-scale=1'
       : 'width=device-width'
@@ -48,11 +64,18 @@ const uiModule = namespace('ui')
 })
 export default class RootLayout extends Vue {
   @walletModule.State('isShowConnectDialog') isShowConnectWalletDialog!: boolean
+  @walletModule.State isShowKeplrWarning!: boolean
   @walletModule.Getter('getWalletAddress') walletAddress!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action initIfNecessary!: () => Promise<boolean>
   @walletModule.Action('reset') resetWallet!: () => void
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (isShow: boolean) => void
+  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
+    isShow: boolean
+  ) => void
+
+  @walletModule.Action('toggleKeplrWarning') toggleKeplrWarningSnackbar!: (
+    isShow: boolean
+  ) => void
 
   @signerModule.Action updateSignerInfo!: (arg0: {
     signer: OfflineSigner | null
@@ -81,6 +104,10 @@ export default class RootLayout extends Vue {
   handleConnectWalletDialogQuit() {
     this.handleConnectWalletDialogClose()
     this.$emit('connect-wallet-dialog-quit')
+  }
+
+  handleKeplrWarningClose() {
+    this.toggleKeplrWarningSnackbar(false)
   }
 }
 </script>
