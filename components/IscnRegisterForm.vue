@@ -1051,6 +1051,7 @@ export default class IscnRegisterForm extends Vue {
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
+      console.error(err)
       this.shouldShowAlert = true
       this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
     } finally {
