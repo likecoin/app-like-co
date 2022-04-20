@@ -117,10 +117,11 @@ router.post('/upload',
         arweaveId,
         list,
       },
-      ,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _,
       numAssetIds,
     ] = await Promise.all(promises)
-    res.json({ arweaveId, ipfsHash, list, numAssetIds });
+    res.json({ arweaveId, ipfsHash, list, numAssetIds: numAssetIds || [] });
   } catch (error) {
     next(error);
   }
