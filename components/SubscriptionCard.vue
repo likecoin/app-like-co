@@ -19,57 +19,36 @@
         'w-full',
         'items-center',
         'justify-center',
-        'mt-[8px]',
         'p-[16px]',
         'sm:flex-row',
         'sm:w-min',
       ]"
     >
-      <TextField
-        v-model="email"
-        :class="['w-full', 'sm:w-min']"
-        :placeholder="$t('AirDrop.placeholder.email')"
-        :error-message="errorMessage"
-      />
       <Button
         :class="[
           'mt-[16px]',
-          'sm:ml-[16px]',
           'sm:mt-0',
         ]"
         preset="secondary"
-        :text="$t('AirDrop.button.notify')"
-        @click="handleSubmit"
+        :text="$t('AirDrop.button.subscribe')"
+        href="https://likecoin.substack.com/"
       >
         <template #prepend>
           <IconSensors />
         </template>
       </Button>
-    </div>
-    <div
-      v-if="preset !== 'community'"
-      :class="[
-        'flex',
-        'flex-col',
-        'items-center',
-        'justify-center',
-        'sm:mt-[8px]',
-        'sm:flex-row',
-      ]"
-    >
       <Label
         :class="[
-          'text-twitter-blue',
-          'mt-[8px]',
-          'mb-[8px]',
-          'sm:mb-0',
+          'text-medium-gray',
+          'my-[8px]',
+          'mx-[8px]',
         ]"
         :text="$t('AirDrop.label.and')"
         preset="h5"
       />
       <Button
         preset="outline"
-        :class="['ml-[16px]', 'text-twitter-blue']"
+        :class="['text-twitter-blue']"
         :style="{ border: '2px solid #4696F1' }"
         :text="$t('AirDrop.label.follow.Twitter')"
         href="https://twitter.com/likecoin"
@@ -188,7 +167,6 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { EMAIL_REGEX, AIRDROP_SUBSCRIBE_ENDPOINT } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 
 export enum Preset {
@@ -207,28 +185,6 @@ export default class SubscriptionCard extends Vue {
 
   onClickSocial(platform: string) {
     logTrackerEvent(this, 'AirdropCheck', `Subscribe${platform}`, '', 1);
-  }
-
-  async handleSubmit() {
-    logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterStart', '', 1);
-    this.errorMessage = ''
-    if (!EMAIL_REGEX.test(this.email)) {
-      this.errorMessage = this.$t('AirDrop.errorMessage.invalidEmail') as string
-      return
-    }
-    const body = { email: this.email, locale: navigator.language }
-    try {
-      await this.$axios.post(
-        AIRDROP_SUBSCRIBE_ENDPOINT,
-        body,
-      )
-      logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterSuccess', '', 1);
-    } catch (err) {
-      logTrackerEvent(this, 'AirdropCheck', 'SubscribeNewsLetterFail', '', 1);
-      this.errorMessage = this.$t('AirDrop.errorMessage.alreadySubscriibed') as string;
-    } finally {
-      if (!this.errorMessage) this.isOpenAlert = true
-    }
   }
 }
 </script>
