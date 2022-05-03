@@ -12,10 +12,10 @@
 
     <DialogContainer>
       <Dialog
-        :open="isOpenBlockingDialog"
+        :open="isOpenChainUpgradeBlockingDialog"
         :has-close-button="false"
         :header-text="$t('ChainUpgrade.header')"
-        @close="handleBlockingDialogClose"
+        @close="handleChainUpgradeBlockingDialogClose"
       >
         <div
           :class="[
@@ -29,7 +29,7 @@
           <i18n path="ChainUpgrade" tag="div">
             <template #announcement>
               <a
-                v-t="`this announcement`"
+                v-t="`announcement`"
                 :class="['underline', 'text-like-green', 'font-medium']"
                 href="https://blog.like.co/likecoin-chain-upgrade-laichikok-overview/"
                 target="_blank"
@@ -118,7 +118,7 @@ export default class RootLayout extends Vue {
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
-  isOpenBlockingDialog = false
+  isOpenChainUpgradeBlockingDialog = false
 
   async mounted() {
     this.initUIStore();
@@ -129,11 +129,11 @@ export default class RootLayout extends Vue {
         signer: this.signer,
       })
     }
-    this.isOpenBlockingDialog = !!IS_CHAIN_UPGRADING
+    this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
   }
 
-  handleBlockingDialogClose() {
-    this.isOpenBlockingDialog = false
+  handleChainUpgradeBlockingDialogClose() {
+    this.isOpenChainUpgradeBlockingDialog = false
   }
 
   handleConnectWalletDialogClose() {

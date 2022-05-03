@@ -120,7 +120,7 @@
   "AppHeader.tabBar.button.publish": "Publish",
   "AppHeader.tabBar.button.publishing": "My Publishing",
   "AppHeader.tabBar.button.stake": "Delegate and Vote",
-  "ChainUpgrade": "LikeCoin chain is being upgraded.\nDuring this period, some services may be affected until the upgrade is completed.\nPlease refer to {announcement} for more details.",
+  "ChainUpgrade": "LikeCoin chain is being upgraded.\nDuring this period, some services may be affected until the upgrade is completed.\nPlease refer to this {announcement} for more details.",
   "ChainUpgrade.header": "System message",
   "ConnectLikerIdDialog.step.1": "Open {likerlandAppLogo} Liker Land app on your phone.",
   "ConnectLikerIdDialog.step.2": "Open {likerlandAppQRCodeIcon} QR code scanner in the wallet dashboard.",
