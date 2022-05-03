@@ -9,6 +9,37 @@
     ]"
   >
     <slot />
+
+    <DialogContainer>
+      <Dialog
+        :open="isOpenBlockingDialog"
+        :has-close-button="false"
+        :header-text="$t('ChainUpgrade.header')"
+        @close="handleBlockingDialogClose"
+      >
+        <div
+          :class="[
+            'text-left',
+            'whitespace-pre-line',
+            'leading-8',
+            'pt-[18px]',
+            'pb-[24px]',
+          ]"
+        >
+          <i18n path="ChainUpgrade" tag="div">
+            <template #announcement>
+              <a
+                v-t="`this announcement`"
+                :class="['underline', 'text-like-green', 'font-medium']"
+                href="https://blog.like.co/likecoin-chain-upgrade-laichikok-overview/"
+                target="_blank"
+              />
+            </template>
+          </i18n>
+        </div>
+      </Dialog>
+    </DialogContainer>
+
     <DialogContainer>
       <ConnectWalletDialog
         :is-opened="isShowConnectWalletDialog"
@@ -41,6 +72,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
+import { IS_CHAIN_UPGRADING } from '~/constant'
 
 const walletModule = namespace('wallet')
 const signerModule = namespace('signer')
@@ -86,6 +118,8 @@ export default class RootLayout extends Vue {
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
+  isOpenBlockingDialog = false
+
   async mounted() {
     this.initUIStore();
     const isInited = await this.initIfNecessary();
@@ -95,6 +129,11 @@ export default class RootLayout extends Vue {
         signer: this.signer,
       })
     }
+    this.isOpenBlockingDialog = !!IS_CHAIN_UPGRADING
+  }
+
+  handleBlockingDialogClose() {
+    this.isOpenBlockingDialog = false
   }
 
   handleConnectWalletDialogClose() {
