@@ -36,6 +36,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { IS_CHAIN_UPGRADING } from '~/constant'
 
 export enum Preset {
   primary = 'primary',
@@ -61,7 +62,7 @@ export default class Button extends Vue {
   @Prop(String) readonly text!: string
 
   // Disable interaction if set to true
-  @Prop({ default: false }) readonly isDisabled!: boolean
+  @Prop({ default: IS_CHAIN_UPGRADING }) readonly isDisabled!: boolean
 
   // Circle style if set to true
   @Prop({ default: false }) readonly circle!: boolean
