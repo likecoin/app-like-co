@@ -134,6 +134,8 @@ export default class Wallet extends VuexModule {
           features: [
             'stargate',
             'ibc-transfer',
+            'no-legacy-stdTx',
+            'ibc-go',
           ],
         });
         await window.keplr.enable(network.id);
