@@ -63,6 +63,7 @@ import {
   AIRDROP_MISSION_ENDPOINT,
   BIG_DIPPER_TX_BASE_URL,
   AIRDROP_DECAY_ENDPOINT,
+  IS_CHAIN_UPGRADING,
 } from '~/constant'
 
 const signerModule = namespace('signer')
@@ -292,6 +293,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async handleMissionDone() {
+    if (IS_CHAIN_UPGRADING) return;
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(

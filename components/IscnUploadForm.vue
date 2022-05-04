@@ -159,6 +159,7 @@ import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { logTrackerEvent } from '~/utils/logger'
+import { IS_CHAIN_UPGRADING } from '~/constant'
 
 import {
   fileToArrayBuffer,
@@ -286,6 +287,7 @@ export default class UploadForm extends Vue {
   }
 
   onSubmit() {
+    if (IS_CHAIN_UPGRADING) return;
     this.$emit('submit', {
       ipfsHash: this.ipfsHash,
       fileData: this.fileData,

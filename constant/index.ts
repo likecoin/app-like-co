@@ -120,3 +120,5 @@ export const AIRDROP_DECAY_ENDPOINT = IS_TESTNET
 export const AIRDROP_OG_ENDPOINT = IS_TESTNET
   ? AIRDROP_OG_URL.testnet
   : AIRDROP_OG_URL.production
+
+export const IS_CHAIN_UPGRADING = false;
