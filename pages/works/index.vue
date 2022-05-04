@@ -104,6 +104,7 @@ export default class WorksIndexPageextends extends Vue {
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getIsLoading') isLoading!: boolean
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>

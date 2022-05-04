@@ -26,6 +26,8 @@ export default class ISCN extends VuexModule {
 
   records: ISCNRecordWithID[] = [];
 
+  isLoading = false;
+
   @Mutation
   setRecords(records: ISCNRecord[]) {
     records.forEach((r) => {
@@ -41,6 +43,11 @@ export default class ISCN extends VuexModule {
     this.recordsById = {}
     this.recordsByIPLD = {}
     this.records = []
+  }
+
+  @Mutation
+  setIsLoading(isLoading: boolean) {
+    this.isLoading = isLoading;
   }
 
   @Action
@@ -87,6 +94,7 @@ export default class ISCN extends VuexModule {
     let nextSequence;
     let records: ISCNRecord[] = [];
     do {
+      this.context.commit('setIsLoading', true);
       // eslint-disable-next-line no-await-in-loop
       res = await client.queryRecordsByOwner(address, nextSequence).catch(() => { })
       if (res) {
@@ -95,6 +103,7 @@ export default class ISCN extends VuexModule {
         records = records.concat(res.records);
       }
     } while (nextSequence !== 0);
+    this.context.commit('setIsLoading', false);
     return addIDToRecords(records);
   }
 
@@ -146,5 +155,9 @@ export default class ISCN extends VuexModule {
   get getISCNChunks() {
     // sort by latest
     return _.chunk([...this.records].reverse(), 4);
+  }
+
+  get getIsLoading() {
+    return this.isLoading;
   }
 }
