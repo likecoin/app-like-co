@@ -3,6 +3,7 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
+import _ from 'lodash';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 
@@ -23,12 +24,15 @@ export default class ISCN extends VuexModule {
     [key: string]: ISCNRecordWithID;
   } = {};
 
+  records: ISCNRecordWithID[] = [];
+
   @Mutation
   setRecords(records: ISCNRecord[]) {
     records.forEach((r) => {
       const id = r.data['@id'] as string;
       Vue.set(this.recordsById, id, { id, ...r })
       Vue.set(this.recordsByIPLD, r.ipld, { id, ...r })
+      this.records.push({ id, ...r })
     })
   }
 
@@ -36,6 +40,7 @@ export default class ISCN extends VuexModule {
   clearRecords() {
     this.recordsById = {}
     this.recordsByIPLD = {}
+    this.records = []
   }
 
   @Action
@@ -78,9 +83,18 @@ export default class ISCN extends VuexModule {
   @Action
   async queryISCNByAddress(address: string): Promise<ISCNRecordWithID[]> {
     const client = await getQueryClient();
-    const res = await client.queryRecordsByOwner(address).catch(() => {})
-    const records: ISCNRecord[] = res ? res.records : [];
-    this.context.commit('setRecords', records)
+    let res;
+    let nextSequence;
+    let records: ISCNRecord[] = [];
+    do {
+      // eslint-disable-next-line no-await-in-loop
+      res = await client.queryRecordsByOwner(address, nextSequence).catch(() => { })
+      if (res) {
+        nextSequence = res.nextSequence.toNumber();
+        this.context.commit('setRecords', res.records)
+        records = records.concat(res.records);
+      }
+    } while (nextSequence !== 0);
     return addIDToRecords(records);
   }
 
@@ -127,5 +141,10 @@ export default class ISCN extends VuexModule {
 
   get getISCNRecords() {
     return Object.values(this.recordsById);
+  }
+
+  get getISCNChunks() {
+    // sort by latest
+    return _.chunk([...this.records].reverse(), 4);
   }
 }

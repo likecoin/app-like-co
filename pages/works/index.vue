@@ -90,7 +90,6 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import chunk from 'lodash.chunk'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
@@ -104,6 +103,7 @@ export default class WorksIndexPageextends extends Vue {
   pageNumber = 0
 
   @signerModule.Getter('getAddress') currentAddress!: string
+  @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
@@ -113,17 +113,21 @@ export default class WorksIndexPageextends extends Vue {
     this.refreshWorks()
   }
 
+  @Watch('recordChunks')
+  onRecordChunksChanged() {
+    this.pages = this.recordChunks
+  }
+
   mounted() {
     this.refreshWorks()
   }
 
-  async refreshWorks() {
+  refreshWorks() {
     if (!this.currentAddress) {
       this.pages = []
     } else {
-      const records = await this.queryISCNByAddress(this.currentAddress)
-      // sort by latest
-      this.pages = chunk(records.reverse(), 4)
+      this.queryISCNByAddress(this.currentAddress)
+      this.pages = this.recordChunks
     }
   }
 
