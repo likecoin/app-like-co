@@ -16,7 +16,7 @@ const mainConfig = {
       icon: 'currencies/like.png',
       coinGeckoId: 'likecoin',
     }],
-  addressPrefix: 'cosmos',
+  addressPrefix: 'like',
   icon: 'https://like.co/logo.png',
 };
 
@@ -25,7 +25,6 @@ const testnetConfig = {
   name: 'LikeCoin public test chain',
   apiURL: 'https://node.testnet.like.co',
   rpcURL: 'https://node.testnet.like.co/rpc/',
-  addressPrefix: 'like',
   stakingWalletURL: 'https://likecoin-public-testnet-5.netlify.app/',
 };
 
