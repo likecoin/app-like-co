@@ -399,7 +399,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { MetaInfo } from 'vue-meta'
 import { isCosmosTransactionHash } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -431,6 +432,17 @@ export enum ExifList {
 }
 
 @Component({
+  head() {
+    let title = ''
+    if (this.$route.query.layout === 'popup') {
+      title = this.$t('page.iscnId.popup.title') as string
+    } else {
+      title = this.$t('page.iscnId.default.title') as string
+    }
+    return {
+      title,
+    } as MetaInfo
+  },
   filters: {
     ellipsis(value: any) {
       const len: number = value.length

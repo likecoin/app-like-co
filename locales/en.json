@@ -272,6 +272,8 @@
   "page.airdrop.checker.title": "LikeCoin Airdrop Checker",
   "page.airdrop.description": "Claim your LIKE airdrop today.",
   "page.airdrop.title": "LikeCoin Airdrop",
+  "page.iscnId.popup.title": "LikeCoin DePub Widget",
+  "page.iscnId.default.title": "ISCN App",
   "Registration.step": "Step {step}/{total}",
   "SearchPage.empty.label": "No record",
   "UploadForm.attention": "Do not connect to Ledger hardware wallets for signing.\n Ledger service temporarily unavailable.",
