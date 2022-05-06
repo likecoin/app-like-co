@@ -20,10 +20,6 @@ export default class ISCN extends VuexModule {
     [key: string]: ISCNRecordWithID;
  } = {};
 
-  recordsByIPLD: {
-    [key: string]: ISCNRecordWithID;
-  } = {};
-
   records: ISCNRecordWithID[] = [];
 
   isLoading = false;
@@ -33,7 +29,6 @@ export default class ISCN extends VuexModule {
     records.forEach((r) => {
       const id = r.data['@id'] as string;
       Vue.set(this.recordsById, id, { id, ...r })
-      Vue.set(this.recordsByIPLD, r.ipld, { id, ...r })
       this.records.push({ id, ...r })
     })
   }
@@ -41,7 +36,6 @@ export default class ISCN extends VuexModule {
   @Mutation
   clearRecords() {
     this.recordsById = {}
-    this.recordsByIPLD = {}
     this.records = []
   }
 
@@ -142,14 +136,6 @@ export default class ISCN extends VuexModule {
 
   get getISCNById() {
     return (iscnId: string) => this.recordsById[iscnId];
-  }
-
-  get getISCNByIPLD() {
-    return (IPLD: string) => this.recordsByIPLD[IPLD];
-  }
-
-  get getISCNRecords() {
-    return Object.values(this.recordsById);
   }
 
   get getISCNChunks() {
