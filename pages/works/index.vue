@@ -1,8 +1,5 @@
 <template>
-  <Page
-    v-if="!pages || !pages.length"
-    class="justify-center"
-  >
+  <Page v-if="!pages.length" class="justify-center">
     <Card>
       <Label :text="$t(!pages ? 'general.loading' : 'WorksPage.empty.label')" />
     </Card>
@@ -102,7 +99,6 @@ const iscnModule = namespace('iscn')
   layout: 'wallet',
 })
 export default class WorksIndexPageextends extends Vue {
-  pages: ISCNRecordWithID[][] | null = null
   pageNumber = 0
 
   @signerModule.Getter('getAddress') currentAddress!: string
@@ -117,21 +113,17 @@ export default class WorksIndexPageextends extends Vue {
     this.refreshWorks()
   }
 
-  @Watch('recordChunks')
-  onRecordChunksChanged() {
-    this.pages = this.recordChunks
-  }
-
   mounted() {
     this.refreshWorks()
   }
 
+  get pages() {
+    return this.recordChunks || []
+  }
+
   refreshWorks() {
-    if (!this.currentAddress) {
-      this.pages = []
-    } else {
+    if (this.currentAddress) {
       this.queryISCNByAddress(this.currentAddress)
-      this.pages = this.recordChunks
     }
   }
 
