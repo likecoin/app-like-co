@@ -46,6 +46,9 @@
           </template>
         </Button>
       </div>
+      
+      <ProgressIndicator v-if="isLoading" preset="thin" />
+        
       <div
         :class="[
           'grid',
