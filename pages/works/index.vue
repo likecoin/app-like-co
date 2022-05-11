@@ -1,8 +1,5 @@
 <template>
-  <Page
-    v-if="!pages || !pages.length"
-    class="justify-center"
-  >
+  <Page v-if="!pages.length" class="justify-center">
     <Card>
       <Label :text="$t(!pages ? 'general.loading' : 'WorksPage.empty.label')" />
     </Card>
@@ -46,6 +43,9 @@
           </template>
         </Button>
       </div>
+      
+      <ProgressIndicator v-if="isLoading" preset="thin" />
+        
       <div
         :class="[
           'grid',
@@ -90,7 +90,6 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import chunk from 'lodash.chunk'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
@@ -100,10 +99,11 @@ const iscnModule = namespace('iscn')
   layout: 'wallet',
 })
 export default class WorksIndexPageextends extends Vue {
-  pages: ISCNRecordWithID[][] | null = null
   pageNumber = 0
 
   @signerModule.Getter('getAddress') currentAddress!: string
+  @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getIsLoading') isLoading!: boolean
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
@@ -117,13 +117,13 @@ export default class WorksIndexPageextends extends Vue {
     this.refreshWorks()
   }
 
-  async refreshWorks() {
-    if (!this.currentAddress) {
-      this.pages = []
-    } else {
-      const records = await this.queryISCNByAddress(this.currentAddress)
-      // sort by latest
-      this.pages = chunk(records.reverse(), 4)
+  get pages() {
+    return this.recordChunks || []
+  }
+
+  refreshWorks() {
+    if (this.currentAddress) {
+      this.queryISCNByAddress(this.currentAddress)
     }
   }
 

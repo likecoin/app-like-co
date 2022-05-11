@@ -3,6 +3,7 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
+import _ from 'lodash';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 
@@ -19,29 +20,35 @@ export default class ISCN extends VuexModule {
     [key: string]: ISCNRecordWithID;
  } = {};
 
-  recordsByIPLD: {
-    [key: string]: ISCNRecordWithID;
-  } = {};
+  records: ISCNRecordWithID[] = [];
+
+  isLoading = false;
 
   @Mutation
-  setRecords(records: ISCNRecord[]) {
+  appendRecords(records: ISCNRecord[]) {
     records.forEach((r) => {
       const id = r.data['@id'] as string;
       Vue.set(this.recordsById, id, { id, ...r })
-      Vue.set(this.recordsByIPLD, r.ipld, { id, ...r })
+      this.records.push({ id, ...r })
     })
   }
 
   @Mutation
   clearRecords() {
     this.recordsById = {}
-    this.recordsByIPLD = {}
+    this.records = []
+  }
+
+  @Mutation
+  setIsLoading(isLoading: boolean) {
+    this.isLoading = isLoading;
   }
 
   @Action
   async fetchISCNByTx(iscnId: string): Promise<{
     records: ISCNRecord[];
 } | null> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const txRes = await client.queryISCNIdsByTx(iscnId).catch(() => null);
     let txRecords: ISCNRecord[] = [];
@@ -54,7 +61,7 @@ export default class ISCN extends VuexModule {
         return t;
       }))).filter(t => t) as ISCNRecord[];
     }
-    this.context.commit('setRecords', txRecords);
+    this.context.commit('appendRecords', txRecords);
     return { records: addIDToRecords(txRecords) };
   }
 
@@ -64,11 +71,12 @@ export default class ISCN extends VuexModule {
     owner: string;
     latestVersion: Long.Long;
 } | null> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const res = await client.queryRecordsById(iscnId).catch(() => null);
     if (!res) return null;
     const records = res ? res.records : [];
-    this.context.commit('setRecords', records);
+    this.context.commit('appendRecords', records);
     return {
       ...res,
       records: addIDToRecords(records),
@@ -77,15 +85,28 @@ export default class ISCN extends VuexModule {
 
   @Action
   async queryISCNByAddress(address: string): Promise<ISCNRecordWithID[]> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
-    const res = await client.queryRecordsByOwner(address).catch(() => {})
-    const records: ISCNRecord[] = res ? res.records : [];
-    this.context.commit('setRecords', records)
+    let res;
+    let nextSequence;
+    let records: ISCNRecord[] = [];
+    do {
+      this.context.commit('setIsLoading', true);
+      // eslint-disable-next-line no-await-in-loop
+      res = await client.queryRecordsByOwner(address, nextSequence).catch(() => { })
+      if (res) {
+        nextSequence = res.nextSequence.toNumber();
+        this.context.commit('appendRecords', res.records)
+        records = records.concat(res.records);
+      }
+    } while (nextSequence !== 0);
+    this.context.commit('setIsLoading', false);
     return addIDToRecords(records);
   }
 
   @Action
   async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const [
       txRes,
@@ -113,7 +134,7 @@ export default class ISCN extends VuexModule {
       .concat(idRes ? idRes.records : [])
       .concat(fingerprintRes ? fingerprintRes.records : [])
       .concat(ownerRes ? ownerRes.records : [])
-    this.context.commit('setRecords', result)
+    this.context.commit('appendRecords', result)
     return addIDToRecords(result);
   }
 
@@ -121,11 +142,12 @@ export default class ISCN extends VuexModule {
     return (iscnId: string) => this.recordsById[iscnId];
   }
 
-  get getISCNByIPLD() {
-    return (IPLD: string) => this.recordsByIPLD[IPLD];
+  get getISCNChunks() {
+    // sort by latest
+    return _.chunk([...this.records].reverse(), 4);
   }
 
-  get getISCNRecords() {
-    return Object.values(this.recordsById);
+  get getIsLoading() {
+    return this.isLoading;
   }
 }
