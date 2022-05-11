@@ -25,7 +25,7 @@ export default class ISCN extends VuexModule {
   isLoading = false;
 
   @Mutation
-  setRecords(records: ISCNRecord[]) {
+  appendRecords(records: ISCNRecord[]) {
     records.forEach((r) => {
       const id = r.data['@id'] as string;
       Vue.set(this.recordsById, id, { id, ...r })
@@ -48,6 +48,7 @@ export default class ISCN extends VuexModule {
   async fetchISCNByTx(iscnId: string): Promise<{
     records: ISCNRecord[];
 } | null> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const txRes = await client.queryISCNIdsByTx(iscnId).catch(() => null);
     let txRecords: ISCNRecord[] = [];
@@ -60,7 +61,7 @@ export default class ISCN extends VuexModule {
         return t;
       }))).filter(t => t) as ISCNRecord[];
     }
-    this.context.commit('setRecords', txRecords);
+    this.context.commit('appendRecords', txRecords);
     return { records: addIDToRecords(txRecords) };
   }
 
@@ -70,11 +71,12 @@ export default class ISCN extends VuexModule {
     owner: string;
     latestVersion: Long.Long;
 } | null> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const res = await client.queryRecordsById(iscnId).catch(() => null);
     if (!res) return null;
     const records = res ? res.records : [];
-    this.context.commit('setRecords', records);
+    this.context.commit('appendRecords', records);
     return {
       ...res,
       records: addIDToRecords(records),
@@ -83,6 +85,7 @@ export default class ISCN extends VuexModule {
 
   @Action
   async queryISCNByAddress(address: string): Promise<ISCNRecordWithID[]> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     let res;
     let nextSequence;
@@ -93,7 +96,7 @@ export default class ISCN extends VuexModule {
       res = await client.queryRecordsByOwner(address, nextSequence).catch(() => { })
       if (res) {
         nextSequence = res.nextSequence.toNumber();
-        this.context.commit('setRecords', res.records)
+        this.context.commit('appendRecords', res.records)
         records = records.concat(res.records);
       }
     } while (nextSequence !== 0);
@@ -103,6 +106,7 @@ export default class ISCN extends VuexModule {
 
   @Action
   async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
+    this.context.commit('clearRecords');
     const client = await getQueryClient();
     const [
       txRes,
@@ -130,7 +134,7 @@ export default class ISCN extends VuexModule {
       .concat(idRes ? idRes.records : [])
       .concat(fingerprintRes ? fingerprintRes.records : [])
       .concat(ownerRes ? ownerRes.records : [])
-    this.context.commit('setRecords', result)
+    this.context.commit('appendRecords', result)
     return addIDToRecords(result);
   }
 
