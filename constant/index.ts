@@ -54,6 +54,7 @@ export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transacti
 export const WALLET_TYPE_REPLACER: any = { cosmos: 'Cosmos Wallet', eth: 'Ethereum Wallet' }
 
 export const WALLET_TYPES = [
+  'like',
   'cosmos',
   'btc',
   'eth',
