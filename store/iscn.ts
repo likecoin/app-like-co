@@ -107,6 +107,7 @@ export default class ISCN extends VuexModule {
   @Action
   async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
+    this.context.commit('setIsLoading', true);
     const client = await getQueryClient();
     const [
       txRes,
@@ -135,6 +136,7 @@ export default class ISCN extends VuexModule {
       .concat(fingerprintRes ? fingerprintRes.records : [])
       .concat(ownerRes ? ownerRes.records : [])
     this.context.commit('appendRecords', result)
+    this.context.commit('setIsLoading', false);
     return addIDToRecords(result);
   }
 

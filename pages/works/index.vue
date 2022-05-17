@@ -1,5 +1,5 @@
 <template>
-  <Page v-if="!pages.length" class="justify-center">
+  <Page v-if="!pages || !pages.length" class="justify-center">
     <Card>
       <Label :text="$t(!pages ? 'general.loading' : 'WorksPage.empty.label')" />
     </Card>

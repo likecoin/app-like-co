@@ -1,13 +1,94 @@
 <template>
-  <Page v-if="!records || !records.length" class="justify-center">
+  <Page v-if="!pages || !pages.length" class="justify-center">
     <Card>
       <Label
-        :text="$t(!records ? 'general.loading' : 'SearchPage.empty.label')"
+        :text="$t(!pages ? 'general.loading' : 'SearchPage.empty.label')"
       />
     </Card>
   </Page>
-  <Page v-else>
+  <!-- <Page v-else>
     <search-results :records="records" />
+  </Page> -->
+  <Page v-else>
+    <nav
+      :class="[
+        'flex',
+        'justify-between',
+        'items-center',
+        'w-full',
+        'max-w-[952px]',
+        'mb-[16px]'
+      ]"
+    >
+      <div
+        :class="[
+          'grid',
+          'grid-flow-col',
+          'gap-[8px]'
+        ]"
+      >
+        <Button
+          class="text-dark-gray"
+          preset="tertiary"
+          size="small"
+          :text="$t('WorksPage.pagination.button.first')"
+          :is-disabled="pageNumber === 0"
+          @click="pageNumber = 0"
+        />
+        <Button
+          class="text-dark-gray"
+          preset="tertiary"
+          size="small"
+          :text="$t('WorksPage.pagination.button.previous')"
+          :is-disabled="pageNumber === 0"
+          @click="previousPage"
+        >
+          <template #prepend>
+            <IconArrowLeft />
+          </template>
+        </Button>
+      </div>
+      
+      <ProgressIndicator v-if="isLoading" preset="thin" />
+        
+      <div
+        :class="[
+          'grid',
+          'grid-flow-col',
+          'gap-[8px]'
+        ]"
+      >
+        <Button
+          class="text-dark-gray"
+          preset="tertiary"
+          size="small"
+          :text="$t('WorksPage.pagination.button.next')"
+          :is-disabled="pageNumber >= pages.length - 1"
+          @click="nextPage"
+        >
+          <template #append>
+            <IconArrowRight />
+          </template>
+        </Button>
+        <Button
+          class="text-dark-gray"
+          preset="tertiary"
+          size="small"
+          :text="$t('WorksPage.pagination.button.last')"
+          :is-disabled="pageNumber >= pages.length - 1"
+          @click="pageNumber = pages.length - 1"
+        />
+      </div>
+    </nav>
+    <Transition
+      name="works-grid"
+      mode="out-in"
+    >
+      <SearchResults
+        :key="pages[pageNumber][0].id"
+        :records="pages[pageNumber]"
+      />
+    </Transition>
   </Page>
 </template>
 
@@ -25,13 +106,15 @@ export default class SearchPage extends Vue {
   @iscnModule.Action fetchISCNById!: (
     arg0: string
   ) => Promise<ISCNRecordWithID[]>
-  
+
+  @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getIsLoading') isLoading!: boolean
+
   @iscnModule.Action queryISCNByKeyword!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  state = ''
-  iscnIds: string[] = []
+  pageNumber = 0
 
   get keyword(): string {
     try {
@@ -43,34 +126,27 @@ export default class SearchPage extends Vue {
     return ''
   }
 
-  get records() {
-    return (this.iscnIds as string[]).map((id) => this.getISCNById(id))
+  get pages() {
+    return this.recordChunks || []
   }
 
   async mounted() {
-    this.state = 'loading'
     if (!this.keyword) {
       this.$router.push(this.localeLocation({ name: 'index' })!)
       return
     }
-
-    const res: ISCNRecordWithID[] = await this.queryISCNByKeyword(this.keyword)
-    if (!res.length) {
-      this.state = 'not-found'
-      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchNotFound', this.keyword, 1)
-    } else {
-      this.state = 'loaded'
-      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.keyword, 1)
-      this.iscnIds = res.map((r) => r.id)
-    }
-
-    const promises: Promise<ISCNRecordWithID[]>[] = []
-    this.iscnIds.forEach((iscnId) => {
-      if (!this.getISCNById(iscnId)) {
-        promises.push(this.fetchISCNById(iscnId))
-      }
-    })
-    await Promise.all(promises)
+    
+    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.keyword, 1)
+    await this.queryISCNByKeyword(this.keyword)
   }
+  
+  nextPage() {
+    this.pageNumber = Math.min(this.pageNumber + 1, this.pages?.length || 1 - 1)
+  }
+
+  previousPage() {
+    this.pageNumber = Math.max(this.pageNumber - 1, 0)
+  }
+  
 }
 </script>

@@ -94,6 +94,7 @@
           v-model="keyword"
           class="flex-grow"
           :placeholder="$t('HomePage.search.placeholder')"
+          :error-message="errorMessage"
         />
         <template #append>
           <Button :text="$t('HomePage.search.button')" preset="outline">
@@ -117,15 +118,25 @@ const iscnModule = namespace('iscn')
 
 @Component
 export default class IndexPage extends Vue {
-  @iscnModule.Action queryISCNByKeyword!: (arg0: string) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>;
+  @iscnModule.Action queryISCNByKeyword!: (
+    arg0: string
+  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  keyword = '';
+  keyword = ''
+  errorMessage = ''
 
   onSearch() {
     const { keyword } = this
+    if (!keyword) {
+      this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
+      return
+    }
+    this.errorMessage = ''
 
-    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearch', keyword, 1);
-    this.$router.push(this.localeLocation({ name: 'search-keyword', params: { keyword }})!);
+    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearch', keyword, 1)
+    this.$router.push(
+      this.localeLocation({ name: 'search-keyword', params: { keyword } })!,
+    )
   }
 }
 </script>

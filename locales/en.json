@@ -151,6 +151,7 @@
   "HomePage.label.register": "Register ISCN",
   "HomePage.register.button": "Register",
   "HomePage.search.button": "Search ISCN",
+  "HomePage.search.errormessage.empty": "The search field cannot be empty",
   "HomePage.search.placeholder_sm": "Address/ISCN ID/IPFS/Arwea...",
   "HomePage.search.placeholder": "Search by Address / ISCN ID / IPFS / Arweave Hash",
   "HomePage.search.results.empty": "No ISCN record found",
