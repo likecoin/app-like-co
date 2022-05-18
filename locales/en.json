@@ -289,6 +289,7 @@
   "UploadForm.view.file.button": "View File Info",
   "UploadForm.warning": "Oops, file is too large. The file size should not exceed 20MB",
   "WorksPage.empty.label": "No works",
+  "WorksPage.label.search.result": "Search result for :",
   "WorksPage.pagination.button.first": "First",
   "WorksPage.pagination.button.last": "Last",
   "WorksPage.pagination.button.next": "Next",

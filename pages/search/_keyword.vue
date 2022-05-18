@@ -6,9 +6,6 @@
       />
     </Card>
   </Page>
-  <!-- <Page v-else>
-    <search-results :records="records" />
-  </Page> -->
   <Page v-else>
     <nav
       :class="[
@@ -17,7 +14,8 @@
         'items-center',
         'w-full',
         'max-w-[952px]',
-        'mb-[16px]'
+        'mt-[12px]',
+        'mb-[32px]',
       ]"
     >
       <div
@@ -48,9 +46,14 @@
           </template>
         </Button>
       </div>
-      
-      <ProgressIndicator v-if="isLoading" preset="thin" />
-        
+
+      <div :class="['flex', 'flex-col', 'items-center', 'flex-shrink']">
+        <Label preset="h6" :text="$t('WorksPage.label.search.result')" />
+        <Label class="text-center" preset="h5" align="center">{{
+          keyword
+        }}</Label>
+      </div>
+
       <div
         :class="[
           'grid',
@@ -80,15 +83,14 @@
         />
       </div>
     </nav>
-    <Transition
-      name="works-grid"
-      mode="out-in"
-    >
-      <SearchResults
-        :key="pages[pageNumber][0].id"
-        :records="pages[pageNumber]"
-      />
-    </Transition>
+    <div class="mb-[40px]">
+      <Transition name="works-grid" mode="out-in">
+        <SearchResults
+          :key="pages[pageNumber][0].id"
+          :records="pages[pageNumber]"
+        />
+      </Transition>
+    </div>
   </Page>
 </template>
 
@@ -100,7 +102,13 @@ import { logTrackerEvent } from '~/utils/logger'
 
 const iscnModule = namespace('iscn')
 
-@Component
+@Component({
+  fetch({ params, redirect }) {
+    if (!params.keyword) {
+      redirect({ name: 'index' })
+    }
+  },
+})
 export default class SearchPage extends Vue {
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (
@@ -108,7 +116,6 @@ export default class SearchPage extends Vue {
   ) => Promise<ISCNRecordWithID[]>
 
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
-  @iscnModule.Getter('getIsLoading') isLoading!: boolean
 
   @iscnModule.Action queryISCNByKeyword!: (
     arg0: string
@@ -131,15 +138,10 @@ export default class SearchPage extends Vue {
   }
 
   async mounted() {
-    if (!this.keyword) {
-      this.$router.push(this.localeLocation({ name: 'index' })!)
-      return
-    }
-    
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.keyword, 1)
     await this.queryISCNByKeyword(this.keyword)
   }
-  
+
   nextPage() {
     this.pageNumber = Math.min(this.pageNumber + 1, this.pages?.length || 1 - 1)
   }
@@ -147,6 +149,5 @@ export default class SearchPage extends Vue {
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
   }
-  
 }
 </script>

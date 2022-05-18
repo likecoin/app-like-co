@@ -118,11 +118,6 @@ export default class WalletFieldList extends Vue {
       isOpenOptions: false,
     }]
 
-  // eslint-disable-next-line class-methods-use-this
-  mounted(){
-    console.log(this.value)
-  }
-
   created() {
     this.inputValue.content = this.value
     if (!this.value.length) {
