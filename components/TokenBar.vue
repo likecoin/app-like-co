@@ -21,16 +21,16 @@
       preset="tertiary"
       text-preset="h6"
       size="mini"
-      href="https://app.osmosis.zone/?from=UST&to=LIKE"
-      :text="$t('HomePage.button.osmosis')"
+      href="https://faucet.like.co/"
+      :text="$t('HomePage.button.faucet')"
     />
     <Button
       class="mr-[24px]"
       preset="tertiary"
       text-preset="h6"
       size="mini"
-      href="https://app.emeris.com/asset/nanolike"
-      :text="$t('HomePage.button.emeris')"
+      href="https://app.osmosis.zone/?from=ATOM&to=LIKE"
+      :text="$t('HomePage.button.osmosis')"
     />
     <Button
       class="mr-[24px]"
