@@ -408,7 +408,7 @@ import {
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
-  ISCN_TX_RAW_DATA_ENDPOINT,
+  ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger';
@@ -581,13 +581,17 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   async fetchTxHash() {
-    const { data } = await this.$axios.get(
-      `${ISCN_TX_RAW_DATA_ENDPOINT}'${this.iscnId}'`,
-    )
-    if(!data || !data.tx_responses || !data.tx_responses.length) {
-      return undefined
+    const datas = await Promise.all(
+      ISCN_TX_RAW_DATA_ENDPOINTS.map((url: string) =>
+        this.$axios.get(`${url}'${this.iscnId}'`),
+      ),
+    );
+
+    const data = datas.find(d => !!(d?.data?.tx_responses?.length));
+    if (!data) {
+      return undefined;
     }
-    return data?.tx_responses[0].txhash
+    return data?.data?.tx_responses[0]?.txhash;
   }
 
   showExifInfo() {
