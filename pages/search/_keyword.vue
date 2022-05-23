@@ -5,6 +5,13 @@
         :text="$t(!pages ? 'general.loading' : 'SearchPage.empty.label')"
       />
     </Card>
+    <Snackbar
+      :open="shouldShowError"
+      class="mx-auto"
+      :text="$t('SearchPage.error')"
+      preset="warn"
+      @close="handleWarningClose"
+    />
   </Page>
   <Page v-else>
     <nav
@@ -116,12 +123,15 @@ export default class SearchPage extends Vue {
   ) => Promise<ISCNRecordWithID[]>
 
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getErrorMessage') errorMessage!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getIsLoading') isLoading!: boolean
 
   @iscnModule.Action queryISCNByKeyword!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   pageNumber = 0
+  closeWarning = false
 
   get keyword(): string {
     try {
@@ -137,6 +147,11 @@ export default class SearchPage extends Vue {
     return this.recordChunks || []
   }
 
+  get shouldShowError() {
+    if(this.closeWarning) return false
+    return !!this.errorMessage
+  }
+
   async mounted() {
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.keyword, 1)
     await this.queryISCNByKeyword(this.keyword)
@@ -148,6 +163,10 @@ export default class SearchPage extends Vue {
 
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
+  }
+
+  handleWarningClose() {
+    this.closeWarning = true
   }
 }
 </script>

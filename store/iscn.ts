@@ -21,8 +21,8 @@ export default class ISCN extends VuexModule {
  } = {};
 
   records: ISCNRecordWithID[] = [];
-
   isLoading = false;
+  errorMessage = ''
 
   @Mutation
   appendRecords(records: ISCNRecord[]) {
@@ -42,6 +42,11 @@ export default class ISCN extends VuexModule {
   @Mutation
   setIsLoading(isLoading: boolean) {
     this.isLoading = isLoading;
+  }
+
+  @Mutation
+  setErrorMessage(errorMessage: any) {
+    this.errorMessage = errorMessage.message;
   }
 
   @Action
@@ -96,7 +101,6 @@ export default class ISCN extends VuexModule {
         // eslint-disable-next-line no-await-in-loop
         res = await client
           .queryRecordsByOwner(address, nextSequence)
-          .catch(() => {})
         if (res) {
           nextSequence = res.nextSequence.toNumber()
           this.context.commit('appendRecords', res.records)
@@ -104,7 +108,7 @@ export default class ISCN extends VuexModule {
         }
       } while (nextSequence !== 0)
     } catch (error) {
-      console.error(error)
+      this.context.commit('setErrorMessage', error)
     } finally {
       this.context.commit('setIsLoading', false)
     }
@@ -150,7 +154,7 @@ export default class ISCN extends VuexModule {
         .concat(ownerRes ? ownerRes.records : [])
       this.context.commit('appendRecords', result)
     } catch (error) {
-      console.error(error)
+      this.context.commit('setErrorMessage', error)
     } finally {
       this.context.commit('setIsLoading', false)
     }
@@ -168,5 +172,9 @@ export default class ISCN extends VuexModule {
 
   get getIsLoading() {
     return this.isLoading;
+  }
+
+  get getErrorMessage() {
+    return this.errorMessage;
   }
 }
