@@ -31,18 +31,23 @@ export const RAWDATA_URL = {
   production: 'https://mainnet-node.like.co/iscn/records/id?iscn_id=',
 }
 
-export const RAWDATA_TX_URL = {
-  testnet: 'https://node.testnet.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id=',
-  production: 'https://mainnet-node.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'create_iscn_record\'&events=iscn_record.iscn_id=',
+export const RAWDATA_TX_URLS = {
+  testnet: [
+    'https://node.testnet.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id=',
+  ],
+  production: [
+    'https://mainnet-node.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'create_iscn_record\'&events=iscn_record.iscn_id=',
+    'https://mainnet-node.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id=',
+  ]
 }
 
 export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
   ? RAWDATA_URL.testnet
   : RAWDATA_URL.production
 
-export const ISCN_TX_RAW_DATA_ENDPOINT = IS_TESTNET
-  ? RAWDATA_TX_URL.testnet
-  : RAWDATA_TX_URL.production
+export const ISCN_TX_RAW_DATA_ENDPOINTS = IS_TESTNET
+  ? RAWDATA_TX_URLS.testnet
+  : RAWDATA_TX_URLS.production
 
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
