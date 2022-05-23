@@ -2,7 +2,7 @@
   <Page v-if="!pages || !pages.length" class="justify-center">
     <Card>
       <Label
-        :text="$t(!pages ? 'general.loading' : 'SearchPage.empty.label')"
+        :text="$t(!pages.length && !isLoading ? 'SearchPage.empty.label' : 'general.loading')"
       />
     </Card>
     <Snackbar
