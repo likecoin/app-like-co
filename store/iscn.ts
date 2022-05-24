@@ -21,8 +21,8 @@ export default class ISCN extends VuexModule {
  } = {};
 
   records: ISCNRecordWithID[] = [];
-
   isLoading = false;
+  errorMessage = ''
 
   @Mutation
   appendRecords(records: ISCNRecord[]) {
@@ -42,6 +42,11 @@ export default class ISCN extends VuexModule {
   @Mutation
   setIsLoading(isLoading: boolean) {
     this.isLoading = isLoading;
+  }
+
+  @Mutation
+  setErrorMessage(errorMessage: any) {
+    this.errorMessage = errorMessage.message;
   }
 
   @Action
@@ -86,55 +91,73 @@ export default class ISCN extends VuexModule {
   @Action
   async queryISCNByAddress(address: string): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
-    const client = await getQueryClient();
-    let res;
-    let nextSequence;
     let records: ISCNRecord[] = [];
-    do {
-      this.context.commit('setIsLoading', true);
-      // eslint-disable-next-line no-await-in-loop
-      res = await client.queryRecordsByOwner(address, nextSequence).catch(() => { })
-      if (res) {
-        nextSequence = res.nextSequence.toNumber();
-        this.context.commit('appendRecords', res.records)
-        records = records.concat(res.records);
-      }
-    } while (nextSequence !== 0);
-    this.context.commit('setIsLoading', false);
-    return addIDToRecords(records);
+    try {
+      const client = await getQueryClient()
+      let res
+      let nextSequence
+      do {
+        this.context.commit('setIsLoading', true)
+        // eslint-disable-next-line no-await-in-loop
+        res = await client
+          .queryRecordsByOwner(address, nextSequence)
+        if (res) {
+          nextSequence = res.nextSequence.toNumber()
+          this.context.commit('appendRecords', res.records)
+          records = records.concat(res.records)
+        }
+      } while (nextSequence !== 0)
+    } catch (error) {
+      this.context.commit('setErrorMessage', error)
+    } finally {
+      this.context.commit('setIsLoading', false)
+    }
+    return addIDToRecords(records)
   }
 
   @Action
   async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
-    const client = await getQueryClient();
-    const [
-      txRes,
-      idRes,
-      fingerprintRes,
-      ownerRes,
-    ] = await Promise.all([
-      client.queryISCNIdsByTx(keyword).catch(() => {}),
-      client.queryRecordsById(keyword).catch(() => {}),
-      client.queryRecordsByFingerprint(keyword).catch(() => {}),
-      client.queryRecordsByOwner(keyword).catch(() => {}),
-    ]);
     let txRecords: ISCNRecord[] = [];
-    if (txRes) {
-      txRecords = (await Promise.all(txRes.map(async (t) => {
-        if (typeof t ==='string') {
-          const res = await client.queryRecordsById(t);
-          return res?.records[0]
-        }
-        return t;
-      }))).filter(t => t) as ISCNRecord[];
+    let result: ISCNRecord[] = ([] as ISCNRecord[])
+    try {
+      this.context.commit('setIsLoading', true)
+      const client = await getQueryClient()
+      const [
+        txRes,
+        idRes,
+        fingerprintRes,
+        ownerRes,
+      ] = await Promise.all([
+        client.queryISCNIdsByTx(keyword).catch(() => {}),
+        client.queryRecordsById(keyword).catch(() => {}),
+        client.queryRecordsByFingerprint(keyword).catch(() => {}),
+        client.queryRecordsByOwner(keyword).catch(() => {}),
+      ])
+      if (txRes) {
+        txRecords = (
+          await Promise.all(
+            txRes.map(async (t) => {
+              if (typeof t === 'string') {
+                const res = await client.queryRecordsById(t)
+                return res?.records[0]
+              }
+              return t
+            }),
+          )
+        ).filter((t) => t) as ISCNRecord[]
+      }
+      result = result
+        .concat(txRecords)
+        .concat(idRes ? idRes.records : [])
+        .concat(fingerprintRes ? fingerprintRes.records : [])
+        .concat(ownerRes ? ownerRes.records : [])
+      this.context.commit('appendRecords', result)
+    } catch (error) {
+      this.context.commit('setErrorMessage', error)
+    } finally {
+      this.context.commit('setIsLoading', false)
     }
-    const result: ISCNRecord[] = ([] as ISCNRecord[])
-      .concat(txRecords)
-      .concat(idRes ? idRes.records : [])
-      .concat(fingerprintRes ? fingerprintRes.records : [])
-      .concat(ownerRes ? ownerRes.records : [])
-    this.context.commit('appendRecords', result)
     return addIDToRecords(result);
   }
 
@@ -149,5 +172,9 @@ export default class ISCN extends VuexModule {
 
   get getIsLoading() {
     return this.isLoading;
+  }
+
+  get getErrorMessage() {
+    return this.errorMessage;
   }
 }

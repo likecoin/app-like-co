@@ -2,9 +2,16 @@
   <Page v-if="!pages || !pages.length" class="justify-center">
     <Card>
       <Label
-        :text="$t(!pages.length && !isLoading ? 'WorksPage.empty.label' : 'general.loading')"
+        :text="$t(!pages.length && !isLoading ? 'SearchPage.empty.label' : 'general.loading')"
       />
     </Card>
+    <Snackbar
+      :open="shouldShowError"
+      class="mx-auto"
+      :text="$t('SearchPage.error')"
+      preset="warn"
+      @close="handleWarningClose"
+    />
   </Page>
   <Page v-else>
     <nav
@@ -14,7 +21,8 @@
         'items-center',
         'w-full',
         'max-w-[952px]',
-        'mb-[16px]'
+        'mt-[12px]',
+        'mb-[32px]',
       ]"
     >
       <div
@@ -45,9 +53,14 @@
           </template>
         </Button>
       </div>
-      
-      <ProgressIndicator v-if="isLoading" preset="thin" />
-        
+
+      <div :class="['flex', 'flex-col', 'items-center', 'flex-shrink']">
+        <Label preset="h6" :text="$t('WorksPage.label.search.result')" />
+        <Label class="text-center" preset="h5" align="center">{{
+          keyword
+        }}</Label>
+      </div>
+
       <div
         :class="[
           'grid',
@@ -77,56 +90,71 @@
         />
       </div>
     </nav>
-    <Transition
-      name="works-grid"
-      mode="out-in"
-    >
-      <SearchResults
-        :key="pages[pageNumber][0].id"
-        :records="pages[pageNumber]"
-      />
-    </Transition>
+    <div class="mb-[40px]">
+      <Transition name="works-grid" mode="out-in">
+        <SearchResults
+          :key="pages[pageNumber][0].id"
+          :records="pages[pageNumber]"
+        />
+      </Transition>
+    </div>
   </Page>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { logTrackerEvent } from '~/utils/logger'
 
-const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
 
 @Component({
-  layout: 'wallet',
+  fetch({ params, redirect }) {
+    if (!params.keyword) {
+      redirect({ name: 'index' })
+    }
+  },
 })
-export default class WorksIndexPageextends extends Vue {
-  pageNumber = 0
+export default class SearchPage extends Vue {
+  @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
+  @iscnModule.Action fetchISCNById!: (
+    arg0: string
+  ) => Promise<ISCNRecordWithID[]>
 
-  @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
+  @iscnModule.Getter('getErrorMessage') errorMessage!: ISCNRecordWithID[][]
   @iscnModule.Getter('getIsLoading') isLoading!: boolean
-  @iscnModule.Action queryISCNByAddress!: (
+
+  @iscnModule.Action queryISCNByKeyword!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  @Watch('currentAddress')
-  onCurrentAddressChanged() {
-    this.refreshWorks()
-  }
+  pageNumber = 0
+  closeWarning = false
 
-  mounted() {
-    this.refreshWorks()
+  get keyword(): string {
+    try {
+      const { keyword } = this.$route.params
+      return keyword
+    } catch (err) {
+      console.error(err)
+    }
+    return ''
   }
 
   get pages() {
     return this.recordChunks || []
   }
 
-  refreshWorks() {
-    if (this.currentAddress) {
-      this.queryISCNByAddress(this.currentAddress)
-    }
+  get shouldShowError() {
+    if(this.closeWarning) return false
+    return !!this.errorMessage
+  }
+
+  async mounted() {
+    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.keyword, 1)
+    await this.queryISCNByKeyword(this.keyword)
   }
 
   nextPage() {
@@ -136,16 +164,9 @@ export default class WorksIndexPageextends extends Vue {
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
   }
+
+  handleWarningClose() {
+    this.closeWarning = true
+  }
 }
 </script>
-
-<style>
-.works-grid-enter-active,
-.works-grid-leave-active {
-  transition: opacity .1s ease-out;
-}
-.works-grid-enter,
-.works-grid-leave-to {
-  opacity: 0;
-}
-</style>

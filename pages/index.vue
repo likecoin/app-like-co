@@ -118,34 +118,25 @@ const iscnModule = namespace('iscn')
 
 @Component
 export default class IndexPage extends Vue {
-  @iscnModule.Action queryISCNByKeyword!: (arg0: string) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>;
+  @iscnModule.Action queryISCNByKeyword!: (
+    arg0: string
+  ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  keyword = '';
-  state = 'idle';
+  keyword = ''
+  errorMessage = ''
 
-  get errorMessage() {
-    return this.state === 'not-found' ? this.$t('HomePage.search.results.empty') : '';
-  }
-
-  async onSearch() {
-    this.state = 'loading';
+  onSearch() {
     const { keyword } = this
-    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearch', keyword, 1);
-    const res: ISCNRecordWithID[] = await this.queryISCNByKeyword(keyword);
-    if (!res.length) {
-      this.state = 'not-found';
-      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchNotFound', keyword, 1);
-    } else {
-      this.state = 'loaded';
-      logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', keyword, 1);
-      if (res.length > 1) {
-        const iscnIds = res.map((r) => r.id);
-        this.$router.push(this.localeLocation({ name: 'search', params: { iscnIds: JSON.stringify(iscnIds) }})!);
-      } else {
-        const iscnId = res[0].id;
-        this.$router.push(this.localeLocation({ name: 'view-iscnId', params: { iscnId }})!);
-      }
+    if (!keyword) {
+      this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
+      return
     }
+    this.errorMessage = ''
+
+    logTrackerEvent(this, 'ISCNSearch', 'ISCNSearch', keyword, 1)
+    this.$router.push(
+      this.localeLocation({ name: 'search-keyword', params: { keyword } })!,
+    )
   }
 }
 </script>

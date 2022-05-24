@@ -43,23 +43,24 @@
         </div>
         <div
           v-if="item.isOpenOptions"
-          class="
-            w-[100%]
-            absolute
-            flex
-            flex-col
-            justify-center
-            items-center
-            buttom-0
-            left-0
-            p-[12px]
-            mt-[4px]
-            text-dark-gray
-            text-left
-            bg-shade-gray
-            rounded-[12px]
-            cursor-pointer
-          "
+          :class="[
+            'w-[100%]',
+            'absolute',
+            'flex',
+            'flex-col',
+            'justify-center',
+            'items-center',
+            'buttom-0',
+            'left-0',
+            'p-[12px]',
+            'mt-[4px]',
+            'text-dark-gray',
+            'text-left',
+            'bg-shade-gray',
+            'rounded-[12px]',
+            'cursor-pointer',
+            'z-50'
+          ]"
         >
           <div
             v-for="type in options"
@@ -154,9 +155,11 @@ export default class WalletFieldList extends Vue {
 
   getWalletAddressPlaceholder(type: string) {
     switch (type) {
-      case 'like':
       case 'cosmos':
         return 'cosmos1...'
+
+      case 'like':
+        return 'like1...'
 
       case 'eth':
         return '0x...'
@@ -175,7 +178,7 @@ export default class WalletFieldList extends Vue {
     this.value.push({
       content: '',
       id: Date.now(),
-      type: 'cosmos',
+      type: 'like',
       isOpenOptions: false,
     })
   }

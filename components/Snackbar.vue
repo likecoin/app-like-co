@@ -93,6 +93,7 @@ export default class Snackbar extends Vue {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   get rootClasses() {
     return [
       'absolute',
@@ -100,7 +101,6 @@ export default class Snackbar extends Vue {
       'flex',
       'justify-center',
       'max-h-screen',
-      this.preset,
     ]
   }
 
@@ -116,7 +116,6 @@ export default class Snackbar extends Vue {
       'pl-[24px]',
       'pr-[27px]',
       'rounded-[24px]',
-      'shadow-popup',
       this.isError ? 'bg-red text-white' : 'bg-white',
     ]
   }
