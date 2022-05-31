@@ -34,7 +34,9 @@ export default class StakeholderInfo extends Vue {
 
   get walletAddress() {
     if (this.id && this.id.includes('cosmos'))
-      return `cosmos${this.id.slice(11)}`
+      return `cosmos${this.id.slice('did:cosmos:'.length)}`
+    if (this.id && this.id.includes('like'))
+      return `like${this.id.slice('did:like:'.length)}`
     return ''
   }
 
