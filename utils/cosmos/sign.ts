@@ -1,4 +1,4 @@
-import { assertIsBroadcastTxSuccess, SigningStargateClient } from '@cosmjs/stargate';
+import { assertIsDeliverTxSuccess, SigningStargateClient } from '@cosmjs/stargate';
 import network from '@/constant/network';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing';
@@ -20,7 +20,7 @@ export async function sendLIKE(
   const client = await SigningStargateClient.connectWithSigner(network.rpcURL, signer);
   const coins = [{ amount: new BigNumber(amount).shiftedBy(9).toFixed(0, 0) , denom: COSMOS_DENOM }]
   const res = await client.sendTokens(fromAddress, toAddress, coins, DEFAULT_TRANSFER_FEE, memo);
-  assertIsBroadcastTxSuccess(res);
+  assertIsDeliverTxSuccess(res);
   return res;
 }
 
