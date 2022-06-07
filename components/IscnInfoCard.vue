@@ -90,6 +90,7 @@
             'border-[1px]',
             'border-white',
             'rounded-[20px]',
+            'my-[12px]'
           ]"
         >
           <Button
@@ -98,6 +99,26 @@
             :to="localeLocation({ name: 'new' })"
             class="text-like-green"
             :style="{ backgroundColor: '#AAF1E7', color: '#28646E' }"
+          >
+            <template #prepend>
+              <IconAddToISCN class="w-[20px]" />
+            </template>
+            <template #append>
+              <IconArrowRight class="w-[20px]" />
+            </template>
+          </Button>
+        </div>
+        <div
+          :class="[
+            'p-[8px]',
+            'my-[12px]'
+          ]"
+        >
+          <Button
+            preset="primary"
+            :text="$t('HomePage.button.nftProtal')"
+            :to="localeLocation({ name: 'nfttest-fetch' })"
+            :style="{ color: '#FFFFFF', backgroundColor: '#C69F67' }"
           >
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />

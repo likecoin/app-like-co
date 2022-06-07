@@ -1,5 +1,16 @@
 <template>
-  <div>
+  <Page
+    :class="[
+      'flex',
+      'flex-col',
+      'relative',
+      'items-center',
+      'justify-center',
+      'px-[20px]',
+      'pt-[38px]',
+      'lg:p-[16px]',
+    ]"
+  >
     <div>ISCN: {{ iscnId }}</div>
     <div>NFT Class: {{ classId }}</div>
     <template v-if="apiData">
@@ -7,8 +18,8 @@
       <div>Count: {{ apiData.totalCount - apiData.soldCount }} / {{ apiData.totalCount }}</div>
     </template>
     <hr/>
-    <button @click="doAction">{{ buttonText }}</button>
-  </div>
+    <Button @click="doAction">{{ buttonText }}</Button>
+  </Page>
 </template>
 
 <script lang="ts">
