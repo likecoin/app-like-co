@@ -19,11 +19,11 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { v4 as uuidv4 } from 'uuid'
 import { DeliverTxResponse } from '@cosmjs/stargate'
+import { formatMsgMintNFT, formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { API_LIKER_NFT_METADATA, API_LIKER_NFT_MINT } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_NFT_API_WALLET } from '~/constant'
-import getQueryClient from '~/utils/cosmos/iscn/query'
 
 
 const iscnModule = namespace('iscn')
@@ -64,7 +64,7 @@ export default class NFTTestMintPage extends Vue {
   get buttonText(): string {
     if (this.state === 'done') return 'go to purchase page';
     if (this.state === 'mint') return 'mint nft';
-    return 'create nft info';
+    return 'create nft';
   }
 
   async mounted() {
@@ -148,27 +148,29 @@ export default class NFTTestMintPage extends Vue {
     await signingClient.setSigner(this.signer);
     const { classId } = this;
 
-    const mintRes = await signingClient.mintNFTs(this.address, this.classId,
-      [...Array(1000).keys()].map(_ => {
-        const id = `liker-${uuidv4()}`;
-        return {
-          id,
-          uri: `${API_LIKER_NFT_METADATA}?class_id=${encodeURIComponent(this.classId)}&nft_id=${encodeURIComponent(id)}`,
-          metadata: {
-            name: this.iscnData.name,
-          }
-        };
-    }));
-    console.log(mintRes)
-    const queryClient = await getQueryClient();
-    const q = await queryClient.getQueryClient();
-    const nftQuery = await q.nft.NFTs(classId, this.address);
-    const sendRes = await signingClient.sendNFTs(
+    const nfts = [...Array(1000).keys()].map(_ => {
+      const id = `liker-${uuidv4()}`;
+      return {
+        id,
+        uri: `${API_LIKER_NFT_METADATA}?class_id=${encodeURIComponent(this.classId)}&nft_id=${encodeURIComponent(id)}`,
+        metadata: {
+          name: this.iscnData.name,
+        },
+      };
+    })
+    const mintMessages = nfts.map((i) => formatMsgMintNFT(
+      this.address,
+      classId,
+      i,
+    ))
+    const sendMessages = nfts.map((i) => formatMsgSend(
       this.address,
       LIKER_NFT_API_WALLET,
       classId,
-      nftQuery.nfts.map((i: { id: string }) => i.id),
-    );
+      i.id,
+    ))
+    const messages = mintMessages.concat(sendMessages);
+    const sendRes = await signingClient.sendMessages(this.address, messages);
     console.log(sendRes);
   }
 }
