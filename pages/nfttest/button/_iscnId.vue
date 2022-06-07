@@ -1,5 +1,16 @@
 <template>
-  <div>
+  <Page
+    :class="[
+      'flex',
+      'flex-col',
+      'relative',
+      'items-center',
+      'justify-center',
+      'px-[20px]',
+      'pt-[38px]',
+      'lg:p-[16px]',
+    ]"
+  >
     <div>ISCN: {{ iscnId }}</div>
     <template v-if="nftInfo">
       <div>NFT Class: {{ nftInfo.classId }}</div>
@@ -7,8 +18,10 @@
     </template>
     <div>Price: {{ nftPrice }} LIKE</div>
     <hr/>
-    <button @click="onClickMint">Mint</button>
-  </div>
+    <Button @click="onClickMint">Mint</Button>
+    <Button v-if="showHistory" :to="localeLocation({ name: 'nfttest-history-iscnId', params: { iscnId: iscnId }  })">check history</Button>
+
+  </Page>
 </template>
 
 <script lang="ts">
@@ -16,7 +29,7 @@ import qs from 'querystring'
 import BigNumber from 'bignumber.js'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { API_LIKER_NFT_PURCHASE } from '~/constant/api'
@@ -41,6 +54,12 @@ export default class NFTTestButtonPage extends Vue {
   totalPrice: number = -1;
   nftInfo: any = null;
   grantTransactionHash: string = '';
+  showHistory = false
+
+  @Watch('nftInfo', { immediate: true, deep: true })
+  showHistoryButton() {
+    this.showHistory = true
+  }
 
   get iscnId(): string {
     const { iscnId } = this.$route.params;
