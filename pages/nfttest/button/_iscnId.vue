@@ -1,8 +1,10 @@
 <template>
   <div>
     <div>ISCN: {{ iscnId }}</div>
-    <div>NFT Class: {{ classId }}</div>
-    <div v-if="nftInfo">Sold count {{ nftInfo.soldCount }} / {{ nftInfo.totalCount }}</div>
+    <template v-if="nftInfo">
+      <div>NFT Class: {{ nftInfo.classId }}</div>
+      <div>Sold count {{ nftInfo.soldCount }} / {{ nftInfo.totalCount }}</div>
+    </template>
     <div>Price: {{ nftPrice }} LIKE</div>
     <hr/>
     <button @click="onClickMint">Mint</button>
