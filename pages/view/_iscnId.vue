@@ -374,7 +374,7 @@
                 :type="wallet.type"
               />
               {{
-                wallet.type === 'cosmos'
+                (wallet.type === 'cosmos' || wallet.type === 'like')
                   ? wallet.address.replace(/(did:|:)/g, '')
                   : wallet.address.split(`did:${wallet.type}:`).join('') | ellipsis
               }}
@@ -683,7 +683,7 @@ export default class ViewIscnIdPage extends Vue {
   handleCopy(address: string, type: string) {
     logTrackerEvent(this, 'ISCNView', 'CopyWalletAddress', this.iscnId, 1);
     let text = ''
-    if (type === 'cosmos') {
+    if (type === 'cosmos' || type === 'like') {
       text = address.replace(/(did:|:)/g, '')
     } else {
       text = address.replace(new RegExp(`(did:|${type}:|:)`, 'g'), '')

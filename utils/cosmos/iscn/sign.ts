@@ -52,7 +52,14 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           return {
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: `did:cosmos:${a.address.slice(6)}`,
+            value: `did:${a.type}:${a.address.slice('cosmos'.length)}`,
+          }
+        }
+        if (a.type === 'like') {
+          return {
+            '@type': 'PropertyValue',
+            propertyID: WALLET_TYPE_REPLACER[a.type],
+            value: `did:${a.type}:${a.address.slice('like'.length)}`,
           }
         }
         return {
