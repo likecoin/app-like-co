@@ -16,6 +16,7 @@ export default {
       { charset: 'utf-8' },
       { hid: 'viewport', name: 'viewport', content: 'width=device-width' },
       { hid: 'description', name: 'description', content: siteDefaultDescription },
+      { hid: 'theme-color', name: 'theme-color', content: '#28646e' },
       { hid: 'og:site_name', name: 'og:site_name', content: 'ISCN App'},
       { hid: 'og:title', property: 'og:title', content: 'ISCN App' },
       { hid: 'og:image', property: 'og:image', content: 'https://app.like.co/images/og/default.png' },
