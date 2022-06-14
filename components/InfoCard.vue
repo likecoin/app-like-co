@@ -30,9 +30,9 @@
         </template>
       </Label>
       <Label
-        v-if="timestamp"
+        v-if="timeStamp"
         class="w-min"
-        :text="timestamp"
+        :text="timeStamp"
         tag="div"
         preset="p6"
         valign="middle"
@@ -52,6 +52,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class InfoCard extends Vue {
   @Prop(String) readonly labelText: String | undefined
-  @Prop(String) readonly timestamp: String | undefined
+  @Prop(String) readonly timeStamp: String | undefined
 }
 </script>

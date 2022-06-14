@@ -8,7 +8,7 @@
       :has-padding="false"
     >
       <!-- header -->
-      <IscnFormHeader :step="step" />
+      <IscnFormHeader :step="step" :total-step="4"/>
       <!-- guide title -->
       <Label
         :text="$t('IscnUploaded.guide.title')"
