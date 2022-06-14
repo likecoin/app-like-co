@@ -38,24 +38,6 @@
           >Collect Now <template #prepend><IconPlaceholder /></template
         ></Button>
       </div>
-      <!-- <div>ISCN: {{ iscnId }}</div>
-      <template v-if="nftInfo">
-        <div>NFT Class: {{ nftInfo.classId }}</div>
-        <div>Sold count {{ nftInfo.soldCount }} / {{ nftInfo.totalCount }}</div>
-      </template>
-      <div>Price: {{ nftPrice }} LIKE</div>
-      <hr />
-      <button @click="onClickMint">Mint</button>
-      <button
-        v-if="showHistory"
-        :to="
-          localeLocation({
-            name: 'nfttest-history-iscnId',
-            params: { iscnId: iscnId },
-          })"
-      >
-        check history
-      </button> -->
     </div>
   </Page>
 </template>
@@ -148,7 +130,6 @@ export default class NFTTestButtonPage extends Vue {
         }],
       Date.now() + 60000,
     )
-    console.log(res)
     this.grantTransactionHash = (res as DeliverTxResponse).transactionHash
   }
 
