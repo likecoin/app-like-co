@@ -1105,7 +1105,6 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     try {
-      console.log('payload',this.payload)
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)

@@ -189,12 +189,6 @@ export default class NFTTestMintPage extends Vue {
         break
       case 'done':
         window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
-      // this.$router.push(
-      //   this.localeLocation({
-      //     name: 'nfttest-button-iscnId',
-      //     params: { iscnId: this.iscnId },
-      //   })!,
-      // )
       default:
     }
     /* eslint-enable no-fallthrough */
@@ -203,7 +197,6 @@ export default class NFTTestMintPage extends Vue {
   async getISCNInfo() {
     const res = await this.fetchISCNById(this.iscnId)
     if (res) {
-      console.log(res)
       ;[this.iscnData] = res.records
     }
   }
@@ -218,7 +211,6 @@ export default class NFTTestMintPage extends Vue {
       })
       this.classId = data.classId
       this.apiData = data
-      console.log('getMintInfo')
     } catch (err) {
       console.error(err)
     }
@@ -239,7 +231,6 @@ export default class NFTTestMintPage extends Vue {
         },
       )
       fdata = data
-      console.log('postMintInfo')
     } catch (error) {
       console.error(error)
     }
