@@ -11,37 +11,70 @@
       'lg:p-[16px]',
     ]"
   >
-    <div :class="['flex','flex-col','justify-center','items-center','w-full']">
-      <form
-        tag="form"
-        :class="['hidden', 'w-full', 'max-w-[800px]', 'my-[64px]', 'lg:block']"
-        @submit.prevent="onSearch"
-      >
+    <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
+      <!-- header -->
+      <div :class="['flex', 'justify-between', 'items-center']">
         <Label
-          class="flex-wrap"
-          align="center"
-          valign="top"
-          content-class="mt-[16px]"
-          append-class="mt-[16px]"
+          class="w-min"
+          text="Convert Article to ISCN"
+          tag="div"
+          preset="p5"
+          valign="middle"
+          content-class="font-semibold whitespace-nowrap text-like-green"
+          prepend-class="text-like-green"
+        >
+          <template #prepend>
+            <IconRegister />
+          </template>
+        </Label>
+        <div :class="['flex', 'flex-col', 'items-end']">
+          <Stepper :step="1" :total-step="3" />
+          <Label
+            preset="p6"
+            :text="$t('Registration.step', { step: 1, total: 3 })"
+            class="text-medium-gray"
+          />
+        </div>
+      </div>
+      <!-- guide text -->
+      <!-- body -->
+      <div
+        :class="[
+          'flex',
+          'flex-col',
+          'justify-center',
+          'items-center',
+          'w-full',
+        ]"
+      >
+        <div
+          :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']"
+          @submit.prevent="onSearch"
         >
           <TextField
             v-model="url"
-            class="flex-grow"
+            class="flex flex-col"
             :placeholder="$t('NFTProtal.placeholder.register')"
             :error-message="errorMessage"
           />
-          <template #append>
-            <Button :text="$t('NFTProtal.button.register')" preset="outline">
-              <template #prepend>
-                <IconAddToISCN class="w-[20px]" />
-              </template>
-            </Button>
-          </template>
-        </Label>
-      </form>
-      {{ iscnId }}
-      <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" />
-    </div>
+          {{ iscnId }}
+        </div>
+        <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
+        <div class="flex flex-row self-end">
+          <ProgressIndicator v-if="isLoading"/>
+          <Button
+            v-else
+            :text="$t('NFTProtal.button.register')"
+            preset="outline"
+            @click="onSearch"
+          >
+            <template #prepend>
+              <IconAddToISCN class="w-[20px]" />
+            </template>
+          </Button>
+        </div>
+      </div>
+    </Card>
   </Page>
 </template>
 
@@ -76,21 +109,23 @@ export default class FetchIndex extends Vue {
       return
     }
     this.errorMessage = ''
+    let description = ''
+    // eslint-disable-next-line no-restricted-globals
+    const { data } = await this.$axios.get(`/crawler/?url=${url}`)
+    description = this.truncate(data.description, 200)
+
     const fetchData = {
       type: 'CreativeWork',
-      // name: '如何一口氣註冊《唐詩三百首》到區塊鏈 - 黃牛山人 (@edmond)',
-      name: 'test 03',
-      description:
-        '本篇教大家如何一次過為大量資料註冊 ISCN，程序含少量技術，但不用害怕，只要跟著一步步做便好，過程一定比填寫政府的稅單容易。',
-      tagsString:
-        'LikeCoin,DePub,去中心出版,ISCN,matters,matters.news,創作有價',
-      url: 'https://matters.news/@edmond/177802-%E5%A6%82%E4%BD%95%E4%B8%80%E5%8F%A3%E6%B0%A3%E8%A8%BB%E5%86%8A-%E5%94%90%E8%A9%A9%E4%B8%89%E7%99%BE%E9%A6%96-%E5%88%B0%E5%8D%80%E5%A1%8A%E9%8F%88-bafyreiautxzy4r3axckcqkks4vlq7zd4rtehagsh3f4zdinlv6zbc3nuhy',
+      name: data.title,
+      description,
+      tagsString: data.keywords,
+      url,
       exifInfo: {},
       license: '',
       ipfsHash: '',
       arweaveId: '',
       fileSHA256: '',
-      authorNames: ['aurorahuang'],
+      authorNames: ['Author'],
       authorUrls: [['']],
       authorWallets: [[{
             address: this.address,
@@ -102,6 +137,14 @@ export default class FetchIndex extends Vue {
     }
     this.state = 'register'
     await this.submitToISCN(fetchData)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  truncate(string: string, limit: number) {
+    if (string.length > limit) {
+      return `${string.substring(0, limit)}...`
+    }
+    return string
   }
 
   async submitToISCN(data: ISCNRegisterPayload): Promise<void> {
@@ -117,13 +160,15 @@ export default class FetchIndex extends Vue {
         this.address,
       )
       this.iscnId = res.iscnId
-      if(res){
-        this.$router.push(this.localeLocation(
-          { name: 'nfttest-mint-iscnId', params: { iscnId: this.iscnId } },
-        )!);
+      if (res) {
+        this.$router.push(
+          this.localeLocation({
+            name: 'nfttest-mint-iscnId',
+            params: { iscnId: this.iscnId },
+          })!,
+        )
       }
     } catch (err) {
-      // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err)
     }
