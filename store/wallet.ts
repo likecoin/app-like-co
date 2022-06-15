@@ -97,13 +97,14 @@ export default class Wallet extends VuexModule {
       this.toggleKeplrWarning(true)
       let tries = 0;
       const TRY_COUNT = 3;
-      while (TRY_COUNT > tries) {
+      while (!window.keplr && TRY_COUNT > tries) {
         // eslint-disable-next-line no-await-in-loop
         await timeout(1000);
         tries += 1;
       }
     }
     if (window.keplr && window.keplr.experimentalSuggestChain) {
+      this.toggleKeplrWarning(false)
       try {
         await window.keplr.experimentalSuggestChain({
           chainId: network.id,
