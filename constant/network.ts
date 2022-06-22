@@ -2,7 +2,7 @@ import { IS_TESTNET, COSMOS_DENOM } from '.';
 
 const mainConfig = {
   id: 'likecoin-mainnet-2',
-  name: 'LikeCoin chain',
+  name: 'LikeCoin',
   logo: 'logo.svg',
   website: 'https://like.co',
   apiURL: 'https://mainnet-node.like.co',
