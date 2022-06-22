@@ -1,9 +1,9 @@
-name: Build and Deploy to GKE
+name: Deploy to app.rinkeby.like.co
 
 on:
   push:
     branches:
-      - 'deploy/app.rinkeby.like.co'
+      - 'deploy/rinkeby'
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
