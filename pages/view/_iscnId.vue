@@ -131,7 +131,7 @@
         'mt-[16px]',
         'lg:mt-0',
       ]">
-        <InfoCard :label-text="type" :time-stamp="recordData.recordTimestamp">
+        <InfoCard :label-text="type" :timestamp="recordData.recordTimestamp">
           <template #icon>
             <ISCNTypeIcon :type="type" />
           </template>
