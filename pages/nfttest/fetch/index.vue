@@ -111,7 +111,7 @@ export default class FetchIndex extends Vue {
     this.errorMessage = ''
     let description = ''
     // eslint-disable-next-line no-restricted-globals
-    const { data } = await this.$axios.get(`/crawler/?url=${url}`)
+    const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
     description = this.truncate(data.description, 200)
 
     const fetchData = {
