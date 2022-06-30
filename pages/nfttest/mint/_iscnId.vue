@@ -85,6 +85,9 @@
         </div>
       </div>
     </Card>
+    <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
+      {{ errorMsg }}
+    </Snackbar>
   </Page>
 </template>
 
@@ -129,7 +132,13 @@ export default class NFTTestMintPage extends Vue {
   iscnData: any = null
   apiData: any = null
 
+  sendRes: any = null
+  postInfo: any = null
+
   isLoading = false
+  isOpenWarningSnackbar: boolean = false
+
+  errorMsg: string = ''
 
   get iscnId(): string {
     const { iscnId } = this.$route.params
@@ -172,7 +181,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async mounted() {
-    await this.getMintInfo()
+    this.getMintInfo()
     await this.getISCNInfo()
   }
 
@@ -180,10 +189,27 @@ export default class NFTTestMintPage extends Vue {
     /* eslint-disable no-fallthrough */
     switch (this.state) {
       case 'create':
+        this.errorMsg = ''
+        this.isOpenWarningSnackbar = false
         this.isLoading = true
-        await this.createNftClass()
-        await this.sendNFT()
-        await this.postMintInfo()
+
+        this.classId = await this.createNftClass()
+        if (!this.classId) {
+          this.setError('creating NFT class')
+          break
+        }
+
+        this.sendRes = await this.sendNFT()
+        if (!this.sendRes) {
+          this.setError('sending NFT')
+          break
+        }
+
+        this.postInfo = await this.postMintInfo()
+        if (!this.postInfo) {
+          this.setError('posting NFT Info')
+          break
+        }
         await this.getMintInfo()
         this.isLoading = false
         break
@@ -197,7 +223,7 @@ export default class NFTTestMintPage extends Vue {
   async getISCNInfo() {
     const res = await this.fetchISCNById(this.iscnId)
     if (res) {
-      ;[this.iscnData] = res.records
+      this.iscnData = res.records[0].data
     }
   }
 
@@ -239,49 +265,75 @@ export default class NFTTestMintPage extends Vue {
 
   async createNftClass() {
     if (!this.signer) return
-    const signingClient = await getSigningClient()
-    await signingClient.setSigner(this.signer)
-    const res = await signingClient.createNFTClass(this.address, this.iscnId, {
-      name: `Liker NFT - ${this.iscnData.name}`,
-    })
-    const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
-    const event = rawLogs[0].events.find(
-      (e: { type: string }) => e.type === 'likechain.likenft.EventNewClass',
-    )
-    const attribute = event.attributes.find(
-      (a: { key: string }) => a.key === 'class_id',
-    )
-    const classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
-    if (classId) this.classId = classId
+    let classId
+    try {
+      const signingClient = await getSigningClient()
+      await signingClient.setSigner(this.signer)
+      const res = await signingClient.createNFTClass(
+        this.address,
+        this.iscnId,
+        {
+          name: `Liker NFT - ${this.iscnData.name}`,
+        },
+      )
+      const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
+      const event = rawLogs[0].events.find(
+        (e: { type: string }) => e.type === 'likechain.likenft.EventNewClass',
+      )
+      const attribute = event.attributes.find(
+        (a: { key: string }) => a.key === 'class_id',
+      )
+      classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
+    } catch (error) {
+      console.error(error)
+    }
+
+    // eslint-disable-next-line consistent-return
+    return classId
   }
 
   async sendNFT() {
     if (!this.signer) return
-    const signingClient = await getSigningClient()
-    await signingClient.setSigner(this.signer)
-    const { classId } = this
+    let sendRes
+    try {
+      const signingClient = await getSigningClient()
+      await signingClient.setSigner(this.signer)
+      const { classId } = this
 
-    const nfts = [...Array(1000).keys()].map((_) => {
-      const id = `liker-${uuidv4()}`
-      return {
-        id,
-        uri: `${API_LIKER_NFT_METADATA}?class_id=${encodeURIComponent(
-          this.classId,
-        )}&nft_id=${encodeURIComponent(id)}`,
-        metadata: {
-          name: this.iscnData.name,
-        },
-      }
-    })
-    const mintMessages = nfts.map((i) =>
-      formatMsgMintNFT(this.address, classId, i),
-    )
-    const sendMessages = nfts.map((i) =>
-      formatMsgSend(this.address, LIKER_NFT_API_WALLET, classId, i.id),
-    )
-    const messages = mintMessages.concat(sendMessages)
-    const sendRes = await signingClient.sendMessages(this.address, messages)
-    console.log(sendRes)
+      const nfts = [...Array(1000).keys()].map((_) => {
+        const id = `liker-${uuidv4()}`
+        return {
+          id,
+          uri: `${API_LIKER_NFT_METADATA}?class_id=${encodeURIComponent(
+            this.classId,
+          )}&nft_id=${encodeURIComponent(id)}`,
+          metadata: {
+            name: this.iscnData.name,
+          },
+        }
+      })
+      const mintMessages = nfts.map((i) =>
+        formatMsgMintNFT(this.address, classId, i),
+      )
+      const sendMessages = nfts.map((i) =>
+        formatMsgSend(this.address, LIKER_NFT_API_WALLET, classId, i.id),
+      )
+      const messages = mintMessages.concat(sendMessages)
+      sendRes = await signingClient.sendMessages(this.address, messages)
+      // eslint-disable-next-line consistent-return
+    } catch (error) {
+      console.error(error)
+    }
+    // eslint-disable-next-line consistent-return
+    return sendRes
+  }
+
+  setError(errorMessage: string) {
+    this.isOpenWarningSnackbar = true
+    this.errorMsg = this.$t('NFTProtal.mint.error', {
+      error: errorMessage,
+    }) as string
+    this.isLoading = false
   }
 }
 </script>
