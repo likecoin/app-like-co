@@ -47,7 +47,7 @@ import qs from 'querystring'
 import BigNumber from 'bignumber.js'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { API_LIKER_NFT_PURCHASE } from '~/constant/api'
@@ -84,11 +84,6 @@ export default class NFTTestButtonPage extends Vue {
   nftInfo: any = null
   grantTransactionHash: string = ''
   showHistory = false
-
-  @Watch('nftInfo', { immediate: true, deep: true })
-  showHistoryButton() {
-    this.showHistory = true
-  }
 
   get iscnId(): string {
     const { iscnId } = this.$route.params
