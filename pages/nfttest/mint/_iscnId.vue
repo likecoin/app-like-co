@@ -79,7 +79,7 @@
             <Label class="text-[8px] text-medium-gray text-center mt-[8px]" align="center">{{ loadingText }}</Label>
           </div>
 
-          <Button v-else preset="outline" class="my-[12px]" @click="doAction">{{
+          <Button v-else preset="outline" :is-disabled="!iscnData" class="my-[12px]" @click="doAction">{{
             buttonText
           }}</Button>
         </div>
@@ -181,7 +181,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async mounted() {
-    this.getMintInfo()
+    await this.getMintInfo()
     await this.getISCNInfo()
   }
 
