@@ -64,7 +64,7 @@
             <Label :text="classId" tag="div" preset="p6" />
           </FormField>
           <FormField
-            v-if="state === 'done'"
+            v-if="state === 'done' && isWritingNFT"
             label="Embed NFT Widget :"
             class="mb-[12px]"
           >
@@ -106,7 +106,7 @@ import {
 import { API_LIKER_NFT_METADATA, API_LIKER_NFT_MINT } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { LIKER_NFT_API_WALLET } from '~/constant'
+import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
@@ -140,6 +140,11 @@ export default class NFTTestMintPage extends Vue {
 
   errorMsg: string = ''
 
+  get isWritingNFT(): boolean {
+    const { raw_nft: nft = 0 } = this.$route.query
+    return !(nft && nft !== '0');
+  }
+
   get iscnId(): string {
     const { iscnId } = this.$route.params
     return iscnId
@@ -152,7 +157,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get buttonText(): string {
-    if (this.state === 'done') return 'Go to Doc'
+    if (this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
     if (this.state === 'mint') return 'Mint NFT'
     return 'Mint NFT'
   }
@@ -199,22 +204,31 @@ export default class NFTTestMintPage extends Vue {
           break
         }
 
-        this.sendRes = await this.sendNFT()
+        this.sendRes = await this.mintNFT()
         if (!this.sendRes) {
           this.setError('sending NFT')
           break
         }
 
-        this.postInfo = await this.postMintInfo()
-        if (!this.postInfo) {
-          this.setError('posting NFT Info')
-          break
+        if (this.isWritingNFT) {
+          this.postInfo = await this.postMintInfo()
+          if (!this.postInfo) {
+            this.setError('posting NFT Info')
+            break
+          }
+
+          await this.getMintInfo()
         }
-        await this.getMintInfo()
+
         this.isLoading = false
         break
       case 'done':
-        window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
+        if (this.isWritingNFT) {
+          window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
+        } else {
+          // TODO: use actual liker land class nft
+          window.location.href = `${LIKER_LAND_URL}/nft/class/${this.classId}`
+        }
       default:
     }
     /* eslint-enable no-fallthrough */
@@ -292,7 +306,7 @@ export default class NFTTestMintPage extends Vue {
     return classId
   }
 
-  async sendNFT() {
+  async mintNFT() {
     if (!this.signer) return
     let sendRes
     try {
@@ -318,7 +332,9 @@ export default class NFTTestMintPage extends Vue {
       const sendMessages = nfts.map((i) =>
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, classId, i.id),
       )
-      const messages = mintMessages.concat(sendMessages)
+      let messages = mintMessages;
+      if (this.isWritingNFT) messages = messages.concat(sendMessages);
+
       sendRes = await signingClient.sendMessages(this.address, messages)
       // eslint-disable-next-line consistent-return
     } catch (error) {
