@@ -94,11 +94,22 @@ export default class FetchIndex extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
-  url = ''
+  url = this.$route.query.url as string || ''
   errorMessage = ''
   state = 'init'
-  iscnId = ''
+  iscnId = this.$route.query.iscn_id as string || ''
   isLoading = false
+
+  mounted() {
+    if (this.iscnId) {
+      this.$router.push(
+        this.localeLocation({
+          name: 'nfttest-mint-iscnId',
+          params: { iscnId: this.iscnId },
+        })!,
+      )
+    }
+  }
 
   async onSearch() {
     const { url } = this
