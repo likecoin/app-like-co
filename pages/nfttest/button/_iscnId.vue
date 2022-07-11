@@ -52,7 +52,7 @@ import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { API_LIKER_NFT_PURCHASE } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
-import { LIKER_NFT_API_WALLET } from '~/constant'
+import { LIKER_NFT_API_WALLET, COSMOS_DENOM } from '~/constant'
 
 const signerModule = namespace('signer')
 
@@ -120,7 +120,7 @@ export default class NFTTestButtonPage extends Vue {
       this.address,
       LIKER_NFT_API_WALLET,
       [{
-          denom: 'nanolike',
+          denom: COSMOS_DENOM,
           amount: new BigNumber(this.totalPrice).shiftedBy(9).toFixed(0),
         }],
       Date.now() + 60000,
