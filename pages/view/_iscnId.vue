@@ -7,49 +7,61 @@
       <Label :text="$t('general.loading')" />
     </Card>
   </Page>
-  <Page v-else-if="isPopupLayout">
-    <IscnUploadedInfo
-      :class="[
-        'w-full',
-        'max-w-[640px]',
-      ]"
-      :owner="owner"
-      :iscn-id="iscnId"
-      :iscn-hash="txHash"
-      :record="record"
-      :exif-info="exifInfo"
-    >
-      <template #footer>
-        <div
-          :class="[
-            'flex',
-            'justify-end',
-          ]"
-        >
-          <Button
-            :class="['w-min', 'mr-[8px]']"
-            preset="outline"
-            tag="a"
-            text-preset="h5"
-            type="button"
-            content-class="font-medium ml-[-4px]"
-            prepend-class="font-bold"
-            :href="rawDataURL"
+  <div v-else-if="isPopupLayout">
+    <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
+      <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
+        Continue to mint Writing NFTs
+      </Button>
+    </div>
+    <Page>
+      <IscnUploadedInfo
+        :class="[
+          'w-full',
+          'max-w-[640px]',
+        ]"
+        :owner="owner"
+        :iscn-id="iscnId"
+        :iscn-hash="txHash"
+        :record="record"
+        :exif-info="exifInfo"
+      >
+        <template #footer>
+          <div
+            :class="[
+              'flex',
+              'justify-end',
+            ]"
           >
-            <template #prepend>
-              <IconInfo />
-            </template>
-            {{ $t('iscn.meta.rawData') }}
-          </Button>
-          <Button
-            preset="secondary"
-            :text="$t('general.closeWindow')"
-            @click="closeWindow"
-          />
-        </div>
-      </template>
-    </IscnUploadedInfo>
-  </Page>
+            <Button
+              :class="['w-min', 'mr-[8px]']"
+              preset="outline"
+              tag="a"
+              text-preset="h5"
+              type="button"
+              content-class="font-medium ml-[-4px]"
+              prepend-class="font-bold"
+              :href="rawDataURL"
+            >
+              <template #prepend>
+                <IconInfo />
+              </template>
+              {{ $t('iscn.meta.rawData') }}
+            </Button>
+            <Button
+              preset="secondary"
+              :text="$t('general.closeWindow')"
+              @click="closeWindow"
+            />
+          </div>
+        </template>
+      </IscnUploadedInfo>
+    </Page>
+    <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
+      <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
+        Continue to mint Writing NFTs
+      </Button>
+    </div>
+  </div>
   <div v-else>
     <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
       <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">Premint NFTs</Button>
@@ -486,7 +498,7 @@ export default class ViewIscnIdPage extends Vue {
     authorUrls: [],
   }
 
-  isPreminted = true
+  isPreminted = !this.isPopupLayout // assume popup is not preminted
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
