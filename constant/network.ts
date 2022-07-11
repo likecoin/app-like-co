@@ -1,4 +1,4 @@
-import { IS_TESTNET, COSMOS_DENOM } from '.';
+import { IS_TESTNET } from '.';
 
 const mainConfig = {
   id: 'likecoin-mainnet-2',
@@ -11,7 +11,7 @@ const mainConfig = {
   stakingDenom: 'LIKE',
   coinLookup: [{
       viewDenom: 'LIKE',
-      chainDenom: COSMOS_DENOM,
+      chainDenom: 'nanolike',
       chainToViewConversionFactor: '0.000000001',
       icon: 'currencies/like.png',
       coinGeckoId: 'likecoin',
@@ -26,6 +26,14 @@ const testnetConfig = {
   apiURL: 'https://node.testnet.like.co',
   rpcURL: 'https://node.testnet.like.co/rpc/',
   stakingWalletURL: 'https://likecoin-public-testnet-5.netlify.app/',
+  stakingDenom: 'EKIL',
+  coinLookup: [{
+      viewDenom: 'EKIL',
+      chainDenom: 'nanoekil',
+      chainToViewConversionFactor: '0.000000001',
+      icon: 'currencies/like.png',
+      coinGeckoId: 'likecoin',
+    }],
 };
 
 const combinedConfig = {
