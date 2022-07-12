@@ -278,7 +278,7 @@ export default class NFTTestMintPage extends Vue {
       )
       const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
       const event = rawLogs[0].events.find(
-        (e: { type: string }) => e.type === 'likechain.likenft.EventNewClass',
+        (e: { type: string }) => e.type === 'likechain.likenft.v1.EventNewClass',
       )
       const attribute = event.attributes.find(
         (a: { key: string }) => a.key === 'class_id',
