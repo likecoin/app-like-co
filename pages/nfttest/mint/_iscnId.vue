@@ -73,13 +73,16 @@
             }}</code>
           </FormField>
         </div>
+        <div v-if="iscnOwner && !isUserISCNOwner">
+          Please use ISCN owner wallet {{ iscnOwner }} to mint NFT
+        </div>
         <div class="flex flex-col self-end">
           <div v-if="isLoading" class="flex flex-col justify-center">
             <ProgressIndicator />
             <Label class="text-[8px] text-medium-gray text-center mt-[8px]" align="center">{{ loadingText }}</Label>
           </div>
 
-          <Button v-else preset="outline" :is-disabled="!iscnData" class="my-[12px]" @click="doAction">{{
+          <Button v-else preset="outline" :is-disabled="!iscnData || !isUserISCNOwner" class="my-[12px]" @click="doAction">{{
             buttonText
           }}</Button>
         </div>
@@ -129,6 +132,7 @@ export default class NFTTestMintPage extends Vue {
   } | null>
 
   classId: string = ''
+  iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
 
@@ -139,6 +143,11 @@ export default class NFTTestMintPage extends Vue {
   isOpenWarningSnackbar: boolean = false
 
   errorMsg: string = ''
+
+  get isUserISCNOwner(): boolean {
+    if (!this.iscnOwner) return false
+    return (this.iscnOwner=== this.address)
+  }
 
   get isWritingNFT(): boolean {
     const { raw_nft: nft = 0 } = this.$route.query
@@ -186,8 +195,10 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async mounted() {
-    await this.getMintInfo()
-    await this.getISCNInfo()
+    await Promise.all([
+      this.getISCNInfo().catch(err => console.error(err)),
+      this.getMintInfo().catch(err => console.error(err)),
+    ]);
   }
 
   async doAction() {
@@ -198,6 +209,10 @@ export default class NFTTestMintPage extends Vue {
         this.isOpenWarningSnackbar = false
         this.isLoading = true
 
+        if (!this.isUserISCNOwner) {
+          this.setError('USER_NOT_ISCN_OWNER')
+          break
+        }
         this.classId = await this.createNftClass()
         if (!this.classId) {
           this.setError('creating NFT class')
@@ -238,6 +253,7 @@ export default class NFTTestMintPage extends Vue {
     const res = await this.fetchISCNById(this.iscnId)
     if (res) {
       this.iscnData = res.records[0].data
+      this.iscnOwner = res.owner
     }
   }
 
