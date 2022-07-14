@@ -9,3 +9,6 @@ export const API_LIKER_NFT_MINT = `${LIKE_CO_API_ROOT}/likernft/mint`;
 export const API_LIKER_NFT_PURCHASE = `${LIKE_CO_API_ROOT}/likernft/purchase`;
 export const API_LIKER_NFT_HISTORY = `${LIKE_CO_API_ROOT}/likernft/history`;
 export const API_LIKER_NFT_METADATA = `${LIKE_CO_API_ROOT}/likernft/metadata`;
+
+export const getLikerIdMinApi = (likerId: string): string => `${LIKE_CO_API_ROOT}/users/id/${likerId}/min`;
+export const getAddressLikerIdMinApi = (wallet: string): string => `${LIKE_CO_API_ROOT}/users/addr/${wallet}/min`;

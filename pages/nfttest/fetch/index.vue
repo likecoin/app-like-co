@@ -38,6 +38,10 @@
       </div>
       <!-- guide text -->
       <!-- body -->
+      <div v-if="ownerWallet">
+        <img v-if="avatar" :src="avatar">
+        Please use {{ ownerWallet }} to sign this transaction.
+      </div>
       <div
         :class="[
           'flex',
@@ -49,7 +53,7 @@
       >
         <div
           :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']"
-          @submit.prevent="onSearch"
+          @submit.prevent="onSubmit"
         >
           <TextField
             v-model="url"
@@ -66,7 +70,7 @@
             v-else
             :text="$t('NFTProtal.button.register')"
             preset="outline"
-            @click="onSearch"
+            @click="onSubmit"
           >
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
@@ -86,6 +90,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
 import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
+import { getLikerIdMinApi, getAddressLikerIdMinApi } from '~/constant/api'
 
 const signerModule = namespace('signer')
 
@@ -95,12 +100,14 @@ export default class FetchIndex extends Vue {
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
   url = this.$route.query.url as string || ''
+  ownerWallet = ''
   errorMessage = ''
   state = 'init'
   iscnId = this.$route.query.iscn_id as string || ''
   isLoading = false
+  avatar = null;
 
-  mounted() {
+  async mounted() {
     if (this.iscnId) {
       this.$router.push(
         this.localeLocation({
@@ -109,9 +116,32 @@ export default class FetchIndex extends Vue {
         })!,
       )
     }
+    const { liker_id: likerId, wallet } = this.$route.query;
+    if (wallet) {
+      this.ownerWallet = wallet as string;
+      try {
+        const { data } = await this.$axios.get(getAddressLikerIdMinApi(wallet as string));
+        this.avatar = data.avatar;
+      } catch (err) {
+        console.error(err);
+      }
+    } else if (likerId) {
+      try {
+        const { data } = await this.$axios.get(getLikerIdMinApi(likerId as string));
+        this.ownerWallet = data.likeWallet;
+        this.avatar = data.avatar;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
   }
 
-  async onSearch() {
+  async onSubmit() {
+    if (this.ownerWallet && this.address !== this.ownerWallet) {
+      this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
+      return
+    }
     const { url } = this
     if (!url) {
       this.errorMessage = this.$t(
