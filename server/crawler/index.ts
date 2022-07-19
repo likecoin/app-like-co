@@ -6,21 +6,22 @@ export default async function getCralwerData(url: string) {
   let keywords = ''
   let title = ''
   try {
-    const cralwerData = await axios.get(encodeURI(url as string))
-    const $ = cheerio.load(cralwerData.data)
-      title = $('title').text()
-      const metas = $('meta')
+    const crawlerData = await axios.get(encodeURI(url as string))
+    const $ = cheerio.load(crawlerData.data)
+    title = $('title').text()
+    const metas = $('meta')
 
-      Object.keys(metas).forEach((key: any) => {
-        if (
-          (metas[key].attribs || {}).name === 'description' ||
-          (metas[key].attribs || {}).property === 'og:description'
-        ) {
-          description = metas[key].attribs.content
-        } else if ((metas[key].attribs || {}).name === 'keywords') {
-          keywords = metas[key].attribs.content
-        }
-      })
+    Object.keys(metas).forEach((key: any) => {
+      const { name, property, content } = metas[key].attribs || {};
+      if (
+        name === 'description' ||
+        property === 'og:description'
+      ) {
+        description = content
+      } else if (name === 'keywords') {
+        keywords = content
+      }
+    })
   } catch (error) {
     console.error(error)
   }
