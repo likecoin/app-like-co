@@ -87,10 +87,14 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
+import BigNumber from 'bignumber.js'
+
 import { signISCNTx } from '~/utils/cosmos/iscn'
+import { sendLIKE } from '~/utils/cosmos/sign';
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
 import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
-import { getLikerIdMinApi, getAddressLikerIdMinApi } from '~/constant/api'
+import { getLikerIdMinApi, getAddressLikerIdMinApi , API_POST_ARWEAVE_ESTIMATE, API_POST_ARWEAVE_UPLOAD } from '~/constant/api'
+
 
 const signerModule = namespace('signer')
 
@@ -103,7 +107,12 @@ export default class FetchIndex extends Vue {
   ownerWallet = ''
   errorMessage = ''
   state = 'init'
-  iscnId = this.$route.query.iscn_id as string || ''
+  body: Blob | null | undefined
+  uploadArweaveId = ''
+  arweaveFeeTargetAddress = ''
+  arweaveFee = new BigNumber(0)
+  memo = ''
+  iscnId = ''
   isLoading = false
   avatar = null;
 
@@ -150,11 +159,13 @@ export default class FetchIndex extends Vue {
       return
     }
     this.errorMessage = ''
-    let description = ''
     // eslint-disable-next-line no-restricted-globals
     const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
-    description = this.truncate(data.description, 200)
+    this.body = new Blob([data.body], {type: "text/html"});
+    await this.estimateArweaveFee();
+    await this.submitToArweave();
 
+    const description = this.truncate(data.description, 200)
     const fetchData = {
       type: 'CreativeWork',
       name: data.title,
@@ -186,6 +197,65 @@ export default class FetchIndex extends Vue {
       return `${string.substring(0, limit)}...`
     }
     return string
+  }
+
+  async estimateArweaveFee(): Promise<void> {
+    const formData = new FormData();
+    if (this.body) formData.append('file', this.body);
+    try {
+      const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
+        API_POST_ARWEAVE_ESTIMATE,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      this.uploadArweaveId = arweaveId;
+      if (LIKE) this.arweaveFee = new BigNumber(LIKE);
+      this.arweaveFeeTargetAddress = address;
+      this.memo = memo;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
+
+  async sendArweaveFeeTx(): Promise<string> {
+    if (!this.signer) throw new Error('SIGNER_NOT_INITED');
+    if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
+    try {
+      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, this.memo);
+      return transactionHash;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+    return '';
+  }
+
+  async submitToArweave(): Promise<void> {
+    const transactionHash = await this.sendArweaveFeeTx();
+    const formData = new FormData();
+    if (this.body) formData.append('file', this.body);
+    try {
+      const {
+        arweaveId,
+      } = await this.$axios.$post(
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      this.uploadArweaveId = arweaveId
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
   }
 
   async submitToISCN(data: ISCNRegisterPayload): Promise<void> {
