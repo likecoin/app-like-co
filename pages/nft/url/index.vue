@@ -197,13 +197,8 @@ export default class FetchIndex extends Vue {
     }
       this.isLoading = true
       await this.crawlUrlData()
-      const { amount, to, memo } = await this.estimateArweaveFee()
-      await this.sendArweaveFeeTx({
-        from: this.address,
-        to,
-        amount,
-        memo,
-      })
+      const arweaveFeeInfo = await this.estimateArweaveFee()
+      await this.sendArweaveFeeTx(arweaveFeeInfo)
       if (!this.arweaveId) {
         await this.submitToArweave()
       }
@@ -229,7 +224,8 @@ export default class FetchIndex extends Vue {
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
       this.crawledData = data
     } catch (err) {
-      this.errorMessage = 'CANNOT_CRAWL_URL';
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_CRAWL_URL')
       throw err
     }
   }
@@ -253,19 +249,21 @@ export default class FetchIndex extends Vue {
         memo,
       }
     } catch (err) {
-      this.errorMessage = 'CANNOT_ESTIMATE_ARWEAVE_FEE'
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_ESTIMATE_ARWEAVE_FEE')
       throw err
     }
   }
 
-  async sendArweaveFeeTx({ from, to, amount, memo }: { from: string, to: string, amount: BigNumber, memo: string }): Promise<void> {
+  async sendArweaveFeeTx({to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
-      const { transactionHash } = await sendLIKE(from, to, amount.toFixed(), this.signer, memo)
+      const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.txHash = transactionHash
     } catch (err) {
-      this.errorMessage = 'CANNOT_SEND_ARWEAVE_FEE_TX'
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
       throw err
     }
   }
@@ -283,7 +281,8 @@ export default class FetchIndex extends Vue {
       )
       this.arweaveId = arweaveId
     } catch (err) {
-      this.errorMessage = 'CANNOT_UPLOAD_TO_ARWEAVE'
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_UPLOAD_TO_ARWEAVE')
       throw err
     }
   }
@@ -310,7 +309,8 @@ export default class FetchIndex extends Vue {
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err)
+      console.error('CANNOT_SEND_ISCN_TX')
+      throw err
     }
   }
 }
