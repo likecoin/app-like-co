@@ -181,6 +181,7 @@ export default async function getCralwerData(url: string) {
   let author = ''
   let title = ''
   let content = ''
+  let image = ''
   try {
     const { data } = await axios.get(encodeURI(url as string))
     content = data
@@ -196,11 +197,13 @@ export default async function getCralwerData(url: string) {
         keywords = value
       } else if (name === 'author') {
         author = value
+      } else if (property === 'og:image') {
+        image = value
       }
     })
   } catch (error) {
     console.error(error)
   }
   const body = formatBody({ content, title, author, description })
-  return { title, description, keywords, author, body }
+  return { title, description, keywords, author, body, image }
 }
