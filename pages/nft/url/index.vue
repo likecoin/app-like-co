@@ -106,7 +106,6 @@ export default class FetchIndex extends Vue {
   url = this.$route.query.url as string || ''
   ownerWallet = ''
   errorMessage = ''
-  state = 'init'
   body: Blob | null | undefined
   uploadArweaveId = ''
   arweaveFeeTargetAddress = ''
@@ -187,7 +186,6 @@ export default class FetchIndex extends Vue {
       descriptions: [''],
       numbersProtocolAssetId: '',
     }
-    this.state = 'register'
     await this.submitToISCN(fetchData)
   }
 
