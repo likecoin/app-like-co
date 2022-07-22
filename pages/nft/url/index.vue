@@ -198,8 +198,8 @@ export default class FetchIndex extends Vue {
       this.isLoading = true
       await this.crawlUrlData()
       const arweaveFeeInfo = await this.estimateArweaveFee()
-      await this.sendArweaveFeeTx(arweaveFeeInfo)
       if (!this.arweaveId) {
+        await this.sendArweaveFeeTx(arweaveFeeInfo)
         await this.submitToArweave()
       }
       await this.submitToISCN()
