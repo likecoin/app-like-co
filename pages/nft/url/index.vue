@@ -236,6 +236,7 @@ export default class FetchIndex extends Vue {
   }
 
   async submitToArweave(): Promise<void> {
+    if (this.uploadArweaveId) return;
     const transactionHash = await this.sendArweaveFeeTx();
     const formData = new FormData();
     if (this.body) formData.append('file', this.body);
