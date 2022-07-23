@@ -106,7 +106,7 @@ import {
   formatMsgMintNFT,
   formatMsgSend,
 } from '@likecoin/iscn-js/dist/messages/likenft'
-import { API_LIKER_NFT_METADATA, API_LIKER_NFT_MINT } from '~/constant/api'
+import { API_LIKER_NFT_MINT, getNftClassImage, getNftClassUriViaIscnId, getNftUriViaNftId } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
@@ -303,7 +303,14 @@ export default class NFTTestMintPage extends Vue {
         this.address,
         this.iscnId,
         {
-          name: `Liker NFT - ${this.iscnData.name}`,
+          name: `Writing NFT - ${this.iscnData.name}`,
+          symbol: 'WRITING',
+          uri: getNftClassUriViaIscnId(this.iscnId),
+          metadata: {
+            nft_meta_collection_id: 'likerland_writing_nft',
+            nft_meta_collection_name: 'Writing NFT',
+            nft_meta_collection_descrption: 'Writing NFT by Liker Land',
+          },
         },
       )
       const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
@@ -331,14 +338,13 @@ export default class NFTTestMintPage extends Vue {
       const { classId } = this
 
       const nfts = [...Array(1000).keys()].map((_) => {
-        const id = `liker-${uuidv4()}`
+        const id = `writing-${uuidv4()}`
         return {
           id,
-          uri: `${API_LIKER_NFT_METADATA}?class_id=${encodeURIComponent(
-            this.classId,
-          )}&nft_id=${encodeURIComponent(id)}`,
+          uri: getNftUriViaNftId(this.classId, id),
           metadata: {
-            name: this.iscnData.name,
+            name: `Writing NFT - ${this.iscnData.name}`,
+            image: getNftClassImage(this.classId),
           },
         }
       })
