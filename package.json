@@ -19,7 +19,7 @@
   "dependencies": {
     "@cosmjs/stargate": "^0.28.4",
     "@likecoin/iscn-js": "^0.2.0-rc.1",
-    "@likecoin/iscn-message-types": "^0.0.3-alpha.0",
+    "@likecoin/iscn-message-types": "^0.0.3",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.0.1",
     "@nuxtjs/pwa": "^3.3.5",
