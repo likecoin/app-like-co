@@ -1,75 +1,54 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <Page :class="[
+    'flex',
+    'flex-col',
+    'relative',
+    'items-center',
+    'justify-center',
+    'px-[20px]',
+    'pt-[38px]',
+    'lg:p-[16px]',
+  ]">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
-        <Label
-          class="w-min"
-          :text="labelText"
-          tag="div"
-          preset="p5"
-          valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green"
-          prepend-class="text-like-green"
-        >
+        <Label class="w-min" :text="labelText" tag="div" preset="p5" valign="middle"
+          content-class="font-semibold whitespace-nowrap text-like-green" prepend-class="text-like-green">
           <template #prepend>
             <IconRegister />
           </template>
         </Label>
         <div :class="['flex', 'flex-col', 'items-end']">
           <Stepper :step="step" :total-step="3" />
-          <Label
-            preset="p6"
-            :text="$t('Registration.step', { step: step, total: 3 })"
-            class="text-medium-gray"
-          />
+          <Label preset="p6" :text="$t('Registration.step', { step: step, total: 3 })" class="text-medium-gray" />
         </div>
       </div>
       <!-- guide text -->
       <!-- body -->
-      <div
-        :class="[
+      <div :class="[
+        'flex',
+        'flex-col',
+        'justify-center',
+        'items-center',
+        'w-full',
+      ]">
+        <div :class="[
           'flex',
           'flex-col',
           'justify-center',
           'items-center',
           'w-full',
-        ]"
-      >
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-            'justify-center',
-            'items-center',
-            'w-full',
-            'my-[64px]',
-          ]"
-        >
+          'my-[64px]',
+        ]">
           <FormField label="ISCN :" class="mb-[12px]">
             <Label :text="iscnId" tag="div" preset="p6" />
           </FormField>
           <FormField v-if="classId" label="NFT Class ID :" class="mb-[12px]">
             <Label :text="classId" tag="div" preset="p6" />
           </FormField>
-          <FormField
-            v-if="state === 'done' && isWritingNFT"
-            label="Embed NFT Widget :"
-            class="mb-[12px]"
-          >
+          <FormField v-if="state === 'done' && isWritingNFT" label="Embed NFT Widget :" class="mb-[12px]">
             <code class="block w-full whitespace-normal bg-light-gray">{{
-              code
+                code
             }}</code>
           </FormField>
         </div>
@@ -82,9 +61,10 @@
             <Label class="text-[8px] text-medium-gray text-center mt-[8px]" align="center">{{ loadingText }}</Label>
           </div>
 
-          <Button v-else preset="outline" :is-disabled="!iscnData || !isUserISCNOwner" class="my-[12px]" @click="doAction">{{
-            buttonText
-          }}</Button>
+          <Button v-else preset="outline" :is-disabled="!iscnData || !isUserISCNOwner" class="my-[12px]"
+            @click="doAction">{{
+                buttonText
+            }}</Button>
         </div>
       </div>
     </Card>
@@ -106,10 +86,20 @@ import {
   formatMsgMintNFT,
   formatMsgSend,
 } from '@likecoin/iscn-js/dist/messages/likenft'
-import { API_LIKER_NFT_MINT, getNftClassImage, getNftClassUriViaIscnId, getNftUriViaNftId } from '~/constant/api'
+import BigNumber from 'bignumber.js'
+
+import {
+  API_LIKER_NFT_MINT,
+  API_POST_ARWEAVE_ESTIMATE,
+  API_POST_ARWEAVE_UPLOAD,
+  getNftClassImage,
+  getNftClassUriViaIscnId,
+  getNftUriViaNftId
+} from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
+import sendLIKE from '~/utils/cosmos/sign'
 
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
@@ -135,6 +125,9 @@ export default class NFTTestMintPage extends Vue {
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
+  ogImageFormData: FormData | null = null
+  ogImageArweaveId: string = ''
+  ogImageTxHash: string = ''
 
   sendRes: any = null
   postInfo: any = null
@@ -146,7 +139,7 @@ export default class NFTTestMintPage extends Vue {
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
-    return (this.iscnOwner=== this.address)
+    return (this.iscnOwner === this.address)
   }
 
   get isWritingNFT(): boolean {
@@ -199,6 +192,7 @@ export default class NFTTestMintPage extends Vue {
       this.getISCNInfo().catch(err => console.error(err)),
       this.getMintInfo().catch(err => console.error(err)),
     ]);
+    this.getOgImage().catch(err => console.error(err));
   }
 
   async doAction() {
@@ -213,6 +207,15 @@ export default class NFTTestMintPage extends Vue {
           this.setError('USER_NOT_ISCN_OWNER')
           break
         }
+
+        if (this.ogImageFormData) {
+          const arweaveFeeInfo = await this.estimateArweaveFee()
+          if (!this.ogImageArweaveId) {
+            await this.sendArweaveFeeTx(arweaveFeeInfo)
+            await this.submitToArweave()
+          }
+        }
+
         this.classId = await this.createNftClass()
         if (!this.classId) {
           this.setError('creating NFT class')
@@ -272,6 +275,79 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
+  async getOgImage() {
+    try {
+      const { url } = this.iscnData.contentMetadata
+      if (!url) { return }
+      const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
+      if (!image) { return }
+      const { data, headers } = await this.$axios.get(image)
+      const blob = new Blob([data], { type: headers['content-type'] })
+      const formData = new FormData()
+      formData.append('file', blob)
+      this.ogImageFormData = formData
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
+  }
+
+  async estimateArweaveFee() {
+    try {
+      const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
+        API_POST_ARWEAVE_ESTIMATE,
+        this.ogImageFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      this.ogImageArweaveId = arweaveId
+      return {
+        to: address,
+        amount: new BigNumber(LIKE),
+        memo,
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_ESTIMATE_ARWEAVE_FEE')
+      throw err
+    }
+  }
+
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+    if (!this.signer) throw new Error('SIGNER_NOT_INITED')
+    if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
+    try {
+      const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
+      this.ogImageTxHash = transactionHash
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
+      throw err
+    }
+  }
+
+  async submitToArweave(): Promise<void> {
+    try {
+      const { arweaveId } = await this.$axios.$post(
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageTxHash}`,
+        this.ogImageFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      this.ogImageArweaveId = arweaveId
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('CANNOT_UPLOAD_TO_ARWEAVE')
+      throw err
+    }
+  }
+
   async postMintInfo() {
     let fdata
     try {
@@ -310,6 +386,7 @@ export default class NFTTestMintPage extends Vue {
             nft_meta_collection_id: 'likerland_writing_nft',
             nft_meta_collection_name: 'Writing NFT',
             nft_meta_collection_descrption: 'Writing NFT by Liker Land',
+            image: getNftClassImage(this.classId),
           },
         },
       )
