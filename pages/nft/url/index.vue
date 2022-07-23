@@ -113,7 +113,7 @@ export default class FetchIndex extends Vue {
   arweaveFeeTargetAddress = ''
   arweaveFee = new BigNumber(0)
   memo = ''
-  iscnId = ''
+  iscnId = this.$route.query.iscn_id as string || ''
   isLoading = false
   avatar = null;
 
