@@ -184,6 +184,7 @@ export default class NFTTestMintPage extends Vue {
   get loadingText(): string {
     if (this.state === 'done') return ''
     if (this.state === 'mint') return 'Minting NFT ...'
+    if (this.ogImageFormData && !this.ogImageArweaveId) return 'Uploading display image ...'
     return 'Creating NFT class ...'
   }
 
