@@ -127,7 +127,6 @@ export default class NFTTestMintPage extends Vue {
   apiData: any = null
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
-  ogImageTxHash: string = ''
 
   sendRes: any = null
   postInfo: any = null
@@ -219,8 +218,8 @@ export default class NFTTestMintPage extends Vue {
         if (this.ogImageBlob) {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.ogImageArweaveId) {
-            await this.sendArweaveFeeTx(arweaveFeeInfo)
-            await this.submitToArweave()
+            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
+            await this.submitToArweave(txHash)
           }
         }
 
@@ -321,12 +320,12 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<string> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
-      this.ogImageTxHash = transactionHash
+      return transactionHash
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -334,10 +333,10 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  async submitToArweave(): Promise<void> {
+  async submitToArweave(txHash: string): Promise<void> {
     try {
       const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageTxHash}`,
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${txHash}`,
         this.ogImageFormData,
         {
           headers: {

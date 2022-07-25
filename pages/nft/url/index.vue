@@ -107,12 +107,10 @@ export default class FetchIndex extends Vue {
   ownerWallet = ''
   errorMessage = ''
   crawledData: any
-  txHash = ''
   ipfsHash = ''
   arweaveId = ''
   arweaveFeeTargetAddress = ''
   arweaveFee = new BigNumber(0)
-  memo = ''
   iscnId = this.$route.query.iscn_id as string || ''
   isLoading = false
   avatar = null;
@@ -199,8 +197,8 @@ export default class FetchIndex extends Vue {
       await this.crawlUrlData()
       const arweaveFeeInfo = await this.estimateArweaveFee()
       if (!this.arweaveId) {
-        await this.sendArweaveFeeTx(arweaveFeeInfo)
-        await this.submitToArweave()
+        const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
+        await this.submitToArweave(txHash)
       }
       await this.submitToISCN()
     } catch (err) {
@@ -241,7 +239,7 @@ export default class FetchIndex extends Vue {
           },
         },
       )
-      this.arweaveId = arweaveId
+      if (arweaveId) { this.arweaveId = arweaveId }
       this.ipfsHash = ipfsHash
       return {
         to: address,
@@ -255,12 +253,12 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async sendArweaveFeeTx({to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<string> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
-      this.txHash = transactionHash
+      return transactionHash
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -268,10 +266,10 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async submitToArweave(): Promise<void> {
+  async submitToArweave(txHash: string): Promise<void> {
     try {
       const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.txHash}`,
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${txHash}`,
         this.formData,
         {
           headers: {
