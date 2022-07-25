@@ -563,7 +563,7 @@ export default class ViewIscnIdPage extends Vue {
 
   created() {
     const { iscnId } = this.$route.params
-    if (iscnId.startsWith(ISCN_PREFIX)) {
+    if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
       this.iscnId = iscnId
     }
   }
