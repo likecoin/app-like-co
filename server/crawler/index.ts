@@ -189,12 +189,11 @@ export default async function getCralwerData(url: string) {
   let keywords = ''
   let author = ''
   let title = ''
-  let content = ''
+  let body = ''
   let image = ''
   try {
-    const { data } = await axios.get(encodeURI(url as string))
-    content = data
-    const $ = cheerio.load(data)
+    const { data: content } = await axios.get(encodeURI(url as string))
+    const $ = cheerio.load(content)
     title = $('title').text()
     const metas = $('meta')
 
@@ -210,9 +209,9 @@ export default async function getCralwerData(url: string) {
         image = value
       }
     })
+    body = formatBody({ content, title, author, description })
   } catch (error) {
     console.error(error)
   }
-  const body = formatBody({ content, title, author, description })
   return { title, description, keywords, author, body, image }
 }
