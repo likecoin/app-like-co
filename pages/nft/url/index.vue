@@ -1,39 +1,26 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <Page :class="[
+    'flex',
+    'flex-col',
+    'relative',
+    'items-center',
+    'justify-center',
+    'px-[20px]',
+    'pt-[38px]',
+    'lg:p-[16px]',
+  ]">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
-        <Label
-          class="w-min"
-          text="Convert Article to ISCN"
-          tag="div"
-          preset="p5"
-          valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green"
-          prepend-class="text-like-green"
-        >
+        <Label class="w-min" text="Convert Article to ISCN" tag="div" preset="p5" valign="middle"
+          content-class="font-semibold whitespace-nowrap text-like-green" prepend-class="text-like-green">
           <template #prepend>
             <IconRegister />
           </template>
         </Label>
         <div :class="['flex', 'flex-col', 'items-end']">
           <Stepper :step="1" :total-step="3" />
-          <Label
-            preset="p6"
-            :text="$t('Registration.step', { step: 1, total: 3 })"
-            class="text-medium-gray"
-          />
+          <Label preset="p6" :text="$t('Registration.step', { step: 1, total: 3 })" class="text-medium-gray" />
         </div>
       </div>
       <!-- guide text -->
@@ -42,36 +29,22 @@
         <img v-if="avatar" :src="avatar">
         Please use {{ ownerWallet }} to sign this transaction.
       </div>
-      <div
-        :class="[
-          'flex',
-          'flex-col',
-          'justify-center',
-          'items-center',
-          'w-full',
-        ]"
-      >
-        <div
-          :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']"
-          @submit.prevent="onSubmit"
-        >
-          <TextField
-            v-model="url"
-            class="flex flex-col"
-            :placeholder="$t('NFTProtal.placeholder.register')"
-            :error-message="errorMessage"
-          />
+      <div :class="[
+        'flex',
+        'flex-col',
+        'justify-center',
+        'items-center',
+        'w-full',
+      ]">
+        <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
+          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTProtal.placeholder.register')"
+            :error-message="errorMessage" />
           {{ iscnId }}
         </div>
         <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
         <div class="flex flex-row self-end">
-          <ProgressIndicator v-if="isLoading"/>
-          <Button
-            v-else
-            :text="$t('NFTProtal.button.register')"
-            preset="outline"
-            @click="onSubmit"
-          >
+          <ProgressIndicator v-if="isLoading" />
+          <Button v-else :text="$t('NFTProtal.button.register')" preset="outline" @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
@@ -201,11 +174,11 @@ export default class FetchIndex extends Vue {
     try {
       this.errorMessage = ''
       if (!this.url) {
-      this.errorMessage = this.$t(
-        'HomePage.search.errormessage.empty',
-      ) as string
-      return
-    }
+        this.errorMessage = this.$t(
+          'HomePage.search.errormessage.empty',
+        ) as string
+        return
+      }
       this.isLoading = true
       await this.crawlUrlData()
       if (this.crawledData?.body) {
@@ -214,7 +187,7 @@ export default class FetchIndex extends Vue {
           if (!this.arweaveId) {
             const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
             await this.submitToArweave(txHash)
-            }
+          }
         } catch (error) {
           console.error(error);
           // skip uploading body to Arweave
