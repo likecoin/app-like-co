@@ -125,7 +125,7 @@ export default class NFTTestMintPage extends Vue {
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
-  ogImageFormData: FormData | null = null
+  ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
   ogImageTxHash: string = ''
 
@@ -184,8 +184,15 @@ export default class NFTTestMintPage extends Vue {
   get loadingText(): string {
     if (this.state === 'done') return ''
     if (this.state === 'mint') return 'Minting NFT ...'
-    if (this.ogImageFormData && !this.ogImageArweaveId) return 'Uploading display image ...'
+    if (this.ogImageBlob && !this.ogImageArweaveId) return 'Uploading display image ...'
     return 'Creating NFT class ...'
+  }
+
+  get ogImageFormData(): FormData | null {
+    if (!this.ogImageBlob) return null
+    const formData = new FormData()
+    formData.append('file', this.ogImageBlob)
+    return formData
   }
 
   async mounted() {
@@ -209,7 +216,7 @@ export default class NFTTestMintPage extends Vue {
           break
         }
 
-        if (this.ogImageFormData) {
+        if (this.ogImageBlob) {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.ogImageArweaveId) {
             await this.sendArweaveFeeTx(arweaveFeeInfo)
@@ -283,10 +290,7 @@ export default class NFTTestMintPage extends Vue {
       const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
       if (!image) { return }
       const { data, headers } = await this.$axios.get(image)
-      const blob = new Blob([data], { type: headers['content-type'] })
-      const formData = new FormData()
-      formData.append('file', blob)
-      this.ogImageFormData = formData
+      this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
