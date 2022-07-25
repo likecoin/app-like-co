@@ -278,7 +278,7 @@ export default class NFTTestMintPage extends Vue {
 
   async getOgImage() {
     try {
-      const { url } = this.iscnData.contentMetadata
+      const url = this.iscnData.contentMetadata?.url
       if (!url) { return }
       const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
       if (!image) { return }
