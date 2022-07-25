@@ -117,7 +117,7 @@
           <Button
             preset="primary"
             :text="$t('HomePage.button.nftProtal')"
-            :to="localeLocation({ name: 'nfttest-fetch' })"
+            :to="localeLocation({ name: 'nft-url' })"
             :style="{ color: '#FFFFFF', backgroundColor: '#C69F67' }"
           >
             <template #prepend>

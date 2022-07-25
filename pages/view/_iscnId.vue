@@ -9,7 +9,7 @@
   </Page>
   <div v-else-if="isPopupLayout">
     <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
-      <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
+      <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
         Continue to mint Writing NFTs
       </Button>
     </div>
@@ -57,14 +57,14 @@
       </IscnUploadedInfo>
     </Page>
     <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
-      <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
+      <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
         Continue to mint Writing NFTs
       </Button>
     </div>
   </div>
   <div v-else>
     <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
-      <Button preset="plain" :to="localeLocation({ name: 'nfttest-mint-iscnId', params: { iscnId: iscnId } })" class="text-like-green">Premint NFTs</Button>
+      <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">Premint NFTs</Button>
     </div>
     <Page
       :class="[
