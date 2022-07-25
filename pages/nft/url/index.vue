@@ -111,7 +111,7 @@ export default class FetchIndex extends Vue {
     if (this.iscnId) {
       this.$router.push(
         this.localeLocation({
-          name: 'nfttest-mint-iscnId',
+          name: 'nft-iscn-iscnId',
           params: { iscnId: this.iscnId },
         })!,
       )
@@ -204,7 +204,7 @@ export default class FetchIndex extends Vue {
       if (res) {
         this.$router.push(
           this.localeLocation({
-            name: 'nfttest-mint-iscnId',
+            name: 'nft-iscn-iscnId',
             params: { iscnId: this.iscnId },
           })!,
         )
