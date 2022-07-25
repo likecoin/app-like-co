@@ -129,8 +129,8 @@ export default class FetchIndex extends Vue {
   }
 
   get iscnPayload(): ISCNRegisterPayload {
-    const { title, keywords, author } = this.crawledData
-    let { description } = this.crawledData
+    const { title = '', keywords = '', author = '' } = this.crawledData
+    let { description = '' } = this.crawledData
     description = this.truncate(description, 200)
     return {
       type: 'CreativeWork',
@@ -153,6 +153,14 @@ export default class FetchIndex extends Vue {
       descriptions: [description],
       numbersProtocolAssetId: '',
     }
+  }
+
+  get mintQuery() {
+    const query: any = {}
+    if (this.crawledData?.image) {
+      query.ogImageUrl = encodeURIComponent(this.crawledData.image)
+    }
+    return query
   }
 
   async mounted() {
@@ -200,10 +208,17 @@ export default class FetchIndex extends Vue {
     }
       this.isLoading = true
       await this.crawlUrlData()
-      const arweaveFeeInfo = await this.estimateArweaveFee()
-      if (!this.arweaveId) {
-        const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
-        await this.submitToArweave(txHash)
+      if (this.crawledData?.body) {
+        try {
+          const arweaveFeeInfo = await this.estimateArweaveFee()
+          if (!this.arweaveId) {
+            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
+            await this.submitToArweave(txHash)
+            }
+        } catch (error) {
+          console.error(error);
+          // skip uploading body to Arweave
+        }
       }
       await this.submitToISCN()
     } catch (err) {
@@ -307,6 +322,7 @@ export default class FetchIndex extends Vue {
           this.localeLocation({
             name: 'nft-iscn-iscnId',
             params: { iscnId: this.iscnId },
+            query: this.mintQuery,
           })!,
         )
       }

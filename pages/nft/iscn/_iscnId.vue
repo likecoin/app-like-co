@@ -125,6 +125,7 @@ export default class NFTTestMintPage extends Vue {
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
+  ogImageUrl = decodeURIComponent(this.$route.query.ogImageUrl as string) || ''
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
 
@@ -284,11 +285,14 @@ export default class NFTTestMintPage extends Vue {
 
   async getOgImage() {
     try {
-      const url = this.iscnData.contentMetadata?.url
-      if (!url) { return }
-      const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
-      if (!image) { return }
-      const { data, headers } = await this.$axios.get(image)
+      if (!this.ogImageUrl) {
+        const url = this.iscnData.contentMetadata?.url
+        if (!url) { return }
+        const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
+        if (!image) { return }
+        this.ogImageUrl = image
+      }
+      const { data, headers } = await this.$axios.get(this.ogImageUrl)
       this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
     } catch (err) {
       // eslint-disable-next-line no-console
