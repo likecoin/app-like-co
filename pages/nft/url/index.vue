@@ -93,7 +93,12 @@ import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
 import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
-import { getLikerIdMinApi, getAddressLikerIdMinApi , API_POST_ARWEAVE_ESTIMATE, API_POST_ARWEAVE_UPLOAD } from '~/constant/api'
+import {
+  getLikerIdMinApi,
+  getAddressLikerIdMinApi,
+  API_POST_ARWEAVE_ESTIMATE,
+  API_POST_ARWEAVE_UPLOAD
+} from '~/constant/api'
 
 
 const signerModule = namespace('signer')
