@@ -129,7 +129,7 @@ export default class FetchIndex extends Vue {
   }
 
   get iscnPayload(): ISCNRegisterPayload {
-    const { title, keywords } = this.crawledData
+    const { title, keywords, author } = this.crawledData
     let { description } = this.crawledData
     description = this.truncate(description, 200)
     return {
@@ -143,14 +143,14 @@ export default class FetchIndex extends Vue {
       ipfsHash: this.ipfsHash,
       arweaveId: this.arweaveId,
       fileSHA256: '',
-      authorNames: ['Author'],
-      authorUrls: [['']],
+      authorNames: [author],
+      authorUrls: [[]],
       authorWallets: [[{
         address: this.address,
         type: 'like',
       }]],
-      likerIds: [''],
-      descriptions: [''],
+      likerIds: [],
+      descriptions: [description],
       numbersProtocolAssetId: '',
     }
   }
