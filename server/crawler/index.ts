@@ -25,6 +25,10 @@ function formatBody({
     <meta property="article:author" content="${author}">
     <meta property="og:title" content="${author}: ${title}">
     <meta name="twitter:title" content="${author}: ${title}">`
+  } else {
+    meta += `
+    <meta property="og:title" content="${title}">
+    <meta name="twitter:title" content="${title}">`
   }
   const style = `
     <style>
