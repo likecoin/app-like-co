@@ -292,7 +292,7 @@ export default class FetchIndex extends Vue {
         this.address,
       )
       this.iscnId = res.iscnId
-      await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId)
+      await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
       if (res) {
         this.$router.push(
           this.localeLocation({
