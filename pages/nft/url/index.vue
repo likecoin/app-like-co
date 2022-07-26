@@ -128,12 +128,12 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  get mintQuery() {
-    const query: any = {}
+  get iscnParams() {
+    const params: any = { iscnId: this.iscnId }
     if (this.crawledData?.image) {
-      query.ogImageUrl = this.crawledData.image
+      params.ogImageUrl = this.crawledData.image
     }
-    return query
+    return params
   }
 
   async mounted() {
@@ -141,7 +141,7 @@ export default class FetchIndex extends Vue {
       this.$router.push(
         this.localeLocation({
           name: 'nft-iscn-iscnId',
-          params: { iscnId: this.iscnId },
+          params: this.iscnParams,
         })!,
       )
     }
@@ -294,8 +294,7 @@ export default class FetchIndex extends Vue {
         this.$router.push(
           this.localeLocation({
             name: 'nft-iscn-iscnId',
-            params: { iscnId: this.iscnId },
-            query: this.mintQuery,
+            params: this.iscnParams,
           })!,
         )
       }

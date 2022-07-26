@@ -125,7 +125,7 @@ export default class NFTTestMintPage extends Vue {
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
-  ogImageUrl = this.$route.query.ogImageUrl as string || ''
+  ogImageUrl = this.$route.params.ogImageUrl as string || ''
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
 
