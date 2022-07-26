@@ -3,21 +3,15 @@ import stringify from 'fast-json-stable-stringify';
 import network from '@/constant/network';
 import { API_LIKER_NFT_MAPPING } from '../constant/api'
 
-async function signISCNMapping(inputWallet, signer, platform, iscnId, url, likerId) {
+async function signISCNMapping(inputWallet, signer, iscnId, url, likerId) {
   if (!inputWallet) return null;
-  if (![
-'likeWallet',
-'cosmosWallet',
-].includes(platform)) {
-    throw new Error('SIGN_COSMOS_LOGIN_INVALID_PLATFORM');
-  }
   const ts = Date.now();
   const payload = JSON.stringify({
     ts,
     iscnId,
     url,
     likerId,
-    [platform]: inputWallet,
+    address: inputWallet,
   });
   const {
     signed: message,
@@ -28,25 +22,16 @@ async function signISCNMapping(inputWallet, signer, platform, iscnId, url, liker
     publicKey: publicKey.value,
     message: stringify(message),
     from: inputWallet,
-    platform,
   };
   return data;
 }
 
-async function signLogin(signPayload,signer,address) {
-  if (!window.keplr) throw new Error('CANNOT_FIND_KEPLR');
-  window.keplr.defaultOptions = window.keplr.defaultOptions || {};
-  const originalConfig = window.keplr.defaultOptions.sign || {};
-  window.keplr.defaultOptions.sign = {
-    ...originalConfig,
-    preferNoSetFee: true,
-    preferNoSetMemo: true,
-  };
+async function payloadSigner(signPayload, signer, address) {
   const message = {
     chain_id: network.id,
     memo: signPayload,
     msgs: [],
-    fee: { gas: '1', amount: [{ denom: 'nanolike', amount: '0' }] },
+    fee: { gas: '1', amount: [{ denom: network.coinLookup[0].chainDenom, amount: '0' }] },
     sequence: '0',
     account_number: '0',
   };
@@ -54,26 +39,23 @@ async function signLogin(signPayload,signer,address) {
     address,
     message,
   );
-  window.keplr.defaultOptions.sign = originalConfig;
   return { message, ...payload };
 }
 
-async function signByCosmosWallet(source, iscnId, url, likerId, signer, address) {
- const platform = address.startsWith('like') ? 'likeWallet' : 'cosmosWallet';
+async function signByCosmosWallet(iscnId, url, likerId, signer, address) {
  const payload = await signISCNMapping(
    address,
-   s => signLogin(s, signer, address),
-   platform,
+   s => payloadSigner(s, signer, address),
    iscnId,
    url,
    likerId,
  );
- return { platform, address, payload: { cosmosWalletSource: source, ...payload } };
+ return { address, payload };
 }
 
 export default async function postWithCosmosWallet(iscnId, url, likerId, signer, address) {
  try {
-   const { payload } = await signByCosmosWallet('keplr', iscnId, url, likerId, signer, address);
+   const { payload } = await signByCosmosWallet(iscnId, url, likerId, signer, address);
    await axios.post(API_LIKER_NFT_MAPPING, { payload })
  } catch (err) {
    console.error(err);
