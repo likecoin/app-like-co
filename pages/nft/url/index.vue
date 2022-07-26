@@ -70,7 +70,7 @@ import {
   getLikerIdMinApi,
   getAddressLikerIdMinApi,
   API_POST_ARWEAVE_ESTIMATE,
-  API_POST_ARWEAVE_UPLOAD
+  API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
 

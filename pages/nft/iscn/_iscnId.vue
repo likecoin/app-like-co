@@ -94,7 +94,7 @@ import {
   API_POST_ARWEAVE_UPLOAD,
   getNftClassImage,
   getNftClassUriViaIscnId,
-  getNftUriViaNftId
+  getNftUriViaNftId,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -186,6 +186,12 @@ export default class NFTTestMintPage extends Vue {
     if (this.state === 'mint') return 'Minting NFT ...'
     if (this.ogImageBlob && !this.ogImageArweaveId) return 'Uploading display image ...'
     return 'Creating NFT class ...'
+  }
+
+  get ogImageUri(): string {
+    if (this.ogImageArweaveId) return `ar://${this.ogImageArweaveId}`
+    if (this.classId) return getNftClassImage(this.classId)
+    return ''
   }
 
   get ogImageFormData(): FormData | null {
@@ -394,7 +400,7 @@ export default class NFTTestMintPage extends Vue {
             nft_meta_collection_id: 'likerland_writing_nft',
             nft_meta_collection_name: 'Writing NFT',
             nft_meta_collection_descrption: 'Writing NFT by Liker Land',
-            image: getNftClassImage(this.classId),
+            image: this.ogImageUri,
           },
         },
       )
@@ -429,7 +435,7 @@ export default class NFTTestMintPage extends Vue {
           uri: getNftUriViaNftId(this.classId, id),
           metadata: {
             name: `Writing NFT - ${this.iscnData.name}`,
-            image: getNftClassImage(this.classId),
+            image: this.ogImageUri,
           },
         }
       })
