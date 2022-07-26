@@ -131,7 +131,7 @@ export default class FetchIndex extends Vue {
   get mintQuery() {
     const query: any = {}
     if (this.crawledData?.image) {
-      query.ogImageUrl = encodeURIComponent(this.crawledData.image)
+      query.ogImageUrl = this.crawledData.image
     }
     return query
   }
