@@ -125,4 +125,4 @@ export const AIRDROP_OG_ENDPOINT = IS_TESTNET
 
 export const IS_CHAIN_UPGRADING = false;
 
-export const LIKER_NFT_API_WALLET = 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp';
+export const LIKER_NFT_API_WALLET = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
