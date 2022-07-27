@@ -101,6 +101,8 @@ import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 
+const PREMINT_NFT_AMOUNT = 500;
+
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
 
@@ -110,6 +112,7 @@ const signerModule = namespace('signer')
       redirect({ name: 'index' })
     }
   },
+  layout: 'wallet',
 })
 export default class NFTTestMintPage extends Vue {
   @signerModule.Getter('getAddress') address!: string
@@ -428,7 +431,7 @@ export default class NFTTestMintPage extends Vue {
       await signingClient.setSigner(this.signer)
       const { classId } = this
 
-      const nfts = [...Array(1000).keys()].map((_) => {
+      const nfts = [...Array(PREMINT_NFT_AMOUNT).keys()].map((_) => {
         const id = `writing-${uuidv4()}`
         return {
           id,
@@ -459,7 +462,7 @@ export default class NFTTestMintPage extends Vue {
 
   setError(errorMessage: string) {
     this.isOpenWarningSnackbar = true
-    this.errorMsg = this.$t('NFTProtal.mint.error', {
+    this.errorMsg = this.$t('NFTPortal.mint.error', {
       error: errorMessage,
     }) as string
     this.isLoading = false
