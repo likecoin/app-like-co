@@ -110,6 +110,7 @@ const signerModule = namespace('signer')
       redirect({ name: 'index' })
     }
   },
+  layout: 'wallet',
 })
 export default class NFTTestMintPage extends Vue {
   @signerModule.Getter('getAddress') address!: string

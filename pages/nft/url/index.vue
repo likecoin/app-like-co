@@ -76,7 +76,9 @@ import {
 
 const signerModule = namespace('signer')
 
-@Component
+@Component({
+  layout: 'wallet',
+})
 export default class FetchIndex extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
