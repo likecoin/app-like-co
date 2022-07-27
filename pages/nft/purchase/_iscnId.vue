@@ -41,7 +41,7 @@
         <div class="flex flex-col items-start w-full sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center">
             <Label preset="h2" class="text-like-green">{{ nftPrice }} $LIKE</Label>
-            <Label preset="p5" class="text-medium-gray ml-[8px]">{{
+            <Label v-if="currentLIKEPrice" preset="p5" class="text-medium-gray ml-[8px]">{{
                 NFTPriceUSD
               }}</Label>
           </div>
@@ -106,7 +106,7 @@ export default class NFTTestButtonPage extends Vue {
   name: string = ''
   description: string = ''
   owner: string = ''
-  currentLikePrice: number = 0
+  currentLIKEPrice: number = 0
 
   isLoading: boolean = false
 
@@ -116,7 +116,7 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   get NFTPriceUSD(): string {
-      const price = this.currentLikePrice * this.nftPrice;
+      const price = this.currentLIKEPrice * this.nftPrice;
       return `(${price.toFixed(3)} USD)`;
   }
 
@@ -124,8 +124,8 @@ export default class NFTTestButtonPage extends Vue {
     await Promise.all([
       this.getPurchaseInfo(),
       this.getNftMetadata(),
-      this.getLIKEPrice(),
-    ]);
+    ]).catch((err) => this.$nuxt.error({ statusCode: 404, message: err }))
+    this.getLIKEPrice().catch(err => console.error(err))
   }
 
   async onClickMint() {
@@ -165,8 +165,8 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   async getLIKEPrice() {
-      const { data } = await this.$axios.get(getLIKEPrice());
-      this.currentLikePrice = data.likecoin.usd;
+    const { data } = await this.$axios.get(getLIKEPrice());
+    this.currentLIKEPrice = data.likecoin.usd;
   }
 
   async grantPurchaseTransaction() {
