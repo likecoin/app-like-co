@@ -28,7 +28,7 @@
         'items-end',
       ]"
     >
-      <Stepper :step="step" />
+      <Stepper :step="step" :total-step="totalStep"  />
       <Label
         preset="p6"
         :text="$t('Registration.step', { step: step, total: 4 })"
@@ -44,5 +44,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class IscnFormHeader extends Vue {
   @Prop(Number) readonly step: number | undefined
+  @Prop(Number) readonly totalStep: number | undefined
+
 }
 </script>

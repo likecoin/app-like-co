@@ -2,7 +2,7 @@
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { ISCNSigningClient, ISCNSignPayload } from '@likecoin/iscn-js';
 import network from '@/constant/network';
-import { BroadcastTxSuccess } from '@cosmjs/stargate';
+import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER } from '~/constant'
 
@@ -110,5 +110,5 @@ export async function signISCN(
   const signingClient = await getSigningClient();
   await signingClient.connectWithSigner(network.rpcURL, signer);
   const res = await signingClient.createISCNRecord(address, tx, { memo: 'app.like.co' });
-  return res as BroadcastTxSuccess;
+  return res as DeliverTxResponse;
 }

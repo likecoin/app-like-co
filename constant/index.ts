@@ -32,13 +32,11 @@ export const RAWDATA_URL = {
 }
 
 export const RAWDATA_TX_URLS = {
-  testnet: [
-    'https://node.testnet.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id=',
-  ],
+  testnet: ['https://node.testnet.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id='],
   production: [
     'https://mainnet-node.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'create_iscn_record\'&events=iscn_record.iscn_id=',
     'https://mainnet-node.like.co/cosmos/tx/v1beta1/txs?events=message.action=\'/likechain.iscn.MsgCreateIscnRecord\'&events=iscn_record.iscn_id=',
-  ]
+  ],
 }
 
 export const ISCN_RAW_DATA_ENDPOINT = IS_TESTNET
@@ -128,3 +126,5 @@ export const AIRDROP_OG_ENDPOINT = IS_TESTNET
   : AIRDROP_OG_URL.production
 
 export const IS_CHAIN_UPGRADING = false;
+
+export const LIKER_NFT_API_WALLET = 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp';

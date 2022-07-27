@@ -2,7 +2,7 @@
   <div>
       <Card class="p-[32px]" :has-padding="false">
         <!-- header -->
-        <IscnFormHeader :step="step" />
+        <IscnFormHeader :step="step" :total-step="4"/>
         <!-- guide text -->
         <Label
           :text="$t('UploadForm.guide.selectFile')"
