@@ -44,7 +44,7 @@ async function payloadSigner(signPayload, signer, address) {
 
 export default async function postMappingWithCosmosWallet(iscnId, url, likerId, signer, address) {
  try {
-   const { payload } = await signISCNMapping(
+   const payload = await signISCNMapping(
     address,
     s => payloadSigner(s, signer, address),
     iscnId,
