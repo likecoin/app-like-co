@@ -41,13 +41,25 @@
         <div class="flex flex-col items-start w-full sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center">
             <Label preset="h2" class="text-like-green">{{ nftPrice }} $LIKE</Label>
-            <Label v-if="currentLIKEPrice" preset="p5" class="text-medium-gray ml-[8px]">{{
-                NFTPriceUSD
-              }}</Label>
+            <Label
+              v-if="currentLIKEPrice"
+              preset="p5"
+              class="text-medium-gray ml-[8px]"
+            >
+              {{ NFTPriceUSD }}
+            </Label>
           </div>
-          <Button v-if="!isLoading" preset="secondary" class="mt-[8px] sm:mt-0" @click="onClickMint"
-            >Collect Now <template #prepend><IconPrice /></template
-          ></Button>
+          <Button
+            v-if="!isLoading"
+            preset="secondary"
+            :text="$t('NFTPortal.button.collect')"
+            class="mt-[8px] sm:mt-0"
+            @click="onClickMint"
+          >
+            <template #prepend>
+              <IconPrice />
+            </template>
+          </Button>
           <ProgressIndicator v-else/>
         </div>
       </div>

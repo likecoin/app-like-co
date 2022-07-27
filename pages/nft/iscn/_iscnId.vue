@@ -40,29 +40,35 @@
           'w-full',
           'my-[64px]',
         ]">
-          <FormField label="ISCN :" class="mb-[12px]">
+          <FormField :label="$t('NFTPortal.label.Iscn')" class="mb-[12px]">
             <Label :text="iscnId" tag="div" preset="p6" />
           </FormField>
-          <FormField v-if="classId" label="NFT Class ID :" class="mb-[12px]">
+          <FormField v-if="classId" :label="$t('NFTPortal.label.classId')" class="mb-[12px]">
             <Label :text="classId" tag="div" preset="p6" />
           </FormField>
-          <FormField v-if="state === 'done' && isWritingNFT" label="NFT Details Page :" class="mb-[12px]">
+          <FormField v-if="state === 'done' && isWritingNFT" :label="$t('NFTPortal.label.detailsPage')" class="mb-[12px]">
             <Link :href="detailsPageURL">{{ detailsPageURL }}</Link>
           </FormField>
         </div>
-        <div v-if="iscnOwner && !isUserISCNOwner">
-          Please use ISCN owner wallet {{ iscnOwner }} to mint NFT
-        </div>
+        <Label
+          v-if="iscnOwner && !isUserISCNOwner"
+          :text="$t('NFTPortal.errorMessage.notIscnOwner', { ownerWallet: iscnOwner })"
+        />
         <div class="flex flex-col self-end">
           <div v-if="isLoading" class="flex flex-col justify-center">
             <ProgressIndicator />
             <Label class="text-[8px] text-medium-gray text-center mt-[8px]" align="center">{{ loadingText }}</Label>
           </div>
 
-          <Button v-else preset="outline" :is-disabled="!iscnData || !isUserISCNOwner" class="my-[12px]"
-            @click="doAction">{{
-                buttonText
-            }}</Button>
+          <Button
+            v-else
+            preset="outline"
+            :is-disabled="!iscnData || !isUserISCNOwner"
+            class="my-[12px]"
+            @click="doAction"
+          >
+            {{ buttonText }}
+          </Button>
         </div>
       </div>
     </Card>
@@ -199,16 +205,11 @@ export default class NFTTestMintPage extends Vue {
     return 2
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  get code() {
-    return `<div class="likecoin-embed likecoin-button" iscn_id="${this.iscnId}"></div>`
-  }
-
   get loadingText(): string {
     if (this.state === 'done') return ''
-    if (this.state === 'mint') return 'Minting NFT ...'
-    if (this.ogImageBlob && !this.ogImageArweaveId) return 'Uploading display image ...'
-    return 'Creating NFT class ...'
+    if (this.state === 'mint') return this.$t('NFTPortal.loadingMessage.mint') as string
+    if (this.ogImageBlob && !this.ogImageArweaveId) return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+    return this.$t('NFTPortal.loadingMessage.createClass') as string
   }
 
   get ogImageUri(): string {
@@ -237,7 +238,7 @@ export default class NFTTestMintPage extends Vue {
         return this.$t('IscnRegisterForm.error.missingSigner')
 
       case ErrorType.USER_NOT_ISCN_OWNER:
-        return `Please use ISCN owner wallet ${this.iscnOwner} to mint NFT`
+        return ErrorType.USER_NOT_ISCN_OWNER
 
       case ErrorType.CREATE_NFT_CLASS_FAILD:
         return this.$t('NFTPortal.mint.error', {

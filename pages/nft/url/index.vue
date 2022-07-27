@@ -12,7 +12,7 @@
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
-        <Label class="w-min" text="Convert Article to ISCN" tag="div" preset="p5" valign="middle"
+        <Label class="w-min" :text="$t('NFTPortal.button.convertToIscn')" tag="div" preset="p5" valign="middle"
           content-class="font-semibold whitespace-nowrap text-like-green" prepend-class="text-like-green">
           <template #prepend>
             <IconRegister />
@@ -27,7 +27,7 @@
       <!-- body -->
       <div v-if="ownerWallet">
         <img v-if="avatar" :src="avatar">
-        Please use {{ ownerWallet }} to sign this transaction.
+        <Label :text="$t('NFTPortal.errorMessage.notIscnOwner', { ownerWallet })" />
       </div>
       <div :class="[
         'flex',
@@ -210,7 +210,7 @@ export default class FetchIndex extends Vue {
 
     this.balance = await getAccountBalance(this.address) as string
     if (this.balance === '0') {
-      this.errorMessage = ErrorType.INSUFFICIENT_BALANCE;
+      this.errorMessage = 'INSUFFICIENT_BALANCE';
       this.isOpenWarningSnackbar = true
       this.errorType = ErrorType.INSUFFICIENT_BALANCE;
       return
