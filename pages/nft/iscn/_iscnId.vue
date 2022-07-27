@@ -396,7 +396,7 @@ export default class NFTTestMintPage extends Vue {
         this.address,
         this.iscnId,
         {
-          name: `Writing NFT - ${this.iscnData.name}`,
+          name: `Writing NFT - ${this.iscnData.contentMetadata?.name || ''}`,
           symbol: 'WRITING',
           uri: getNftClassUriViaIscnId(this.iscnId),
           metadata: {
@@ -437,7 +437,7 @@ export default class NFTTestMintPage extends Vue {
           id,
           uri: getNftUriViaNftId(this.classId, id),
           metadata: {
-            name: `Writing NFT - ${this.iscnData.name}`,
+            name: `Writing NFT - ${this.iscnData.contentMetadata?.name || ''}`,
             image: this.ogImageUri,
           },
         }
