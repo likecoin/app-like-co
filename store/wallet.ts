@@ -181,7 +181,7 @@ export default class Wallet extends VuexModule {
           id: payloadId(),
           jsonrpc: '2.0',
           method: 'cosmos_getAccounts',
-          params: ['likecoin-mainnet-2'],
+          params: [network.id],
         }));
         window.localStorage?.setItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`, JSON.stringify(account));
       } else {
@@ -216,6 +216,22 @@ export default class Wallet extends VuexModule {
           return {
             signed: SignDoc.fromJSON(resInJSON.signed),
             signature: resInJSON.signature,
+          };
+        },
+        signAmino: async (signerAddress, data) => {
+          const [resInObject] = await connector.sendCustomRequest({
+            id: payloadId(),
+            jsonrpc: '2.0',
+            method: 'cosmos_signAmino',
+            params: [
+'',
+signerAddress,
+data,
+],
+          });
+          return {
+            signed: resInObject.signed,
+            signature: resInObject.signature,
           };
         },
       }

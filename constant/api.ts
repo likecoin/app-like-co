@@ -9,6 +9,7 @@ export const API_LIKER_NFT_MINT = `${LIKE_CO_API_ROOT}/likernft/mint`;
 export const API_LIKER_NFT_PURCHASE = `${LIKE_CO_API_ROOT}/likernft/purchase`;
 export const API_LIKER_NFT_HISTORY = `${LIKE_CO_API_ROOT}/likernft/history`;
 export const API_LIKER_NFT_METADATA = `${LIKE_CO_API_ROOT}/likernft/metadata`;
+export const API_LIKER_NFT_MAPPING = `${LIKE_CO_API_ROOT}/like/iscn/mapping`;
 
 export const getNftClassUriViaIscnId = (iscnId: string): string => `${LIKE_CO_API_ROOT}/likernft/metadata?iscn_id=${encodeURIComponent(iscnId)}`;
 export const getNftUriViaNftId = (classId: string, nftId: string): string => `${LIKE_CO_API_ROOT}/likernft/metadata?class_id=${encodeURIComponent(classId)}&nft_id=${encodeURIComponent(nftId)}`;

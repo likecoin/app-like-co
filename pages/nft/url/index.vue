@@ -74,6 +74,7 @@ import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
+import postMappingWithCosmosWallet from '@/utils/mapping';
 
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
@@ -111,6 +112,7 @@ export default class FetchIndex extends Vue {
   arweaveFeeTargetAddress = ''
   arweaveFee = new BigNumber(0)
   iscnId = this.$route.query.iscn_id as string || ''
+  likerId = this.$route.query.liker_id as string || ''
   isLoading = false
   avatar = null
   balance: string = ''
@@ -333,6 +335,7 @@ export default class FetchIndex extends Vue {
         this.address,
       )
       this.iscnId = res.iscnId
+      if (this.url && this.likerId) await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
       if (res) {
         this.$router.push(
           this.localeLocation({
