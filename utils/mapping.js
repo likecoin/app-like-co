@@ -31,11 +31,11 @@ async function payloadSigner(signPayload, signer, address) {
     chain_id: network.id,
     memo: signPayload,
     msgs: [],
-    fee: { gas: '1', amount: [{ denom: network.coinLookup[0].chainDenom, amount: '0' }] },
+    fee: { gas: '1', amount: [{ denom: 'nanolike', amount: '0' }] },
     sequence: '0',
     account_number: '0',
   };
-  const payload = await signer.sign(
+  const payload = await signer.signAmino(
     address,
     message,
   );
