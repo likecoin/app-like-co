@@ -76,6 +76,7 @@ const signerModule = namespace('signer')
       return value
     },
   },
+  layout: 'wallet',
 })
 export default class NFTTestButtonPage extends Vue {
   @signerModule.Getter('getAddress') address!: string

@@ -37,20 +37,33 @@
         'w-full',
       ]">
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
-          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTProtal.placeholder.register')"
+          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTPortal.placeholder.register')"
             :error-message="errorMessage" />
           {{ iscnId }}
         </div>
         <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
         <div class="flex flex-row self-end">
           <ProgressIndicator v-if="isLoading" />
-          <Button v-else :text="$t('NFTProtal.button.register')" preset="outline" @click="onSubmit">
+          <Button v-else :text="$t('NFTPortal.button.register')" preset="outline" @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
           </Button>
         </div>
       </div>
+      <Snackbar
+        v-model="isOpenWarningSnackbar"
+        preset="warn"
+      >
+        {{ errorAlert }}
+        <Link
+          v-if="errorType === 'INSUFFICIENT_BALANCE'"
+          :class="['text-white','ml-[2px]']"
+          href="https://faucet.like.co/"
+        >
+          {{ $t('IscnRegisterForm.error.faucet') }}
+        </Link>
+      </Snackbar>
     </Card>
   </Page>
 </template>
@@ -73,10 +86,18 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
+import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
 
-@Component
+export enum ErrorType {
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
+  MISSING_SIGNER = 'MISSING_SIGNER'
+}
+
+@Component({
+  layout: 'wallet',
+})
 export default class FetchIndex extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
@@ -91,7 +112,10 @@ export default class FetchIndex extends Vue {
   arweaveFee = new BigNumber(0)
   iscnId = this.$route.query.iscn_id as string || ''
   isLoading = false
-  avatar = null;
+  avatar = null
+  balance: string = ''
+  errorType: string = ''
+  isOpenWarningSnackbar: boolean = false
 
   get formData(): FormData | null {
     if (!this.crawledData?.body) { return null }
@@ -136,6 +160,17 @@ export default class FetchIndex extends Vue {
     return params
   }
 
+  get errorAlert() {
+    switch (this.errorType) {
+      case ErrorType.INSUFFICIENT_BALANCE:
+        return this.$t('IscnRegisterForm.error.insufficient')
+      case ErrorType.MISSING_SIGNER:
+        return this.$t('IscnRegisterForm.error.missingSigner')
+      default:
+        return ''
+    }
+  }
+
   async mounted() {
     if (this.iscnId) {
       this.$router.push(
@@ -163,7 +198,6 @@ export default class FetchIndex extends Vue {
         console.error(err);
       }
     }
-
   }
 
   async onSubmit() {
@@ -171,6 +205,15 @@ export default class FetchIndex extends Vue {
       this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
       return
     }
+
+    this.balance = await getAccountBalance(this.address) as string
+    if (this.balance === '0') {
+      this.errorMessage = ErrorType.INSUFFICIENT_BALANCE;
+      this.isOpenWarningSnackbar = true
+      this.errorType = ErrorType.INSUFFICIENT_BALANCE;
+      return
+    }
+
     try {
       this.errorMessage = ''
       if (!this.url) {

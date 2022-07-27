@@ -110,6 +110,7 @@ const signerModule = namespace('signer')
       redirect({ name: 'index' })
     }
   },
+  layout: 'wallet',
 })
 export default class NFTTestMintPage extends Vue {
   @signerModule.Getter('getAddress') address!: string
@@ -459,7 +460,7 @@ export default class NFTTestMintPage extends Vue {
 
   setError(errorMessage: string) {
     this.isOpenWarningSnackbar = true
-    this.errorMsg = this.$t('NFTProtal.mint.error', {
+    this.errorMsg = this.$t('NFTPortal.mint.error', {
       error: errorMessage,
     }) as string
     this.isLoading = false
