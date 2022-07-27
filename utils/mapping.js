@@ -31,7 +31,7 @@ async function payloadSigner(signPayload, signer, address) {
     chain_id: network.id,
     memo: signPayload,
     msgs: [],
-    fee: { gas: '1', amount: [{ denom: 'nanolike', amount: '0' }] },
+    fee: { gas: '1', amount: [{ denom: network.coinLookup[0].chainDenom, amount: '0' }] },
     sequence: '0',
     account_number: '0',
   };
@@ -42,21 +42,16 @@ async function payloadSigner(signPayload, signer, address) {
   return { message, ...payload };
 }
 
-async function signByCosmosWallet(iscnId, url, likerId, signer, address) {
- const payload = await signISCNMapping(
-   address,
-   s => payloadSigner(s, signer, address),
-   iscnId,
-   url,
-   likerId,
- );
- return { address, payload };
-}
-
-export default async function postWithCosmosWallet(iscnId, url, likerId, signer, address) {
+export default async function postMappingWithCosmosWallet(iscnId, url, likerId, signer, address) {
  try {
-   const { payload } = await signByCosmosWallet(iscnId, url, likerId, signer, address);
-   await axios.post(API_LIKER_NFT_MAPPING, { payload })
+   const { payload } = await signISCNMapping(
+    address,
+    s => payloadSigner(s, signer, address),
+    iscnId,
+    url,
+    likerId,
+  )
+   await axios.post(API_LIKER_NFT_MAPPING, { address, payload })
  } catch (err) {
    console.error(err);
  }
