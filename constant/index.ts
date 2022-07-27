@@ -24,7 +24,7 @@ export const ISCN_REGISTRY_NAME = 'likecoin-chain';
 
 export const ISCN_PREFIX = `iscn://${ISCN_REGISTRY_NAME}`;
 
-export const LIKER_LAND_URL = 'https://liker.land/';
+export const LIKER_LAND_URL = IS_TESTNET ? 'https://rinkeby.liker.land' : 'https://liker.land';
 
 export const RAWDATA_URL = {
   testnet: 'https://node.testnet.like.co/iscn/records/id?iscn_id=',

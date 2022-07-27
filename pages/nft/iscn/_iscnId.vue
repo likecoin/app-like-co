@@ -46,10 +46,8 @@
           <FormField v-if="classId" label="NFT Class ID :" class="mb-[12px]">
             <Label :text="classId" tag="div" preset="p6" />
           </FormField>
-          <FormField v-if="state === 'done' && isWritingNFT" label="Embed NFT Widget :" class="mb-[12px]">
-            <code class="block w-full whitespace-normal bg-light-gray">{{
-                code
-            }}</code>
+          <FormField v-if="state === 'done' && isWritingNFT" label="NFT Details Page :" class="mb-[12px]">
+            <Link :href="detailsPageURL">{{ detailsPageURL }}</Link>
           </FormField>
         </div>
         <div v-if="iscnOwner && !isUserISCNOwner">
@@ -68,9 +66,19 @@
         </div>
       </div>
     </Card>
-    <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
-      {{ errorMsg }}
-    </Snackbar>
+    <Snackbar
+        v-model="isOpenWarningSnackbar"
+        preset="warn"
+      >
+        {{ errorMessage }}
+        <Link
+          v-if="errorType === 'INSUFFICIENT_BALANCE'"
+          :class="['text-white','ml-[2px]']"
+          href="https://faucet.like.co/"
+        >
+          {{ $t('IscnRegisterForm.error.faucet') }}
+        </Link>
+      </Snackbar>
   </Page>
 </template>
 
@@ -100,11 +108,21 @@ import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
+import { getAccountBalance } from '~/utils/cosmos'
 
 const PREMINT_NFT_AMOUNT = 500;
 
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
+
+export enum ErrorType {
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
+  MISSING_SIGNER = 'MISSING_SIGNER',
+  USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER',
+  CREATE_NFT_CLASS_FAILD = 'CREATE_NFT_CLASS_FAILD',
+  SEND_NFT_FAILD = 'SEND_NFT_FAILD',
+  POST_NFT_INFO = 'POST_NFT_INFO'
+}
 
 @Component({
   fetch({ params, redirect }) {
@@ -138,7 +156,8 @@ export default class NFTTestMintPage extends Vue {
   isLoading = false
   isOpenWarningSnackbar: boolean = false
 
-  errorMsg: string = ''
+  errorType: string = ''
+  balance: string = ''
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
@@ -162,8 +181,9 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get buttonText(): string {
-    if (this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
-    if (this.state === 'mint') return 'Mint NFT'
+    if (this.errorType) return 'Retry'
+    if (!this.errorType && this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
+    if (!this.errorType && this.state === 'mint') return 'Mint NFT'
     return 'Mint NFT'
   }
 
@@ -204,6 +224,40 @@ export default class NFTTestMintPage extends Vue {
     return formData
   }
 
+  get detailsPageURL(): string {
+    return `${LIKER_LAND_URL}/nft/class/${this.classId}`
+  }
+
+  get errorMessage() {
+    switch (this.errorType) {
+      case ErrorType.INSUFFICIENT_BALANCE:
+        return this.$t('IscnRegisterForm.error.insufficient')
+
+      case ErrorType.MISSING_SIGNER:
+        return this.$t('IscnRegisterForm.error.missingSigner')
+
+      case ErrorType.USER_NOT_ISCN_OWNER:
+        return `Please use ISCN owner wallet ${this.iscnOwner} to mint NFT`
+
+      case ErrorType.CREATE_NFT_CLASS_FAILD:
+        return this.$t('NFTPortal.mint.error', {
+          error: 'creating NFT classId',
+        }) as string
+
+      case ErrorType.SEND_NFT_FAILD:
+        return this.$t('NFTPortal.mint.error', {
+          error: 'sending NFT',
+        }) as string
+
+      case ErrorType.POST_NFT_INFO:
+        return this.$t('NFTPortal.mint.error', {
+          error: 'posting NFT info',
+        }) as string
+      default:
+        return ''
+    }
+  }
+
   async mounted() {
     await Promise.all([
       this.getISCNInfo().catch(err => console.error(err)),
@@ -213,15 +267,19 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async doAction() {
+    this.errorType = ''
+    this.balance = await getAccountBalance(this.address) as string
+    if(this.balance === '0'){
+      this.setError(ErrorType.INSUFFICIENT_BALANCE)
+      return
+    }
+    this.isLoading = true
+    this.isOpenWarningSnackbar = false
     /* eslint-disable no-fallthrough */
     switch (this.state) {
       case 'create':
-        this.errorMsg = ''
-        this.isOpenWarningSnackbar = false
-        this.isLoading = true
-
         if (!this.isUserISCNOwner) {
-          this.setError('USER_NOT_ISCN_OWNER')
+          this.setError(ErrorType.USER_NOT_ISCN_OWNER)
           break
         }
 
@@ -235,23 +293,23 @@ export default class NFTTestMintPage extends Vue {
 
         this.classId = await this.createNftClass()
         if (!this.classId) {
-          this.setError('creating NFT class')
+          this.setError(ErrorType.CREATE_NFT_CLASS_FAILD)
           break
         }
 
+      case 'mint':
         this.sendRes = await this.mintNFT()
         if (!this.sendRes) {
-          this.setError('sending NFT')
+          this.setError(ErrorType.SEND_NFT_FAILD)
           break
         }
 
         if (this.isWritingNFT) {
           this.postInfo = await this.postMintInfo()
           if (!this.postInfo) {
-            this.setError('posting NFT Info')
+            this.setError(ErrorType.POST_NFT_INFO)
             break
           }
-
           await this.getMintInfo()
         }
 
@@ -460,11 +518,9 @@ export default class NFTTestMintPage extends Vue {
     return sendRes
   }
 
-  setError(errorMessage: string) {
+  setError(errorType: string) {
     this.isOpenWarningSnackbar = true
-    this.errorMsg = this.$t('NFTPortal.mint.error', {
-      error: errorMessage,
-    }) as string
+    this.errorType = errorType
     this.isLoading = false
   }
 }
