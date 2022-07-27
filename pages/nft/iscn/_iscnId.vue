@@ -206,7 +206,11 @@ export default class NFTTestMintPage extends Vue {
 
   async mounted() {
     await Promise.all([
-      this.getISCNInfo().catch(err => console.error(err)),
+      this.getISCNInfo().catch(err => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        this.setError('ISCN_NOT_FOUND')
+      }),
       this.getMintInfo().catch(err => console.error(err)),
     ]);
     this.getOgImage().catch(err => console.error(err));
