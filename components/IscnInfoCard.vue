@@ -114,7 +114,9 @@
             'my-[12px]'
           ]"
         >
+        <!-- hidden for now -->
           <Button
+            class="hidden"
             preset="primary"
             :text="$t('HomePage.button.nftPortal')"
             :to="localeLocation({ name: 'nft-url' })"
