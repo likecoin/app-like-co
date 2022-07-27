@@ -22,6 +22,7 @@
         :total-airdrop="totalAirdrop"
         :total-claimed-amount="totalClaimedAmount"
         :decay="decay"
+        :countdown-date="countdownDate"
       />
       <AirdropProgress
         :has-connected-wallet="!!currentAddress"
@@ -97,7 +98,9 @@ export default class AirdropClaimPage extends Vue {
   shouldCloseAirdrop: boolean = false
 
   deadline = ''
-  decay: any = { factor: 0, days: '0', hours: '0', minutes: '0' }
+  endDate = ''
+  countdownDate = { days: '0', hours: '0', minutes: '0' }
+  decay: any = { factor: 0, started: false }
   intervalID: any
 
   totalAirdrop = '-'
@@ -236,12 +239,14 @@ export default class AirdropClaimPage extends Vue {
 
   getTimeRemaining() {
     const startDate: any = new Date().getTime()
-    const endDate: any = new Date(this.deadline)
-    const spantime = endDate - startDate
+    const decayDate: any = new Date(this.deadline)
+    const endDate: any = new Date(this.endDate)
 
-    this.decay.minutes = Math.floor((spantime / 1000 / 60) % 60).toString()
-    this.decay.hours = Math.floor((spantime / (1000 * 60 * 60)) % 24).toString()
-    this.decay.days = Math.floor(spantime / (1000 * 60 * 60 * 24)).toString()
+    this.decay.started = startDate > decayDate;
+    const spantime = this.decay.started ? endDate - startDate : decayDate - startDate
+    this.countdownDate.minutes = Math.floor((spantime / 1000 / 60) % 60).toString()
+    this.countdownDate.hours = Math.floor((spantime / (1000 * 60 * 60)) % 24).toString()
+    this.countdownDate.days = Math.floor(spantime / (1000 * 60 * 60 * 24)).toString()
 
     if (spantime <= 0) {
       clearInterval(this.intervalID)
@@ -251,6 +256,7 @@ export default class AirdropClaimPage extends Vue {
   async fetchMissionDecay() {
     const data = await this.$axios.get(AIRDROP_DECAY_ENDPOINT).then((item) => item.data)
     this.deadline = data.startingDate
+    this.endDate = data.endingDate
     this.decay.factor = data.factor
 
     this.getTimeRemaining()

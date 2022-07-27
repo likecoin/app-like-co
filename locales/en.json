@@ -38,6 +38,7 @@
   "AirDrop.label.decay.start": "Time to Airdrop Decay start",
   "AirDrop.label.decay": "Current Decay Factor",
   "AirDrop.label.discord": "Discord",
+  "AirDrop.label.end": "Time to Airdrop End",
   "AirDrop.label.follow.LikeCoin": "Follow LikeCoin",
   "AirDrop.label.follow.Twitter": "Follow us on Twitter",
   "AirDrop.label.here": "here",

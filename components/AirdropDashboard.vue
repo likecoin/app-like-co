@@ -98,7 +98,7 @@
             'font-bold',
             'text-black',
           ]"
-          :text="`${decay.factor}`"
+          :text="`${decay.factor.toFixed(2)}`"
           preset="h1"
         />
         <Label
@@ -150,7 +150,7 @@
             'font-bold',
             'text-black',
           ]"
-          :text="decay.days"
+          :text="countdownDate.days"
           preset="h1"
         />
         <Label
@@ -168,7 +168,7 @@
             'font-bold',
             'text-black',
           ]"
-          :text="decay.hours"
+          :text="countdownDate.hours"
           preset="h1"
         />
         <Label
@@ -186,7 +186,7 @@
             'font-bold',
             'text-black',
           ]"
-          :text="`${decay.minutes}`"
+          :text="`${countdownDate.minutes}`"
           preset="h1"
         />
         <Label
@@ -204,7 +204,7 @@
           'font-bold',
           'text-medium-gray',
         ]"
-        :text="$t('AirDrop.label.decay.start')"
+        :text="$t( decay.started ? 'AirDrop.label.end' : 'AirDrop.label.decay')"
         preset="p6"
       />
     </div>
@@ -224,6 +224,9 @@ export default class AirdropDashboard extends Vue {
 
   // Contains the time information about decay
   @Prop(Object) readonly decay!: object | undefined
+
+  // Contains the time information about end
+  @Prop(Object) readonly countdownDate!: object | undefined
 
   get airdropAmount() {
     return `${this.totalClaimedAmount}/${this.totalAirdrop}`
