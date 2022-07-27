@@ -182,8 +182,8 @@ export default class NFTTestMintPage extends Vue {
 
   get buttonText(): string {
     if (this.errorType) return 'Retry'
-    if (!this.errorType && this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
-    if (!this.errorType && this.state === 'mint') return 'Mint NFT'
+    if (this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
+    if (this.state === 'mint') return 'Mint NFT'
     return 'Mint NFT'
   }
 
@@ -225,7 +225,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get detailsPageURL(): string {
-    return `${LIKER_LAND_URL}/nft/class/${this.classId}`
+    return `${LIKER_LAND_URL}/nft/class/${encodeURIComponent(this.classId)}`
   }
 
   get errorMessage() {
@@ -320,7 +320,7 @@ export default class NFTTestMintPage extends Vue {
           window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
         } else {
           // TODO: use actual liker land class nft
-          window.location.href = `${LIKER_LAND_URL}/nft/class/${this.classId}`
+          window.location.href = this.detailsPageURL
         }
       default:
     }
