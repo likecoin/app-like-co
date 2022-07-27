@@ -39,6 +39,9 @@
         ></Button>
       </div>
     </div>
+    <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
+      {{ errorMsg }}
+    </Snackbar>
   </Page>
 </template>
 
@@ -83,7 +86,8 @@ export default class NFTTestButtonPage extends Vue {
   totalPrice: number = -1
   nftInfo: any = null
   grantTransactionHash: string = ''
-  showHistory = false
+  isOpenWarningSnackbar = false
+  errorMsg: string = ''
 
   get iscnId(): string {
     const { iscnId } = this.$route.params
@@ -95,9 +99,16 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   async onClickMint() {
-    await this.grantPurchaseTransaction()
-    await this.purchaseNFT()
-    await this.getPurchaseInfo()
+    try {
+      this.isOpenWarningSnackbar = false;
+      await this.grantPurchaseTransaction()
+      await this.purchaseNFT()
+      await this.getPurchaseInfo()
+    } catch (err) {
+      console.error(err)
+      this.isOpenWarningSnackbar = true;
+      this.errorMsg = (err as Error).toString();
+    }
   }
 
   async getPurchaseInfo() {
@@ -113,7 +124,7 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   async grantPurchaseTransaction() {
-    if (!this.signer) return
+    if (!this.signer) throw new Error('PLEASE_CONNECT_WALLET_FIRST')
     const signingClient = await getSigningClient()
     await signingClient.setSigner(this.signer)
     const res = await signingClient.createSendGrant(
