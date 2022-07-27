@@ -11,9 +11,8 @@
       'lg:p-[16px]',
     ]"
   >
-    <div class="flex flex-col w-[480px]">
-      <div class="flex justify-between">
-        <Label class="text-[8px]">Collect this work as NFT</Label>
+    <div class="flex flex-col w-full max-w-[580px]">
+      <div class="flex justify-end">
         <Label class="text-[9px] text-dark-gray"
           >Work : {{ iscnId | ellipsis }}
           <template #prepend>
@@ -23,20 +22,34 @@
       </div>
       <div
         :class="[
+          'flex',
+          'flex-col',
           'mt-[4px]',
-          'p-[16px]',
+          'py-[22px]',
+          'px-[28px]',
           'border-[2px]',
           'border-medium-gray',
           'rounded-[16px]',
-          'flex',
-          'justify-between',
-          'items-center',
+          'justify-center',
+          'items-start',
         ]"
       >
-        <Label preset="h2" class="text-like-green">{{ nftPrice }} $LIKE</Label>
-        <Button preset="secondary" @click="onClickMint"
-          >Collect Now <template #prepend><IconPlaceholder /></template
-        ></Button>
+        <Label preset="h3" class="text-dark-gray mb-[8px]">{{ name }}</Label>
+        <Label preset="p6" class="text-dark-gray mb-[8px]">{{ description }}</Label>
+        <p class="text-[12px] text-medium-gray">by {{ owner | ellipsis }}</p>
+        <div class="w-[24px] h-[2px] bg-medium-gray my-[20px]" />
+        <div class="flex flex-col items-start w-full sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center">
+            <Label preset="h2" class="text-like-green">{{ nftPrice }} $LIKE</Label>
+            <Label preset="p5" class="text-medium-gray ml-[8px]">{{
+                NFTPriceUSD
+              }}</Label>
+          </div>
+          <Button v-if="!isLoading" preset="secondary" class="mt-[8px] sm:mt-0" @click="onClickMint"
+            >Collect Now <template #prepend><IconPrice /></template
+          ></Button>
+          <ProgressIndicator v-else/>
+        </div>
       </div>
     </div>
     <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
@@ -53,7 +66,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
-import { API_LIKER_NFT_PURCHASE } from '~/constant/api'
+import { API_LIKER_NFT_PURCHASE, getNftClassUriViaIscnId, getLIKEPrice } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM } from '~/constant'
 
@@ -88,18 +101,35 @@ export default class NFTTestButtonPage extends Vue {
   nftInfo: any = null
   grantTransactionHash: string = ''
   isOpenWarningSnackbar = false
+
   errorMsg: string = ''
+  name: string = ''
+  description: string = ''
+  owner: string = ''
+  currentLikePrice: number = 0
+
+  isLoading: boolean = false
 
   get iscnId(): string {
     const { iscnId } = this.$route.params
     return iscnId
   }
 
+  get NFTPriceUSD(): string {
+      const price = this.currentLikePrice * this.nftPrice;
+      return `(${price.toFixed(3)} USD)`;
+  }
+
   async mounted() {
-    await this.getPurchaseInfo()
+    await Promise.all([
+      this.getPurchaseInfo(),
+      this.getNftMetadata(),
+      this.getLIKEPrice(),
+    ]);
   }
 
   async onClickMint() {
+    this.isLoading = true
     try {
       this.isOpenWarningSnackbar = false;
       await this.grantPurchaseTransaction()
@@ -109,6 +139,8 @@ export default class NFTTestButtonPage extends Vue {
       console.error(err)
       this.isOpenWarningSnackbar = true;
       this.errorMsg = (err as Error).toString();
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -122,6 +154,19 @@ export default class NFTTestButtonPage extends Vue {
     this.nftPrice = data.price
     this.totalPrice = data.totalPrice
     this.nftInfo = data.metadata
+    this.classId = data.metadata.classId
+  }
+
+  async getNftMetadata() {
+    const { data } = await this.$axios.get(getNftClassUriViaIscnId(this.iscnId));
+    this.name = data.name
+    this.description = data.description
+    this.owner = data.iscn_owner
+  }
+
+  async getLIKEPrice() {
+      const { data } = await this.$axios.get(getLIKEPrice());
+      this.currentLikePrice = data.likecoin.usd;
   }
 
   async grantPurchaseTransaction() {

@@ -1,3 +1,4 @@
+import querystring from 'querystring';
 import { IS_TESTNET } from ".";
 
 export const API_POST_ARWEAVE_ESTIMATE = '/arweave/estimate';
@@ -16,3 +17,12 @@ export const getNftUriViaNftId = (classId: string, nftId: string): string => `${
 export const getNftClassImage = (classId: string): string => `${LIKE_CO_API_ROOT}/likernft//image/class_${classId}.png`;
 export const getLikerIdMinApi = (likerId: string): string => `${LIKE_CO_API_ROOT}/users/id/${likerId}/min`;
 export const getAddressLikerIdMinApi = (wallet: string): string => `${LIKE_CO_API_ROOT}/users/addr/${wallet}/min`;
+export const getLIKEPrice = () => `https://api.coingecko.com/api/v3/simple/price?ids=likecoin&vs_currencies=usd`;
+export const getNFTMetadata = (iscnId: string) => {
+  const qsPayload = {
+    iscn_id: iscnId,
+  };
+  return `${LIKE_CO_API_ROOT}/likernft/metadata?${querystring.stringify(
+    qsPayload,
+  )}`;
+};
