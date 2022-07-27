@@ -116,7 +116,7 @@
         >
           <Button
             preset="primary"
-            :text="$t('HomePage.button.nftProtal')"
+            :text="$t('HomePage.button.nftPortal')"
             :to="localeLocation({ name: 'nft-url' })"
             :style="{ color: '#FFFFFF', backgroundColor: '#C69F67' }"
           >

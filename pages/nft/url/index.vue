@@ -37,14 +37,14 @@
         'w-full',
       ]">
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
-          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTProtal.placeholder.register')"
+          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTPortal.placeholder.register')"
             :error-message="errorMessage" />
           {{ iscnId }}
         </div>
         <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
         <div class="flex flex-row self-end">
           <ProgressIndicator v-if="isLoading" />
-          <Button v-else :text="$t('NFTProtal.button.register')" preset="outline" @click="onSubmit">
+          <Button v-else :text="$t('NFTPortal.button.register')" preset="outline" @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
