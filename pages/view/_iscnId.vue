@@ -8,7 +8,7 @@
     </Card>
   </Page>
   <div v-else-if="isPopupLayout">
-    <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
+    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
       <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
         Continue to mint Writing NFTs
       </Button>
@@ -56,14 +56,14 @@
         </template>
       </IscnUploadedInfo>
     </Page>
-    <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
+    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
       <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">
         Continue to mint Writing NFTs
       </Button>
     </div>
   </div>
   <div v-else>
-    <div v-if="!isPreminted" class="flex justify-center w-full bg-like-cyan-light">
+    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
       <Button preset="plain" :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })" class="text-like-green">Premint NFTs</Button>
     </div>
     <Page
@@ -510,6 +510,11 @@ export default class ViewIscnIdPage extends Vue {
   @iscnModule.Action fetchISCNByTx!: (
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
+
+  get isShowMintButton() {
+    const { mint } = this.$route.query;
+    return !this.isPreminted && mint && mint !== '0'
+  }
 
   get isPopupLayout() {
     return this.$route.query.layout === 'popup'
