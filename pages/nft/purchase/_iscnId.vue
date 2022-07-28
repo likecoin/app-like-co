@@ -12,14 +12,6 @@
     ]"
   >
     <div class="flex flex-col w-full max-w-[580px]">
-      <div class="flex justify-end">
-        <Label class="text-[9px] text-dark-gray"
-          >Work : {{ iscnId | ellipsis }}
-          <template #prepend>
-            <IconCreativeWork />
-          </template>
-        </Label>
-      </div>
       <div
         :class="[
           'flex',
