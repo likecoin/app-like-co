@@ -282,6 +282,7 @@
   "NFTPortal.label.classId": "NFT Class ID :",
   "NFTPortal.label.detailsPage": "NFT Details Page :",
   "NFTPortal.label.Iscn": "ISCN :",
+  "NFTPortal.label.owning": "You have owned {count} already",
   "NFTPortal.loadingMessage.createClass": "Creating NFT class ...",
   "NFTPortal.loadingMessage.mint": "Minting NFT ...",
   "NFTPortal.loadingMessage.uploadImg": "Uploading display image ...",

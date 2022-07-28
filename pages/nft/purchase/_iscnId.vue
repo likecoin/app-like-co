@@ -12,7 +12,7 @@
     ]"
   >
     <div class="flex flex-col w-full max-w-[580px]">
-      <div
+      <Card
         :class="[
           'flex',
           'flex-col',
@@ -54,7 +54,12 @@
           </Button>
           <ProgressIndicator v-else/>
         </div>
-      </div>
+        <Label v-if="owningCount > 0" class="self-end mt-[4px]">
+          <i18n path="NFTPortal.label.owning">
+            <span class="font-bold text-like-green" place="count">{{ owningCount }}</span>
+          </i18n>
+        </Label>
+      </Card>
     </div>
     <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
       {{ errorMsg }}
@@ -71,6 +76,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import {
+  API_LIKER_NFT_HISTORY,
   API_LIKER_NFT_PURCHASE,
   getNftClassUriViaIscnId,
   getLIKEPrice,
@@ -108,6 +114,7 @@ export default class NFTTestButtonPage extends Vue {
   nftPrice: number = -1
   totalPrice: number = -1
   nftInfo: any = null
+  history: any[] = []
   grantTransactionHash: string = ''
   isOpenWarningSnackbar = false
 
@@ -130,13 +137,29 @@ export default class NFTTestButtonPage extends Vue {
       return `(${price.toFixed(3)} USD)`;
   }
 
+  get owningCount() {
+    if (!this.address) return -1
+    return this.history.reduce((count, { toWallet }) => toWallet === this.address ? count + 1 : count, 0)
+  }
+
   async mounted() {
     await Promise.all([
       this.getPurchaseInfo(),
       this.getNftMetadata(),
+      this.getNFTHistory(),
     ]).catch((err) => this.$nuxt.error({ statusCode: 404, message: err }))
     await this.getOwnerName().catch(err => console.error(err))
     this.getLIKEPrice().catch(err => console.error(err))
+  }
+
+  async getNFTHistory() {
+    const { data } = await this.$axios.get(API_LIKER_NFT_HISTORY, {
+      params: {
+        iscn_id: this.iscnId,
+      },
+      paramsSerializer: params => qs.stringify(params),
+    })
+    this.history = data.list
   }
 
   redirectToPurchaserPortfolio() {
