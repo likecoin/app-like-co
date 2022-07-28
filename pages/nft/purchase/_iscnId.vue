@@ -72,16 +72,16 @@ import qs from 'querystring'
 import BigNumber from 'bignumber.js'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import {
-  API_LIKER_NFT_HISTORY,
   API_LIKER_NFT_PURCHASE,
   getNftClassUriViaIscnId,
   getLIKEPrice,
   getAddressLikerIdMinApi,
 } from '~/constant/api'
+import getQueryClient from '~/utils/cosmos/iscn/query';
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 
@@ -114,7 +114,7 @@ export default class NFTTestButtonPage extends Vue {
   nftPrice: number = -1
   totalPrice: number = -1
   nftInfo: any = null
-  history: any[] = []
+  owningCount = -1
   grantTransactionHash: string = ''
   isOpenWarningSnackbar = false
 
@@ -137,29 +137,24 @@ export default class NFTTestButtonPage extends Vue {
       return `(${price.toFixed(3)} USD)`;
   }
 
-  get owningCount() {
-    if (!this.address) return -1
-    return this.history.reduce((count, { toWallet }) => toWallet === this.address ? count + 1 : count, 0)
-  }
-
   async mounted() {
     await Promise.all([
       this.getPurchaseInfo(),
       this.getNftMetadata(),
-      this.getNFTHistory(),
+      this.getOwningCount(),
     ]).catch((err) => this.$nuxt.error({ statusCode: 404, message: err }))
     await this.getOwnerName().catch(err => console.error(err))
     this.getLIKEPrice().catch(err => console.error(err))
   }
 
-  async getNFTHistory() {
-    const { data } = await this.$axios.get(API_LIKER_NFT_HISTORY, {
-      params: {
-        iscn_id: this.iscnId,
-      },
-      paramsSerializer: params => qs.stringify(params),
-    })
-    this.history = data.list
+  @Watch('classId')
+  @Watch('address')
+  async getOwningCount() {
+    if (!this.classId || !this.address) return;
+    const c = await getQueryClient();
+    const client = await c.getQueryClient();
+    const { amount = 0 } = await (client as any).nft.balance(this.classId, this.address);
+    this.owningCount = amount;
   }
 
   redirectToPurchaserPortfolio() {
