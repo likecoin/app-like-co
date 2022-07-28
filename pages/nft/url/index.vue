@@ -119,6 +119,10 @@ export default class FetchIndex extends Vue {
   errorType: string = ''
   isOpenWarningSnackbar: boolean = false
 
+  get isUrlIscnId(): boolean {
+    return this.url.startsWith('iscn://likecoin-chain')
+  }
+
   get formData(): FormData | null {
     if (!this.crawledData?.body) { return null }
     const body = new Blob([this.crawledData.body], { type: "text/html" })
@@ -206,6 +210,16 @@ export default class FetchIndex extends Vue {
     if (this.ownerWallet && this.address !== this.ownerWallet) {
       this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
       return
+    }
+    if (this.isUrlIscnId) {
+      this.iscnId = this.url;
+      this.$router.push(
+        this.localeLocation({
+          name: 'nft-iscn-iscnId',
+          params: this.iscnParams,
+        })!,
+      )
+      return;
     }
 
     this.balance = await getAccountBalance(this.address) as string
