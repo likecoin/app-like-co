@@ -3,7 +3,9 @@
     <template v-if="currentAddress">
       <AppHeader />
       <Nuxt class="min-h-full" />
-      <AppFooter/>
+      <AppFooter
+        :class="{ hidden: $route.path.includes('/nft/purchase/') }"
+      />
     </template>
   </RootLayout>
 </template>
