@@ -36,7 +36,7 @@
       >
         <Label preset="h3" class="text-dark-gray mb-[8px]">{{ name }}</Label>
         <Label preset="p6" class="text-dark-gray mb-[8px]">{{ description }}</Label>
-        <p class="text-[12px] text-medium-gray">by {{ owner | ellipsis }}</p>
+        <p class="text-[12px] text-medium-gray">by {{ ownerName || ownerAddr | ellipsis }}</p>
         <div class="w-[24px] h-[2px] bg-medium-gray my-[20px]" />
         <div class="flex flex-col items-start w-full sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center">
@@ -78,7 +78,12 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
-import { API_LIKER_NFT_PURCHASE, getNftClassUriViaIscnId, getLIKEPrice } from '~/constant/api'
+import { 
+  API_LIKER_NFT_PURCHASE,
+  getNftClassUriViaIscnId,
+  getLIKEPrice,
+  getAddressLikerIdMinApi,
+} from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM } from '~/constant'
 
@@ -117,7 +122,8 @@ export default class NFTTestButtonPage extends Vue {
   errorMsg: string = ''
   name: string = ''
   description: string = ''
-  owner: string = ''
+  ownerAddr: string = ''
+  ownerName: string = ''
   currentLIKEPrice: number = 0
 
   isLoading: boolean = false
@@ -137,6 +143,7 @@ export default class NFTTestButtonPage extends Vue {
       this.getPurchaseInfo(),
       this.getNftMetadata(),
     ]).catch((err) => this.$nuxt.error({ statusCode: 404, message: err }))
+    await this.getOwnerName().catch(err => console.error(err))
     this.getLIKEPrice().catch(err => console.error(err))
   }
 
@@ -173,7 +180,7 @@ export default class NFTTestButtonPage extends Vue {
     const { data } = await this.$axios.get(getNftClassUriViaIscnId(this.iscnId));
     this.name = data.name
     this.description = data.description
-    this.owner = data.iscn_owner
+    this.ownerAddr = data.iscn_owner
   }
 
   async getLIKEPrice() {
@@ -211,6 +218,15 @@ export default class NFTTestButtonPage extends Vue {
       },
     )
     return data
+  }
+
+  async getOwnerName() {
+    const { data } = await this.$axios.get(
+      getAddressLikerIdMinApi(this.ownerAddr as string),
+    )
+    if (data) {
+      this.ownerName = data.displayName
+    }
   }
 }
 </script>
