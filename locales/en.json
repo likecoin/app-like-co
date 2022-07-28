@@ -274,7 +274,7 @@
   "IscnUploaded.guide.title": "Completed! Here is your ISCN",
   "IscnUploaded.title": "ISCN Registed",
   "NFTPortal.button.register":"Register ISCN",
-  "NFTPortal.placeholder.register":"Article URL",
+  "NFTPortal.placeholder.register":"Article URL e.g. https://like.co",
   "NFTPortal.mint.error":"Oops, something went wrong when {error}, please try again.",
   "page.airdrop.checker.description": "Check if you are eligible for LIKE airdrop today.",
   "page.airdrop.checker.title": "LikeCoin Airdrop Checker",
