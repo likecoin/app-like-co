@@ -78,14 +78,14 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
-import { 
+import {
   API_LIKER_NFT_PURCHASE,
   getNftClassUriViaIscnId,
   getLIKEPrice,
   getAddressLikerIdMinApi,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
-import { LIKER_NFT_API_WALLET, COSMOS_DENOM } from '~/constant'
+import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 
 const signerModule = namespace('signer')
 
@@ -147,6 +147,19 @@ export default class NFTTestButtonPage extends Vue {
     this.getLIKEPrice().catch(err => console.error(err))
   }
 
+  redirectToPurchaserPortfolio() {
+    const purchaserAddress = this.address
+    if (window.opener) {
+      window.opener.postMessage({
+        type: 'navigate',
+        route: `/${purchaserAddress}`,
+      }, '*');
+      window.close()
+    } else {
+      window.open(`${LIKER_LAND_URL}/${purchaserAddress}`, '_blank', 'noopener')
+    }
+  }
+
   async onClickMint() {
     this.isLoading = true
     try {
@@ -154,6 +167,7 @@ export default class NFTTestButtonPage extends Vue {
       await this.grantPurchaseTransaction()
       await this.purchaseNFT()
       await this.getPurchaseInfo()
+      this.redirectToPurchaserPortfolio()
     } catch (err) {
       console.error(err)
       this.isOpenWarningSnackbar = true;
