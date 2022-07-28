@@ -73,18 +73,18 @@
       </div>
     </Card>
     <Snackbar
-        v-model="isOpenWarningSnackbar"
-        preset="warn"
+      v-model="isOpenWarningSnackbar"
+      preset="warn"
+    >
+      {{ errorMessage }}
+      <Link
+        v-if="errorType === 'INSUFFICIENT_BALANCE'"
+        :class="['text-white', 'ml-[2px]']"
+        href="https://faucet.like.co/"
       >
-        {{ errorMessage }}
-        <Link
-          v-if="errorType === 'INSUFFICIENT_BALANCE'"
-          :class="['text-white','ml-[2px]']"
-          href="https://faucet.like.co/"
-        >
-          {{ $t('IscnRegisterForm.error.faucet') }}
-        </Link>
-      </Snackbar>
+        {{ $t('IscnRegisterForm.error.faucet') }}
+      </Link>
+    </Snackbar>
   </Page>
 </template>
 
@@ -324,7 +324,6 @@ export default class NFTTestMintPage extends Vue {
         if (this.isWritingNFT) {
           window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
         } else {
-          // TODO: use actual liker land class nft
           window.location.href = this.detailsPageURL
         }
       default:
