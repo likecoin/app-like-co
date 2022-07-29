@@ -4,8 +4,10 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
 import _ from 'lodash';
+import axios from 'axios';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
+import network from '~/constant/network'
 
 function addIDToRecords(records: ISCNRecord[]): ISCNRecordWithID[] {
   return records.map(r => ({ id: r.data['@id'] as string, ...r }));
@@ -118,40 +120,11 @@ export default class ISCN extends VuexModule {
   @Action
   async queryISCNByKeyword(keyword: string): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
-    let txRecords: ISCNRecord[] = [];
     let result: ISCNRecord[] = ([] as ISCNRecord[])
     try {
       this.context.commit('setIsLoading', true)
-      const client = await getQueryClient()
-      const [
-        txRes,
-        idRes,
-        fingerprintRes,
-        ownerRes,
-      ] = await Promise.all([
-        client.queryISCNIdsByTx(keyword).catch(() => {}),
-        client.queryRecordsById(keyword).catch(() => {}),
-        client.queryRecordsByFingerprint(keyword).catch(() => {}),
-        client.queryRecordsByOwner(keyword).catch(() => {}),
-      ])
-      if (txRes) {
-        txRecords = (
-          await Promise.all(
-            txRes.map(async (t) => {
-              if (typeof t === 'string') {
-                const res = await client.queryRecordsById(t)
-                return res?.records[0]
-              }
-              return t
-            }),
-          )
-        ).filter((t) => t) as ISCNRecord[]
-      }
-      result = result
-        .concat(txRecords)
-        .concat(idRes ? idRes.records : [])
-        .concat(fingerprintRes ? fingerprintRes.records : [])
-        .concat(ownerRes ? ownerRes.records : [])
+      const { data } = await axios.get(`${network.apiURL}/iscn/records?q=${keyword}`)
+      if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {
       this.context.commit('setErrorMessage', error)
