@@ -608,7 +608,10 @@ export default class ViewIscnIdPage extends Vue {
     this.getMintInfo()
     if (!this.getISCNById(this.iscnId) || !this.owner) {
       const res = await this.fetchISCNById(this.iscnId)
-      if (res) this.owner = res.owner
+      if (res) {
+        this.iscnId = res.records[0].id // To replace prefix with full id
+        this.owner = res.owner
+      }
     }
     if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
