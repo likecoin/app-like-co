@@ -52,20 +52,20 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           return {
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: `did:${a.type}:${a.address.slice('cosmos'.length)}`,
+            value: a.address,
           }
         }
         if (a.type === 'like') {
           return {
             '@type': 'PropertyValue',
             propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: `did:${a.type}:${a.address.slice('like'.length)}`,
+            value: a.address,
           }
         }
         return {
           '@type': 'PropertyValue',
           propertyID: WALLET_TYPE_REPLACER[a.type],
-          value: `did:${a.type}:${a.address}`,
+          value: a.address,
         }
       })
 
