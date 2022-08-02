@@ -47,27 +47,11 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
 
-      const identifiers = authorWallets[i].map((a: any) => {
-        if (a.type === 'cosmos') {
-          return {
-            '@type': 'PropertyValue',
-            propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: a.address,
-          }
-        }
-        if (a.type === 'like') {
-          return {
-            '@type': 'PropertyValue',
-            propertyID: WALLET_TYPE_REPLACER[a.type],
-            value: a.address,
-          }
-        }
-        return {
+      const identifiers = authorWallets[i].map((a: any) => ({
           '@type': 'PropertyValue',
-          propertyID: WALLET_TYPE_REPLACER[a.type],
+          propertyID: WALLET_TYPE_REPLACER[a.type] || a.type,
           value: a.address,
-        }
-      })
+        }))
 
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length

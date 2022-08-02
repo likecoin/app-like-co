@@ -1,10 +1,7 @@
 <template>
   <div>
     <div class="font-normal text-[16px] leading-[22px]">
-      <div v-if="address">
-        {{ `cosmos${address.slice(11)}` }}
-      </div>
-      <div v-else-if="walletAddress">
+      <div v-if="walletAddress">
         {{ walletAddress }}
       </div>
     </div>
@@ -25,18 +22,35 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+const { bech32 } = require('bech32')
+
+function isValidAddress(address:any) {
+  try {
+    bech32.decode(address);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 @Component
 export default class StakeholderInfo extends Vue {
   @Prop(String) readonly id: string | undefined
-  @Prop(String) readonly address: string | undefined
   @Prop(String) readonly name: string | undefined
   @Prop(String) readonly url: string | undefined
 
   get walletAddress() {
-    if (this.id && this.id.includes('cosmos'))
-      return `cosmos${this.id.slice('did:cosmos:'.length)}`
-    if (this.id && this.id.includes('like'))
+    if (this.id && this.id.startsWith('did:like:')) {
       return `like${this.id.slice('did:like:'.length)}`
+    } if (this.id && this.id.startsWith('did:cosmos:')) {
+      return `cosmos${this.id.slice('did:cosmos:'.length)}`
+    }
+    if (isValidAddress(this.id)) {
+      return this.id
+    }
+    if (this.id && (this.id.startsWith('like') || this.id.startsWith('cosmos')) && isValidAddress(this.id)) {
+      return this.id
+    }
     return ''
   }
 
