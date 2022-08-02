@@ -48,9 +48,6 @@ export default class StakeholderInfo extends Vue {
     if (isValidAddress(this.id)) {
       return this.id
     }
-    if (this.id && (this.id.startsWith('like') || this.id.startsWith('cosmos')) && isValidAddress(this.id)) {
-      return this.id
-    }
     return ''
   }
 
