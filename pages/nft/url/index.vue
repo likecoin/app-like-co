@@ -37,6 +37,7 @@
         'w-full',
       ]">
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
+          <Label preset="p6" :text="$t('NFTPortal.label.register')" />
           <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTPortal.placeholder.register')"
             :error-message="errorMessage" />
           {{ iscnId }}
