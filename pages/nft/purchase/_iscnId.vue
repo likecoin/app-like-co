@@ -85,6 +85,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { DeliverTxResponse } from '@cosmjs/stargate'
+import axios, { AxiosError } from 'axios'
 import {
   API_LIKER_NFT_PURCHASE,
   getNftClassUriViaIscnId,
@@ -209,9 +210,13 @@ export default class NFTTestButtonPage extends Vue {
       await this.purchaseNFT()
       await this.getPurchaseInfo()
       this.redirectToPurchaserPortfolio()
-    } catch (err: any) {
+    } catch (err) {
       this.isOpenWarningSnackbar = true;
-      this.errorType = err.response.data;
+      if (axios.isAxiosError(err)) {
+        this.errorType = (err as AxiosError).response?.data || (err as Error).toString();
+      } else {
+        this.errorType = (err as Error).toString();
+      }
     } finally {
       this.isLoading = false
     }
