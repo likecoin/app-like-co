@@ -3,9 +3,11 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
+import axios from 'axios';
 import _ from 'lodash';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
+import network from '~/constant/network'
 
 function addIDToRecords(records: ISCNRecord[]): ISCNRecordWithID[] {
   return records.map(r => ({ id: r.data['@id'] as string, ...r }));
@@ -152,6 +154,25 @@ export default class ISCN extends VuexModule {
         .concat(idRes ? idRes.records : [])
         .concat(fingerprintRes ? fingerprintRes.records : [])
         .concat(ownerRes ? ownerRes.records : [])
+      this.context.commit('appendRecords', result)
+    } catch (error) {
+      this.context.commit('setErrorMessage', error)
+    } finally {
+      this.context.commit('setIsLoading', false)
+    }
+    return addIDToRecords(result);
+  }
+
+  @Action
+  async queryISCNByField({
+    keyword,
+  }: { keyword: string }): Promise<ISCNRecordWithID[]> {
+    this.context.commit('clearRecords');
+    let result: ISCNRecord[] = ([] as ISCNRecord[])
+    try {
+      this.context.commit('setIsLoading', true)
+      const { data } = await axios.get(`${network.apiURL}/iscn/records?keyword=${encodeURIComponent(keyword)}`)
+      if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {
       this.context.commit('setErrorMessage', error)
