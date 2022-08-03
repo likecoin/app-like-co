@@ -116,7 +116,12 @@ import { logTrackerEvent } from '~/utils/logger'
 
 const iscnModule = namespace('iscn')
 
-@Component
+@Component({
+  fetch({ redirect, query }) {
+    const { q } = query;
+    if (q) redirect({ name: 'search-keyword___en', query });
+  },
+})
 export default class IndexPage extends Vue {
   @iscnModule.Action queryISCNByKeyword!: (
     arg0: string
