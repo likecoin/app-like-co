@@ -61,9 +61,19 @@
         </Label>
       </Card>
     </div>
-    <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
-      {{ errorMsg }}
-    </Snackbar>
+    <Snackbar
+        v-model="isOpenWarningSnackbar"
+        preset="warn"
+      >
+        {{ errorAlert }}
+        <Link
+          v-if="errorType === 'INSUFFICIENT_BALANCE'"
+          :class="['text-white','ml-[2px]']"
+          href="https://faucet.like.co/"
+        >
+          {{ $t('IscnRegisterForm.error.faucet') }}
+        </Link>
+      </Snackbar>
   </Page>
 </template>
 
@@ -82,10 +92,15 @@ import {
   getAddressLikerIdMinApi,
 } from '~/constant/api'
 import getQueryClient from '~/utils/cosmos/iscn/query';
+import { getAccountBalance } from '~/utils/cosmos'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 
 const signerModule = namespace('signer')
+
+export enum ErrorType {
+  INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
+}
 
 @Component({
   fetch({ params, redirect }) {
@@ -118,7 +133,7 @@ export default class NFTTestButtonPage extends Vue {
   grantTransactionHash: string = ''
   isOpenWarningSnackbar = false
 
-  errorMsg: string = ''
+  errorType: string = ''
   name: string = ''
   description: string = ''
   ownerAddr: string = ''
@@ -135,6 +150,15 @@ export default class NFTTestButtonPage extends Vue {
   get NFTPriceUSD(): string {
       const price = this.currentLIKEPrice * this.nftPrice;
       return `(${price.toFixed(3)} USD)`;
+  }
+
+  get errorAlert() {
+    switch (this.errorType) {
+      case ErrorType.INSUFFICIENT_BALANCE:
+        return this.$t('IscnRegisterForm.error.insufficient')
+      default:
+        return this.errorType
+    }
   }
 
   async mounted() {
@@ -172,16 +196,22 @@ export default class NFTTestButtonPage extends Vue {
 
   async onClickMint() {
     this.isLoading = true
+    const balance = await getAccountBalance(this.address) as number
+    if (balance < this.nftPrice) {
+      this.isOpenWarningSnackbar = true
+      this.errorType = ErrorType.INSUFFICIENT_BALANCE;
+      this.isLoading = false
+      return
+    }
     try {
       this.isOpenWarningSnackbar = false;
       await this.grantPurchaseTransaction()
       await this.purchaseNFT()
       await this.getPurchaseInfo()
       this.redirectToPurchaserPortfolio()
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
       this.isOpenWarningSnackbar = true;
-      this.errorMsg = (err as Error).toString();
+      this.errorType = err.response.data;
     } finally {
       this.isLoading = false
     }
