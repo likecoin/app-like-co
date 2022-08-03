@@ -58,6 +58,7 @@ export default {
         'script-src': [
           "'self'",
           "'unsafe-inline'", // ignored by browser with sha support
+          "'wasm-unsafe-eval'",
           "www.googletagmanager.com",
         ],
         'connect-src': [
