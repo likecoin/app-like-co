@@ -84,6 +84,7 @@ import {
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
+import axios, { AxiosError } from 'axios'
 
 const signerModule = namespace('signer')
 
@@ -181,7 +182,11 @@ export default class NFTTestButtonPage extends Vue {
     } catch (err) {
       console.error(err)
       this.isOpenWarningSnackbar = true;
-      this.errorMsg = (err as Error).toString();
+      if (axios.isAxiosError(err)) {
+        this.errorMsg = (err as AxiosError).response?.data || (err as Error).toString();
+      } else {
+        this.errorMsg = (err as Error).toString();
+      }
     } finally {
       this.isLoading = false
     }
