@@ -311,7 +311,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async handleMissionDone() {
-    if (IS_CHAIN_UPGRADING) return;
+    if (IS_CHAIN_UPGRADING || this.isAirdropEnd) return;
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
