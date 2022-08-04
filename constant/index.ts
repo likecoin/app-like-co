@@ -71,57 +71,7 @@ export const COSMOS_ADDRESS_REGEX = /^cosmos1[ac-hj-np-z02-9]{38}$/
 
 export const OSMOSIS_ADDRESS_REGEX = /^osmo1[ac-hj-np-z02-9]{38}$/
 
-export const AIRDROP_CLAIM_URL = {
-  testnet: 'https://airdrop.rinkeby.like.co/api/claims?address=',
-  production: 'https://airdrop.like.co/api/claims?address=',
-}
-
-export const AIRDROP_OVERVIEW_URL = {
-  testnet: 'https://airdrop.rinkeby.like.co/api/overview?address=',
-  production: 'https://airdrop.like.co/api/overview?address=',
-}
-
-export const AIRDROP_SUBSCRIBE_URL = {
-  testnet: 'https://airdrop.rinkeby.like.co/api/subscribe',
-  production: 'https://airdrop.like.co/api/subscribe',
-}
-
-export const AIRDROP_MISSION_URL = {
-  testnet: 'https://airdrop.rinkeby.like.co/api/claims/',
-  production: 'https://airdrop.like.co/api/claims/',
-}
-
-export const AIRDROP_DECAY_URL = {
-  testnet: 'https://airdrop.rinkeby.like.co/api/decay',
-  production: 'https://airdrop.like.co/api/decay',
-}
-
-export const AIRDROP_OG_URL = {
-  testnet: 'https://app.rinkeby.like.co/images/og/',
-  production: 'https://app.like.co/images/og/',
-}
-
-export const AIRDROP_CLAIM_ENDPOINT = IS_TESTNET
-  ? AIRDROP_CLAIM_URL.testnet
-  : AIRDROP_CLAIM_URL.production
-
-export const AIRDROP_OVERVIEW_ENDPOINT = IS_TESTNET
-  ? AIRDROP_OVERVIEW_URL.testnet
-  : AIRDROP_OVERVIEW_URL.production
-
-export const AIRDROP_SUBSCRIBE_ENDPOINT = IS_TESTNET
-  ? AIRDROP_SUBSCRIBE_URL.testnet
-  : AIRDROP_SUBSCRIBE_URL.production
-
-export const AIRDROP_MISSION_ENDPOINT = IS_TESTNET
-  ? AIRDROP_MISSION_URL.testnet
-  : AIRDROP_MISSION_URL.production
-
-export const AIRDROP_DECAY_ENDPOINT = AIRDROP_DECAY_URL.production
-
-export const AIRDROP_OG_ENDPOINT = IS_TESTNET
-  ? AIRDROP_OG_URL.testnet
-  : AIRDROP_OG_URL.production
+export const AIRDROP_URL = IS_TESTNET ? 'https://airdrop.rinkeby.like.co' : 'https://airdrop.like.co';
 
 export const IS_CHAIN_UPGRADING = false;
 

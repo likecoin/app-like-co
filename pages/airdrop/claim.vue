@@ -60,10 +60,8 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import BigNumber from 'bignumber.js'
 import {
-  AIRDROP_CLAIM_ENDPOINT,
-  AIRDROP_MISSION_ENDPOINT,
+  AIRDROP_URL,
   BIG_DIPPER_TX_BASE_URL,
-  AIRDROP_DECAY_ENDPOINT,
   IS_CHAIN_UPGRADING,
 } from '~/constant'
 
@@ -174,7 +172,7 @@ export default class AirdropClaimPage extends Vue {
     this.isFinishedLoading = false
     if (this.currentAddress) {
       const res: any = await this.$axios
-        .get(`${AIRDROP_CLAIM_ENDPOINT}${this.currentAddress}`)
+        .get(`${AIRDROP_URL}/api/claims?address=${this.currentAddress}`)
         .catch((err) => {
           console.error(err)
           if (err.response.status === 403) {
@@ -254,7 +252,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async fetchMissionDecay() {
-    const data = await this.$axios.get(AIRDROP_DECAY_ENDPOINT).then((item) => item.data)
+    const data = await this.$axios.get(`${AIRDROP_URL}/api/decay`).then((item) => item.data)
     this.deadline = data.startingDate
     this.endDate = data.endingDate
     this.decay.factor = data.factor
@@ -303,7 +301,7 @@ export default class AirdropClaimPage extends Vue {
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
-        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name}?address=${this.currentAddress}`,
+        `${AIRDROP_URL}/api/claims/${this.currentMission.name}?address=${this.currentAddress}`,
       )
       .catch((err) => {
         console.error(err)
