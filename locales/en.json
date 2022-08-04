@@ -63,7 +63,7 @@
   "AirDrop.mission.button.previous": "Previous",
   "AirDrop.mission.button.retry": "retry",
   "AirDrop.mission.button.seeTransaction": "Check Tx",
-  "AirDrop.mission.button.technicalError": "Not opened for claim",
+  "AirDrop.mission.button.technicalError": "Not open for claim",
   "AirDrop.mission.decay.days": "D",
   "AirDrop.mission.decay.hours": "H",
   "AirDrop.mission.decay.minutes": "M",
