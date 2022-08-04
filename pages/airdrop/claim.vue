@@ -241,7 +241,7 @@ export default class AirdropClaimPage extends Vue {
     const endDate: any = new Date(this.endDate)
 
     this.decay.started = startDate > decayDate;
-    const spantime = this.decay.started ? endDate - startDate : decayDate - startDate
+    const spantime = Math.max(this.decay.started ? endDate - startDate : decayDate - startDate, 0)
     this.countdownDate.minutes = Math.floor((spantime / 1000 / 60) % 60).toString()
     this.countdownDate.hours = Math.floor((spantime / (1000 * 60 * 60)) % 24).toString()
     this.countdownDate.days = Math.floor(spantime / (1000 * 60 * 60 * 24)).toString()
