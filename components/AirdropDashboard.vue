@@ -98,7 +98,7 @@
             'font-bold',
             'text-black',
           ]"
-          :text="`${decay.factor.toFixed(2)}`"
+          :text="`${decay.factor.toFixed(4) * 100}`"
           preset="h1"
         />
         <Label

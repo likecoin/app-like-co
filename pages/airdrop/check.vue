@@ -117,7 +117,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import { MetaInfo } from 'vue-meta'
 import BigNumber from 'bignumber.js'
 import {
-  AIRDROP_OVERVIEW_ENDPOINT,
+  AIRDROP_URL,
   COSMOS_ADDRESS_REGEX,
   OSMOSIS_ADDRESS_REGEX,
 } from '~/constant'
@@ -160,7 +160,7 @@ export default class AirdropCheckPage extends Vue {
 
   async fetchClaimmableAmount(address: string) {
       const res: any = await this.$axios.get(
-        `${AIRDROP_OVERVIEW_ENDPOINT}${address}`,
+        `${AIRDROP_URL}/api/overview?address=${address}`,
       )
       this.$emit('claimmingAddress')
       this.claimmableAmount = new BigNumber(res.data.allocatedAmount)

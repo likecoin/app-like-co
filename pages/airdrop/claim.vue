@@ -60,10 +60,8 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import BigNumber from 'bignumber.js'
 import {
-  AIRDROP_CLAIM_ENDPOINT,
-  AIRDROP_MISSION_ENDPOINT,
+  AIRDROP_URL,
   BIG_DIPPER_TX_BASE_URL,
-  AIRDROP_DECAY_ENDPOINT,
   IS_CHAIN_UPGRADING,
 } from '~/constant'
 
@@ -161,8 +159,12 @@ export default class AirdropClaimPage extends Vue {
     return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
   }
 
-  mounted() {
-    this.fetchMissionDecay()
+  get isAirdropEnd() {
+    return this.decay.factor >= 1;
+  }
+
+  async mounted() {
+    await this.fetchMissionDecay()
 
     if (this.currentAddress) {
       this.fetchMissionStatus()
@@ -174,15 +176,17 @@ export default class AirdropClaimPage extends Vue {
     this.isFinishedLoading = false
     if (this.currentAddress) {
       const res: any = await this.$axios
-        .get(`${AIRDROP_CLAIM_ENDPOINT}${this.currentAddress}`)
+        .get(`${AIRDROP_URL}/api/claims?address=${this.currentAddress}`)
         .catch((err) => {
           console.error(err)
-          if (err.response.status === 403) {
-            this.errorMessage = this.$t(
-              'AirDrop.errorMessage.ineligible',
-            ) as string
-          } else {
-            this.closeAirdrop()
+          if (!this.isAirdropEnd) {
+            if (err.response.status === 403) {
+              this.errorMessage = this.$t(
+                'AirDrop.errorMessage.ineligible',
+              ) as string
+            } else {
+              this.closeAirdrop()
+            }
           }
           this.initClaimStatus()
           this.totalAirdrop = '0'
@@ -201,7 +205,6 @@ export default class AirdropClaimPage extends Vue {
             .shiftedBy(-9)
             .toFixed(0, BigNumber.ROUND_DOWN)
 
-          this.errorMessage = ''
           this.missionsOverview.forEach((mission: any, i) => {
             this.claimData.forEach((element: any) => {
               if (mission.name === element.mission) {
@@ -233,6 +236,11 @@ export default class AirdropClaimPage extends Vue {
     this.shouldCloseAirdrop = true
   }
 
+  endAirdrop() {
+    this.errorMessage = this.$t('AirDrop.errorMessage.end') as string
+    this.shouldCloseAirdrop = true
+  }
+
   changeStep(step: number) {
     this.step = step
   }
@@ -243,7 +251,7 @@ export default class AirdropClaimPage extends Vue {
     const endDate: any = new Date(this.endDate)
 
     this.decay.started = startDate > decayDate;
-    const spantime = this.decay.started ? endDate - startDate : decayDate - startDate
+    const spantime = Math.max(this.decay.started ? endDate - startDate : decayDate - startDate, 0)
     this.countdownDate.minutes = Math.floor((spantime / 1000 / 60) % 60).toString()
     this.countdownDate.hours = Math.floor((spantime / (1000 * 60 * 60)) % 24).toString()
     this.countdownDate.days = Math.floor(spantime / (1000 * 60 * 60 * 24)).toString()
@@ -254,10 +262,14 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async fetchMissionDecay() {
-    const data = await this.$axios.get(AIRDROP_DECAY_ENDPOINT).then((item) => item.data)
+    const data = await this.$axios.get(`${AIRDROP_URL}/api/decay`).then((item) => item.data)
     this.deadline = data.startingDate
     this.endDate = data.endingDate
     this.decay.factor = data.factor
+    if (this.decay.factor >= 1) {
+      this.endAirdrop()
+      return
+    }
 
     this.getTimeRemaining()
     if (!this.intervalID)
@@ -299,11 +311,11 @@ export default class AirdropClaimPage extends Vue {
   }
 
   async handleMissionDone() {
-    if (IS_CHAIN_UPGRADING) return;
+    if (IS_CHAIN_UPGRADING || this.isAirdropEnd) return;
     this.missionLoadingStatus = 'Loading'
     const res: any = await this.$axios
       .post(
-        `${AIRDROP_MISSION_ENDPOINT}${this.currentMission.name}?address=${this.currentAddress}`,
+        `${AIRDROP_URL}/api/claims/${this.currentMission.name}?address=${this.currentAddress}`,
       )
       .catch((err) => {
         console.error(err)
