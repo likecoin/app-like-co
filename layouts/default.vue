@@ -10,11 +10,11 @@
         'justify-center',
         'z-10',
         { 'lg:hidden': !isDesktopViewMode },
-        { 'bg-white lg:bg-light-gray': $nuxt.$route.path.includes('airdrop') },
+        { 'bg-white lg:bg-light-gray': $route.path.includes('airdrop') },
       ]"
     >
       <Button
-        v-if="$nuxt.$route.path !== '/'"
+        v-if="$route.path !== '/'"
         :class="[
           'mt-[16px]',
           'underline',
