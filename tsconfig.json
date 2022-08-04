@@ -27,11 +27,11 @@
       ]
     },
     "types": [
+      "@types/node",
       "@nuxt/types",
+      "@nuxtjs/sentry",
       "@nuxtjs/axios",
       "@nuxtjs/i18n",
-      "@nuxtjs/sentry",
-      "@types/node",
       "types/*.d.ts"
     ]
   },
