@@ -160,7 +160,7 @@ export default class AirdropClaimPage extends Vue {
   }
 
   get isAirdropEnd() {
-    return this.decay.factor === 1;
+    return this.decay.factor >= 1;
   }
 
   async mounted() {
