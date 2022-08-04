@@ -159,8 +159,12 @@ export default class AirdropClaimPage extends Vue {
     return `${BIG_DIPPER_TX_BASE_URL}${this.currentMission.txHash}`
   }
 
-  mounted() {
-    this.fetchMissionDecay()
+  get isAirdropEnd() {
+    return this.decay.factor === 1;
+  }
+
+  async mounted() {
+    await this.fetchMissionDecay()
 
     if (this.currentAddress) {
       this.fetchMissionStatus()
@@ -175,12 +179,14 @@ export default class AirdropClaimPage extends Vue {
         .get(`${AIRDROP_URL}/api/claims?address=${this.currentAddress}`)
         .catch((err) => {
           console.error(err)
-          if (err.response.status === 403) {
-            this.errorMessage = this.$t(
-              'AirDrop.errorMessage.ineligible',
-            ) as string
-          } else {
-            this.closeAirdrop()
+          if (!this.isAirdropEnd) {
+            if (err.response.status === 403) {
+              this.errorMessage = this.$t(
+                'AirDrop.errorMessage.ineligible',
+              ) as string
+            } else {
+              this.closeAirdrop()
+            }
           }
           this.initClaimStatus()
           this.totalAirdrop = '0'
@@ -199,7 +205,6 @@ export default class AirdropClaimPage extends Vue {
             .shiftedBy(-9)
             .toFixed(0, BigNumber.ROUND_DOWN)
 
-          this.errorMessage = ''
           this.missionsOverview.forEach((mission: any, i) => {
             this.claimData.forEach((element: any) => {
               if (mission.name === element.mission) {
@@ -231,6 +236,11 @@ export default class AirdropClaimPage extends Vue {
     this.shouldCloseAirdrop = true
   }
 
+  endAirdrop() {
+    this.errorMessage = this.$t('AirDrop.errorMessage.end') as string
+    this.shouldCloseAirdrop = true
+  }
+
   changeStep(step: number) {
     this.step = step
   }
@@ -256,6 +266,10 @@ export default class AirdropClaimPage extends Vue {
     this.deadline = data.startingDate
     this.endDate = data.endingDate
     this.decay.factor = data.factor
+    if (this.decay.factor >= 1) {
+      this.endAirdrop()
+      return
+    }
 
     this.getTimeRemaining()
     if (!this.intervalID)
