@@ -299,8 +299,14 @@ export default class NFTTestMintPage extends Vue {
               /* eslint-disable no-await-in-loop */
               try {
                 await this.submitToArweave(txHash)
-              } catch (err) {
-                if (tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) await timeout(2000)
+              } catch (err: any) {
+                if (err.response?.status === 400 
+                  && err.response?.data === 'TX_NOT_FOUND'
+                  && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
+                  await timeout(2000)
+                } else {
+                  throw err
+                }
               }
               /* eslint-enable no-await-in-loop */
             } while (!this.ogImageArweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT )

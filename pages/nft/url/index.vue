@@ -242,30 +242,33 @@ export default class FetchIndex extends Vue {
         return
       }
       this.isLoading = true
+      this.arweaveId = ''
       await this.crawlUrlData()
       if (this.crawledData?.body) {
         try {
           const arweaveFeeInfo = await this.estimateArweaveFee();
           if (!this.arweaveId) {
             const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo);
-            let tryTime = 0;
+            let tryTime = 0
             do {
-              tryTime += 1;
+              tryTime += 1
               /* eslint-disable no-await-in-loop */
               try {
-                await this.submitToArweave(txHash);
-              } catch (err) {
-                if (tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
-                  await timeout(2000);
+                await this.submitToArweave(txHash)
+              } catch (err: any) {
+                if (err.response?.status === 400 
+                  && err.response?.data === 'TX_NOT_FOUND'
+                  && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
+                  await timeout(2000)
                 } else {
-                  throw err;
+                  throw err
                 }
               }
               /* eslint-enable no-await-in-loop */
-            } while (!this.arweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT);
+            } while (!this.arweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT)
           }
         } catch (error) {
-          console.error(error);
+          console.error(error)
           // skip uploading body to Arweave
         }
       }
