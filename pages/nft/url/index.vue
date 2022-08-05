@@ -89,6 +89,7 @@ import {
 } from '~/constant/api'
 
 import { getAccountBalance } from '~/utils/cosmos'
+import { timeout } from '~/utils/misc';
 
 const signerModule = namespace('signer')
 
@@ -243,10 +244,25 @@ export default class FetchIndex extends Vue {
       await this.crawlUrlData()
       if (this.crawledData?.body) {
         try {
-          const arweaveFeeInfo = await this.estimateArweaveFee()
+          const arweaveFeeInfo = await this.estimateArweaveFee();
           if (!this.arweaveId) {
-            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
-            await this.submitToArweave(txHash)
+            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo);
+            const TRY_LIMIT = 5;
+            let tryTime = 0;
+            do {
+              tryTime += 1;
+              /* eslint-disable no-await-in-loop */
+              try {
+                await this.submitToArweave(txHash);
+              } catch (err) {
+                if (tryTime < TRY_LIMIT) {
+                  await timeout(2000);
+                } else {
+                  throw err;
+                }
+              }
+              /* eslint-enable no-await-in-loop */
+            } while (!this.arweaveId && tryTime < TRY_LIMIT);
           }
         } catch (error) {
           console.error(error);
