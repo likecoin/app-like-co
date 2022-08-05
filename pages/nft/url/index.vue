@@ -77,10 +77,13 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
 import postMappingWithCosmosWallet from '@/utils/mapping';
 
+import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
 import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
+import { timeout } from '~/utils/misc';
+import { ARWEAVE_UPLOAD_TRY_LIMIT } from '~/constant';
 import {
   getLikerIdMinApi,
   getAddressLikerIdMinApi,
@@ -88,8 +91,6 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
-import { getAccountBalance } from '~/utils/cosmos'
-import { timeout } from '~/utils/misc';
 
 const signerModule = namespace('signer')
 
@@ -247,7 +248,6 @@ export default class FetchIndex extends Vue {
           const arweaveFeeInfo = await this.estimateArweaveFee();
           if (!this.arweaveId) {
             const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo);
-            const TRY_LIMIT = 5;
             let tryTime = 0;
             do {
               tryTime += 1;
@@ -255,14 +255,14 @@ export default class FetchIndex extends Vue {
               try {
                 await this.submitToArweave(txHash);
               } catch (err) {
-                if (tryTime < TRY_LIMIT) {
+                if (tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
                   await timeout(2000);
                 } else {
                   throw err;
                 }
               }
               /* eslint-enable no-await-in-loop */
-            } while (!this.arweaveId && tryTime < TRY_LIMIT);
+            } while (!this.arweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT);
           }
         } catch (error) {
           console.error(error);
