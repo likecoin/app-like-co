@@ -272,6 +272,7 @@ export default class NFTTestButtonPage extends Vue {
           iscn_id: this.iscnId,
           class_id: this.classId,
           tx_hash: this.grantTransactionHash,
+          user_ts: Date.now(),
         },
         paramsSerializer: (params) => qs.stringify(params),
       },
