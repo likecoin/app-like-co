@@ -201,13 +201,19 @@ export default async function getCralwerData(url: string) {
     [
       'script',
       'style',
-      'img',
-      'picture',
       'svg',
     ].forEach((t: string) => $(t).remove())
     title = $('title').text()
     const metas = $('meta')
     body = $('body').html() || ''
+
+    const img = $('img')
+    Object.keys(img).forEach((key: any) => {
+      const { src } = img[key].attribs || {};
+      if (!src) {
+        delete img[key]
+      }
+    })
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
