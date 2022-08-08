@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
@@ -206,6 +206,15 @@ export default class FetchIndex extends Vue {
     }
   }
 
+  @Watch('url')
+  reset() {
+    this.crawledData = null
+    this.ipfsHash = ''
+    this.arweaveId = ''
+    this.arweaveFeeTxHash = ''
+    this.iscnId = ''
+  }
+
   async onSubmit() {
     if (this.ownerWallet && this.address !== this.ownerWallet) {
       this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
@@ -239,8 +248,6 @@ export default class FetchIndex extends Vue {
         return
       }
       this.isLoading = true
-      this.arweaveId = ''
-      this.arweaveFeeTxHash = ''
       await this.crawlUrlData()
       if (this.crawledData?.body) {
         try {
