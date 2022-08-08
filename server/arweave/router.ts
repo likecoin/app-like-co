@@ -85,11 +85,8 @@ router.post('/upload',
     do {
       tryTimes += 1
       /* eslint-disable no-await-in-loop */
-      try {
-        tx = await queryLIKETransactionInfo(txHash as string, LIKE_TARGET_ADDRESS);
-      } catch (err) {
-        await timeout(2000)
-      }
+      tx = await queryLIKETransactionInfo(txHash as string, LIKE_TARGET_ADDRESS);
+      if (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT) await timeout(2000);
       /* eslint-enable no-await-in-loop */
     } while (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT)
 
