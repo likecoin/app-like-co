@@ -210,7 +210,7 @@ export default async function getCralwerData(url: string) {
     const img = $('img')
     Object.keys(img).forEach((key: any) => {
       const { src } = img[key].attribs || {};
-      if(!src){
+      if (!src) {
         delete img[key]
       }
     })
