@@ -88,14 +88,10 @@ router.post('/upload',
       try {
         tx = await queryLIKETransactionInfo(txHash as string, LIKE_TARGET_ADDRESS);
       } catch (err) {
-        if (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT) {
-          await timeout(2000)
-        } else {
-          break;
-        }
+        await timeout(2000)
       }
       /* eslint-enable no-await-in-loop */
-    } while (!tx)
+    } while (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT)
 
     if (!tx || !tx?.amount) {
       res.status(400).send('TX_NOT_FOUND');
