@@ -82,8 +82,6 @@ import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
 import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
-import { timeout } from '~/utils/misc';
-import { ARWEAVE_UPLOAD_TRY_LIMIT } from '~/constant';
 import {
   getLikerIdMinApi,
   getAddressLikerIdMinApi,
@@ -246,29 +244,13 @@ export default class FetchIndex extends Vue {
       await this.crawlUrlData()
       if (this.crawledData?.body) {
         try {
-          const arweaveFeeInfo = await this.estimateArweaveFee();
+          const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.arweaveId) {
-            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo);
-            let tryTime = 0
-            do {
-              tryTime += 1
-              /* eslint-disable no-await-in-loop */
-              try {
-                await this.submitToArweave(txHash)
-              } catch (err: any) {
-                if (err.response?.status === 400 
-                  && err.response?.data === 'TX_NOT_FOUND'
-                  && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
-                  await timeout(2000)
-                } else {
-                  throw err
-                }
-              }
-              /* eslint-enable no-await-in-loop */
-            } while (!this.arweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT)
+            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
+            await this.submitToArweave(txHash)
           }
         } catch (error) {
-          console.error(error)
+          console.error(error);
           // skip uploading body to Arweave
         }
       }

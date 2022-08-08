@@ -76,5 +76,3 @@ export const AIRDROP_URL = IS_TESTNET ? 'https://airdrop.rinkeby.like.co' : 'htt
 export const IS_CHAIN_UPGRADING = false;
 
 export const LIKER_NFT_API_WALLET = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
-
-export const ARWEAVE_UPLOAD_TRY_LIMIT = 5;

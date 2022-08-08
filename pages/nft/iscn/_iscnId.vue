@@ -112,10 +112,9 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, ARWEAVE_UPLOAD_TRY_LIMIT } from '~/constant'
+import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
-import { timeout } from '~/utils/misc'
 
 const PREMINT_NFT_AMOUNT = 500;
 
@@ -293,23 +292,7 @@ export default class NFTTestMintPage extends Vue {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.ogImageArweaveId) {
             const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
-            let tryTime = 0
-            do {
-              tryTime += 1
-              /* eslint-disable no-await-in-loop */
-              try {
-                await this.submitToArweave(txHash)
-              } catch (err: any) {
-                if (err.response?.status === 400 
-                  && err.response?.data === 'TX_NOT_FOUND'
-                  && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT) {
-                  await timeout(2000)
-                } else {
-                  throw err
-                }
-              }
-              /* eslint-enable no-await-in-loop */
-            } while (!this.ogImageArweaveId && tryTime < ARWEAVE_UPLOAD_TRY_LIMIT )
+            await this.submitToArweave(txHash)
           }
         }
 

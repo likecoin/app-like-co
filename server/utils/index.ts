@@ -2,6 +2,10 @@ import { NextFunction, Request, Response } from "express";
 
 import { ArweaveFile } from '../arweave/types';
 
+export function timeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function checkFileValid(req: Request, res: Response, next: NextFunction) {
   if (!(req.files && req.files.length)) {
     res.status(400).send('MISSING_FILE');
