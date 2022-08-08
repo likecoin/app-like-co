@@ -290,10 +290,15 @@ export default class NFTTestMintPage extends Vue {
         }
 
         if (this.ogImageBlob) {
-          const arweaveFeeInfo = await this.estimateArweaveFee()
-          if (!this.ogImageArweaveId) {
-            await this.sendArweaveFeeTx(arweaveFeeInfo)
-            await this.submitToArweave()
+          try {
+            const arweaveFeeInfo = await this.estimateArweaveFee()
+            if (!this.ogImageArweaveId) {
+              await this.sendArweaveFeeTx(arweaveFeeInfo)
+              await this.submitToArweave()
+            }
+          } catch (err) {
+            console.error(err);
+            // skip uploading ogImage to Arweave
           }
         }
 
@@ -384,6 +389,7 @@ export default class NFTTestMintPage extends Vue {
         },
       )
       this.ogImageArweaveId = arweaveId
+      console.log('extimateArweaveFee', arweaveId)
       return {
         to: address,
         amount: new BigNumber(LIKE),
@@ -402,6 +408,7 @@ export default class NFTTestMintPage extends Vue {
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.ogImageArweaveFeeTxHash = transactionHash
+      console.log('sendArweaveFeeTx', transactionHash)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -422,6 +429,7 @@ export default class NFTTestMintPage extends Vue {
         },
       )
       this.ogImageArweaveId = arweaveId
+      console.log('submitToArweave', arweaveId)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_UPLOAD_TO_ARWEAVE')

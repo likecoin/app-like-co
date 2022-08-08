@@ -294,6 +294,7 @@ export default class FetchIndex extends Vue {
         },
       )
       if (arweaveId) { this.arweaveId = arweaveId }
+      console.log('estimateArweaveFee', arweaveId)
       this.ipfsHash = ipfsHash
       return {
         to: address,
@@ -313,6 +314,7 @@ export default class FetchIndex extends Vue {
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.arweaveFeeTxHash = transactionHash;
+      console.log('sendArweaveFeeTx', transactionHash)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -333,6 +335,7 @@ export default class FetchIndex extends Vue {
         },
       )
       this.arweaveId = arweaveId
+      console.log('submitToArweave', arweaveId)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_UPLOAD_TO_ARWEAVE')
