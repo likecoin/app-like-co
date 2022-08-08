@@ -110,8 +110,6 @@ export default class FetchIndex extends Vue {
   crawledData: any
   ipfsHash = ''
   arweaveId = ''
-  arweaveFeeTargetAddress = ''
-  arweaveFee = new BigNumber(0)
   iscnId = this.$route.query.iscn_id as string || ''
   likerId = this.$route.query.liker_id as string || ''
   isLoading = false
