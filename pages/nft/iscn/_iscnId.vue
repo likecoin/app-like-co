@@ -292,7 +292,7 @@ export default class NFTTestMintPage extends Vue {
         if (this.ogImageBlob) {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.ogImageArweaveId) {
-            await this.sendArweaveFeeTx(arweaveFeeInfo)
+            if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
             await this.submitToArweave()
           }
         }
