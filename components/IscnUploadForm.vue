@@ -256,6 +256,7 @@ export default class UploadForm extends Vue {
             try {
               this.exifInfo = await exifr.parse(files[0])
             } catch (err) {
+              // eslint-disable-next-line no-console
               console.error(err)
               this.exifInfo = null
             }

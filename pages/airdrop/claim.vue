@@ -178,6 +178,7 @@ export default class AirdropClaimPage extends Vue {
       const res: any = await this.$axios
         .get(`${AIRDROP_URL}/api/claims?address=${this.currentAddress}`)
         .catch((err) => {
+          // eslint-disable-next-line no-console
           console.error(err)
           if (!this.isAirdropEnd) {
             if (err.response.status === 403) {
@@ -318,6 +319,7 @@ export default class AirdropClaimPage extends Vue {
         `${AIRDROP_URL}/api/claims/${this.currentMission.name}?address=${this.currentAddress}`,
       )
       .catch((err) => {
+        // eslint-disable-next-line no-console
         console.error(err)
         if (err.response.status !== 400 && err.response.status !== 401 && err.response.status !== 403) {
           this.currentMission.isEnabled = false

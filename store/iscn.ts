@@ -5,7 +5,6 @@ import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
 import axios from 'axios';
 import _ from 'lodash';
-import axios from 'axios';
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 import network from '~/constant/network'

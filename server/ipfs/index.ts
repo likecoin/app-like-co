@@ -29,6 +29,7 @@ const getInstance = (() => {
 export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } = {}) {
   const client = getInstance()
   const fileBlob = file.buffer;
+  // eslint-disable-next-line no-console
   if (!onlyHash) client.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
   const res = await client.primary.add(fileBlob, { onlyHash });
   return res.cid.toString();
@@ -54,6 +55,7 @@ export async function uploadFilesToIPFS(files: ArweaveFile[], { onlyHash = false
   const client = getInstance()
   const directoryName = 'tmp';
   if (!onlyHash) {
+    // eslint-disable-next-line no-console
     client.replicas.map(c => internalUploadAll(c, files, { directoryName, onlyHash }).catch((e) => console.error(e)));
   }
   const results = await internalUploadAll(client.primary, files, { directoryName, onlyHash });

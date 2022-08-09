@@ -11,6 +11,7 @@ app.use('/numbers-protocol', numbersProtocol);
 app.use('/crawler', crawler);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  // eslint-disable-next-line no-console
   console.error(err);
   res.set('Content-Type', 'text/plain');
   if (err.message?.includes('invalid address')) {

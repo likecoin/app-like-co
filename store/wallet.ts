@@ -148,6 +148,7 @@ export default class Wallet extends VuexModule {
       window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'keplr')
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     }
     return false;

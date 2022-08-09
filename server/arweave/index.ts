@@ -47,6 +47,7 @@ export async function getArweaveIdFromHashes(ipfsHash: string) {
     if (ids[0]) return ids[0].node.id;
     return undefined;
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     return undefined;
   }

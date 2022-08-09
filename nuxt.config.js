@@ -110,7 +110,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     browserBaseURL: '/api',
-    retry: { retries: 1 }
+    retry: { retries: 1 },
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
@@ -137,9 +137,7 @@ export default {
     },
   },
 
-  serverMiddleware: [
-    { path: '/api', handler: '~/server/index.ts' },
-  ],
+  serverMiddleware: [{ path: '/api', handler: '~/server/index.ts' }],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {

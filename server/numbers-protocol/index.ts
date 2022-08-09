@@ -55,6 +55,7 @@ export async function registerNUMAsset(file: Buffer, filename?: string, {
         }
       }
     }
+    // eslint-disable-next-line no-console
     console.error(error)
     throw new Error("REGISTER_NUM_ASSET_FAILED")
   }

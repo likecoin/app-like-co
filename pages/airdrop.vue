@@ -197,13 +197,11 @@ const signerModule = namespace('signer')
     const title = this.$t('page.airdrop.title')
     return {
       title,
-      meta: [
-        {
+      meta: [{
           hid: 'og:image',
           property: 'og:image',
           content: `${SITE_URL}/images/og/airdrop_launch.png`,
-        },
-      ],
+        }],
     } as MetaInfo
   },
 })

@@ -168,7 +168,9 @@ export default class NFTTestButtonPage extends Vue {
       this.getNftMetadata(),
       this.getOwningCount(),
     ]).catch((err) => this.$nuxt.error({ statusCode: 404, message: err }))
+    // eslint-disable-next-line no-console
     await this.getOwnerName().catch(err => console.error(err))
+    // eslint-disable-next-line no-console
     this.getLIKEPrice().catch(err => console.error(err))
   }
 

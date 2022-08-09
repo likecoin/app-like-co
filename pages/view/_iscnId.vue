@@ -761,6 +761,7 @@ export default class ViewIscnIdPage extends Vue {
       this.isPreminted = !!data.classId
     } catch (err) {
       this.isPreminted = false
+      // eslint-disable-next-line no-console
       console.error(err)
     }
   }

@@ -53,6 +53,7 @@ export default async function postMappingWithCosmosWallet(iscnId, url, likerId, 
   )
    await axios.post(API_LIKER_NFT_MAPPING, { address, payload })
  } catch (err) {
+   // eslint-disable-next-line no-console
    console.error(err);
  }
 }

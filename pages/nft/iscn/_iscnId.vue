@@ -266,8 +266,10 @@ export default class NFTTestMintPage extends Vue {
         console.error(err);
         this.setError('ISCN_NOT_FOUND')
       }),
+      // eslint-disable-next-line no-console
       this.getMintInfo().catch(err => console.error(err)),
     ]);
+    // eslint-disable-next-line no-console
     this.getOgImage().catch(err => console.error(err));
   }
 
@@ -350,6 +352,7 @@ export default class NFTTestMintPage extends Vue {
       this.classId = data.classId
       this.apiData = data
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(err)
     }
   }
@@ -443,6 +446,7 @@ export default class NFTTestMintPage extends Vue {
       )
       fdata = data
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error)
     }
     return fdata
@@ -478,6 +482,7 @@ export default class NFTTestMintPage extends Vue {
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error)
     }
 
@@ -514,8 +519,8 @@ export default class NFTTestMintPage extends Vue {
       if (this.isWritingNFT) messages = messages.concat(sendMessages);
 
       sendRes = await signingClient.sendMessages(this.address, messages)
-      // eslint-disable-next-line consistent-return
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error)
     }
     // eslint-disable-next-line consistent-return

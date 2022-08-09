@@ -229,6 +229,7 @@ export default async function getCralwerData(url: string) {
     })
     body = formatBody({ content: body, title, author, description })
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
   }
   return { title, description, keywords, author, body, image }

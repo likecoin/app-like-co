@@ -194,6 +194,7 @@ export default class FetchIndex extends Vue {
         const { data } = await this.$axios.get(getAddressLikerIdMinApi(wallet as string));
         this.avatar = data.avatar;
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(err);
       }
     } else if (likerId) {
@@ -202,6 +203,7 @@ export default class FetchIndex extends Vue {
         this.ownerWallet = data.likeWallet;
         this.avatar = data.avatar;
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(err);
       }
     }
@@ -249,6 +251,7 @@ export default class FetchIndex extends Vue {
             await this.submitToArweave(txHash)
           }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(error);
           // skip uploading body to Arweave
         }
