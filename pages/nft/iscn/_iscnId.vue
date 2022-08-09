@@ -176,6 +176,18 @@ export default class NFTTestMintPage extends Vue {
     return !(nft && nft !== '0');
   }
 
+  get hasOpener(): boolean {
+    const { opener = 0 } = this.$route.query
+    return window?.opener && (opener && opener !== '0');
+  }
+
+  get redirectOrigin(): string {
+    const redirectUri: string = this.$route.query.redirect_uri as string;
+    if (!redirectUri) return '';
+    const url = new URL(redirectUri);
+    return url.origin;
+  }
+
   get iscnId(): string {
     const { iscnId } = this.$route.params
     return iscnId
@@ -348,6 +360,18 @@ export default class NFTTestMintPage extends Vue {
       })
       this.classId = data.classId
       this.apiData = data
+
+      if (this.hasOpener) {
+        try {
+          window.opener.postMessage(JSON.stringify({
+            action: 'NFT_MINT_DATA',
+            data,
+          }), this.redirectOrigin);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
