@@ -136,13 +136,13 @@ export default class ISCN extends VuexModule {
 
   @Action
   async queryISCNByField({
-    keyword,
-  }: { keyword: string }): Promise<ISCNRecordWithID[]> {
+    keywords,
+  }: { keywords: string }): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
     let result: ISCNRecord[] = ([] as ISCNRecord[])
     try {
       this.context.commit('setIsLoading', true)
-      const { data } = await axios.get(`${network.apiURL}/iscn/records?keyword=${encodeURIComponent(keyword)}`)
+      const { data } = await axios.get(`${network.apiURL}/iscn/records?keywords=${encodeURIComponent(keywords)}`)
       if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {

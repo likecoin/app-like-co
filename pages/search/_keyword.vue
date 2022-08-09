@@ -115,8 +115,8 @@ const iscnModule = namespace('iscn')
       const { name } = route
       redirect({ name: name as string, query: { q: params.keyword, ...query } });
     }
-    const { q, keyword } = query;
-    if (!q && !keyword) {
+    const { q, keywords } = query;
+    if (!q && !keywords) {
       redirect({ name: 'index' });
     }
   },
@@ -136,7 +136,7 @@ export default class SearchPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   @iscnModule.Action queryISCNByField!: (
-    arg0: { keyword: string }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
+    arg0: { keywords: string }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   pageNumber = 0
   closeWarning = false
@@ -157,11 +157,11 @@ export default class SearchPage extends Vue {
 
   async mounted() {
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.searchTerm, 1)
-    const { keyword } = this.$route.query;
+    const { keywords } = this.$route.query;
     if (this.searchTerm)  {
       await this.queryISCNByKeyword(this.searchTerm)
-    } else if (keyword)  {
-      await this.queryISCNByField({ keyword: keyword as string })
+    } else if (keywords)  {
+      await this.queryISCNByField({ keywords: keywords as string })
     }
   }
 
