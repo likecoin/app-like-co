@@ -69,9 +69,9 @@
         <Link
           v-if="errorType === 'INSUFFICIENT_BALANCE'"
           :class="['text-white','ml-[2px]']"
-          href="https://faucet.like.co/"
+          href="https://docs.like.co/general-guides/trade"
         >
-          {{ $t('IscnRegisterForm.error.faucet') }}
+          {{ $t('IscnRegisterForm.error.buy') }}
         </Link>
       </Snackbar>
   </Page>
