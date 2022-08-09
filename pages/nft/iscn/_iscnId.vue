@@ -188,7 +188,7 @@ export default class NFTTestMintPage extends Vue {
 
   get buttonText(): string {
     if (this.errorType) return 'Retry'
-    if (this.state === 'done') return this.isWritingNFT ? 'Go to Doc' : 'View NFT'
+    if (this.state === 'done') return 'View NFT'
     if (this.state === 'mint') return 'Mint NFT'
     return 'Mint NFT'
   }
@@ -323,11 +323,7 @@ export default class NFTTestMintPage extends Vue {
         this.isLoading = false
         break
       case 'done':
-        if (this.isWritingNFT) {
-          window.location.href = 'https://github.com/likecoin/likecoin-button-sdk'
-        } else {
-          window.location.href = this.detailsPageURL
-        }
+        window.location.href = this.detailsPageURL
       default:
     }
     /* eslint-enable no-fallthrough */
