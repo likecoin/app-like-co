@@ -1,6 +1,7 @@
 import { IPFS } from 'ipfs-core-types';
 import { create } from 'ipfs-http-client';
 import { ArweaveFile } from '../arweave/types';
+import { timeout } from '../../utils/misc';
 
 const hash = require('ipfs-only-hash');
 
@@ -30,6 +31,7 @@ export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } =
   const client = getInstance()
   const fileBlob = file.buffer;
   // eslint-disable-next-line no-console
+  await timeout(1500)
   if (!onlyHash) client.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
   const res = await client.primary.add(fileBlob, { onlyHash });
   return res.cid.toString();

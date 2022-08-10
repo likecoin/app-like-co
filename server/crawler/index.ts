@@ -195,6 +195,8 @@ export default async function getCralwerData(url: string) {
   let title = ''
   let body = ''
   let image = ''
+  const imgBase64:any = []
+
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
     const $ = cheerio.load(content);
@@ -207,13 +209,50 @@ export default async function getCralwerData(url: string) {
     const metas = $('meta')
     body = $('body').html() || ''
 
+    const promiseImg:any = []
+    const promiseSource:any = []
+
+    const imgKey:any = []
+    const sourceKey:any = []
+
     const img = $('img')
     Object.keys(img).forEach((key: any) => {
       const { src } = img[key].attribs || {};
       if (!src) {
         delete img[key]
+      } else{
+        const srcChange = src.replace('&',`&amp;`)
+        body = body.replace(src,`./img${key}.png`)
+        body = body.replace(srcChange,`./img${key}.png`)
+        imgKey.push(`./img${key}.png`)
+        promiseImg.push(axios.get(`${src}`, {responseType: 'arraybuffer'}).catch(()=> {}));
       }
     })
+    const imgData:any = await Promise.all(promiseImg)
+    for (let i = 0; i < imgData.length; i+=1 ){
+      if(imgData[i]?.status === 200){
+      imgBase64.push({'data':Buffer.from(imgData[i].data).toString('base64'),'key':imgKey[i]});
+      }
+    }
+    const source = $('source')
+    Object.keys(source).forEach((key: any) => {
+    const { srcset } = source[key].attribs || {};
+    if (!srcset) {
+      delete source[key]
+    } else {
+      const srcsetChange = srcset.replace('&',`&amp;`)
+      body = body.replace(srcset,`./source${key}.jepg`)
+      body = body.replace(srcsetChange,`./source${key}.jepg`)
+      sourceKey.push(`./source${key}.jpeg`)
+      promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'}).catch(()=> {}));
+    }})
+    const sourceData:any = await Promise.all(promiseSource)
+
+    for (let j = 0; j < sourceData.length; j+=1 ) {
+      if(sourceData[j]?.status === 200){
+        imgBase64.push({'data':Buffer.from(sourceData[j].data).toString('base64'),'key':sourceKey[j]});
+      }
+    }
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
@@ -232,5 +271,5 @@ export default async function getCralwerData(url: string) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
-  return { title, description, keywords, author, body, image }
+  return { title, description, keywords, author, body, image, imgBase64 }
 }
