@@ -6,11 +6,11 @@ import { UPLOAD_FILESIZE_MAX } from "../constant"
 import { getIPFSHash, uploadFilesToIPFS } from '../ipfs';
 import { queryLIKETransactionInfo } from '../like';
 import { registerNUMAssets } from '../numbers-protocol';
-import { checkFileValid, convertMulterFiles } from '../utils';
+import { timeout, checkFileValid, convertMulterFiles } from '../utils';
 
 import { estimateARPrices, convertARPricesToLIKE, uploadFilesToArweave } from '.';
 
-const { LIKE_TARGET_ADDRESS } = require('../config/config');
+const { LIKE_TARGET_ADDRESS, ARWEAVE_UPLOAD_TRY_LIMIT } = require('../config/config');
 
 const router = Router();
 
@@ -80,7 +80,16 @@ router.post('/upload',
       res.status(400).send('MISSING_TX_HASH');
       return
     }
-    const tx = await queryLIKETransactionInfo(txHash as string, LIKE_TARGET_ADDRESS);
+    let tx;
+    let tryTimes = 0;
+    do {
+      tryTimes += 1
+      /* eslint-disable no-await-in-loop */
+      tx = await queryLIKETransactionInfo(txHash as string, LIKE_TARGET_ADDRESS);
+      if (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT) await timeout(2000);
+      /* eslint-enable no-await-in-loop */
+    } while (!tx && tryTimes < ARWEAVE_UPLOAD_TRY_LIMIT)
+
     if (!tx || !tx?.amount) {
       res.status(400).send('TX_NOT_FOUND');
       return;

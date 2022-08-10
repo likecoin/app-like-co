@@ -70,13 +70,14 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
 import postMappingWithCosmosWallet from '@/utils/mapping';
 
+import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
@@ -88,7 +89,6 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
-import { getAccountBalance } from '~/utils/cosmos'
 
 const signerModule = namespace('signer')
 
@@ -110,8 +110,7 @@ export default class FetchIndex extends Vue {
   crawledData: any
   ipfsHash = ''
   arweaveId = ''
-  arweaveFeeTargetAddress = ''
-  arweaveFee = new BigNumber(0)
+  arweaveFeeTxHash = ''
   iscnId = this.$route.query.iscn_id as string || ''
   likerId = this.$route.query.liker_id as string || ''
   isLoading = false
@@ -209,6 +208,15 @@ export default class FetchIndex extends Vue {
     }
   }
 
+  @Watch('url')
+  reset() {
+    this.crawledData = null
+    this.ipfsHash = ''
+    this.arweaveId = ''
+    this.arweaveFeeTxHash = ''
+    this.iscnId = ''
+  }
+
   async onSubmit() {
     if (this.ownerWallet && this.address !== this.ownerWallet) {
       this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
@@ -247,8 +255,8 @@ export default class FetchIndex extends Vue {
         try {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.arweaveId) {
-            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
-            await this.submitToArweave(txHash)
+            if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
+            await this.submitToArweave()
           }
         } catch (error) {
           // eslint-disable-next-line no-console
@@ -309,12 +317,12 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<string> {
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
-      return transactionHash
+      this.arweaveFeeTxHash = transactionHash;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -322,10 +330,11 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async submitToArweave(txHash: string): Promise<void> {
+  async submitToArweave(): Promise<void> {
     try {
+      if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${txHash}`,
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
         this.formData,
         {
           headers: {

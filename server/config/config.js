@@ -12,4 +12,6 @@ config.NUMBERS_PROTOCOL_BASE_URL = '';
 config.NUMBERS_PROTOCOL_API_KEY = '';
 config.NUMBERS_PROTOCOL_TOKEN = '';
 
+config.ARWEAVE_UPLOAD_TRY_LIMIT = 5;
+
 module.exports = config;

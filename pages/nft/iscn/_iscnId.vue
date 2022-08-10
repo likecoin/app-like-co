@@ -155,6 +155,7 @@ export default class NFTTestMintPage extends Vue {
   ogImageUrl = this.$route.params.ogImageUrl as string || ''
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
+  ogImageArweaveFeeTxHash: string = ''
 
   sendRes: any = null
   postInfo: any = null
@@ -293,8 +294,8 @@ export default class NFTTestMintPage extends Vue {
         if (this.ogImageBlob) {
           const arweaveFeeInfo = await this.estimateArweaveFee()
           if (!this.ogImageArweaveId) {
-            const txHash = await this.sendArweaveFeeTx(arweaveFeeInfo)
-            await this.submitToArweave(txHash)
+            if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
+            await this.submitToArweave()
           }
         }
 
@@ -398,12 +399,12 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<string> {
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
-      return transactionHash
+      this.ogImageArweaveFeeTxHash = transactionHash
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -411,10 +412,11 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  async submitToArweave(txHash: string): Promise<void> {
+  async submitToArweave(): Promise<void> {
     try {
+      if (!this.ogImageArweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${txHash}`,
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageArweaveFeeTxHash}`,
         this.ogImageFormData,
         {
           headers: {
