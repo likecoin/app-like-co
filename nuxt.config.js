@@ -131,6 +131,9 @@ export default {
   },
 
   sentry: {
+    config: {
+      ignoreErrors: ['WebAssembly.instantiate'],
+    },
     clientIntegrations: {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
