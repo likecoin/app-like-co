@@ -200,7 +200,7 @@ export default class NFTTestButtonPage extends Vue {
     if (window.opener) {
       window.opener.postMessage({
         type: 'navigate',
-        route: `/${purchaserAddress}`,
+        route: `/${purchaserAddress}?tab=collected`,
       }, '*');
       window.close()
     } else {
