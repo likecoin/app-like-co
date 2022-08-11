@@ -274,6 +274,7 @@
   "IscnUploaded.button.new": "Register Another ISCN",
   "IscnUploaded.guide.title": "Completed! Here is your ISCN",
   "IscnUploaded.title": "ISCN Registed",
+  "NFTPortal.attention.openApp": "You had connected with WalletConnect. Please open Liker Land App to approve collecting.",
   "NFTPortal.button.collect": "Collect Now",
   "NFTPortal.button.convertToIscn": "Convert Content to Writing NFT",
   "NFTPortal.button.notPreminted": "Continue to mint Writing NFTs",

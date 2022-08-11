@@ -60,21 +60,25 @@
           </i18n>
         </Label>
       </Card>
-      <AttentionsLedger />
+
+      <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
+      <AttentionsLedger v-else />
+
+
     </div>
     <Snackbar
-        v-model="isOpenWarningSnackbar"
-        preset="warn"
+      v-model="isOpenWarningSnackbar"
+      preset="warn"
+    >
+      {{ errorAlert }}
+      <Link
+        v-if="errorType === 'INSUFFICIENT_BALANCE'"
+        :class="['text-white','ml-[2px]']"
+        href="https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7"
       >
-        {{ errorAlert }}
-        <Link
-          v-if="errorType === 'INSUFFICIENT_BALANCE'"
-          :class="['text-white','ml-[2px]']"
-          href="https://docs.like.co/general-guides/trade"
-        >
-          {{ $t('IscnRegisterForm.error.buy') }}
-        </Link>
-      </Snackbar>
+        {{ $t('IscnRegisterForm.error.buy') }}
+      </Link>
+    </Snackbar>
   </Page>
 </template>
 
@@ -99,6 +103,7 @@ import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 
 const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -126,6 +131,7 @@ export enum ErrorType {
 export default class NFTTestButtonPage extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getType') walletType!: string | null
 
   classId: string = ''
   nftPrice: number = -1
@@ -161,6 +167,10 @@ export default class NFTTestButtonPage extends Vue {
       default:
         return this.errorType
     }
+  }
+
+  get isUsingLikerLandApp(){
+    return this.walletType === 'likerland_app'
   }
 
   async mounted() {
