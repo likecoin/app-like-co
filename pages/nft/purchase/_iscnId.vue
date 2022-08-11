@@ -60,6 +60,7 @@
           </i18n>
         </Label>
       </Card>
+      <AttentionsLedger />
     </div>
     <Snackbar
         v-model="isOpenWarningSnackbar"

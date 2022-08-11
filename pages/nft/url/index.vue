@@ -1,14 +1,16 @@
 <template>
-  <Page :class="[
-    'flex',
-    'flex-col',
-    'relative',
-    'items-center',
-    'justify-center',
-    'px-[20px]',
-    'pt-[38px]',
-    'lg:p-[16px]',
-  ]">
+  <Page
+    :class="[
+      'flex',
+      'flex-col',
+      'relative',
+      'items-center',
+      'justify-center',
+      'px-[20px]',
+      'pt-[38px]',
+      'lg:p-[16px]',
+    ]"
+  >
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -66,6 +68,7 @@
         </Link>
       </Snackbar>
     </Card>
+    <AttentionsLedger />
   </Page>
 </template>
 

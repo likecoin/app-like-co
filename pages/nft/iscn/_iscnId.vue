@@ -72,6 +72,7 @@
         </div>
       </div>
     </Card>
+    <AttentionsLedger />
     <Snackbar
       v-model="isOpenWarningSnackbar"
       preset="warn"
