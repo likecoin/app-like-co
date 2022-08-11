@@ -2,7 +2,7 @@ const { IS_TESTNET } = process.env;
 
 const config = {};
 
-config.IPFS_ENDPOINT = 'https://ipfs.infura.io:5001/api/v0';
+config.IPFS_ENDPOINT = 'https://ipfs.io:5001/api/v0';
 config.REPLICA_IPFS_ENDPOINTS = [];
 config.COSMOS_RPC_ENDPOINT = 'https://node.testnet.like.co/rpc/';
 config.COSMOS_DENOM = IS_TESTNET ? 'nanoekil' : 'nanolike';
