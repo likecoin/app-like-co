@@ -5,10 +5,12 @@
       'border-[4px]',
       'border-shade-gray',
       'hover:border-like-cyan',
+      { 'hover:border-medium-gray': disabled },
       'rounded-[16px]',
       'p-[24px]',
       'group',
       'hover:bg-like-cyan-extralight',
+      { 'hover:bg-shade-gray': disabled },
       'transition-colors',
       'cursor-pointer',
     ]"
@@ -18,6 +20,7 @@
     <Label
       :class="[
         'group-hover:text-like-green',
+        { 'group-hover:text-dark-gray': disabled },
         'transition-colors',
       ]"
       preset="h4"
@@ -48,6 +51,7 @@ const walletModule = namespace('wallet')
 @Component
 export default class ConnectWalletButton extends Vue {
   @Prop(String) readonly type!: string
+  @Prop({ default: false }) readonly disabled!: boolean
 
   @signerModule.Action updateSignerInfo!: (arg0: {
     signer: OfflineSigner | null
@@ -86,6 +90,7 @@ export default class ConnectWalletButton extends Vue {
   }
 
   async handleClick() {
+    if (this.disabled) return;
     this.$emit('click', this.type)
     switch (this.type) {
       case 'keplr':

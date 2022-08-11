@@ -24,11 +24,13 @@
       >
         <ConnectWalletButton
           class="w-full"
+          :disabled="isMobileViews"
           :type="type"
           @click="$emit('close')"
         />
       </li>
     </ul>
+    <AttentionsMobileNotSupported v-if="isMobileViews" />
   </Dialog>
 </template>
 <script lang="ts">
@@ -38,6 +40,14 @@ import { CONNECT_WALLET_TYPES } from '~/constant'
 @Component
 export default class ConnectWalletDialog extends Vue {
   @Prop({ default: false }) readonly isOpened!: boolean
+
+  isMobileViews: boolean = false;
+
+  mounted(){
+    if (window.innerWidth <= 640) {
+      this.isMobileViews = true
+    }
+  }
 
   // eslint-disable-next-line class-methods-use-this
   get connectWalletTypes() {
