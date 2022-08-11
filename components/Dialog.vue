@@ -43,6 +43,8 @@
             'relative',
             'shadow-popup',
             'max-h-[80vh]',
+            'w-full',
+            'max-w-[700px]',
             'overflow-y-scroll',
             'scrollbar-hidden',
           ]"

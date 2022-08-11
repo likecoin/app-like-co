@@ -10,35 +10,10 @@
   >
     <slot />
 
-    <DialogContainer>
-      <Dialog
-        :open="isOpenChainUpgradeBlockingDialog"
-        :has-close-button="false"
-        :header-text="$t('ChainUpgrade.header')"
-        @close="handleChainUpgradeBlockingDialogClose"
-      >
-        <div
-          :class="[
-            'text-left',
-            'whitespace-pre-line',
-            'leading-8',
-            'pt-[18px]',
-            'pb-[24px]',
-          ]"
-        >
-          <i18n path="ChainUpgrade" tag="div">
-            <template #announcement>
-              <a
-                v-t="`announcement`"
-                :class="['underline', 'text-like-green', 'font-medium']"
-                href="https://blog.like.co/likecoin-chain-upgrade-laichikok-overview/"
-                target="_blank"
-              />
-            </template>
-          </i18n>
-        </div>
-      </Dialog>
-    </DialogContainer>
+    <AlertsChainUpgrading
+      v-model="isOpenChainUpgradeBlockingDialog"
+      @close="isOpenChainUpgradeBlockingDialog"
+    />
 
     <DialogContainer>
       <ConnectWalletDialog
@@ -48,22 +23,12 @@
       />
       <ConnectLikerIdDialog @quit="toggleConnectWalletDialog(true)" />
     </DialogContainer>
-    <Snackbar
-      :open="isShowKeplrWarning"
-      preset="warn"
+    
+    <AlertsKeplrNotFound
+      v-model="isShowKeplrWarning"
       @close="handleKeplrWarningClose"
-    >
-      <i18n path="error.not.found.keplr" tag="div">
-        <template #keplr>
-          <a
-            v-t="$t('error.not.found.keplr.name')"
-            :class="['underline', 'text-white', 'font-medium']"
-            :href="$t('error.not.found.keplr.link')"
-            target="_blank"
-          />
-        </template>
-      </i18n>
-    </Snackbar>
+    />
+
   </div>
 </template>
 
@@ -147,6 +112,7 @@ export default class RootLayout extends Vue {
 
   handleKeplrWarningClose() {
     this.toggleKeplrWarningSnackbar(false)
+    this.$router.go(-1)
   }
 }
 </script>
