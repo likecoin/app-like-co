@@ -60,20 +60,11 @@
           </i18n>
         </Label>
       </Card>
+
+      <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
+      <AttentionsLedger v-else />
     </div>
-    <Snackbar
-        v-model="isOpenWarningSnackbar"
-        preset="warn"
-      >
-        {{ errorAlert }}
-        <Link
-          v-if="errorType === 'INSUFFICIENT_BALANCE'"
-          :class="['text-white','ml-[2px]']"
-          href="https://docs.like.co/general-guides/trade"
-        >
-          {{ $t('IscnRegisterForm.error.buy') }}
-        </Link>
-      </Snackbar>
+    <AlertsSignFailed />
   </Page>
 </template>
 
@@ -98,6 +89,7 @@ import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 
 const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -125,6 +117,10 @@ export enum ErrorType {
 export default class NFTTestButtonPage extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getType') walletType!: string | null
+  @walletModule.Action toggleSnackbar!: (
+    error: string,
+  ) => void
 
   classId: string = ''
   nftPrice: number = -1
@@ -132,9 +128,7 @@ export default class NFTTestButtonPage extends Vue {
   nftInfo: any = null
   owningCount = -1
   grantTransactionHash: string = ''
-  isOpenWarningSnackbar = false
 
-  errorType: string = ''
   name: string = ''
   description: string = ''
   ownerAddr: string = ''
@@ -153,13 +147,8 @@ export default class NFTTestButtonPage extends Vue {
       return `(${price.toFixed(3)} USD)`;
   }
 
-  get errorAlert() {
-    switch (this.errorType) {
-      case ErrorType.INSUFFICIENT_BALANCE:
-        return this.$t('IscnRegisterForm.error.insufficient')
-      default:
-        return this.errorType
-    }
+  get isUsingLikerLandApp() {
+    return this.walletType === 'likerland_app'
   }
 
   async mounted() {
@@ -189,7 +178,7 @@ export default class NFTTestButtonPage extends Vue {
     if (window.opener) {
       window.opener.postMessage({
         type: 'navigate',
-        route: `/${purchaserAddress}`,
+        route: `/${purchaserAddress}?tab=collected`,
       }, '*');
       window.close()
     } else {
@@ -201,24 +190,17 @@ export default class NFTTestButtonPage extends Vue {
     this.isLoading = true
     const balance = await getAccountBalance(this.address) as number
     if (balance < this.nftPrice) {
-      this.isOpenWarningSnackbar = true
-      this.errorType = ErrorType.INSUFFICIENT_BALANCE;
       this.isLoading = false
+      this.toggleSnackbar(ErrorType.INSUFFICIENT_BALANCE)
       return
     }
     try {
-      this.isOpenWarningSnackbar = false;
       await this.grantPurchaseTransaction()
       await this.purchaseNFT()
       await this.getPurchaseInfo()
       this.redirectToPurchaserPortfolio()
     } catch (err) {
-      this.isOpenWarningSnackbar = true;
-      if (axios.isAxiosError(err)) {
-        this.errorType = (err as AxiosError).response?.data || (err as Error).toString();
-      } else {
-        this.errorType = (err as Error).toString();
-      }
+      this.setError(err)
     } finally {
       this.isLoading = false
     }
@@ -288,6 +270,19 @@ export default class NFTTestButtonPage extends Vue {
     )
     if (data) {
       this.ownerName = data.displayName
+    }
+  }
+
+  setError(err: any) {
+    this.isLoading = false
+    // eslint-disable-next-line no-console
+    console.error(err)
+    if (axios.isAxiosError(err)) {
+      this.toggleSnackbar(
+        (err as AxiosError).response?.data || (err as Error).toString(),
+      )
+    } else {
+      this.toggleSnackbar((err as Error).toString())
     }
   }
 }
