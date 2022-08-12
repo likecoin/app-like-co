@@ -446,6 +446,8 @@ export default class NFTTestMintPage extends Vue {
             nft_meta_collection_name: 'Writing NFT',
             nft_meta_collection_descrption: 'Writing NFT by Liker Land',
             image: this.ogImageUri,
+            description: this.iscnData.contentMetadata?.description,
+            external_url: this.iscnData.contentMetadata?.url,
           },
         },
       )
