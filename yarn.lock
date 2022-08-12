@@ -1922,22 +1922,17 @@
     methods "^1.1.2"
     path-to-regexp "^6.1.0"
 
-"@likecoin/iscn-js@^0.2.0-rc.1":
-  version "0.2.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.2.0-rc.1.tgz#f89a9f9899369000359099c1d1e8aa1ba4a20987"
-  integrity sha512-sKFgoWmqo5AopVP+30kNc6ubjNVeaMFm+UZl85pAE6CDqIhBtEvnsaq7ml005JchisSTryzomQ42wM++Z8Jn9A==
+"@likecoin/iscn-js@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.2.1.tgz#bab4c00aa10ff8d09714357b652dd9eaae0fd8a4"
+  integrity sha512-rXSanM0xsshD2DSMrj6466zhzFVmZ11r8VK+84xBoLC4GWJDqdG8bCheHrQkmJQz1iWxk3eQTQRf8EppzxKe2Q==
   dependencies:
-    "@likecoin/iscn-message-types" "0.0.3-rc.1"
+    "@likecoin/iscn-message-types" "0.0.3"
     bignumber.js "^9.0.1"
     buffer "^6.0.3"
     fast-json-stable-stringify "^2.1.0"
 
-"@likecoin/iscn-message-types@0.0.3-rc.1":
-  version "0.0.3-rc.1"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-message-types/-/iscn-message-types-0.0.3-rc.1.tgz#70ef972f16dd3cb0713013b9fe21e05ea730ac70"
-  integrity sha512-shWRi1DZ8WWRsZCVTsf17MNvCAEdy4v5eYAcZjOcmA8w7RyXIr70ol+AMT468JBszbMQgPOIfOyxxado+SM2xA==
-
-"@likecoin/iscn-message-types@^0.0.3":
+"@likecoin/iscn-message-types@0.0.3", "@likecoin/iscn-message-types@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@likecoin/iscn-message-types/-/iscn-message-types-0.0.3.tgz#7d14a832b0a65dca039d697dbbdeb5db6b5f50e0"
   integrity sha512-kyjyLWfUyffTqKY+Jkw2FjFgN8uu5VGB2hvk9ipKNLw6cHzKbLOQadFuzw6vxX1nbF81oYC5JsDpd5xR23YrSA==
