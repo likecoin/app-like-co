@@ -195,7 +195,7 @@ export default async function getCralwerData(url: string) {
   let title = ''
   let body = ''
   let image = ''
-  const imgBase64:any = []
+  const imgDataKey:any = []
 
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
@@ -225,13 +225,14 @@ export default async function getCralwerData(url: string) {
         body = body.replace(src,`./img${key}.png`)
         body = body.replace(srcChange,`./img${key}.png`)
         imgKey.push(`./img${key}.png`)
-        promiseImg.push(axios.get(`${src}`, {responseType: 'arraybuffer'}).catch(()=> {}));
+        promiseImg.push(axios.get(`${src}`, {responseType: 'blob'}).catch(()=> {}));
       }
     })
+
     const imgData:any = await Promise.all(promiseImg)
     for (let i = 0; i < imgData.length; i+=1 ){
       if(imgData[i]?.status === 200){
-      imgBase64.push({'data':Buffer.from(imgData[i].data).toString('base64'),'key':imgKey[i]});
+        imgDataKey.push({'data':imgData[i].data,'key':imgKey[i]});
       }
     }
     const source = $('source')
@@ -244,13 +245,13 @@ export default async function getCralwerData(url: string) {
       body = body.replace(srcset,`./source${key}.jepg`)
       body = body.replace(srcsetChange,`./source${key}.jepg`)
       sourceKey.push(`./source${key}.jpeg`)
-      promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'}).catch(()=> {}));
+      promiseSource.push(axios.get(`${srcset}`, {responseType: 'blob'}).catch(()=> {}));
     }})
     const sourceData:any = await Promise.all(promiseSource)
 
     for (let j = 0; j < sourceData.length; j+=1 ) {
       if(sourceData[j]?.status === 200){
-        imgBase64.push({'data':Buffer.from(sourceData[j].data).toString('base64'),'key':sourceKey[j]});
+        imgDataKey.push({'data':sourceData[j].data,'key':sourceKey[j]});
       }
     }
 
@@ -271,5 +272,5 @@ export default async function getCralwerData(url: string) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
-  return { title, description, keywords, author, body, image, imgBase64 }
+  return { title, description, keywords, author, body, image, imgDataKey }
 }
