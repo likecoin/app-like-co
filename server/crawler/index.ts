@@ -225,14 +225,14 @@ export default async function getCralwerData(url: string) {
         body = body.replace(src,`./img${key}.png`)
         body = body.replace(srcChange,`./img${key}.png`)
         imgKey.push(`./img${key}.png`)
-        promiseImg.push(axios.get(`${src}`, {responseType: 'blob'}).catch(()=> {}));
+        promiseImg.push(axios.get(`${src}`, {responseType: 'arraybuffer'}).catch(()=> {}));
       }
     })
 
     const imgData:any = await Promise.all(promiseImg)
     for (let i = 0; i < imgData.length; i+=1 ){
       if(imgData[i]?.status === 200){
-        imgDataKey.push({'data':imgData[i].data,'key':imgKey[i]});
+        imgDataKey.push({'data':Buffer.from(imgData[i].data, 'binary').toString('base64'),'key':imgKey[i]});
       }
     }
     const source = $('source')
@@ -245,13 +245,13 @@ export default async function getCralwerData(url: string) {
       body = body.replace(srcset,`./source${key}.jepg`)
       body = body.replace(srcsetChange,`./source${key}.jepg`)
       sourceKey.push(`./source${key}.jpeg`)
-      promiseSource.push(axios.get(`${srcset}`, {responseType: 'blob'}).catch(()=> {}));
+      promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'}).catch(()=> {}));
     }})
     const sourceData:any = await Promise.all(promiseSource)
 
     for (let j = 0; j < sourceData.length; j+=1 ) {
       if(sourceData[j]?.status === 200){
-        imgDataKey.push({'data':sourceData[j].data,'key':sourceKey[j]});
+        imgDataKey.push({'data':Buffer.from(sourceData[j].data, 'binary').toString('base64'),'key':sourceKey[j]});
       }
     }
 
