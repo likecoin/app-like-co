@@ -18,7 +18,7 @@
         place="LikerLandApp"
         class="text-white"
         :text="$t('error.not.support.browser.app')"
-        href="https://likecoin.page.link/?link=https://play.google.com/store/apps/details?id%3Dcom.oice&apn=com.oice&isi=1248232355&ibi=com.oice&utm_campaign=Liker+Land+get+app+page&utm_medium=getapp_page&utm_source=likerland&cid=8581483681510579488&_osl=https://likecoin.page.link/likerland&_icp=1"
+        href="https://liker.land/getapp"
         :is-inline="true"
         >{{ $t('error.not.support.browser.app') }}
       </Link>

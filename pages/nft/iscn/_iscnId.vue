@@ -72,7 +72,8 @@
         </div>
       </div>
     </Card>
-    <AttentionsLedger />
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
+    <AttentionsLedger v-else />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -139,6 +140,8 @@ export default class NFTTestMintPage extends Vue {
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
+
+  @walletModule.Getter('getType') walletType!: string | null
 
   classId: string = ''
   iscnOwner: string = ''
@@ -231,6 +234,10 @@ export default class NFTTestMintPage extends Vue {
 
   get detailsPageURL(): string {
     return `${LIKER_LAND_URL}/nft/class/${encodeURIComponent(this.classId)}`
+  }
+
+  get isUsingLikerLandApp() {
+    return this.walletType === 'likerland_app'
   }
 
   async mounted() {
@@ -333,9 +340,9 @@ export default class NFTTestMintPage extends Vue {
     try {
       if (!this.ogImageUrl) {
         const url = this.iscnData.contentMetadata?.url
-        if (!url) { return }
+        if (!url) return
         const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
-        if (!image) { return }
+        if (!image) return
         this.ogImageUrl = image
       }
       const { data, headers } = await this.$axios.get(this.ogImageUrl)
@@ -343,7 +350,6 @@ export default class NFTTestMintPage extends Vue {
     } catch (error) {
       this.setError(error)
     }
-    
   }
 
   async estimateArweaveFee() {

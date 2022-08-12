@@ -55,7 +55,8 @@
         </div>
       </div>
     </Card>
-    <AttentionsLedger />
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
+    <AttentionsLedger v-else />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -100,6 +101,9 @@ export default class FetchIndex extends Vue {
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
+  
+  @walletModule.Getter('getType') walletType!: string | null
+
 
   url = this.$route.query.url as string || ''
   ownerWallet = ''
@@ -159,6 +163,10 @@ export default class FetchIndex extends Vue {
       params.ogImageUrl = this.crawledData.image
     }
     return params
+  }
+
+  get isUsingLikerLandApp() {
+    return this.walletType === 'likerland_app'
   }
 
   async mounted() {
