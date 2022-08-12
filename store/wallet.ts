@@ -12,11 +12,13 @@ import network from '~/constant/network';
 const KEY_CONNECTED_WALLET_TYPE = 'KEY_CONNECTED_WALLET_TYPE';
 const KEY_WALLET_CONNECT = 'walletconnect';
 const KEY_WALLET_CONNECT_ACCOUNT_PREFIX = 'KEY_WALLET_CONNECT_ACCOUNT_PREFIX';
+
 @Module({
   name: 'wallet',
   stateFactory: true,
   namespaced: true,
 })
+
 export default class Wallet extends VuexModule {
   type = '';
   signer: OfflineSigner | null = null;
@@ -24,6 +26,8 @@ export default class Wallet extends VuexModule {
   accounts: readonly AccountData[] = [];
   isShowConnectDialog = false;
   isShowKeplrWarning = false;
+  isOpenSnackbar = false;
+  errorType = '';
 
   @Mutation
   setType(type: string) {
@@ -55,6 +59,17 @@ export default class Wallet extends VuexModule {
     this.isShowKeplrWarning = isShow;
   }
 
+  @Mutation
+  setOpenSnackbar(error: string) {
+    this.isOpenSnackbar = true
+    this.errorType = error
+  }
+
+  @Mutation
+  setCloseSnackbar() {
+    this.isOpenSnackbar = false
+  }
+
   @Action
   toggleKeplrWarning(isShow: boolean) {
     this.setKeplrWarning(isShow);
@@ -63,6 +78,16 @@ export default class Wallet extends VuexModule {
   @Action
   toggleConnectDialog(isShow: boolean) {
     this.setIsShowConnectDialog(isShow);
+  }
+
+  @Action
+  toggleSnackbar(error: string = '') {
+    this.setOpenSnackbar(error)
+  }
+
+  @Action
+  closeSnackbar() {
+    this.setCloseSnackbar()
   }
 
   @Action

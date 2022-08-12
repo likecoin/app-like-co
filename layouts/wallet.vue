@@ -20,7 +20,15 @@ const walletModule = namespace('wallet')
 @Component
 export default class WalletLayout extends Vue {
   @walletModule.State('isShowConnectDialog') isShowConnectWalletDialog!: boolean
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (isShow: boolean) => void
+  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
+    isShow: boolean
+  ) => void
+
+  @walletModule.Action toggleAlert!: (
+    isShow: boolean,
+    error: string,
+    severity: string
+  ) => void
 
   @signerModule.Getter('getAddress') currentAddress!: string
 

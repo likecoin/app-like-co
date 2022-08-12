@@ -54,21 +54,9 @@
           </Button>
         </div>
       </div>
-      <Snackbar
-        v-model="isOpenWarningSnackbar"
-        preset="warn"
-      >
-        {{ errorAlert }}
-        <Link
-          v-if="errorType === 'INSUFFICIENT_BALANCE'"
-          :class="['text-white','ml-[2px]']"
-          href="https://faucet.like.co/"
-        >
-          {{ $t('IscnRegisterForm.error.faucet') }}
-        </Link>
-      </Snackbar>
     </Card>
     <AttentionsLedger />
+    <AlertsSignFaild />
   </Page>
 </template>
 
@@ -79,6 +67,7 @@ import { namespace } from 'vuex-class'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
 import postMappingWithCosmosWallet from '@/utils/mapping';
+import axios, { AxiosError } from 'axios'
 
 import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
@@ -94,6 +83,7 @@ import {
 
 
 const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -107,6 +97,10 @@ export default class FetchIndex extends Vue {
   @signerModule.Getter('getAddress') address!: string
   @signerModule.Getter('getSigner') signer!: OfflineSigner | null
 
+  @walletModule.Action toggleSnackbar!: (
+    error: string,
+  ) => void
+
   url = this.$route.query.url as string || ''
   ownerWallet = ''
   errorMessage = ''
@@ -119,8 +113,6 @@ export default class FetchIndex extends Vue {
   isLoading = false
   avatar = null
   balance: string = ''
-  errorType: string = ''
-  isOpenWarningSnackbar: boolean = false
 
   get isUrlIscnId(): boolean {
     return this.url.startsWith('iscn://likecoin-chain')
@@ -167,17 +159,6 @@ export default class FetchIndex extends Vue {
       params.ogImageUrl = this.crawledData.image
     }
     return params
-  }
-
-  get errorAlert() {
-    switch (this.errorType) {
-      case ErrorType.INSUFFICIENT_BALANCE:
-        return this.$t('IscnRegisterForm.error.insufficient')
-      case ErrorType.MISSING_SIGNER:
-        return this.$t('IscnRegisterForm.error.missingSigner')
-      default:
-        return ''
-    }
   }
 
   async mounted() {
@@ -238,9 +219,7 @@ export default class FetchIndex extends Vue {
 
     this.balance = await getAccountBalance(this.address) as string
     if (this.balance === '0') {
-      this.errorMessage = 'INSUFFICIENT_BALANCE';
-      this.isOpenWarningSnackbar = true
-      this.errorType = ErrorType.INSUFFICIENT_BALANCE;
+      this.toggleSnackbar('INSUFFICIENT_BALANCE')
       return
     }
 
@@ -265,6 +244,7 @@ export default class FetchIndex extends Vue {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
+      this.setError(err)
     } finally {
       this.isLoading = false
     }
@@ -372,6 +352,19 @@ export default class FetchIndex extends Vue {
       // eslint-disable-next-line no-console
       console.error('CANNOT_SEND_ISCN_TX')
       throw err
+    }
+  }
+
+  setError(err: any) {
+    this.isLoading = false
+    // eslint-disable-next-line no-console
+    console.error(err)
+    if (axios.isAxiosError(err)) {
+      this.toggleSnackbar(
+        (err as AxiosError).response?.data || (err as Error).toString(),
+      )
+    } else {
+      this.toggleSnackbar((err as Error).toString())
     }
   }
 }

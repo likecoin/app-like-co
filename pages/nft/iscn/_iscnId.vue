@@ -73,19 +73,7 @@
       </div>
     </Card>
     <AttentionsLedger />
-    <Snackbar
-      v-model="isOpenWarningSnackbar"
-      preset="warn"
-    >
-      {{ errorMessage }}
-      <Link
-        v-if="errorType === 'INSUFFICIENT_BALANCE'"
-        :class="['text-white', 'ml-[2px]']"
-        href="https://faucet.like.co/"
-      >
-        {{ $t('IscnRegisterForm.error.faucet') }}
-      </Link>
-    </Snackbar>
+    <AlertsSignFaild />
   </Page>
 </template>
 
@@ -102,6 +90,7 @@ import {
   formatMsgSend,
 } from '@likecoin/iscn-js/dist/messages/likenft'
 import BigNumber from 'bignumber.js'
+import axios, { AxiosError } from 'axios'
 
 import {
   API_LIKER_NFT_MINT,
@@ -121,14 +110,12 @@ const PREMINT_NFT_AMOUNT = 500;
 
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
   USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER',
-  CREATE_NFT_CLASS_FAILD = 'CREATE_NFT_CLASS_FAILD',
-  SEND_NFT_FAILD = 'SEND_NFT_FAILD',
-  POST_NFT_INFO = 'POST_NFT_INFO'
 }
 
 @Component({
@@ -149,6 +136,10 @@ export default class NFTTestMintPage extends Vue {
     latestVersion: Long.Long
   } | null>
 
+  @walletModule.Action toggleSnackbar!: (
+    error: string,
+  ) => void
+
   classId: string = ''
   iscnOwner: string = ''
   iscnData: any = null
@@ -162,7 +153,6 @@ export default class NFTTestMintPage extends Vue {
   postInfo: any = null
 
   isLoading = false
-  isOpenWarningSnackbar: boolean = false
 
   errorType: string = ''
   balance: string = ''
@@ -243,36 +233,6 @@ export default class NFTTestMintPage extends Vue {
     return `${LIKER_LAND_URL}/nft/class/${encodeURIComponent(this.classId)}`
   }
 
-  get errorMessage() {
-    switch (this.errorType) {
-      case ErrorType.INSUFFICIENT_BALANCE:
-        return this.$t('IscnRegisterForm.error.insufficient')
-
-      case ErrorType.MISSING_SIGNER:
-        return this.$t('IscnRegisterForm.error.missingSigner')
-
-      case ErrorType.USER_NOT_ISCN_OWNER:
-        return ErrorType.USER_NOT_ISCN_OWNER
-
-      case ErrorType.CREATE_NFT_CLASS_FAILD:
-        return this.$t('NFTPortal.mint.error', {
-          error: 'creating NFT classId',
-        }) as string
-
-      case ErrorType.SEND_NFT_FAILD:
-        return this.$t('NFTPortal.mint.error', {
-          error: 'sending NFT',
-        }) as string
-
-      case ErrorType.POST_NFT_INFO:
-        return this.$t('NFTPortal.mint.error', {
-          error: 'posting NFT info',
-        }) as string
-      default:
-        return ''
-    }
-  }
-
   async mounted() {
     await Promise.all([
       this.getISCNInfo().catch(err => {
@@ -282,58 +242,50 @@ export default class NFTTestMintPage extends Vue {
       }),
       // eslint-disable-next-line no-console
       this.getMintInfo().catch(err => console.error(err)),
+
+      // eslint-disable-next-line no-console
+      this.getOgImage().catch(err => console.error(err)),
     ]);
-    // eslint-disable-next-line no-console
-    this.getOgImage().catch(err => console.error(err));
   }
 
   async doAction() {
     this.errorType = ''
     this.balance = await getAccountBalance(this.address) as string
     if(this.balance === '0'){
-      this.setError(ErrorType.INSUFFICIENT_BALANCE)
+      this.toggleSnackbar(ErrorType.INSUFFICIENT_BALANCE)
       return
     }
     this.isLoading = true
-    this.isOpenWarningSnackbar = false
     /* eslint-disable no-fallthrough */
     switch (this.state) {
       case 'create':
         if (!this.isUserISCNOwner) {
-          this.setError(ErrorType.USER_NOT_ISCN_OWNER)
+          this.toggleSnackbar(ErrorType.USER_NOT_ISCN_OWNER)
           break
         }
 
-        if (this.ogImageBlob) {
-          const arweaveFeeInfo = await this.estimateArweaveFee()
-          if (!this.ogImageArweaveId) {
-            if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
-            await this.submitToArweave()
+        try {
+          if (this.ogImageBlob) {
+            const arweaveFeeInfo = await this.estimateArweaveFee()
+            if (!this.ogImageArweaveId) {
+              if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
+              await this.submitToArweave()
+            }
           }
-        }
-
-        this.classId = await this.createNftClass()
-        if (!this.classId) {
-          this.setError(ErrorType.CREATE_NFT_CLASS_FAILD)
-          break
+          this.classId = await this.createNftClass()
+          if (!this.classId) break
+        } catch (error) {
+          this.setError(error)
         }
 
       case 'mint':
         this.sendRes = await this.mintNFT()
-        if (!this.sendRes) {
-          this.setError(ErrorType.SEND_NFT_FAILD)
-          break
-        }
-
+        if (!this.sendRes) break
         if (this.isWritingNFT) {
           this.postInfo = await this.postMintInfo()
-          if (!this.postInfo) {
-            this.setError(ErrorType.POST_NFT_INFO)
-            break
-          }
+          if (!this.postInfo) break
           await this.getMintInfo()
         }
-
         this.isLoading = false
         break
       case 'done':
@@ -380,20 +332,15 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async getOgImage() {
-    try {
-      if (!this.ogImageUrl) {
-        const url = this.iscnData.contentMetadata?.url
-        if (!url) { return }
-        const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
-        if (!image) { return }
-        this.ogImageUrl = image
-      }
-      const { data, headers } = await this.$axios.get(this.ogImageUrl)
-      this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
+    if (!this.ogImageUrl) {
+      const url = this.iscnData.contentMetadata?.url
+      if (!url) { return }
+      const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
+      if (!image) { return }
+      this.ogImageUrl = image
     }
+    const { data, headers } = await this.$axios.get(this.ogImageUrl)
+    this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
   }
 
   async estimateArweaveFee() {
@@ -427,9 +374,7 @@ export default class NFTTestMintPage extends Vue {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.ogImageArweaveFeeTxHash = transactionHash
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
-      throw err
+      this.setError(err)
     }
   }
 
@@ -469,8 +414,7 @@ export default class NFTTestMintPage extends Vue {
       )
       fdata = data
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+      this.setError(error)
     }
     return fdata
   }
@@ -505,8 +449,7 @@ export default class NFTTestMintPage extends Vue {
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+      this.setError(error)
     }
 
     // eslint-disable-next-line consistent-return
@@ -543,17 +486,23 @@ export default class NFTTestMintPage extends Vue {
 
       sendRes = await signingClient.sendMessages(this.address, messages)
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+      this.setError(error)
     }
     // eslint-disable-next-line consistent-return
     return sendRes
   }
 
-  setError(errorType: string) {
-    this.isOpenWarningSnackbar = true
-    this.errorType = errorType
+  setError(err: any) {
     this.isLoading = false
+    // eslint-disable-next-line no-console
+    console.error(err)
+    if (axios.isAxiosError(err)) {
+      this.toggleSnackbar(
+        (err as AxiosError).response?.data || (err as Error).toString(),
+      )
+    } else {
+      this.toggleSnackbar((err as Error).toString())
+    }
   }
 }
 </script>
