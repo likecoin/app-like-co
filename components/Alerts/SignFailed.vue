@@ -27,14 +27,12 @@ export enum ErrorType {
 }
 
 @Component
-export default class SignFaild extends Vue {
+export default class SignFailed extends Vue {
   @walletModule.State isOpenSnackbar!: boolean
   @walletModule.State errorType!: string
-  @walletModule.State severity!: string
   @walletModule.Action closeSnackbar!: () => void
 
   get errorAlert() {
-    console.log('severity',this.severity)
     switch (this.errorType) {
       case ErrorType.INSUFFICIENT_BALANCE:
         return this.$t('IscnRegisterForm.error.insufficient')

@@ -64,7 +64,7 @@
       <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
       <AttentionsLedger v-else />
     </div>
-    <AlertsSignFaild />
+    <AlertsSignFailed />
   </Page>
 </template>
 
@@ -147,7 +147,7 @@ export default class NFTTestButtonPage extends Vue {
       return `(${price.toFixed(3)} USD)`;
   }
 
-  get isUsingLikerLandApp(){
+  get isUsingLikerLandApp() {
     return this.walletType === 'likerland_app'
   }
 

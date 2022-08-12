@@ -73,7 +73,7 @@
       </div>
     </Card>
     <AttentionsLedger />
-    <AlertsSignFaild />
+    <AlertsSignFailed />
   </Page>
 </template>
 
@@ -242,10 +242,8 @@ export default class NFTTestMintPage extends Vue {
       }),
       // eslint-disable-next-line no-console
       this.getMintInfo().catch(err => console.error(err)),
-
-      // eslint-disable-next-line no-console
-      this.getOgImage().catch(err => console.error(err)),
     ]);
+    this.getOgImage()
   }
 
   async doAction() {
@@ -332,15 +330,20 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async getOgImage() {
-    if (!this.ogImageUrl) {
-      const url = this.iscnData.contentMetadata?.url
-      if (!url) { return }
-      const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
-      if (!image) { return }
-      this.ogImageUrl = image
+    try {
+      if (!this.ogImageUrl) {
+        const url = this.iscnData.contentMetadata?.url
+        if (!url) { return }
+        const { data: { image } } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(url)}`)
+        if (!image) { return }
+        this.ogImageUrl = image
+      }
+      const { data, headers } = await this.$axios.get(this.ogImageUrl)
+      this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
+    } catch (error) {
+      this.setError(error)
     }
-    const { data, headers } = await this.$axios.get(this.ogImageUrl)
-    this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
+    
   }
 
   async estimateArweaveFee() {

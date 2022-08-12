@@ -15,7 +15,7 @@
       <IconAttention class="mr-[12px]" />
     </div>
     <div class="whitespace-pre-line text-red">
-      {{ $t('errpr.not.support.mobile') }}
+      {{ $t('error.not.support.mobile') }}
     </div>
   </div>
 </template>

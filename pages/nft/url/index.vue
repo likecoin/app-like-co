@@ -56,7 +56,7 @@
       </div>
     </Card>
     <AttentionsLedger />
-    <AlertsSignFaild />
+    <AlertsSignFailed />
   </Page>
 </template>
 
