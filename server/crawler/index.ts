@@ -199,61 +199,75 @@ export default async function getCralwerData(url: string) {
 
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
+    const { protocol , host} = new URL(url)
     const $ = cheerio.load(content);
     [
       'script',
       'style',
       'svg',
+      'source',
     ].forEach((t: string) => $(t).remove())
     title = $('title').text()
     const metas = $('meta')
     body = $('body').html() || ''
-
     const promiseImg:any = []
-    const promiseSource:any = []
-
+    // const promiseSource:any = []
     const imgKey:any = []
-    const sourceKey:any = []
+    // const sourceKey:any = []
 
     const img = $('img')
     Object.keys(img).forEach((key: any) => {
       const { src } = img[key].attribs || {};
       if (!src) {
         delete img[key]
-      } else{
-        const srcChange = src.replace('&',`&amp;`)
-        body = body.replace(src,`./img${key}.png`)
-        body = body.replace(srcChange,`./img${key}.png`)
-        imgKey.push(`./img${key}.png`)
-        promiseImg.push(axios.get(`${src}`, {responseType: 'arraybuffer'}).catch(()=> {}));
+      } else {
+        let srcUrl = src
+        if ( !src.startsWith('http') ) {
+          srcUrl = `${protocol}//${host}${src}`
+        }
+        promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
+        .then((element)=> {
+          const srcChange = src.replace(/&/g, `&amp;`)
+          body = body.replace(src, `./img${key}.png`)
+          body = body.replace(srcChange, `./img${key}.png`)
+          imgKey.push(`./img${key}.png`)
+          return element
+        })
+        .catch(()=> {}));
       }
     })
-
     const imgData:any = await Promise.all(promiseImg)
     for (let i = 0; i < imgData.length; i+=1 ){
       if(imgData[i]?.status === 200){
-        imgDataKey.push({'data':Buffer.from(imgData[i].data, 'binary').toString('base64'),'key':imgKey[i]});
+        imgDataKey.push({ 'data': Buffer.from(imgData[i].data, 'binary').toString('base64'), 'key': imgKey[i]} );
       }
     }
-    const source = $('source')
-    Object.keys(source).forEach((key: any) => {
-    const { srcset } = source[key].attribs || {};
-    if (!srcset) {
-      delete source[key]
-    } else {
-      const srcsetChange = srcset.replace('&',`&amp;`)
-      body = body.replace(srcset,`./source${key}.jepg`)
-      body = body.replace(srcsetChange,`./source${key}.jepg`)
-      sourceKey.push(`./source${key}.jpeg`)
-      promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'}).catch(()=> {}));
-    }})
-    const sourceData:any = await Promise.all(promiseSource)
 
-    for (let j = 0; j < sourceData.length; j+=1 ) {
-      if(sourceData[j]?.status === 200){
-        imgDataKey.push({'data':Buffer.from(sourceData[j].data, 'binary').toString('base64'),'key':sourceKey[j]});
-      }
-    }
+    // const source = $('source')
+    // Object.keys(source).forEach((key: any) => {
+    // let { srcset } = source[key].attribs || {};
+    // if (!srcset) {
+    //   delete source[key]
+    // } else {
+    //   if ( !srcset.startsWith('http') ) {
+    //     srcset = `${protocol}//${host}${srcset}`
+    //   }
+    //   promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'})
+    //   .then((element)=> {
+    //     const srcsetChange = srcset.replace(/&/g,`&amp;`)
+    //     body = body.replace(srcset,`./source${key}.jepg`)
+    //     body = body.replace(srcsetChange,`./source${key}.jepg`)
+    //     sourceKey.push(`./source${key}.jpeg`)
+    //     return element
+    //   })
+    //   .catch(()=> {}));
+    // }})
+    // const sourceData:any = await Promise.all(promiseSource)
+    // for (let j = 0; j < sourceData.length; j+=1 ) {
+    //   if(sourceData[j]?.status === 200){
+    //     imgDataKey.push( {'data': Buffer.from(sourceData[j].data, 'binary').toString('base64'), 'key': sourceKey[j]} );
+    //   }
+    // }
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};

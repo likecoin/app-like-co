@@ -142,7 +142,7 @@ export default class FetchIndex extends Vue {
     if (!this.crawledData?.body) { return null }
     const body = new Blob([this.crawledData.body], { type: "text/html" })
     const formData = new FormData()
-    formData.append('file', body, 'index.html')
+    formData.append('index.html', body, 'index.html')
     const { imgDataKey } = this.crawledData
     imgDataKey.forEach((element:any) => {
       formData.append(`${element.key}`, base64toBlob(element.data), `${element.key}`)
