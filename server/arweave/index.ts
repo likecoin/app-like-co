@@ -150,13 +150,13 @@ export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePri
   }
 }
 
-export async function convertARPriceToLIKE(ar: ArweavePrice, {
+export function convertARPriceToLIKE(ar: ArweavePrice, {
   priceRatio: inputPriceRatio = '', margin = 0.05, decimal = 0,
-} = {}): Promise<ArweavePriceWithLIKE> {
+} = {}, likecoin:any, arweavePrice:any ): any {
   let priceRatio = inputPriceRatio;
   if (!priceRatio) {
-    const { data } = await axios.get(COINGECKO_PRICE_API);
-    const { likecoin, arweave: arweavePrice } = data;
+    // const { data } = await axios.get(COINGECKO_PRICE_API);
+    // const { likecoin, arweave: arweavePrice } = data;
     priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
   }
   // At least 1 LIKE for 1 AR
@@ -177,10 +177,12 @@ export async function convertARPriceToLIKE(ar: ArweavePrice, {
 export async function convertARPricesToLIKE(ar: ArweavePrice,
   { margin = 0.05, decimal = 0 } = {},
 ): Promise<ArweavePriceWithLIKE> {
+  const { data } = await axios.get(COINGECKO_PRICE_API);
+  const { likecoin, arweave: arweavePrice } = data;
   if (!(ar.list && ar.list.length)) {
-    return convertARPriceToLIKE(ar, { margin, decimal });
+    return convertARPriceToLIKE(ar, { margin, decimal }, likecoin, arweavePrice);
   }
-  const newList = await Promise.all(ar.list.map(a => convertARPriceToLIKE(a, { margin, decimal })));
+  const newList = (ar.list.map(a => convertARPriceToLIKE(a, { margin, decimal }, likecoin, arweavePrice)));
   const totalLIKE = newList.reduce((acc, cur) => acc.plus(cur.LIKE), new BigNumber(0));
   return {
     ...ar,
