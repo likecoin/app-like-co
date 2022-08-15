@@ -89,22 +89,18 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
-const b64toBlob = (b64Data:string, contentType='image/jpeg', sliceSize=512) => {
-  const byteCharacters = atob(b64Data);
+const base64toBlob = (base64Data:string, contentType = 'image/jpeg', sliceSize = 512) => {
+  const byteCharacters = atob(base64Data);
   const byteArrays = [];
-
   for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
     const slice = byteCharacters.slice(offset, offset + sliceSize);
-
     const byteNumbers = new Array(slice.length);
     for (let i = 0; i < slice.length; i+=1) {
       byteNumbers[i] = slice.charCodeAt(i);
     }
-
     const byteArray = new Uint8Array(byteNumbers);
     byteArrays.push(byteArray);
   }
-
   const blob = new Blob(byteArrays, {type: contentType});
   return blob;
 }
@@ -147,10 +143,9 @@ export default class FetchIndex extends Vue {
     const body = new Blob([this.crawledData.body], { type: "text/html" })
     const formData = new FormData()
     formData.append('file', body, 'index.html')
-    const {imgDataKey} = this.crawledData
+    const { imgDataKey } = this.crawledData
     imgDataKey.forEach((element:any) => {
-      // const imgaeFile = new Blob([element.data], { type: "image/jpeg" })
-      formData.append(`${element.key}`, b64toBlob(element.data), `${element.key}`)
+      formData.append(`${element.key}`, base64toBlob(element.data), `${element.key}`)
     });
     return formData
   }

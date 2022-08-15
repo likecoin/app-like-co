@@ -155,8 +155,6 @@ export function convertARPriceToLIKE(ar: ArweavePrice, {
 } = {}, likecoin:any, arweavePrice:any ): any {
   let priceRatio = inputPriceRatio;
   if (!priceRatio) {
-    // const { data } = await axios.get(COINGECKO_PRICE_API);
-    // const { likecoin, arweave: arweavePrice } = data;
     priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
   }
   // At least 1 LIKE for 1 AR
