@@ -226,9 +226,10 @@ export default async function getCralwerData(url: string) {
         .then((element)=> {
           const srcChange = src.replace(/&/g, `&amp;`)
           const { pathname } = new URL(src)
+          const extension = pathname.split('.').pop()
           const regExp = new RegExp(src, 'g');
           const regExpChange = new RegExp(srcChange, 'g');
-          const newFileName = `.${pathname}`
+          const newFileName = `./img${key}.${extension}`
           body = body.replace(regExp, newFileName)
           body = body.replace(regExpChange, newFileName)
           return { element, key: newFileName }
