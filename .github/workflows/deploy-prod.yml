@@ -41,11 +41,6 @@ jobs:
         location: ${{ env.GKE_ZONE }}
         credentials: ${{ secrets.GKE_SA_KEY }}
 
-    - name: Set Env
-      run: |
-        echo "BUILD_TAG=${GITHUB_REF}" >> $GITHUB_ENV
-        echo "BUILD_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -55,12 +50,12 @@ jobs:
         context: .
         push: true
         tags: |
-          us.gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ env.BUILD_SHA }}
+          us.gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         build-args: |-
-          GITHUB_SHA="${{ env.BUILD_SHA }}" \
-          GITHUB_REF="${{ env.BUILD_REF }}" \
+          GITHUB_SHA="${{ github.sha }}" \
+          GITHUB_REF="${{ github.ref }}" \
           GA_TRACKING_ID="${{ env.GA_TRACKING_ID }}" \
           SENTRY_DSN="${{ env.SENTRY_DSN }}" \
 
