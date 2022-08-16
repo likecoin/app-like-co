@@ -9,15 +9,19 @@
     >
       <Link
         place="keplr"
+        :is-inline="true"
         :class="['underline', 'text-white', 'font-medium']"
-        :text="$t('error.not.found.keplr.name')"
         :href="$t('error.not.found.keplr.link')"
-        >{{ $t('error.not.support.browser.app') }}
-      </Link>
+      >{{ $t('error.not.found.keplr.name') }}</Link>
+      <Link
+        place="guide"
+        :is-inline="true"
+        :class="['underline', 'text-white', 'font-medium']"
+        :href="$t('error.not.found.keplr.guide.link')"
+      >{{ $t('error.not.found.keplr.guide') }}</Link>
       <Link
         place="LikerLandApp"
         class="text-white"
-        :text="$t('error.not.support.browser.app')"
         href="https://liker.land/getapp"
         :is-inline="true"
         >{{ $t('error.not.support.browser.app') }}
