@@ -179,8 +179,8 @@ export default class FetchIndex extends Vue {
 
   get iscnParams() {
     const params: any = { iscnId: this.iscnId }
-    if (this.crawledData?.image) {
-      params.ogImageUrl = this.crawledData.image
+    if (this.crawledData?.ogImage) {
+      params.ogImageUrl = this.crawledData.ogImage
     }
     return params
   }
