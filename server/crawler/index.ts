@@ -211,7 +211,6 @@ export default async function getCralwerData(url: string) {
     const metas = $('meta')
     body = $('body').html() || ''
     const promiseImg:any = []
-    const imgKey:any = []
 
     const img = $('img')
     Object.keys(img).forEach((key: any) => {
@@ -226,26 +225,27 @@ export default async function getCralwerData(url: string) {
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
           const srcChange = src.replace(/&/g, `&amp;`)
-          let extension
+          let extension = 'png'
           if (src.endsWith('jpeg')) {
             extension = 'jpeg'
           } else if(src.endsWith('png')) {
             extension = 'png'
-          }
-          body = body.replace(src, `./img${key}.${extension}`)
-          body = body.replace(srcChange, `./img${key}.${extension}`)
-          imgKey.push(`./img${key}.${extension}`)
-          return element
+          } 
+          const regExp = new RegExp(src, 'g');
+          const regExpChange = new RegExp(srcChange, 'g');
+          body = body.replace(regExp, `./img${key}.${extension}`)
+          body = body.replace(regExpChange, `./img${key}.${extension}`)
+          return { element, key:`./img${key}.${extension}` }
         })
         .catch(()=> {}));
       }
     })
     const imgData:any = await Promise.all(promiseImg)
-    for (let i = 0; i < imgData.length; i+=1 ){
-      if(imgData[i]?.status === 200){
-        images.push({ 'data': Buffer.from(imgData[i].data, 'binary').toString('base64'), 'key': imgKey[i], 'type': imgData[i].headers['content-type']} );
-      }
-    }
+
+    imgData.filter((e: any) => e.element.status === 200).map((e: any) => {
+      images.push({ 'data': Buffer.from(e.element.data, 'binary').toString('base64'), 'key': e.key, 'type': e.element.headers['content-type']} );
+      return ''
+    })
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
