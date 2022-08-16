@@ -209,34 +209,30 @@ export default async function getCralwerData(url: string) {
     ].forEach((t: string) => $(t).remove())
     title = $('title').text()
     const metas = $('meta')
-    body = $('body').html() || ''
     const promiseImg:any = []
 
     const img = $('img')
-    Object.keys(img).forEach((key: any) => {
-      const { src } = img[key].attribs || {};
-      if (!src) {
-        delete img[key]
-      } else {
+    let i = 0
+    img.each(function() {
+      const src = $(this).attr('src');
+      if (src) {
         let srcUrl = src
         if ( !src.startsWith('http') ) {
           srcUrl = `${protocol}//${host}${src}`
         }
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
-          const srcChange = src.replace(/&/g, `&amp;`)
-          const { pathname } = new URL(src)
+          const { pathname } = new URL(srcUrl)
           const extension = pathname.split('.').pop()
-          const regExp = new RegExp(src, 'g');
-          const regExpChange = new RegExp(srcChange, 'g');
-          const newFileName = `./img${key}.${extension}`
-          body = body.replace(regExp, newFileName)
-          body = body.replace(regExpChange, newFileName)
+          const newFileName = `./img${i}.${extension}`
+          i += 1
+          $(this).attr('src', newFileName); 
           return { element, key: newFileName }
         })
         .catch(()=> {}));
       }
-    })
+    });
+
     const imgData:any = await Promise.all(promiseImg)
     imgData.filter((e: any) => e?.element?.status === 200).map((e: any) => {
       images.push({ 'data': Buffer.from(e.element.data, 'binary').toString('base64'), 'key': e.key, 'type': e.element.headers['content-type']} );
@@ -255,6 +251,7 @@ export default async function getCralwerData(url: string) {
         ogImage = value
       }
     })
+    body = $('body').html() || ''
     body = formatBody({ content: body, title, author, description })
   } catch (error) {
     // eslint-disable-next-line no-console
