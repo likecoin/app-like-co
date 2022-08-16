@@ -41,20 +41,22 @@ jobs:
         location: ${{ env.GKE_ZONE }}
         credentials: ${{ secrets.GKE_SA_KEY }}
 
-    # Build the Docker image
-    - name: Build
-      run: |-
-        docker build \
-          --tag "us.gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA" \
-          --build-arg IS_TESTNET="$IS_TESTNET" \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="$GITHUB_REF" \
-          .
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    # Push the Docker image to Google Container Registry
-    - name: Publish
-      run: |-
-        docker push "us.gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        push: true
+        tags: |
+          us.gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |-
+          IS_TESTNET="${{ env.IS_TESTNET }}" \
+          GITHUB_SHA="${{ github.sha }}" \
+          GITHUB_REF="${{ github.ref }}" \
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
