@@ -230,6 +230,8 @@ export default async function getCralwerData(url: string) {
             extension = 'jpeg'
           } else if(src.endsWith('png')) {
             extension = 'png'
+          } else if(src.endsWith('gif')) {
+            extension = 'gif'
           } 
           const regExp = new RegExp(src, 'g');
           const regExpChange = new RegExp(srcChange, 'g');
@@ -241,7 +243,6 @@ export default async function getCralwerData(url: string) {
       }
     })
     const imgData:any = await Promise.all(promiseImg)
-
     imgData.filter((e: any) => e.element.status === 200).map((e: any) => {
       images.push({ 'data': Buffer.from(e.element.data, 'binary').toString('base64'), 'key': e.key, 'type': e.element.headers['content-type']} );
       return ''
