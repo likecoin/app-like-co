@@ -89,7 +89,7 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
-const base64toBlob = (base64Data:string, contentType = 'image/jpeg', sliceSize = 512) => {
+const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
   const byteArrays = [];
   for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
@@ -143,9 +143,9 @@ export default class FetchIndex extends Vue {
     const body = new Blob([this.crawledData.body], { type: "text/html" })
     const formData = new FormData()
     formData.append('index.html', body, 'index.html')
-    const { imgDataKey } = this.crawledData
-    imgDataKey.forEach((element:any) => {
-      formData.append(`${element.key}`, base64toBlob(element.data), `${element.key}`)
+    const { images } = this.crawledData
+    images.forEach((element:any) => {
+      formData.append(`${element.key}`, base64toBlob(element.data, element.type), `${element.key}`)
     });
     return formData
   }

@@ -194,8 +194,8 @@ export default async function getCralwerData(url: string) {
   let author = ''
   let title = ''
   let body = ''
-  let image = ''
-  const imgDataKey:any = []
+  let ogImage = ''
+  const images:any = []
 
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
@@ -211,9 +211,7 @@ export default async function getCralwerData(url: string) {
     const metas = $('meta')
     body = $('body').html() || ''
     const promiseImg:any = []
-    // const promiseSource:any = []
     const imgKey:any = []
-    // const sourceKey:any = []
 
     const img = $('img')
     Object.keys(img).forEach((key: any) => {
@@ -228,9 +226,15 @@ export default async function getCralwerData(url: string) {
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
           const srcChange = src.replace(/&/g, `&amp;`)
-          body = body.replace(src, `./img${key}.png`)
-          body = body.replace(srcChange, `./img${key}.png`)
-          imgKey.push(`./img${key}.png`)
+          let extension
+          if (src.endsWith('jpeg')) {
+            extension = 'jpeg'
+          } else if(src.endsWith('png')) {
+            extension = 'png'
+          }
+          body = body.replace(src, `./img${key}.${extension}`)
+          body = body.replace(srcChange, `./img${key}.${extension}`)
+          imgKey.push(`./img${key}.${extension}`)
           return element
         })
         .catch(()=> {}));
@@ -239,35 +243,9 @@ export default async function getCralwerData(url: string) {
     const imgData:any = await Promise.all(promiseImg)
     for (let i = 0; i < imgData.length; i+=1 ){
       if(imgData[i]?.status === 200){
-        imgDataKey.push({ 'data': Buffer.from(imgData[i].data, 'binary').toString('base64'), 'key': imgKey[i]} );
+        images.push({ 'data': Buffer.from(imgData[i].data, 'binary').toString('base64'), 'key': imgKey[i], 'type': imgData[i].headers['content-type']} );
       }
     }
-
-    // const source = $('source')
-    // Object.keys(source).forEach((key: any) => {
-    // let { srcset } = source[key].attribs || {};
-    // if (!srcset) {
-    //   delete source[key]
-    // } else {
-    //   if ( !srcset.startsWith('http') ) {
-    //     srcset = `${protocol}//${host}${srcset}`
-    //   }
-    //   promiseSource.push(axios.get(`${srcset}`, {responseType: 'arraybuffer'})
-    //   .then((element)=> {
-    //     const srcsetChange = srcset.replace(/&/g,`&amp;`)
-    //     body = body.replace(srcset,`./source${key}.jepg`)
-    //     body = body.replace(srcsetChange,`./source${key}.jepg`)
-    //     sourceKey.push(`./source${key}.jpeg`)
-    //     return element
-    //   })
-    //   .catch(()=> {}));
-    // }})
-    // const sourceData:any = await Promise.all(promiseSource)
-    // for (let j = 0; j < sourceData.length; j+=1 ) {
-    //   if(sourceData[j]?.status === 200){
-    //     imgDataKey.push( {'data': Buffer.from(sourceData[j].data, 'binary').toString('base64'), 'key': sourceKey[j]} );
-    //   }
-    // }
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
@@ -278,7 +256,7 @@ export default async function getCralwerData(url: string) {
       } else if (name === 'author') {
         author = value
       } else if (property === 'og:image') {
-        image = value
+        ogImage = value
       }
     })
     body = formatBody({ content: body, title, author, description })
@@ -286,5 +264,5 @@ export default async function getCralwerData(url: string) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
-  return { title, description, keywords, author, body, image, imgDataKey }
+  return { title, description, keywords, author, body, ogImage, images }
 }
