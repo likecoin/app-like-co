@@ -159,8 +159,8 @@ async function getPriceRatioBigNumber () {
 }
 
 export function convertARPriceToLIKE(ar: ArweavePrice, {
-  priceRatioBigNumber = 1 as any, margin = 0.05, decimal = 0,
-} = {} ): any {
+  priceRatioBigNumber, margin = 0.05, decimal = 0,
+}:any ): any {
   const res = new BigNumber(ar.AR)
     .multipliedBy(priceRatioBigNumber)
     .multipliedBy(1 + margin)

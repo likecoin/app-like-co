@@ -225,19 +225,13 @@ export default async function getCralwerData(url: string) {
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
           const srcChange = src.replace(/&/g, `&amp;`)
-          let extension = 'png'
-          if (src.endsWith('jpeg')) {
-            extension = 'jpeg'
-          } else if(src.endsWith('png')) {
-            extension = 'png'
-          } else if(src.endsWith('gif')) {
-            extension = 'gif'
-          } 
+          const { pathname } = new URL(src)
           const regExp = new RegExp(src, 'g');
           const regExpChange = new RegExp(srcChange, 'g');
-          body = body.replace(regExp, `./img${key}.${extension}`)
-          body = body.replace(regExpChange, `./img${key}.${extension}`)
-          return { element, key:`./img${key}.${extension}` }
+          const newFileName = `.${pathname}`
+          body = body.replace(regExp, newFileName)
+          body = body.replace(regExpChange, newFileName)
+          return { element, key: newFileName }
         })
         .catch(()=> {}));
       }
