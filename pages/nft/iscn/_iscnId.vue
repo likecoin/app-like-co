@@ -246,7 +246,7 @@ export default class NFTTestMintPage extends Vue {
         this.getISCNInfo(),
         this.getMintInfo(),
       ])
-      this.getOgImage()
+      await this.getOgImage()
     } catch (error) {
       this.setError(error)
     }
