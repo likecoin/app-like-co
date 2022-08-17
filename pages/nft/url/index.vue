@@ -1,16 +1,14 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <Page :class="[
+    'flex',
+    'flex-col',
+    'relative',
+    'items-center',
+    'justify-center',
+    'px-[20px]',
+    'pt-[38px]',
+    'lg:p-[16px]',
+  ]">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -116,7 +114,7 @@ export default class FetchIndex extends Vue {
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
-  
+
   @walletModule.Getter('getType') walletType!: string | null
 
 
@@ -261,16 +259,14 @@ export default class FetchIndex extends Vue {
       this.isLoading = true
       await this.crawlUrlData()
       if (this.crawledData?.body) {
-          const arweaveFeeInfo = await this.estimateArweaveFee()
-          if (!this.arweaveId) {
-            if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
-            await this.submitToArweave()
-          }
+        const arweaveFeeInfo = await this.estimateArweaveFee()
+        if (!this.arweaveId) {
+          if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
+          await this.submitToArweave()
+        }
       }
-      await this.submitToISCN()
+      await this.registerISCN()
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
       this.setError(err)
     } finally {
       this.isLoading = false
@@ -291,8 +287,8 @@ export default class FetchIndex extends Vue {
       this.crawledData = data
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_CRAWL_URL')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_CRAWL_THIS_URL')
     }
   }
 
@@ -316,8 +312,8 @@ export default class FetchIndex extends Vue {
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_ESTIMATE_ARWEAVE_FEE')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
     }
   }
 
@@ -329,8 +325,8 @@ export default class FetchIndex extends Vue {
       this.arweaveFeeTxHash = transactionHash;
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
     }
   }
 
@@ -350,12 +346,12 @@ export default class FetchIndex extends Vue {
       this.arweaveId = arweaveId
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_UPLOAD_TO_ARWEAVE')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_SUBMIT_TO_ARWEAVE')
     }
   }
 
-  async submitToISCN(): Promise<void> {
+  async registerISCN(): Promise<void> {
     if (!this.signer) {
       this.errorMessage = 'MISSING_SIGNER'
       return
@@ -378,8 +374,8 @@ export default class FetchIndex extends Vue {
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_SEND_ISCN_TX')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_REGISTER_ISCN')
     }
   }
 
