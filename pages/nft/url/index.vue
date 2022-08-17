@@ -42,14 +42,18 @@
             :error-message="errorMessage" />
           {{ iscnId }}
         </div>
-        <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
         <div class="flex flex-row self-end">
           <ProgressIndicator v-if="isLoading" />
-          <Button v-else :text="$t('NFTPortal.button.register')" preset="outline" @click="onSubmit">
+          <Button v-else-if="state === 'INIT'" :text="$t('NFTPortal.button.register')" preset="outline"
+            @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
           </Button>
+          <div v-else class="flex">
+            <Button preset="outline" @click="onSubmit">Retry</Button>
+            <Button preset="outline" @click="onSkip">Skip & Continue</Button>
+          </div>
         </div>
       </div>
     </Card>
@@ -104,6 +108,15 @@ export enum ErrorType {
   MISSING_SIGNER = 'MISSING_SIGNER'
 }
 
+enum State {
+  INIT = 'INIT',
+  TO_CRAWL = 'TO_CRAWL',
+  TO_ESTIMATE_FEE = 'TO_ESTIMATE_FEE',
+  TO_UPLOAD = 'TO_UPLOAD',
+  TO_REGISTER = 'TO_REGISTER',
+  DONE = 'DONE',
+}
+
 @Component({
   layout: 'wallet',
 })
@@ -117,13 +130,14 @@ export default class FetchIndex extends Vue {
 
   @walletModule.Getter('getType') walletType!: string | null
 
-
+  state = State.INIT
   url = this.$route.query.url as string || ''
   ownerWallet = ''
   errorMessage = ''
   crawledData: any
   ipfsHash = ''
   arweaveId = ''
+  arweaveFeeInfo: any
   arweaveFeeTxHash = ''
   iscnId = this.$route.query.iscn_id as string || ''
   likerId = this.$route.query.liker_id as string || ''
@@ -224,52 +238,79 @@ export default class FetchIndex extends Vue {
     this.arweaveId = ''
     this.arweaveFeeTxHash = ''
     this.iscnId = ''
+    this.state = State.INIT
   }
 
   async onSubmit() {
-    if (this.ownerWallet && this.address !== this.ownerWallet) {
-      this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
-      return
-    }
-    if (this.isUrlIscnId) {
-      this.iscnId = this.url;
-      this.$router.push(
-        this.localeLocation({
-          name: 'nft-iscn-iscnId',
-          params: this.iscnParams,
-        })!,
-      )
-      return;
-    }
-
-    this.balance = await getAccountBalance(this.address) as string
-    if (this.balance === '0') {
-      this.toggleSnackbar('INSUFFICIENT_BALANCE')
-      return
-    }
-
     try {
-      this.errorMessage = ''
-      if (!this.url) {
-        this.errorMessage = this.$t(
-          'HomePage.search.errormessage.empty',
-        ) as string
-        return
+      while (this.state !== State.DONE) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.doAction()
       }
-      this.isLoading = true
-      await this.crawlUrlData()
-      if (this.crawledData?.body) {
-        const arweaveFeeInfo = await this.estimateArweaveFee()
-        if (!this.arweaveId) {
-          if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
-          await this.submitToArweave()
-        }
-      }
-      await this.registerISCN()
     } catch (err) {
       this.setError(err)
     } finally {
       this.isLoading = false
+    }
+  }
+
+  onSkip() {
+    this.state = State.TO_REGISTER
+    this.onSubmit()
+  }
+
+  async doAction() {
+    this.isLoading = true
+    switch (this.state) {
+      case State.INIT:
+        if (this.ownerWallet && this.address !== this.ownerWallet) {
+          this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
+          break
+        }
+        if (this.isUrlIscnId) {
+          this.iscnId = this.url;
+          this.$router.push(
+            this.localeLocation({
+              name: 'nft-iscn-iscnId',
+              params: this.iscnParams,
+            })!,
+          )
+          break
+        }
+
+        this.balance = await getAccountBalance(this.address) as string
+        if (this.balance === '0') {
+          this.toggleSnackbar('INSUFFICIENT_BALANCE')
+          break
+        }
+
+        this.errorMessage = ''
+        if (!this.url) {
+          this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
+          break
+        }
+        this.state = State.TO_CRAWL
+        break
+      case State.TO_CRAWL:
+        await this.crawlUrlData()
+        this.state = State.TO_ESTIMATE_FEE
+        break
+      case State.TO_ESTIMATE_FEE:
+        await this.estimateArweaveFee()
+        this.state = this.arweaveId ? State.TO_REGISTER : State.TO_UPLOAD
+        break
+      case State.TO_UPLOAD:
+        if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx() }
+        await this.submitToArweave()
+        this.state = State.TO_REGISTER
+        break
+      case State.TO_REGISTER:
+        await this.registerISCN()
+        this.state = State.DONE
+        break
+      case State.DONE:
+      default:
+        break
     }
   }
 
@@ -285,6 +326,7 @@ export default class FetchIndex extends Vue {
     try {
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
       this.crawledData = data
+      if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
@@ -305,7 +347,7 @@ export default class FetchIndex extends Vue {
       )
       if (arweaveId) { this.arweaveId = arweaveId }
       this.ipfsHash = ipfsHash
-      return {
+      this.arweaveFeeInfo = {
         to: address,
         amount: new BigNumber(LIKE),
         memo,
@@ -317,7 +359,8 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+  async sendArweaveFeeTx(): Promise<void> {
+    const { to, amount, memo } = this.arweaveFeeInfo
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
