@@ -353,7 +353,7 @@ export default class FetchIndex extends Vue {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          timeout: 180000,
+          timeout: 90000,
         },
       )
       this.arweaveId = arweaveId
