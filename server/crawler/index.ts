@@ -195,7 +195,7 @@ export default async function getCralwerData(url: string) {
   let title = ''
   let body = ''
   let ogImage = ''
-  const images:any = []
+  let images:any = []
 
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
@@ -230,15 +230,12 @@ export default async function getCralwerData(url: string) {
     });
 
     const imgData:any = await Promise.all(promiseImg)
-    imgData.filter( (e: any) => e?.element?.status === 200 )
-      .map((e: any) => {
-        images.push({ 
+    images = imgData.filter( (e: any) => e?.element?.status === 200 )
+      .map((e: any) => ({
           data: Buffer.from(e.element.data, 'binary').toString('base64'), 
           key: e.key, 
           type: e.element.headers['content-type'],
-        });
-        return ''
-      })
+        }))
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
