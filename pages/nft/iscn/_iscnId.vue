@@ -345,8 +345,14 @@ export default class NFTTestMintPage extends Vue {
         if (!image) return
         this.ogImageUrl = image
       }
-      const { data, headers } = await this.$axios.get(this.ogImageUrl)
-      this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
+      try {
+        const { data, headers } = await this.$axios.get(this.ogImageUrl)
+        this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
+      } catch (error) {
+        // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     } catch (error) {
       this.setError(error)
     }
