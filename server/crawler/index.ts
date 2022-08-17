@@ -212,7 +212,6 @@ export default async function getCralwerData(url: string) {
     const promiseImg:any = []
 
     const img = $('img')
-    let i = 0
     img.each(function() {
       const src = $(this).attr('src');
       if (src) {
@@ -222,8 +221,8 @@ export default async function getCralwerData(url: string) {
         }
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
-          const newFileName = `./img${i}`
-          i += 1
+          const { pathname } = new URL(srcUrl)
+          const newFileName = `./${encodeURIComponent(pathname)}`
           $(this).attr('src', newFileName); 
           return { element, key: newFileName }
         })
