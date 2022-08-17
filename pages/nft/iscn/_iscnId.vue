@@ -277,7 +277,7 @@ export default class NFTTestMintPage extends Vue {
             } catch (error) {
               // eslint-disable-next-line no-console
               console.error(error);
-              // skip uploading image if there is an error
+              this.toggleSnackbar('Warning: Cannot upload display image to Arweave')
             }
           }
           this.classId = await this.createNftClass()
