@@ -44,7 +44,7 @@ export async function getArweaveIdFromHashes(ipfsHash: string) {
     }`,
     });
     const ids = res?.data?.data?.transactions?.edges;
-    if (ids[0]) return ids[0].node.id;
+    if (ids && ids[0]) return ids[0].node.id;
     return undefined;
   } catch (err) {
     // eslint-disable-next-line no-console

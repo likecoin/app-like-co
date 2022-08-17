@@ -237,10 +237,15 @@ export default async function getCralwerData(url: string) {
     });
 
     const imgData:any = await Promise.all(promiseImg)
-    imgData.filter((e: any) => e?.element?.status === 200).map((e: any) => {
-      images.push({ 'data': Buffer.from(e.element.data, 'binary').toString('base64'), 'key': e.key, 'type': e.element.headers['content-type']} );
-      return ''
-    })
+    imgData.filter( (e: any) => e?.element?.status === 200 )
+      .map((e: any) => {
+        images.push({ 
+          data: Buffer.from(e.element.data, 'binary').toString('base64'), 
+          key: e.key, 
+          type: e.element.headers['content-type'],
+        });
+        return ''
+      })
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
