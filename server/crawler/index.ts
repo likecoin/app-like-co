@@ -211,21 +211,18 @@ export default async function getCralwerData(url: string) {
     const metas = $('meta')
     const promiseImg:any = []
 
-    const urlIndexObject:any = {}
     const img = $('img')
-    img.each(function(i) {
-      const src = $(this).attr('src');
+    img.each( (i, e) => {
+      const src = $(e).attr('src');
       if (src) {
         let srcUrl = src
         if ( !src.startsWith('http') ) {
           srcUrl = `${protocol}//${host}${src}`
         }
-        if(!urlIndexObject[srcUrl]) urlIndexObject[srcUrl] = i
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
-          const elementUrl = element?.config?.url
-          const newFileName = `./img${urlIndexObject[`${elementUrl}`]}`
-          $(this).attr('src', newFileName); 
+          const newFileName = `./image_${i}`
+          $(e).attr('src', newFileName);
           return { element, key: newFileName }
         })
         .catch(()=> {}));
