@@ -243,10 +243,8 @@ export default class FetchIndex extends Vue {
 
   async onSubmit() {
     try {
-      while (this.state !== State.DONE) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.doAction()
-      }
+      this.isLoading = true
+      await this.doAction()
     } catch (err) {
       this.setError(err)
     } finally {
@@ -260,7 +258,7 @@ export default class FetchIndex extends Vue {
   }
 
   async doAction() {
-    this.isLoading = true
+    /* eslint-disable no-fallthrough */
     switch (this.state) {
       case State.INIT:
         if (this.ownerWallet && this.address !== this.ownerWallet) {
@@ -290,28 +288,24 @@ export default class FetchIndex extends Vue {
           break
         }
         this.state = State.TO_CRAWL
-        break
       case State.TO_CRAWL:
         await this.crawlUrlData()
         this.state = State.TO_ESTIMATE_FEE
-        break
       case State.TO_ESTIMATE_FEE:
         await this.estimateArweaveFee()
         this.state = this.arweaveId ? State.TO_REGISTER : State.TO_UPLOAD
-        break
       case State.TO_UPLOAD:
         if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx() }
         await this.submitToArweave()
         this.state = State.TO_REGISTER
-        break
       case State.TO_REGISTER:
         await this.registerISCN()
         this.state = State.DONE
-        break
       case State.DONE:
       default:
         break
     }
+    /* eslint-enable no-fallthrough */
   }
 
   // eslint-disable-next-line class-methods-use-this
