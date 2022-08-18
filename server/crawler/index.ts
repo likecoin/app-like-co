@@ -188,7 +188,7 @@ function formatBody({
   return body
 }
 
-export default async function getCralwerData(url: string) {
+export async function getCralwerData(url: string) {
   let description = ''
   let keywords = ''
   let author = ''
@@ -256,4 +256,9 @@ export default async function getCralwerData(url: string) {
     console.error(error)
   }
   return { title, description, keywords, author, body, ogImage, images }
+}
+
+export async function crawlImage(url: string) {
+  const { data, headers } = await axios.get(encodeURI(url as string))
+  return { data, headers }
 }
