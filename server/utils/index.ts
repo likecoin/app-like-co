@@ -27,7 +27,7 @@ export function convertMulterFiles(files: Express.Multer.File[]): ArweaveFile[] 
       originalname: filename,
     } = f;
     return {
-      key: f.fieldname,
+      key: filename,
       mimetype,
       buffer,
       filename,
