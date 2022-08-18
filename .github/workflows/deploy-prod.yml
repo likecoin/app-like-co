@@ -53,11 +53,11 @@ jobs:
           us.gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        build-args: |-
-          GITHUB_SHA="${{ github.sha }}" \
-          GITHUB_REF="${{ github.ref }}" \
-          GA_TRACKING_ID="${{ env.GA_TRACKING_ID }}" \
-          SENTRY_DSN="${{ env.SENTRY_DSN }}" \
+        build-args: |
+          "GITHUB_SHA=${{ github.sha }}"
+          "GITHUB_REF=${{ github.ref }}"
+          "GA_TRACKING_ID=${{ env.GA_TRACKING_ID }}"
+          "SENTRY_DSN=${{ env.SENTRY_DSN }}"
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy

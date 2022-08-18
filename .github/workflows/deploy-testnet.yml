@@ -53,10 +53,10 @@ jobs:
           us.gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        build-args: |-
-          IS_TESTNET="${{ env.IS_TESTNET }}" \
-          GITHUB_SHA="${{ github.sha }}" \
-          GITHUB_REF="${{ github.ref }}" \
+        build-args: |
+          "IS_TESTNET=${{ env.IS_TESTNET }}"
+          "GITHUB_SHA=${{ github.sha }}"
+          "GITHUB_REF=${{ github.ref }}"
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
