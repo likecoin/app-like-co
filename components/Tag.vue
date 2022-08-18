@@ -1,5 +1,5 @@
 <template>
-  <div
+  <nuxt-link
     :class="[
       'inline-block',
       'bg-shade-gray',
@@ -8,9 +8,10 @@
       'text-[12px]',
       'rounded-[16px]',
     ]"
+    :to="localeLocation({ name: 'search-keyword', query: { keyword: text } })"
   >
     {{ text }}
-  </div>
+  </nuxt-link>
 </template>
 
 <script lang="ts">
