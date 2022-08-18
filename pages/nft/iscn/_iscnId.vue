@@ -157,7 +157,7 @@ export default class NFTTestMintPage extends Vue {
 
   isLoading = false
 
-  errorType: string = ''
+  hasError = false
   balance: string = ''
 
   get isUserISCNOwner(): boolean {
@@ -194,7 +194,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get buttonText(): string {
-    if (this.errorType) return 'Retry'
+    if (this.hasError) return 'Retry'
     if (this.state === 'done') return 'View NFT'
     if (this.state === 'mint') return 'Mint NFT'
     return 'Mint NFT'
@@ -254,9 +254,9 @@ export default class NFTTestMintPage extends Vue {
 
   async doAction() {
     try {
-      this.errorType = ''
+      this.hasError = false
       this.balance = await getAccountBalance(this.address) as string
-      if (this.balance === '0'){
+      if (this.balance === '0') {
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
       this.isLoading = true
@@ -276,7 +276,7 @@ export default class NFTTestMintPage extends Vue {
           }
           this.classId = await this.createNftClass()
           if (!this.classId) break
-  
+
         case 'mint':
           await this.mintNFT()
           if (!this.mintNFTResult) break
@@ -293,6 +293,7 @@ export default class NFTTestMintPage extends Vue {
       }
       /* eslint-enable no-fallthrough */
     } catch (error) {
+      this.hasError = true
       this.setError(error)
     }
   }
