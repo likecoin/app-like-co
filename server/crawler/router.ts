@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getCralwerData as crawlData, crawlImage } from ".";
+import { crawlData, crawlOgImage } from ".";
 
 const router = Router();
 
@@ -8,7 +8,7 @@ router.get('/', async (req, res, next) => {
   try {
     const { url } = req.query
     if (!url) {
-      res.status(400).send('MISSING_ASSET_ID')
+      res.status(400).send('MISSING_URL')
       return
     }
     const data = await crawlData(url as string)
@@ -18,15 +18,21 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-router.get('/image', async (req, res, next) => {
+router.get('/ogimage', async (req, res, next) => {
   try {
     const { url } = req.query
     if (!url) {
-      res.status(400).send('MISSING_IMAGE_URL')
+      res.status(400).send('MISSING_URL')
       return
     }
-    const data = await crawlImage(url as string)
-    res.send(data)
+    const ogImageRes = await crawlOgImage(url as string)
+    if (!ogImageRes) {
+      res.status(404).send('OG_IMAGE_NOT_FOUND')
+      return
+    }
+    const { data, headers } = ogImageRes
+    res.setHeader('Content-Type', headers['content-type'])
+    data.pipe(res)
   } catch (error) {
     next(error)
   }
