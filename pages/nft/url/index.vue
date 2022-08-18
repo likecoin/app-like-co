@@ -110,10 +110,10 @@ export enum ErrorType {
 
 enum State {
   INIT = 'INIT',
-  TO_CRAWL = 'TO_CRAWL',
-  TO_ESTIMATE_FEE = 'TO_ESTIMATE_FEE',
-  TO_UPLOAD = 'TO_UPLOAD',
-  TO_REGISTER = 'TO_REGISTER',
+  TO_CRAWL_URL = 'TO_CRAWL_URL',
+  TO_ESTIMATE_ARWEAVE_FEE = 'TO_ESTIMATE_ARWEAVE_FEE',
+  TO_UPLOAD_TO_ARWEAVE = 'TO_UPLOAD_TO_ARWEAVE',
+  TO_REGISTER_ISCN = 'TO_REGISTER_ISCN',
 }
 
 @Component({
@@ -252,7 +252,7 @@ export default class FetchIndex extends Vue {
   }
 
   onSkip() {
-    this.state = State.TO_REGISTER
+    this.state = State.TO_REGISTER_ISCN
     this.onSubmit()
   }
 
@@ -286,18 +286,18 @@ export default class FetchIndex extends Vue {
           this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
           break
         }
-        this.state = State.TO_CRAWL
-      case State.TO_CRAWL:
+        this.state = State.TO_CRAWL_URL
+      case State.TO_CRAWL_URL:
         await this.crawlUrlData()
-        this.state = State.TO_ESTIMATE_FEE
-      case State.TO_ESTIMATE_FEE:
+        this.state = State.TO_ESTIMATE_ARWEAVE_FEE
+      case State.TO_ESTIMATE_ARWEAVE_FEE:
         await this.checkArweaveIdExistsAndEstimateFee()
-        this.state = this.arweaveId ? State.TO_REGISTER : State.TO_UPLOAD
-      case State.TO_UPLOAD:
+        this.state = this.arweaveId ? State.TO_REGISTER_ISCN : State.TO_UPLOAD_TO_ARWEAVE
+      case State.TO_UPLOAD_TO_ARWEAVE:
         if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(this.arweaveFeeInfo) }
         await this.submitToArweave()
-        this.state = State.TO_REGISTER
-      case State.TO_REGISTER:
+        this.state = State.TO_REGISTER_ISCN
+      case State.TO_REGISTER_ISCN:
         await this.registerISCN()
       default:
         break
