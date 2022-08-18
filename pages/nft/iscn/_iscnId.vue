@@ -332,10 +332,15 @@ export default class NFTTestMintPage extends Vue {
       this.apiData = data
 
       if (this.hasOpener) {
-        window.opener.postMessage(JSON.stringify({
-          action: 'NFT_MINT_DATA',
-          data,
-        }), this.redirectOrigin)
+        try {
+          window.opener.postMessage(JSON.stringify({
+            action: 'NFT_MINT_DATA',
+            data,
+          }), this.redirectOrigin)
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       }
     } catch (err) {
       // eslint-disable-next-line no-console
