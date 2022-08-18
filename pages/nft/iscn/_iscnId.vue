@@ -268,16 +268,10 @@ export default class NFTTestMintPage extends Vue {
           }
 
           if (this.ogImageBlob) {
-            try {
-              const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
-              if (!this.ogImageArweaveId) {
-                if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
-                await this.submitToArweave()
-              }
-            } catch (error) {
-              // eslint-disable-next-line no-console
-              console.error(error);
-              this.toggleSnackbar('Warning: Cannot upload display image to Arweave')
+            const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
+            if (!this.ogImageArweaveId) {
+              if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
+              await this.submitToArweave()
             }
           }
           this.classId = await this.createNftClass()
