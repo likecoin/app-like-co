@@ -82,6 +82,21 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 
+const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i+=1) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+  const blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+}
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
@@ -126,7 +141,11 @@ export default class FetchIndex extends Vue {
     if (!this.crawledData?.body) { return null }
     const body = new Blob([this.crawledData.body], { type: "text/html" })
     const formData = new FormData()
-    formData.append('file', body, 'index.html')
+    formData.append('index.html', body, 'index.html')
+    const { images } = this.crawledData
+    images.forEach((element:any) => {
+      formData.append(`${element.key}`, base64toBlob(element.data, element.type), `${element.key}`)
+    });
     return formData
   }
 
@@ -159,8 +178,8 @@ export default class FetchIndex extends Vue {
 
   get iscnParams() {
     const params: any = { iscnId: this.iscnId }
-    if (this.crawledData?.image) {
-      params.ogImageUrl = this.crawledData.image
+    if (this.crawledData?.ogImage) {
+      params.ogImageUrl = this.crawledData.ogImage
     }
     return params
   }
@@ -325,6 +344,7 @@ export default class FetchIndex extends Vue {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
+          timeout: 90000,
         },
       )
       this.arweaveId = arweaveId

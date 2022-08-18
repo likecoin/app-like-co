@@ -194,26 +194,48 @@ export default async function getCralwerData(url: string) {
   let author = ''
   let title = ''
   let body = ''
-  let image = ''
+  let ogImage = ''
+  let images:any = []
+
   try {
     const { data: content } = await axios.get(encodeURI(url as string))
+    const { protocol , host} = new URL(url)
     const $ = cheerio.load(content);
     [
       'script',
       'style',
       'svg',
+      'source',
     ].forEach((t: string) => $(t).remove())
     title = $('title').text()
     const metas = $('meta')
-    body = $('body').html() || ''
+    const promiseImg:any = []
 
     const img = $('img')
-    Object.keys(img).forEach((key: any) => {
-      const { src } = img[key].attribs || {};
-      if (!src) {
-        delete img[key]
+    img.each( (i, e) => {
+      const src = $(e).attr('src');
+      if (src) {
+        let srcUrl = src
+        if ( !src.startsWith('http') ) {
+          srcUrl = `${protocol}//${host}${src}`
+        }
+        promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
+        .then((element)=> {
+          const newFileName = `./image_${i}`
+          $(e).attr('src', newFileName);
+          return { element, key: newFileName }
+        })
+        .catch(()=> {}));
       }
-    })
+    });
+
+    const imgData:any = await Promise.all(promiseImg)
+    images = imgData.filter( (e: any) => e?.element?.status === 200 )
+      .map((e: any) => ({
+          data: Buffer.from(e.element.data, 'binary').toString('base64'), 
+          key: e.key, 
+          type: e.element.headers['content-type'],
+        }))
 
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {};
@@ -224,13 +246,14 @@ export default async function getCralwerData(url: string) {
       } else if (name === 'author') {
         author = value
       } else if (property === 'og:image') {
-        image = value
+        ogImage = value
       }
     })
+    body = $('body').html() || ''
     body = formatBody({ content: body, title, author, description })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
-  return { title, description, keywords, author, body, image }
+  return { title, description, keywords, author, body, ogImage, images }
 }

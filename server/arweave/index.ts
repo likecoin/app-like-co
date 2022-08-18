@@ -43,8 +43,8 @@ export async function getArweaveIdFromHashes(ipfsHash: string) {
       }
     }`,
     });
-    const ids = res.data.data.transactions.edges;
-    if (ids[0]) return ids[0].node.id;
+    const ids = res?.data?.data?.transactions?.edges;
+    if (ids && ids[0]) return ids[0].node.id;
     return undefined;
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -150,17 +150,17 @@ export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePri
   }
 }
 
-export async function convertARPriceToLIKE(ar: ArweavePrice, {
-  priceRatio: inputPriceRatio = '', margin = 0.05, decimal = 0,
-} = {}): Promise<ArweavePriceWithLIKE> {
-  let priceRatio = inputPriceRatio;
-  if (!priceRatio) {
-    const { data } = await axios.get(COINGECKO_PRICE_API);
-    const { likecoin, arweave: arweavePrice } = data;
-    priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
-  }
-  // At least 1 LIKE for 1 AR
+async function getPriceRatioBigNumber () {
+  const { data } = await axios.get(COINGECKO_PRICE_API);
+  const { likecoin, arweave: arweavePrice } = data;
+  const priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
   const priceRatioBigNumber = BigNumber.max(priceRatio, 1);
+  return priceRatioBigNumber;
+}
+
+export function convertARPriceToLIKE(ar: ArweavePrice, {
+  priceRatioBigNumber, margin = 0.05, decimal = 0,
+}:any ): any {
   const res = new BigNumber(ar.AR)
     .multipliedBy(priceRatioBigNumber)
     .multipliedBy(1 + margin)
@@ -177,10 +177,11 @@ export async function convertARPriceToLIKE(ar: ArweavePrice, {
 export async function convertARPricesToLIKE(ar: ArweavePrice,
   { margin = 0.05, decimal = 0 } = {},
 ): Promise<ArweavePriceWithLIKE> {
+  const priceRatioBigNumber = await getPriceRatioBigNumber()
   if (!(ar.list && ar.list.length)) {
-    return convertARPriceToLIKE(ar, { margin, decimal });
+    return convertARPriceToLIKE(ar, { priceRatioBigNumber, margin, decimal });
   }
-  const newList = await Promise.all(ar.list.map(a => convertARPriceToLIKE(a, { margin, decimal })));
+  const newList = (ar.list.map(a => convertARPriceToLIKE(a, { priceRatioBigNumber, margin, decimal })));
   const totalLIKE = newList.reduce((acc, cur) => acc.plus(cur.LIKE), new BigNumber(0));
   return {
     ...ar,
