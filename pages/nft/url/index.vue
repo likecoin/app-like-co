@@ -152,6 +152,7 @@ export default class FetchIndex extends Vue {
         type: 'like',
       }]],
       likerIds: [],
+      likerIdsAddress: [],
       descriptions: [description],
       numbersProtocolAssetId: '',
     }

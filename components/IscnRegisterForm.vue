@@ -514,6 +514,7 @@ import { signISCNTx } from '~/utils/cosmos/iscn';
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import {
+  getLikerIdMinApi,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
@@ -566,6 +567,7 @@ export default class IscnRegisterForm extends Vue {
   uploadArweaveId: string = this.arweaveId || ''
   error: string = ''
   likerId: string = ''
+  likerIdsAddress: string[] = []
   authorDescription: string = ''
 
   arweaveFeeTargetAddress: string = ''
@@ -710,6 +712,7 @@ export default class IscnRegisterForm extends Vue {
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       likerIds: this.likerIds,
+      likerIdsAddress: this.likerIdsAddress,
       descriptions: this.descriptions,
     }
   }
@@ -857,6 +860,7 @@ export default class IscnRegisterForm extends Vue {
     } else {
       this.authors.push(newAuthor)
     }
+
     this.dismissAuthorDialog()
   }
 
@@ -874,6 +878,16 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async calculateISCNFee(): Promise<void> {
+    try {
+      const [ data ] = await Promise.all(
+        this.likerIds.map((e) =>
+          this.$axios.get(getLikerIdMinApi(e as string),
+        )),
+      )
+      this.likerIdsAddress = data?.data?.likeWallet
+    } catch {
+    }
+
     const [
       balance,
       estimation,

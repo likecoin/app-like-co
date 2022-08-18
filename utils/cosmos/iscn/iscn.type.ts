@@ -16,6 +16,7 @@ export interface ISCNRegisterPayload {
   authorUrls: string[][];
   authorWallets: any[][];
   likerIds: string[];
+  likerIdsAddress: string[];
   descriptions: string[];
 }
 export interface ISCNRecordWithID extends ISCNRecord {

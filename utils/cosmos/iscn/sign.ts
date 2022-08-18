@@ -28,6 +28,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorUrls,
     authorWallets,
     likerIds,
+    likerIdsAddress,
     descriptions,
     numbersProtocolAssetId,
     ...data
@@ -43,22 +44,31 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
       const description = descriptions[i]
+
       const url: string = likerIds[i]
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
 
-      const identifiers = authorWallets[i].map((a: any) => ({
+      let identifiers = authorWallets[i].map((a: any) => ({
           '@type': 'PropertyValue',
           propertyID: WALLET_TYPE_REPLACER[a.type] || a.type,
           value: a.address,
         }))
+
+      if ( !identifiers ) {
+        identifiers = likerIds.map((a: any) => ({
+          '@type': 'PropertyValue',
+          propertyID: 'Liker ID',
+          value: `https://like.co/${a}`,
+        }))
+      }
 
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
       if (isNonEmpty) {
         stakeholders.push({
           entity: {
-            '@id': identifiers.length ? identifiers[0].value : url,
+            '@id': identifiers.length ? identifiers[0].value : likerIdsAddress[i] || url,
             name: authorName,
             url,
             description,
