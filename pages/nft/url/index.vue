@@ -114,7 +114,6 @@ enum State {
   TO_ESTIMATE_FEE = 'TO_ESTIMATE_FEE',
   TO_UPLOAD = 'TO_UPLOAD',
   TO_REGISTER = 'TO_REGISTER',
-  DONE = 'DONE',
 }
 
 @Component({
@@ -300,8 +299,6 @@ export default class FetchIndex extends Vue {
         this.state = State.TO_REGISTER
       case State.TO_REGISTER:
         await this.registerISCN()
-        this.state = State.DONE
-      case State.DONE:
       default:
         break
     }
