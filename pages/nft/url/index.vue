@@ -51,8 +51,8 @@
             </template>
           </Button>
           <div v-else class="flex">
-            <Button preset="outline" @click="onSubmit">Retry</Button>
             <Button preset="outline" @click="onSkip">Skip & Continue</Button>
+            <Button preset="outline" @click="onSubmit">Retry</Button>
           </div>
         </div>
       </div>
