@@ -222,7 +222,7 @@ export default async function getCralwerData(url: string) {
         promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
         .then((element)=> {
           const newFileName = `image_${i}`
-          $(e).attr('src', `${newFileName}`);
+          $(e).attr('src', `./${newFileName}`);
           return { element, key: newFileName }
         })
         .catch(()=> {}));
