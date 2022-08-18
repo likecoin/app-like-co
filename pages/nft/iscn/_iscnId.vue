@@ -152,7 +152,7 @@ export default class NFTTestMintPage extends Vue {
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
 
-  sendRes: any = null
+  mintNFTResult: any = null
   postInfo: any = null
 
   isLoading = false
@@ -285,7 +285,7 @@ export default class NFTTestMintPage extends Vue {
   
         case 'mint':
           await this.mintNFT()
-          if (!this.sendRes) break
+          if (!this.mintNFTResult) break
           if (this.isWritingNFT) {
             await this.postMintInfo()
             if (!this.postInfo) break
@@ -514,7 +514,7 @@ export default class NFTTestMintPage extends Vue {
       let messages = mintMessages;
       if (this.isWritingNFT) messages = messages.concat(sendMessages);
 
-      this.sendRes = await signingClient.sendMessages(this.address, messages)
+      this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
