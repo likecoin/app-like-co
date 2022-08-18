@@ -12,7 +12,7 @@ export function checkFileValid(req: Request, res: Response, next: NextFunction) 
     return;
   }
   const files = req.files as Express.Multer.File[];
-  if (files.length > 1 && !files.find(f => f.originalname === 'index.html')) {
+  if (files.length > 1 && !files.find(f => f.fieldname === 'index.html')) {
     res.status(400).send('MISSING_INDEX_FILE');
     return;
   }
