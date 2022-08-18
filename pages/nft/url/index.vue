@@ -295,7 +295,7 @@ export default class FetchIndex extends Vue {
         await this.estimateArweaveFee()
         this.state = this.arweaveId ? State.TO_REGISTER : State.TO_UPLOAD
       case State.TO_UPLOAD:
-        if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx() }
+        if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(this.arweaveFeeInfo) }
         await this.submitToArweave()
         this.state = State.TO_REGISTER
       case State.TO_REGISTER:
@@ -353,8 +353,7 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async sendArweaveFeeTx(): Promise<void> {
-    const { to, amount, memo } = this.arweaveFeeInfo
+  async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
