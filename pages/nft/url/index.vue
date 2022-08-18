@@ -292,7 +292,7 @@ export default class FetchIndex extends Vue {
         await this.crawlUrlData()
         this.state = State.TO_ESTIMATE_FEE
       case State.TO_ESTIMATE_FEE:
-        await this.estimateArweaveFee()
+        await this.checkArweaveIdExistsAndEstimateFee()
         this.state = this.arweaveId ? State.TO_REGISTER : State.TO_UPLOAD
       case State.TO_UPLOAD:
         if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(this.arweaveFeeInfo) }
@@ -328,7 +328,7 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  async estimateArweaveFee() {
+  async checkArweaveIdExistsAndEstimateFee() {
     try {
       const { address, arweaveId, LIKE, ipfsHash, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,

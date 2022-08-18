@@ -269,7 +269,7 @@ export default class NFTTestMintPage extends Vue {
 
           if (this.ogImageBlob) {
             try {
-              const arweaveFeeInfo = await this.estimateArweaveFee()
+              const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
               if (!this.ogImageArweaveId) {
                 if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
                 await this.submitToArweave()
@@ -366,7 +366,7 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  async estimateArweaveFee() {
+  async checkArweaveIdExistsAndEstimateFee() {
     try {
       const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
