@@ -147,6 +147,9 @@ import {
       ],
     } as MetaInfo
   },
+  fetch({ redirect }) {
+    redirect('airdrop/claim')
+  },
 })
 export default class AirdropCheckPage extends Vue {
   claimmableAmount: string = '0'
