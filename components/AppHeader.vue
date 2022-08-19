@@ -67,19 +67,6 @@
               </template>
             </MenuButton>
           </div>
-          <Button
-            :to="localeLocation({ name: 'airdrop' })"
-            :text="$t('AirDrop.button')"
-            preset="primary"
-            text-preset="h5"
-            size="large"
-            :class="['ml-[16px]']"
-            :style="{ color: '#FFFFFF', backgroundColor: '#C69F67'}"
-          >
-            <template #prepend>
-              <IconClaim class="w-[20px]" />
-            </template>
-          </Button>
           <div
             :class="[
               'flex',

@@ -68,6 +68,9 @@ const signerModule = namespace('signer')
       ],
     } as MetaInfo
   },
+  fetch({ redirect }) {
+    redirect('airdrop/claim')
+  },
 })
 export default class AirdropPage extends Vue {
   @signerModule.Getter('getAddress') walletAddress!: string

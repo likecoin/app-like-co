@@ -22,13 +22,6 @@
         'lg:h-[429px]',
       ]"
     >
-      <AirdropInfoCard
-        :class="[
-          'h-full',
-          'w-full',
-          'max-w-[304px]',
-        ]"
-      />
       <IscnInfoCard
         :class="[
           'hidden',
