@@ -87,6 +87,7 @@ import getQueryClient from '~/utils/cosmos/iscn/query';
 import { getAccountBalance } from '~/utils/cosmos'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
+import { logTrackerEvent } from '~/utils/logger'
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
@@ -248,6 +249,7 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   async purchaseNFT() {
+    logTrackerEvent(this, 'NFT', 'NFTCollect(purchase)', this.classId, 1);
     const { data } = await this.$axios.post(
       API_LIKER_NFT_PURCHASE,
       {},
