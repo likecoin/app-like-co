@@ -44,7 +44,6 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
       const description = descriptions[i]
-
       const url: string = likerIds[i]
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
