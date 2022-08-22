@@ -175,7 +175,7 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   redirectToPurchaserPortfolio() {
-    logTrackerEvent(this, 'NFT', 'redirectToPurchaser', this.address, 1);
+    logTrackerEvent(this, 'NFTCollect', 'RedirectToPortfolio', this.address, 1);
     const purchaserAddress = this.address
     if (window.opener) {
       window.opener.postMessage({
@@ -189,13 +189,13 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   async onClickMint() {
-    logTrackerEvent(this, 'NFT', 'onClickMint', this.address, 1);
+    logTrackerEvent(this, 'NFTCollect', 'ClickCollect', this.address, 1);
     this.isLoading = true
     const balance = await getAccountBalance(this.address) as number
     if (balance < this.nftPrice) {
       this.isLoading = false
       this.toggleSnackbar(ErrorType.INSUFFICIENT_BALANCE)
-      logTrackerEvent(this, 'NFT', 'Insufficient Balance', this.address, 1);
+      logTrackerEvent(this, 'NFTCollect', 'ErrorInsufficientBalance', this.address, 1);
       return
     }
     try {
@@ -204,7 +204,7 @@ export default class NFTTestButtonPage extends Vue {
       await this.getPurchaseInfo()
       this.redirectToPurchaserPortfolio()
     } catch (err) {
-      logTrackerEvent(this, 'NFT', 'error', (err as Error).toString(), 1)
+      logTrackerEvent(this, 'NFTCollect', 'ErrorGeneric', (err as Error).toString(), 1)
       this.setError(err)
     } finally {
       this.isLoading = false
@@ -240,7 +240,7 @@ export default class NFTTestButtonPage extends Vue {
     if (!this.signer) throw new Error('PLEASE_CONNECT_WALLET_FIRST')
     const signingClient = await getSigningClient()
     await signingClient.setSigner(this.signer)
-    logTrackerEvent(this, 'NFT', 'createSendGrant', this.address, 1);
+    logTrackerEvent(this, 'NFTCollect', 'StartSigning', this.address, 1);
     const res = await signingClient.createSendGrant(
       this.address,
       LIKER_NFT_API_WALLET,
@@ -251,11 +251,10 @@ export default class NFTTestButtonPage extends Vue {
       Date.now() + 60000,
     )
     this.grantTransactionHash = (res as DeliverTxResponse).transactionHash
-    logTrackerEvent(this, 'NFT', 'grantPurchaseTransaction', this.grantTransactionHash, 1);
+    logTrackerEvent(this, 'NFTCollect', 'TransactionSuccess', this.grantTransactionHash, 1);
   }
 
   async purchaseNFT() {
-    logTrackerEvent(this, 'NFT', 'postPurchaseNFT', this.classId, 1);
     const { data } = await this.$axios.post(
       API_LIKER_NFT_PURCHASE,
       {},
@@ -269,9 +268,7 @@ export default class NFTTestButtonPage extends Vue {
         paramsSerializer: (params) => qs.stringify(params),
       },
     )
-    if (data) {
-      logTrackerEvent(this, 'NFT', 'purchasedNFT', this.classId, 1)
-    }
+    logTrackerEvent(this, 'NFTCollect', data ? 'PurchaseSuccess' : 'PurchaseDataMissing', this.classId, 1)
     return data
   }
 
