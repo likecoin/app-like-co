@@ -1,5 +1,7 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
@@ -188,6 +190,17 @@ function formatBody({
   return body
 }
 
+async function getBrowserPage():Promise<any> {
+  // Launch headless Chrome. Turn off sandbox so Chrome can run under root.
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless,
+  });
+  return { browser };
+}
+
 export default async function getCralwerData(url: string) {
   let description = ''
   let keywords = ''
@@ -196,9 +209,19 @@ export default async function getCralwerData(url: string) {
   let body = ''
   let ogImage = ''
   let images:any = []
+  let browser:any
+  let page:any
+  let content:any
 
   try {
-    const { data: content } = await axios.get(encodeURI(url as string))
+    await axios.get(encodeURI(url as string),{ withCredentials: true }).then((element)=>{
+      content = element.data
+    }).catch(async () => {
+        ({ browser } = await getBrowserPage());
+        page = await browser.newPage();
+        await page.goto(encodeURI(url as string), {'timeout': 90000, waitUntil: 'networkidle2' });
+        content = await page.content();
+      })
     const { protocol , host} = new URL(url)
     const $ = cheerio.load(content);
     [
@@ -255,5 +278,7 @@ export default async function getCralwerData(url: string) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
+  if (page) await page.close();
+  if (browser) await browser.close();
   return { title, description, keywords, author, body, ogImage, images }
 }
