@@ -860,7 +860,6 @@ export default class IscnRegisterForm extends Vue {
     } else {
       this.authors.push(newAuthor)
     }
-
     this.dismissAuthorDialog()
   }
 
