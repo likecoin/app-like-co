@@ -1,5 +1,6 @@
 <template>
-  <nuxt-link
+  <component
+    :is="tag"
     :class="[
       'inline-block',
       'bg-shade-gray',
@@ -8,10 +9,10 @@
       'text-[12px]',
       'rounded-[16px]',
     ]"
-    :to="localeLocation({ name: 'search-keyword', query: { keyword: text } })"
+    :to="to"
   >
     {{ text }}
-  </nuxt-link>
+  </component>
 </template>
 
 <script lang="ts">
@@ -20,5 +21,11 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class Tag extends Vue {
   @Prop(String) readonly text: String | undefined
+  @Prop(String) readonly to: String | undefined
+
+  get tag(): any {
+    return this.to ? 'nuxt-link' : 'div'
+  }
 }
+
 </script>

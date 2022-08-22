@@ -23,10 +23,10 @@
     <FormField :label="$t('iscn.meta.name')">
       {{ name }}
     </FormField>
-    <Tag
+    <Keyword
       v-for="item in keywords"
       :key="item.key"
-      :text="item"
+      :keyword="item"
       class="mr-[8px] mb-[4px]"
     />
   </div>

@@ -160,10 +160,10 @@
         :label="$t('iscn.meta.tags.title')"
         class="mb-[12px]"
       >
-        <Tag
+        <Keyword
           v-for="item in keywords"
           :key="item.key"
-          :text="item"
+          :keyword="item"
           :class="[
             'mr-[8px]',
             'mb-[4px]',
