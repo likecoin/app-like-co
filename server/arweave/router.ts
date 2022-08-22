@@ -37,7 +37,6 @@ router.post(
       address: LIKE_TARGET_ADDRESS,
     });
   } catch (error) {
-    res.status(200)
     next(error);
   }
 });
@@ -133,8 +132,6 @@ router.post('/upload',
     ] = await Promise.all(promises)
     res.json({ arweaveId, ipfsHash, list, numAssetIds: numAssetIds || [] });
   } catch (error) {
-    res.status(200)
-
     next(error);
   }
 });
