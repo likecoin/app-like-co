@@ -206,16 +206,22 @@ export default async function getCralwerData(url: string) {
   let images:any = []
   let browser:any
   let page:any
-  let content:any
+  let content = ''
 
   try {
     await axios.get(encodeURI(url as string),{ withCredentials: true }).then((element)=>{
       content = element.data
-    }).catch(async () => {
-        ({ browser } = await getBrowserPage());
-        page = await browser.newPage();
-        await page.goto(encodeURI(url as string), {'timeout': 90000, waitUntil: 'networkidle2' });
-        content = await page.content();
+    }).catch(async (error) => {
+        if(error?.response?.status === 403) {
+          ({ browser } = await getBrowserPage());
+          page = await browser.newPage();
+          await page.goto(encodeURI(url as string), {'timeout': 90000, waitUntil: 'networkidle2' });
+          content = await page.content();
+          await page.close();
+          await browser.close();
+        } else {
+          throw error
+        }
       })
     const { protocol , host} = new URL(url)
     const $ = cheerio.load(content);
@@ -273,7 +279,5 @@ export default async function getCralwerData(url: string) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
-  if (page) await page.close();
-  if (browser) await browser.close();
   return { title, description, keywords, author, body, ogImage, images }
 }
