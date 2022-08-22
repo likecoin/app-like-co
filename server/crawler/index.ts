@@ -1,7 +1,6 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
-import puppeteer from 'puppeteer-core';
-import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer';
 
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
@@ -191,12 +190,8 @@ function formatBody({
 }
 
 async function getBrowserPage():Promise<any> {
-  // Launch headless Chrome. Turn off sandbox so Chrome can run under root.
   const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless,
+    headless: false,
   });
   return { browser };
 }
