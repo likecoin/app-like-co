@@ -218,7 +218,7 @@ export default async function getCralwerData(url: string) {
           await page.setExtraHTTPHeaders({
             'Accept-Language': 'zh-HK,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6', // bypass Cloudflare
           });
-          await page.goto(encodeURI(url as string), {'timeout': 90000, waitUntil: 'networkidle2' });
+          await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' });
           content = await page.content();
           await page.close();
           await browser.close();
