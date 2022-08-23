@@ -1,7 +1,11 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
+puppeteer.use(require('puppeteer-extra-plugin-anonymize-ua')())
+
+puppeteer.use(StealthPlugin())
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
   content,
