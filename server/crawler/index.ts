@@ -192,6 +192,10 @@ function formatBody({
 async function getBrowserPage():Promise<any> {
   const browser = await puppeteer.launch({
     headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      ],
   });
   return browser;
 }
