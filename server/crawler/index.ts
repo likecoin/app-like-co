@@ -2,9 +2,9 @@ import axios from 'axios'
 import cheerio from 'cheerio'
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import UaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
 
-puppeteer.use(require('puppeteer-extra-plugin-anonymize-ua')())
-
+puppeteer.use(UaPlugin())
 puppeteer.use(StealthPlugin())
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
@@ -215,20 +215,52 @@ export default async function getCralwerData(url: string) {
   let content = ''
 
   try {
-    await axios.get(encodeURI(url as string),{ withCredentials: true }).then((element)=>{
-      content = element.data
-    }).catch(async (error) => {
-        if(error?.response?.status === 403) {
-          const browser = await getBrowserPage();
-          const page = await browser.newPage();
-          await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' });
-          content = await page.content();
-          await page.close();
-          await browser.close();
-        } else {
-          throw error
-        }
-      })
+    try {
+      const { data } = await axios.get(encodeURI(url as string),{ withCredentials: true })
+      content = data
+    } catch (error:any) {
+      if(error?.response?.status === 403) {
+        const browser = await getBrowserPage();
+        const page = await browser.newPage();
+        const blockedResources = [
+'image',
+'stylesheet',
+'media',
+'font',
+'texttrack',
+'object',
+'beacon',
+'csp_report',
+'imageset',
+];
+        await page.setRequestInterception(true);
+        page.on('request', (request:any) => {
+          const handled = false;
+          if (!handled) {
+            const url1 = request.url();
+            const { host, pathname } = new URL(url1);
+            if (blockedResources.includes(request.resourceType())
+              || pathname.endsWith('.jpg')
+              || pathname.endsWith('.jpeg')
+              || pathname.endsWith('.png')
+              || pathname.endsWith('.gif')
+              || pathname.endsWith('.css')
+              || host.includes('button.like.co')) {
+              request.abort('blockedbyclient');
+            } else {
+              request.continue();
+            }
+          }
+        })
+        await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' });
+        content = await page.content();
+        await page.close();
+        await browser.close();
+      } else {
+        throw error;
+      }
+    }
+
     const { protocol , host} = new URL(url)
     const $ = cheerio.load(content);
     [
