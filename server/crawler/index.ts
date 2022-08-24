@@ -188,7 +188,7 @@ function formatBody({
   return body
 }
 
-export default async function getCralwerData(url: string) {
+export async function crawlData(url: string) {
   let description = ''
   let keywords = ''
   let author = ''
@@ -256,4 +256,21 @@ export default async function getCralwerData(url: string) {
     console.error(error)
   }
   return { title, description, keywords, author, body, ogImage, images }
+}
+
+export async function crawlOgImage(url: string) {
+  const { data } = await axios.get(encodeURI(url as string))
+  const $ = cheerio.load(data)
+  const metas = $('meta')
+  let ogImageUrl = ''
+  for (let i = 0; i < Object.keys(metas).length; i += 1) {
+    const { attribs } = metas[i]; // keys are integers 1 to N
+    if (attribs?.property === 'og:image') {
+      ogImageUrl = attribs.content
+      break
+    }
+  }
+  if (!ogImageUrl) return null;
+  const res = await axios.get(encodeURI(ogImageUrl), { responseType: 'stream' })
+  return res;
 }
