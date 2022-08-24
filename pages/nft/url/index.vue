@@ -1,16 +1,14 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <Page :class="[
+    'flex',
+    'flex-col',
+    'relative',
+    'items-center',
+    'justify-center',
+    'px-[20px]',
+    'pt-[38px]',
+    'lg:p-[16px]',
+  ]">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -44,14 +42,18 @@
             :error-message="errorMessage" />
           {{ iscnId }}
         </div>
-        <!-- <ProgressIndicator v-if="isLoading" class="my-[4px]" preset="thin" /> -->
         <div class="flex flex-row self-end">
           <ProgressIndicator v-if="isLoading" />
-          <Button v-else :text="$t('NFTPortal.button.register')" preset="outline" @click="onSubmit">
+          <Button v-else-if="state === 'INIT'" :text="$t('NFTPortal.button.register')" preset="outline"
+            @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
           </Button>
+          <div v-else class="flex">
+            <Button preset="outline" @click="onSkip">Skip & Continue</Button>
+            <Button preset="outline" @click="onSubmit">Retry</Button>
+          </div>
         </div>
       </div>
     </Card>
@@ -106,6 +108,14 @@ export enum ErrorType {
   MISSING_SIGNER = 'MISSING_SIGNER'
 }
 
+enum State {
+  INIT = 'INIT',
+  TO_CRAWL_URL = 'TO_CRAWL_URL',
+  TO_ESTIMATE_ARWEAVE_FEE = 'TO_ESTIMATE_ARWEAVE_FEE',
+  TO_UPLOAD_TO_ARWEAVE = 'TO_UPLOAD_TO_ARWEAVE',
+  TO_REGISTER_ISCN = 'TO_REGISTER_ISCN',
+}
+
 @Component({
   layout: 'wallet',
 })
@@ -116,16 +126,17 @@ export default class FetchIndex extends Vue {
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
-  
+
   @walletModule.Getter('getType') walletType!: string | null
 
-
+  state = State.INIT
   url = this.$route.query.url as string || ''
   ownerWallet = ''
   errorMessage = ''
   crawledData: any
   ipfsHash = ''
   arweaveId = ''
+  arweaveFeeInfo: any
   arweaveFeeTxHash = ''
   iscnId = this.$route.query.iscn_id as string || ''
   likerId = this.$route.query.liker_id as string || ''
@@ -178,9 +189,6 @@ export default class FetchIndex extends Vue {
 
   get iscnParams() {
     const params: any = { iscnId: this.iscnId }
-    if (this.crawledData?.ogImage) {
-      params.ogImageUrl = this.crawledData.ogImage
-    }
     return params
   }
 
@@ -226,55 +234,72 @@ export default class FetchIndex extends Vue {
     this.arweaveId = ''
     this.arweaveFeeTxHash = ''
     this.iscnId = ''
+    this.state = State.INIT
   }
 
   async onSubmit() {
-    if (this.ownerWallet && this.address !== this.ownerWallet) {
-      this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
-      return
-    }
-    if (this.isUrlIscnId) {
-      this.iscnId = this.url;
-      this.$router.push(
-        this.localeLocation({
-          name: 'nft-iscn-iscnId',
-          params: this.iscnParams,
-        })!,
-      )
-      return;
-    }
-
-    this.balance = await getAccountBalance(this.address) as string
-    if (this.balance === '0') {
-      this.toggleSnackbar('INSUFFICIENT_BALANCE')
-      return
-    }
-
     try {
-      this.errorMessage = ''
-      if (!this.url) {
-        this.errorMessage = this.$t(
-          'HomePage.search.errormessage.empty',
-        ) as string
-        return
-      }
       this.isLoading = true
-      await this.crawlUrlData()
-      if (this.crawledData?.body) {
-          const arweaveFeeInfo = await this.estimateArweaveFee()
-          if (!this.arweaveId) {
-            if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
-            await this.submitToArweave()
-          }
-      }
-      await this.submitToISCN()
+      await this.doAction()
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
       this.setError(err)
     } finally {
       this.isLoading = false
     }
+  }
+
+  onSkip() {
+    this.state = State.TO_REGISTER_ISCN
+    this.onSubmit()
+  }
+
+  async doAction() {
+    /* eslint-disable no-fallthrough */
+    switch (this.state) {
+      case State.INIT:
+        if (this.ownerWallet && this.address !== this.ownerWallet) {
+          this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
+          break
+        }
+        if (this.isUrlIscnId) {
+          this.iscnId = this.url;
+          this.$router.push(
+            this.localeLocation({
+              name: 'nft-iscn-iscnId',
+              params: this.iscnParams,
+            })!,
+          )
+          break
+        }
+
+        this.balance = await getAccountBalance(this.address) as string
+        if (this.balance === '0') {
+          this.toggleSnackbar('INSUFFICIENT_BALANCE')
+          break
+        }
+
+        this.errorMessage = ''
+        if (!this.url) {
+          this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
+          break
+        }
+        this.state = State.TO_CRAWL_URL
+      case State.TO_CRAWL_URL:
+        await this.crawlUrlData()
+        this.state = State.TO_ESTIMATE_ARWEAVE_FEE
+      case State.TO_ESTIMATE_ARWEAVE_FEE:
+        await this.checkArweaveIdExistsAndEstimateFee()
+        this.state = this.arweaveId ? State.TO_REGISTER_ISCN : State.TO_UPLOAD_TO_ARWEAVE
+      case State.TO_UPLOAD_TO_ARWEAVE:
+        if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(this.arweaveFeeInfo) }
+        await this.submitToArweave()
+        this.state = State.TO_REGISTER_ISCN
+      case State.TO_REGISTER_ISCN:
+        await this.registerISCN()
+      default:
+        break
+    }
+    /* eslint-enable no-fallthrough */
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -289,14 +314,15 @@ export default class FetchIndex extends Vue {
     try {
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
       this.crawledData = data
+      if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_CRAWL_URL')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_CRAWL_THIS_URL')
     }
   }
 
-  async estimateArweaveFee() {
+  async checkArweaveIdExistsAndEstimateFee() {
     try {
       const { address, arweaveId, LIKE, ipfsHash, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
@@ -309,15 +335,15 @@ export default class FetchIndex extends Vue {
       )
       if (arweaveId) { this.arweaveId = arweaveId }
       this.ipfsHash = ipfsHash
-      return {
+      this.arweaveFeeInfo = {
         to: address,
         amount: new BigNumber(LIKE),
         memo,
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_ESTIMATE_ARWEAVE_FEE')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
     }
   }
 
@@ -329,8 +355,8 @@ export default class FetchIndex extends Vue {
       this.arweaveFeeTxHash = transactionHash;
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_SEND_ARWEAVE_FEE_TX')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
     }
   }
 
@@ -350,12 +376,12 @@ export default class FetchIndex extends Vue {
       this.arweaveId = arweaveId
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_UPLOAD_TO_ARWEAVE')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_SUBMIT_TO_ARWEAVE')
     }
   }
 
-  async submitToISCN(): Promise<void> {
+  async registerISCN(): Promise<void> {
     if (!this.signer) {
       this.errorMessage = 'MISSING_SIGNER'
       return
@@ -378,8 +404,8 @@ export default class FetchIndex extends Vue {
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('CANNOT_SEND_ISCN_TX')
-      throw err
+      console.error(err)
+      throw new Error('CANNOT_REGISTER_ISCN')
     }
   }
 
