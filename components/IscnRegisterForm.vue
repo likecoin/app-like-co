@@ -567,7 +567,7 @@ export default class IscnRegisterForm extends Vue {
   uploadArweaveId: string = this.arweaveId || ''
   error: string = ''
   likerId: string = ''
-  likerIdsAddress: string[] = []
+  likerIdsAddresses: string[] = []
   authorDescription: string = ''
 
   arweaveFeeTargetAddress: string = ''
@@ -712,7 +712,7 @@ export default class IscnRegisterForm extends Vue {
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       likerIds: this.likerIds,
-      likerIdsAddress: this.likerIdsAddress,
+      likerIdsAddresses: this.likerIdsAddresses,
       descriptions: this.descriptions,
     }
   }
@@ -878,13 +878,16 @@ export default class IscnRegisterForm extends Vue {
 
   async calculateISCNFee(): Promise<void> {
     try {
-      const [ data ] = await Promise.all(
+      this.likerIdsAddresses =(await Promise.all(
         this.likerIds.map((e) =>
-          this.$axios.get(getLikerIdMinApi(e as string),
-        )),
-      )
-      this.likerIdsAddress = data?.data?.likeWallet
-    } catch {
+          this.$axios.get(getLikerIdMinApi(e as string))
+          .then((element):any => element?.data?.likeWallet)
+          .catch(()=>{}),
+        ),
+      )).filter((x) => x !== undefined);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
     }
 
     const [
