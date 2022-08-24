@@ -1,8 +1,8 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-import { crawlData, crawlOgImage } from ".";
+import { getCralwerData, crawlOgImage } from '.';
 
-const router = Router();
+const router = Router()
 
 router.get('/', async (req, res, next) => {
   try {
@@ -11,7 +11,7 @@ router.get('/', async (req, res, next) => {
       res.status(400).send('MISSING_URL')
       return
     }
-    const data = await crawlData(url as string)
+    const data = await getCralwerData(url as string)
     res.send(data)
   } catch (error) {
     next(error)

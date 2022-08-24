@@ -1,6 +1,11 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import UaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
 
+puppeteer.use(UaPlugin())
+puppeteer.use(StealthPlugin())
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
   content,
@@ -8,10 +13,10 @@ function formatBody({
   author,
   description,
 }: {
-  content: string,
-  title: string,
-  author: string,
-  description: string,
+  content: string
+  title: string
+  author: string
+  description: string
 }) {
   let meta = ''
   if (description) {
@@ -188,20 +193,81 @@ function formatBody({
   return body
 }
 
-export async function crawlData(url: string) {
+async function getBrowser(): Promise<any> {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
+  })
+  return browser
+}
+
+export async function getCralwerData(url: string) {
   let description = ''
   let keywords = ''
   let author = ''
   let title = ''
   let body = ''
   let ogImage = ''
-  let images:any = []
+  let images: any = []
+  let content = ''
 
   try {
-    const { data: content } = await axios.get(encodeURI(url as string))
-    const { protocol , host} = new URL(url)
-    const $ = cheerio.load(content);
-    [
+    try {
+      const { data } = await axios.get(encodeURI(url as string), {
+        withCredentials: true,
+      })
+      content = data
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        const browser = await getBrowser()
+        const page = await browser.newPage()
+        const blockedResources = [
+          'image',
+          'stylesheet',
+          'media',
+          'font',
+          'texttrack',
+          'object',
+          'beacon',
+          'csp_report',
+          'imageset',
+        ]
+        await page.setRequestInterception(true)
+        page.on('request', (request: any) => {
+          const handled = false
+          if (!handled) {
+            const url1 = request.url()
+            const { host, pathname } = new URL(url1)
+            if (
+              blockedResources.includes(request.resourceType()) ||
+              pathname.endsWith('.jpg') ||
+              pathname.endsWith('.jpeg') ||
+              pathname.endsWith('.png') ||
+              pathname.endsWith('.gif') ||
+              pathname.endsWith('.css') ||
+              host.includes('button.like.co')
+            ) {
+              request.abort('blockedbyclient')
+            } else {
+              request.continue()
+            }
+          }
+        })
+        await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' })
+        content = await page.content()
+        await page.close()
+        await browser.close()
+      } else {
+        throw error
+      }
+    }
+
+    const { protocol, host } = new URL(url)
+    const $ = cheerio.load(content)
+    ;[
       'script',
       'style',
       'svg',
@@ -209,36 +275,40 @@ export async function crawlData(url: string) {
     ].forEach((t: string) => $(t).remove())
     title = $('title').text()
     const metas = $('meta')
-    const promiseImg:any = []
+    const promiseImg: any = []
 
     const img = $('img')
-    img.each( (i, e) => {
-      const src = $(e).attr('src');
+    img.each((i, e) => {
+      const src = $(e).attr('src')
       if (src) {
         let srcUrl = src
-        if ( !src.startsWith('http') ) {
+        if (!src.startsWith('http')) {
           srcUrl = `${protocol}//${host}${src}`
         }
-        promiseImg.push(axios.get(`${srcUrl}`, {responseType: 'arraybuffer'})
-        .then((element)=> {
-          const newFileName = `image_${i}`
-          $(e).attr('src', `./${newFileName}`);
-          return { element, key: newFileName }
-        })
-        .catch(()=> {}));
+        promiseImg.push(
+          axios
+            .get(`${srcUrl}`, { responseType: 'arraybuffer' })
+            .then((element) => {
+              const newFileName = `image_${i}`
+              $(e).attr('src', `./${newFileName}`)
+              return { element, key: newFileName }
+            })
+            .catch(() => {}),
+        )
       }
-    });
+    })
 
-    const imgData:any = await Promise.all(promiseImg)
-    images = imgData.filter( (e: any) => e?.element?.status === 200 )
+    const imgData: any = await Promise.all(promiseImg)
+    images = imgData
+      .filter((e: any) => e?.element?.status === 200)
       .map((e: any) => ({
-          data: Buffer.from(e.element.data, 'binary').toString('base64'), 
-          key: e.key, 
-          type: e.element.headers['content-type'],
-        }))
+        data: Buffer.from(e.element.data, 'binary').toString('base64'),
+        key: e.key,
+        type: e.element.headers['content-type'],
+      }))
 
     Object.keys(metas).forEach((key: any) => {
-      const { name, property, content: value } = metas[key].attribs || {};
+      const { name, property, content: value } = metas[key].attribs || {}
       if (name === 'description' || property === 'og:description') {
         description = value
       } else if (name === 'keywords') {
