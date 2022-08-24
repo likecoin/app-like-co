@@ -54,7 +54,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: a.address,
         }))
 
-      const wallet = identifiers.length ? identifiers[0].value : likerIdsAddresses[0]
+      const wallet = identifiers.length ? identifiers[0].value : likerIdsAddresses[i]
 
       const likerIdentifiers:any = likerIds.map((a: any) => ({
           '@type': 'PropertyValue',
