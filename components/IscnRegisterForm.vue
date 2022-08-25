@@ -878,13 +878,13 @@ export default class IscnRegisterForm extends Vue {
 
   async getLikerIdsAddresses(): Promise<void> {
     try {
-      this.likerIdsAddresses =(await Promise.all(
+      this.likerIdsAddresses = await Promise.all(
         this.likerIds.map((e) =>
           this.$axios.get(getLikerIdMinApi(e as string))
           .then((element):any => element?.data?.likeWallet)
           .catch(()=>{}),
         ),
-      ))
+      )
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
