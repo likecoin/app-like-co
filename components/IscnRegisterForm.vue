@@ -508,6 +508,7 @@ import debounce from 'lodash.debounce'
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
+import { AxiosResponse } from 'axios'
 import { Author } from '~/types/author'
 
 import { signISCNTx } from '~/utils/cosmos/iscn';
@@ -567,7 +568,7 @@ export default class IscnRegisterForm extends Vue {
   uploadArweaveId: string = this.arweaveId || ''
   error: string = ''
   likerId: string = ''
-  likerIdsAddresses: string[] = []
+  likerIdsAddresses: (string | void)[] = []
   authorDescription: string = ''
 
   arweaveFeeTargetAddress: string = ''
@@ -881,7 +882,7 @@ export default class IscnRegisterForm extends Vue {
       this.likerIdsAddresses = await Promise.all(
         this.likerIds.map((e) =>
           this.$axios.get(getLikerIdMinApi(e as string))
-          .then((element):any => element?.data?.likeWallet)
+          .then((element: AxiosResponse): string | undefined => element?.data?.likeWallet)
           .catch(()=>{}),
         ),
       )
