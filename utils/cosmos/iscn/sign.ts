@@ -54,13 +54,13 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: a.address,
         }))
 
-      const wallet = identifiers.length ? identifiers[0].value : likerIdsAddresses[i]
+      const wallet = authorWallets[i]?.address || likerIdsAddresses[i]
 
-      const likerIdentifiers:any = likerIds.map((a: any) => ({
+      const likerIdentifiers = {
           '@type': 'PropertyValue',
           propertyID: 'Liker ID',
-          value: `https://like.co/${a}`,
-        }))
+          value: `https://like.co/${likerIds[i]}`,
+        }
 
       identifiers.push(likerIdentifiers)
 
@@ -82,6 +82,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       }
     }
   }
+
   return {
     ...data,
     keywords: tagsString.split(','),

@@ -884,7 +884,7 @@ export default class IscnRegisterForm extends Vue {
           .then((element):any => element?.data?.likeWallet)
           .catch(()=>{}),
         ),
-      )).filter((x) => x !== undefined);
+      ))
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
