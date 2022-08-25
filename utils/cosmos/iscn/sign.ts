@@ -44,7 +44,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
       const description = descriptions[i]
-      const url: string = likerIds[i]
+      const url: string = (likerIds[i] && likerIdsAddresses[i])
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
 
@@ -62,7 +62,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: `https://like.co/${likerIds[i]}`,
         }
 
-      if(likerIds[i]) identifiers.push(likerIdentifiers)
+      if(likerIds[i] && likerIdsAddresses[i]) identifiers.push(likerIdentifiers)
 
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
