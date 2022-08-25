@@ -28,6 +28,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorUrls,
     authorWallets,
     likerIds,
+    likerIdsAddresses,
     descriptions,
     numbersProtocolAssetId,
     ...data
@@ -43,7 +44,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
       const description = descriptions[i]
-      const url: string = likerIds[i]
+      const url: string = (likerIds[i] && likerIdsAddresses[i])
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
 
@@ -53,12 +54,22 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: a.address,
         }))
 
+      const wallet = authorWallets[i][0]?.address || likerIdsAddresses[i]
+
+      const likerIdentifiers = {
+          '@type': 'PropertyValue',
+          propertyID: 'Liker ID',
+          value: `https://like.co/${likerIds[i]}`,
+        }
+
+      if(likerIds[i] && likerIdsAddresses[i]) identifiers.push(likerIdentifiers)
+
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
       if (isNonEmpty) {
         stakeholders.push({
           entity: {
-            '@id': identifiers.length ? identifiers[0].value : url,
+            '@id': wallet || url,
             name: authorName,
             url,
             description,
@@ -71,6 +82,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       }
     }
   }
+
   return {
     ...data,
     keywords: tagsString.split(','),
