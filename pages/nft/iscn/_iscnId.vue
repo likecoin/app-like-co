@@ -97,13 +97,14 @@ import {
   API_LIKER_NFT_MINT,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
+  getWhitelistApi,
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
+import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 
@@ -117,6 +118,7 @@ export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
   USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER',
+  USER_NOT_WHITELISTED = ' USER_NOT_WHITELISTED'
 }
 
 @Component({
@@ -261,7 +263,13 @@ export default class NFTTestMintPage extends Vue {
       this.isLoading = true
       /* eslint-disable no-fallthrough */
       switch (this.state) {
-        case 'create':
+        case 'create': {
+          const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
+          if (!isAllowed) {
+            this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
+            break
+          }
+
           if (!this.isUserISCNOwner) {
             throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
           }
@@ -275,8 +283,8 @@ export default class NFTTestMintPage extends Vue {
           }
           this.classId = await this.createNftClass()
           if (!this.classId) break
-
-        case 'mint':
+        }
+        case 'mint': {
           await this.mintNFT()
           if (!this.mintNFTResult) break
           if (this.isWritingNFT) {
@@ -286,6 +294,7 @@ export default class NFTTestMintPage extends Vue {
           }
           this.isLoading = false
           break
+        }
         case 'done':
           window.location.href = this.detailsPageURL
         default:
@@ -295,6 +304,11 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = true
       this.setError(error)
     }
+  }
+
+  async checkIsWhitelisted() {
+    const { data } = await this.$axios.get(getWhitelistApi(this.address))
+    return data.isWhitelisted;
   }
 
   async getISCNInfo() {

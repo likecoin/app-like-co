@@ -5,6 +5,8 @@ export const API_POST_ARWEAVE_ESTIMATE = '/arweave/estimate';
 export const API_POST_ARWEAVE_UPLOAD = '/arweave/upload';
 export const API_POST_NUMBERS_PROTOCOL_ASSETS = '/numbers-protocol/assets';
 
+export const getWhitelistApi = (wallet = '') => `/nft/whitelist?wallet=${encodeURIComponent(wallet)}`;
+
 const LIKE_CO_API_ROOT = IS_TESTNET ? 'https://api.rinkeby.like.co' : 'https://api.like.co'
 export const API_LIKER_NFT_MINT = `${LIKE_CO_API_ROOT}/likernft/mint`;
 export const API_LIKER_NFT_PURCHASE = `${LIKE_CO_API_ROOT}/likernft/purchase`;
