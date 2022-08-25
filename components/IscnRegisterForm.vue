@@ -876,7 +876,7 @@ export default class IscnRegisterForm extends Vue {
     this.authorName = value
   }
 
-  async calculateISCNFee(): Promise<void> {
+  async getLikerIdsAddresses(): Promise<void> {
     try {
       this.likerIdsAddresses =(await Promise.all(
         this.likerIds.map((e) =>
@@ -889,7 +889,9 @@ export default class IscnRegisterForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(error)
     }
+  }
 
+  async calculateISCNFee(): Promise<void> {
     const [
       balance,
       estimation,
@@ -966,6 +968,7 @@ export default class IscnRegisterForm extends Vue {
 
   async onSubmit(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
+    await this.getLikerIdsAddresses()
     this.$emit('handleSubmit')
     this.isChecked = true
     if (!this.isMetadataReady) return

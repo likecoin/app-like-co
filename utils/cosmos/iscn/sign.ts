@@ -62,7 +62,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: `https://like.co/${likerIds[i]}`,
         }
 
-      identifiers.push(likerIdentifiers)
+      if(likerIds[i]) identifiers.push(likerIdentifiers)
 
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
