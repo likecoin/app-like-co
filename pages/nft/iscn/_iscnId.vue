@@ -264,8 +264,8 @@ export default class NFTTestMintPage extends Vue {
       /* eslint-disable no-fallthrough */
       switch (this.state) {
         case 'create': {
-          const isAllowed = await this.checkIsWhitelisted();
-          if (!(IS_TESTNET || isAllowed)) {
+          const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
+          if (!isAllowed) {
             this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
             break
           }
