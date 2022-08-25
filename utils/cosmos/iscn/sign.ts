@@ -54,7 +54,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: a.address,
         }))
 
-      const wallet = authorWallets[i]?.address || likerIdsAddresses[i]
+      const wallet = authorWallets[i][0]?.address || likerIdsAddresses[i]
 
       const likerIdentifiers = {
           '@type': 'PropertyValue',
