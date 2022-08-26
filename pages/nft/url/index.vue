@@ -83,6 +83,7 @@ import {
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
+import { logTrackerEvent } from '~/utils/logger'
 
 const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
@@ -240,9 +241,11 @@ export default class FetchIndex extends Vue {
 
   async onSubmit() {
     try {
+      logTrackerEvent(this, 'NFTUrlMint', 'onSubmit', this.state, 1);
       this.isLoading = true
       await this.doAction()
     } catch (err) {
+      logTrackerEvent(this, 'NFTUrlMint', 'onSubmitErr', (err as Error).toString(), 1);
       this.setError(err)
     } finally {
       this.isLoading = false
@@ -313,11 +316,13 @@ export default class FetchIndex extends Vue {
 
   async crawlUrlData() {
     try {
+      logTrackerEvent(this, 'NFTUrlMint', 'crawlUrlData', this.url, 1);
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
       this.crawledData = data
       if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
     } catch (err) {
       // eslint-disable-next-line no-console
+      logTrackerEvent(this, 'NFTUrlMint', 'crawlUrlErr', (err as Error).toString(), 1);
       console.error(err)
       throw new Error('CANNOT_CRAWL_THIS_URL')
     }
@@ -325,6 +330,7 @@ export default class FetchIndex extends Vue {
 
   async checkArweaveIdExistsAndEstimateFee() {
     try {
+      logTrackerEvent(this, 'NFTUrlMint', 'checkArweaveIdExistsAndEstimateFee', '', 1);
       const { address, arweaveId, LIKE, ipfsHash, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
         this.formData,
@@ -342,6 +348,7 @@ export default class FetchIndex extends Vue {
         memo,
       }
     } catch (err) {
+      logTrackerEvent(this, 'NFTUrlMint', 'checkArweaveIdExistsAndEstimateFeeErr', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
@@ -349,12 +356,14 @@ export default class FetchIndex extends Vue {
   }
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+    logTrackerEvent(this, 'NFTUrlMint', 'sendArweaveFeeTx', to, 1);
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.arweaveFeeTxHash = transactionHash;
     } catch (err) {
+      logTrackerEvent(this, 'NFTUrlMint', 'sendArweaveFeeTxErr', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -363,6 +372,7 @@ export default class FetchIndex extends Vue {
 
   async submitToArweave(): Promise<void> {
     try {
+      logTrackerEvent(this, 'NFTUrlMint', 'submitToArweave', this.arweaveFeeTxHash, 1);
       if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
@@ -376,6 +386,7 @@ export default class FetchIndex extends Vue {
       )
       this.arweaveId = arweaveId
     } catch (err) {
+      logTrackerEvent(this, 'NFTUrlMint', 'submitToArweaveErr', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_SUBMIT_TO_ARWEAVE')
@@ -388,11 +399,13 @@ export default class FetchIndex extends Vue {
       return
     }
     try {
+      logTrackerEvent(this, 'NFTUrlMint', 'signISCNTx', this.url, 1);
       const res = await signISCNTx(
         formatISCNTxPayload(this.iscnPayload),
         this.signer,
         this.address,
       )
+      logTrackerEvent(this, 'NFTUrlMint', 'postMappingWithCosmosWallet', this.iscnId, 1);
       this.iscnId = res.iscnId
       if (this.url && this.likerId) await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
       if (res) {
@@ -404,6 +417,7 @@ export default class FetchIndex extends Vue {
         )
       }
     } catch (err) {
+      logTrackerEvent(this, 'NFTUrlMint', 'registerISCNErr', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_REGISTER_ISCN')
