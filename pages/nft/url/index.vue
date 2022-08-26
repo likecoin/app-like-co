@@ -315,8 +315,8 @@ export default class FetchIndex extends Vue {
     try {
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
       this.crawledData = data
-      if (!this.crawledData?.body) { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
-      if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('BLOCK_patreon.com') }
+      if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
+      if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
