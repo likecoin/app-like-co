@@ -245,7 +245,6 @@ export default class FetchIndex extends Vue {
       this.isLoading = true
       await this.doAction()
     } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'onSubmitErr', (err as Error).toString(), 1);
       this.setError(err)
     } finally {
       this.isLoading = false
@@ -322,7 +321,7 @@ export default class FetchIndex extends Vue {
       if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
     } catch (err) {
       // eslint-disable-next-line no-console
-      logTrackerEvent(this, 'NFTUrlMint', 'crawlUrlErr', (err as Error).toString(), 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'crawlUrlError', (err as Error).toString(), 1);
       console.error(err)
       throw new Error('CANNOT_CRAWL_THIS_URL')
     }
@@ -348,7 +347,7 @@ export default class FetchIndex extends Vue {
         memo,
       }
     } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'checkArweaveIdExistsAndEstimateFeeErr', (err as Error).toString(), 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'checkArweaveIdExistsAndEstimateFeeError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
@@ -362,8 +361,9 @@ export default class FetchIndex extends Vue {
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.arweaveFeeTxHash = transactionHash;
+      logTrackerEvent(this, 'NFTUrlMint', 'sendArweaveFeeTxSuccess', transactionHash, 1);
     } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'sendArweaveFeeTxErr', (err as Error).toString(), 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'sendArweaveFeeTxError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -384,9 +384,10 @@ export default class FetchIndex extends Vue {
           timeout: 90000,
         },
       )
+      logTrackerEvent(this, 'NFTUrlMint', 'submitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
     } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'submitToArweaveErr', (err as Error).toString(), 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'submitToArweaveError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_SUBMIT_TO_ARWEAVE')
@@ -405,10 +406,13 @@ export default class FetchIndex extends Vue {
         this.signer,
         this.address,
       )
-      logTrackerEvent(this, 'NFTUrlMint', 'postMappingWithCosmosWallet', this.iscnId, 1);
       this.iscnId = res.iscnId
-      if (this.url && this.likerId) await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+      if (this.url && this.likerId) {
+        logTrackerEvent(this, 'NFTUrlMint', 'postMappingWithCosmosWallet', this.iscnId, 1);
+        await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+      }
       if (res) {
+      logTrackerEvent(this, 'NFTUrlMint', 'registerISCNSuccess', this.iscnId, 1);
         this.$router.push(
           this.localeLocation({
             name: 'nft-iscn-iscnId',
@@ -417,7 +421,7 @@ export default class FetchIndex extends Vue {
         )
       }
     } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'registerISCNErr', (err as Error).toString(), 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'registerISCNError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_REGISTER_ISCN')
