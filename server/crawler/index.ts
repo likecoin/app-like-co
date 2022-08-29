@@ -204,6 +204,58 @@ async function getBrowser(): Promise<any> {
   return browser
 }
 
+async function getContentFromUrl(url: string) {
+  let content
+  try {
+    const { data } = await axios.get(encodeURI(url as string))
+    content = data
+  } catch (error: any) {
+    if (error?.response?.status === 403) {
+      const browser = await getBrowser()
+      const page = await browser.newPage()
+      const blockedResources = [
+        'image',
+        'stylesheet',
+        'media',
+        'font',
+        'texttrack',
+        'object',
+        'beacon',
+        'csp_report',
+        'imageset',
+      ]
+      await page.setRequestInterception(true)
+      page.on('request', (request: any) => {
+        const handled = false
+        if (!handled) {
+          const url1 = request.url()
+          const { host, pathname } = new URL(url1)
+          if (
+            blockedResources.includes(request.resourceType()) ||
+            pathname.endsWith('.jpg') ||
+            pathname.endsWith('.jpeg') ||
+            pathname.endsWith('.png') ||
+            pathname.endsWith('.gif') ||
+            pathname.endsWith('.css') ||
+            host.includes('button.like.co')
+          ) {
+            request.abort('blockedbyclient')
+          } else {
+            request.continue()
+          }
+        }
+      })
+      await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' })
+      content = await page.content()
+      await page.close()
+      await browser.close()
+    } else {
+      throw error
+    }
+  }
+  return content
+}
+
 export async function getCralwerData(url: string) {
   let description = ''
   let keywords = ''
@@ -212,59 +264,9 @@ export async function getCralwerData(url: string) {
   let body = ''
   let ogImage = ''
   let images: any = []
-  let content = ''
 
   try {
-    try {
-      const { data } = await axios.get(encodeURI(url as string), {
-        withCredentials: true,
-      })
-      content = data
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        const browser = await getBrowser()
-        const page = await browser.newPage()
-        const blockedResources = [
-          'image',
-          'stylesheet',
-          'media',
-          'font',
-          'texttrack',
-          'object',
-          'beacon',
-          'csp_report',
-          'imageset',
-        ]
-        await page.setRequestInterception(true)
-        page.on('request', (request: any) => {
-          const handled = false
-          if (!handled) {
-            const url1 = request.url()
-            const { host, pathname } = new URL(url1)
-            if (
-              blockedResources.includes(request.resourceType()) ||
-              pathname.endsWith('.jpg') ||
-              pathname.endsWith('.jpeg') ||
-              pathname.endsWith('.png') ||
-              pathname.endsWith('.gif') ||
-              pathname.endsWith('.css') ||
-              host.includes('button.like.co')
-            ) {
-              request.abort('blockedbyclient')
-            } else {
-              request.continue()
-            }
-          }
-        })
-        await page.goto(encodeURI(url as string), { waitUntil: 'networkidle2' })
-        content = await page.content()
-        await page.close()
-        await browser.close()
-      } else {
-        throw error
-      }
-    }
-
+    const content = await getContentFromUrl(url)
     const { protocol, host } = new URL(url)
     const $ = cheerio.load(content)
     ;[
@@ -329,17 +331,16 @@ export async function getCralwerData(url: string) {
 }
 
 export async function crawlOgImage(url: string) {
-  const { data } = await axios.get(encodeURI(url as string))
-  const $ = cheerio.load(data)
+  const content = await getContentFromUrl(url)
+  const $ = cheerio.load(content)
   const metas = $('meta')
   let ogImageUrl = ''
-  for (let i = 0; i < Object.keys(metas).length; i += 1) {
-    const { attribs } = metas[i]; // keys are integers 1 to N
-    if (attribs?.property === 'og:image') {
-      ogImageUrl = attribs.content
-      break
+  Object.keys(metas).forEach((key: any) => {
+    const { property, content: value } = metas[key].attribs || {}
+    if (property === 'og:image') {
+      ogImageUrl = value
     }
-  }
+  })
   if (!ogImageUrl) return null;
   const res = await axios.get(encodeURI(ogImageUrl), { responseType: 'stream' })
   return res;
