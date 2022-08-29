@@ -241,7 +241,7 @@ export default class FetchIndex extends Vue {
 
   async onSubmit() {
     try {
-      logTrackerEvent(this, 'NFTUrlMint', 'onSubmit', this.state, 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'OnSubmit', this.state, 1);
       this.isLoading = true
       await this.doAction()
     } catch (err) {
