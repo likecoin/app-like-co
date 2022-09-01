@@ -109,7 +109,6 @@ export default class Wallet extends VuexModule {
       }
       if (!res) {
         window.localStorage?.removeItem(KEY_CONNECTED_WALLET_TYPE);
-        throw new Error('CANNOT_INIT_WALLET');
       }
     }
     return res;
