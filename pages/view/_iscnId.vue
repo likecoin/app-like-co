@@ -247,7 +247,7 @@
               tag="div"
               text-preset="h6"
               type="button"
-              :text="(stakeholders[index].entity || {}).name"
+              :text="stakeholders[index].entity.name || stakeholders[index].entity['@id'] | ellipsis"
               @click="showStakeholder(index)"
             />
           </FormField>
