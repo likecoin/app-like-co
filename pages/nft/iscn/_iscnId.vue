@@ -107,6 +107,7 @@ import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
+import { logTrackerEvent } from '~/utils/logger'
 
 const PREMINT_NFT_AMOUNT = 500;
 
@@ -307,12 +308,14 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async checkIsWhitelisted() {
+    logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelisted', this.address, 1);
     const { data } = await this.$axios.get(getWhitelistApi(this.address))
     return data.isWhitelisted;
   }
 
   async getISCNInfo() {
     try {
+      logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfo', this.iscnId, 1);
       const res = await this.fetchISCNById(this.iscnId)
       if (res) {
         this.iscnData = res.records[0].data
@@ -322,6 +325,7 @@ export default class NFTTestMintPage extends Vue {
         }
       }
     } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(error)
       throw new Error('ISCN not found')
@@ -330,6 +334,7 @@ export default class NFTTestMintPage extends Vue {
 
   async getMintInfo() {
     try {
+      logTrackerEvent(this, 'IscnMintNFT', 'GetMintInfo', this.iscnId, 1);
       const { data } = await this.$axios.get(API_LIKER_NFT_MINT, {
         params: {
           iscn_id: this.iscnId,
@@ -351,6 +356,7 @@ export default class NFTTestMintPage extends Vue {
         }
       }
     } catch (err) {
+      logTrackerEvent(this, 'IscnMintNFT', 'GetMintInfoError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
     }
@@ -359,10 +365,12 @@ export default class NFTTestMintPage extends Vue {
   async getOgImage() {
     try {
       const url = this.iscnData.contentMetadata?.url
+      logTrackerEvent(this, 'IscnMintNFT', 'GetOgImage', url, 1);
       if (!url) return
       const { data, headers } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`)
       this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
     } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
       // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
       // eslint-disable-next-line no-console
       console.error(error)
@@ -371,6 +379,7 @@ export default class NFTTestMintPage extends Vue {
 
   async checkArweaveIdExistsAndEstimateFee() {
     try {
+      logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFee', '', 1);
       const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
         this.ogImageFormData,
@@ -387,6 +396,7 @@ export default class NFTTestMintPage extends Vue {
         memo,
       }
     } catch (err) {
+      logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFeeError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
@@ -394,12 +404,15 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+    logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTx', to, 1);
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.ogImageArweaveFeeTxHash = transactionHash
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxSuccess', transactionHash, 1);
     } catch (err) {
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
@@ -408,6 +421,7 @@ export default class NFTTestMintPage extends Vue {
 
   async submitToArweave(): Promise<void> {
     try {
+      logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweave', this.ogImageArweaveFeeTxHash, 1);
       if (!this.ogImageArweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       const { arweaveId } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageArweaveFeeTxHash}`,
@@ -418,8 +432,10 @@ export default class NFTTestMintPage extends Vue {
           },
         },
       )
+      logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.ogImageArweaveId = arweaveId
     } catch (err) {
+      logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
       throw new Error('CANNOT_UPLOAD_TO_ARWEAVE')
@@ -428,6 +444,7 @@ export default class NFTTestMintPage extends Vue {
 
   async postMintInfo() {
     try {
+      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfo', this.classId, 1);
       const { data } = await this.$axios.post(
         API_LIKER_NFT_MINT,
         {},
@@ -439,8 +456,10 @@ export default class NFTTestMintPage extends Vue {
           paramsSerializer: (params) => qs.stringify(params),
         },
       )
+      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', data, 1);
       this.postInfo = data
     } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(error)
       throw new Error('CANNOT_POST_MINT_INFO')
@@ -453,6 +472,7 @@ export default class NFTTestMintPage extends Vue {
     try {
       const signingClient = await getSigningClient()
       await signingClient.setSigner(this.signer)
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
       const res = await signingClient.createNFTClass(
         this.address,
         this.iscnId,
@@ -479,6 +499,7 @@ export default class NFTTestMintPage extends Vue {
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
     } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(error)
       if ((error as Error).message?.includes('code 11')) {
@@ -487,6 +508,7 @@ export default class NFTTestMintPage extends Vue {
       throw new Error('CANNOT_CREATE_NFT_CLASS')
     }
 
+    logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1);
     // eslint-disable-next-line consistent-return
     return classId
   }
@@ -517,8 +539,10 @@ export default class NFTTestMintPage extends Vue {
       let messages = mintMessages;
       if (this.isWritingNFT) messages = messages.concat(sendMessages);
 
+      logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', '', 1);
       this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
     } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(error)
       if ((error as Error).message?.includes('code 11')) {
