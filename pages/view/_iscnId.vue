@@ -178,7 +178,14 @@
             :label="$t('iscn.meta.owner')"
             class="mb-[12px]"
           >
-            <Label :text="owner" tag="div" preset="p6" />
+            <Link
+              :class="[
+                'text-[14px]',
+                'break-all',
+              ]"
+              :href="`/search?q=${owner}`">
+              {{ owner }}
+            </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
             <Link
@@ -332,14 +339,21 @@
                 :label="$t('iscn.meta.creator.name')"
                 class="w-[50%] my-[12px]"
               >
-                <Label :text="stakeholderInfo.authorName" tag="div" preset="p4" />
+                <Link
+                  v-if="stakeholderInfo.authorWalletAddresses.length"
+                  :class="'text-[16px]'"
+                  :href="`/search?q=${stakeholderInfo.authorWalletAddresses[0].address}`" 
+                >
+                  {{ stakeholderInfo.authorName }}
+                </Link>
+                <Label v-else :text="stakeholderInfo.authorName" tag="div" preset="p4" />
               </FormField>
               <FormField
                 v-if="stakeholderInfo.likerId"
                 :label="$t('iscn.meta.stakeholders.likerId')"
                 class="w-[50%] my-[12px]"
               >
-                <Link :href="stakeholderInfo.likerId">{{
+                <Link :href="`/search?q=${stakeholderInfo.likerId}`">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>
