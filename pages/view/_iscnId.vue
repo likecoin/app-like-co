@@ -677,14 +677,14 @@ export default class ViewIscnIdPage extends Vue {
 
     if (this.stakeholders[index].entity?.identifier) {
       const { description: authorDescription, name: authorName } = stakeholders
-      const likerId = stakeholders!.url.includes('like.co')
+      const likerId = stakeholders.url?.includes('like.co')
         ? stakeholders.url.slice(16)
         : ''
       const authorWalletAddresses = stakeholders.identifier.map((a: any) => ({
         address: a.value,
         type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
       }))
-      const authorUrls = stakeholders.sameAs
+      const authorUrls = stakeholders.sameAs || []
       this.stakeholderInfo = {
         likerId,
         authorDescription,
