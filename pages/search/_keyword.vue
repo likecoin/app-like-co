@@ -114,8 +114,7 @@ const iscnModule = namespace('iscn')
     if (params.keyword) {
       const { name } = route
       redirect({ name: name as string, query: { q: params.keyword, ...query } });
-    }
-    if (!Object.keys(query).length) {
+    } else if (!Object.keys(query).length) {
       redirect({ name: 'index' });
     }
   },
