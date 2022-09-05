@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger'
@@ -160,7 +160,16 @@ export default class SearchPage extends Vue {
     return !!this.errorMessage
   }
 
-  async mounted() {
+  mounted() {
+    this.search()
+  }
+
+  @Watch('$route.query')
+  onQueryChange() {
+    this.search()
+  }
+
+  async search(){
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.queryAllTerm, 1)
     if (this.queryAllTerm)  {
       await this.queryISCNByKeyword(this.queryAllTerm)
