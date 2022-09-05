@@ -15,7 +15,7 @@
     </Link>
 
     <Link
-      v-if="errorType === ' USER_NOT_WHITELISTED'"
+      v-if="errorType === 'USER_NOT_WHITELISTED'"
       :class="['text-white', 'ml-[2px]']"
       href="https://docs.google.com/forms/d/e/1FAIpQLSdPkunbI-68k7dzDqNNDX0U8Lr6lg3R2Jsm-RPduUNQ9Om05Q/viewform"
     >
