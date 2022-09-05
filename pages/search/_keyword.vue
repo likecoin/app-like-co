@@ -134,7 +134,14 @@ export default class SearchPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   @iscnModule.Action queryISCNByField!: (
-    arg0: { keyword: string }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
+    arg0: { 
+      iscnId?: string,
+      owner?: string,
+      contentFingerprint?: string,
+      stakeholderId?: string,
+      stakeholderName?: string,
+      keyword?: string, 
+  }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   pageNumber = 0
   closeWarning = false
@@ -158,9 +165,21 @@ export default class SearchPage extends Vue {
     if (this.queryAllTerm)  {
       await this.queryISCNByKeyword(this.queryAllTerm)
     } else {
-      const { keyword, keywords } = this.$route.query;
+      const { 
+        iscnId,
+        owner,
+        contentFingerprint,
+        stakeholderId,
+        stakeholderName, 
+        keyword,
+      } = this.$route.query;
       const searchObject = {
-        keyword: (keyword || keywords) as string,
+        iscnId: iscnId as string,
+        owner: owner as string,
+        contentFingerprint: contentFingerprint as string,
+        stakeholderId: stakeholderId as string,
+        stakeholderName: stakeholderName as string,
+        keyword: keyword as string,
       };
       if (Object.keys(searchObject).filter(k => !!k).length) {
         await this.queryISCNByField(searchObject)
