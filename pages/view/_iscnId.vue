@@ -183,7 +183,7 @@
                 'text-[14px]',
                 'break-all',
               ]"
-              :href="`/search?q=${owner}`">
+              :to="localeLocation({ name: 'search-keyword', query: { owner } })">
               {{ owner }}
             </Link>
           </FormField>
@@ -342,7 +342,7 @@
                 <Link
                   v-if="stakeholderInfo.authorWalletAddresses.length"
                   :class="'text-[16px]'"
-                  :href="`/search?q=${stakeholderInfo.authorWalletAddresses[0].address}`" 
+                  :to="localeLocation({ name: 'search-keyword', query: { stakeholderName: stakeholderInfo.authorName }})"
                 >
                   {{ stakeholderInfo.authorName }}
                 </Link>
@@ -353,7 +353,7 @@
                 :label="$t('iscn.meta.stakeholders.likerId')"
                 class="w-[50%] my-[12px]"
               >
-                <Link :href="`/search?q=${stakeholderInfo.likerId}`">{{
+                <Link :to="localeLocation({ name: 'search-keyword', query: { stakeholderId: stakeholderInfo.likerId } })">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>
