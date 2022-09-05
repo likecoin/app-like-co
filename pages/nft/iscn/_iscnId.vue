@@ -259,6 +259,7 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = false
       this.balance = await getAccountBalance(this.address) as string
       if (this.balance === '0') {
+        logTrackerEvent(this, 'IscnMintNFT', 'GetAccountBalanceError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
       this.isLoading = true
@@ -267,11 +268,13 @@ export default class NFTTestMintPage extends Vue {
         case 'create': {
           const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
           if (!isAllowed) {
+            logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelistedError', ErrorType.USER_NOT_WHITELISTED, 1);
             this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
             break
           }
 
           if (!this.isUserISCNOwner) {
+            logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelistedError', ErrorType.USER_NOT_ISCN_OWNER, 1);
             throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
           }
 
@@ -308,19 +311,18 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async checkIsWhitelisted() {
-    logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelisted', this.address, 1);
     const { data } = await this.$axios.get(getWhitelistApi(this.address))
     return data.isWhitelisted;
   }
 
   async getISCNInfo() {
     try {
-      logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfo', this.iscnId, 1);
       const res = await this.fetchISCNById(this.iscnId)
       if (res) {
         this.iscnData = res.records[0].data
         this.iscnOwner = res.owner
         if (!this.iscnData.contentMetadata?.url) {
+          logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoWarning', 'No URL in ISCN\'s metadata', 1);
           this.toggleSnackbar('Warning: No URL in ISCN\'s metadata')
         }
       }
@@ -334,7 +336,6 @@ export default class NFTTestMintPage extends Vue {
 
   async getMintInfo() {
     try {
-      logTrackerEvent(this, 'IscnMintNFT', 'GetMintInfo', this.iscnId, 1);
       const { data } = await this.$axios.get(API_LIKER_NFT_MINT, {
         params: {
           iscn_id: this.iscnId,
@@ -351,6 +352,7 @@ export default class NFTTestMintPage extends Vue {
             data,
           }), this.redirectOrigin)
         } catch (error) {
+          logTrackerEvent(this, 'IscnMintNFT', 'PostMessageNFTMintDataError',  (error as Error).toString(), 1);
           // eslint-disable-next-line no-console
           console.error(error);
         }
@@ -404,9 +406,14 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
-    logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTx', to, 1);
-    if (!this.signer) throw new Error('SIGNER_NOT_INITED')
-    if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
+    if (!this.signer) {
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxSignerError', 'SIGNER_NOT_INITED', 1);
+      throw new Error('SIGNER_NOT_INITED')
+    }
+    if (!to) {
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxTargetError', 'TARGET_ADDRESS_NOT_SET', 1);
+      throw new Error('TARGET_ADDRESS_NOT_SET')
+    }
     try {
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.ogImageArweaveFeeTxHash = transactionHash
