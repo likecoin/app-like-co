@@ -342,7 +342,7 @@
                 <Link
                   v-if="stakeholderInfo.authorWalletAddresses.length"
                   :class="'text-[16px]'"
-                  :to="localeLocation({ name: 'search-keyword', query: { stakeholderName: stakeholderInfo.authorName }})"
+                  :to="localeLocation({ name: 'search-keyword', query: { stakeholder_name: stakeholderInfo.authorName }})"
                 >
                   {{ stakeholderInfo.authorName }}
                 </Link>
@@ -353,7 +353,7 @@
                 :label="$t('iscn.meta.stakeholders.likerId')"
                 class="w-[50%] my-[12px]"
               >
-                <Link :to="localeLocation({ name: 'search-keyword', query: { stakeholderId: stakeholderInfo.likerId } })">{{
+                <Link :to="localeLocation({ name: 'search-keyword', query: { stakeholder_id: stakeholderInfo.likerId } })">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>

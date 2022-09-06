@@ -177,9 +177,9 @@ export default class SearchPage extends Vue {
       const { 
         iscnId,
         owner,
-        contentFingerprint,
-        stakeholderId,
-        stakeholderName, 
+        content_fingerprint: contentFingerprint,
+        stakeholder_id: stakeholderId,
+        stakeholder_name: stakeholderName, 
         keyword,
       } = this.$route.query;
       const searchObject = {
