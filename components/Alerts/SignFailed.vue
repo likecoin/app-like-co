@@ -15,11 +15,11 @@
     </Link>
 
     <Link
-      v-if="errorType === 'USER_NOT_WHITELISTED'"
+      v-else-if="errorType === 'USER_NOT_WHITELISTED'"
       :class="['text-white', 'ml-[2px]']"
       href="https://forms.gle/GFbp9SNwSWdmmnQQ6"
     >
-      {{ $t('IscnRegisterForm.error.notWhiteListed') }}
+      {{ $t('IscnRegisterForm.error.notWhitelisted') }}
     </Link>
   </Snackbar>
 </template>
