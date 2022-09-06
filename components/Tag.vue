@@ -21,7 +21,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class Tag extends Vue {
   @Prop(String) readonly text: String | undefined
-  @Prop(String) readonly to: String | undefined
+  @Prop({ default: null }) readonly to: Location | null | undefined
 
   get tag(): any {
     return this.to ? 'nuxt-link' : 'div'
