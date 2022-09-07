@@ -46,7 +46,7 @@
           <FormField v-if="classId" :label="$t('NFTPortal.label.classId')" class="mb-[12px]">
             <Label :text="classId" tag="div" preset="p6" />
           </FormField>
-          <FormField v-if="state === 'done' && isWritingNFT" :label="$t('NFTPortal.label.detailsPage')" class="mb-[12px]">
+          <FormField v-if="state === 'done'" :label="$t('NFTPortal.label.detailsPage')" class="mb-[12px]">
             <Link :href="detailsPageURL">{{ detailsPageURL }}</Link>
           </FormField>
         </div>
@@ -108,8 +108,6 @@ import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
-
-const PREMINT_NFT_AMOUNT = 500;
 
 const iscnModule = namespace('iscn')
 const signerModule = namespace('signer')
@@ -242,6 +240,34 @@ export default class NFTTestMintPage extends Vue {
     return this.walletType === 'likerland_app'
   }
 
+  get createNftClassPayload() {
+    let metadata = {
+      image: this.ogImageUri,
+      description: this.iscnData.contentMetadata?.description,
+      external_url: this.iscnData.contentMetadata?.url,
+    };
+    if (this.isWritingNFT) {
+      metadata = Object.assign(metadata, {
+        nft_meta_collection_id: 'likerland_writing_nft',
+        nft_meta_collection_name: 'Writing NFT',
+        nft_meta_collection_descrption: 'Writing NFT by Liker Land',
+      })
+    }
+    const name = `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
+    let payload = { name, metadata };
+    if(this.isWritingNFT) {
+      payload = Object.assign(payload, {
+        symbol: 'WRITING',
+        uri: getNftClassUriViaIscnId(this.iscnId),
+      });
+    }
+    return payload;
+  }
+
+  get premintAmount() {
+    return this.isWritingNFT ? 500 : 100;
+  }
+
   async mounted() {
     try {
       await Promise.all([
@@ -313,6 +339,18 @@ export default class NFTTestMintPage extends Vue {
   async checkIsWhitelisted() {
     const { data } = await this.$axios.get(getWhitelistApi(this.address))
     return data.isWhitelisted;
+  }
+
+  getMintNftPayload(id: string) {
+    const name = `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
+    return {
+      id,
+      uri: this.isWritingNFT ? getNftUriViaNftId(this.classId, id) : '',
+      metadata: {
+        name,
+        image: this.ogImageUri,
+      },
+    }
   }
 
   async getISCNInfo() {
@@ -486,19 +524,7 @@ export default class NFTTestMintPage extends Vue {
       const res = await signingClient.createNFTClass(
         this.address,
         this.iscnId,
-        {
-          name: `Writing NFT - ${this.iscnData.contentMetadata?.name || ''}`,
-          symbol: 'WRITING',
-          uri: getNftClassUriViaIscnId(this.iscnId),
-          metadata: {
-            nft_meta_collection_id: 'likerland_writing_nft',
-            nft_meta_collection_name: 'Writing NFT',
-            nft_meta_collection_descrption: 'Writing NFT by Liker Land',
-            image: this.ogImageUri,
-            description: this.iscnData.contentMetadata?.description,
-            external_url: this.iscnData.contentMetadata?.url,
-          },
-        },
+        this.createNftClassPayload,
       )
       const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
       const event = rawLogs[0].events.find(
@@ -529,16 +555,9 @@ export default class NFTTestMintPage extends Vue {
       const signingClient = await getSigningClient()
       await signingClient.setSigner(this.signer)
 
-      const nfts = [...Array(PREMINT_NFT_AMOUNT).keys()].map((_) => {
-        const id = `writing-${uuidv4()}`
-        return {
-          id,
-          uri: getNftUriViaNftId(this.classId, id),
-          metadata: {
-            name: `Writing NFT - ${this.iscnData.contentMetadata?.name || ''}`,
-            image: this.ogImageUri,
-          },
-        }
+      const nfts = [...Array(this.premintAmount).keys()].map((_) => {
+        const id = `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`
+        return this.getMintNftPayload(id);
       })
       const mintMessages = nfts.map((i) =>
         formatMsgMintNFT(this.address, this.classId, i),
