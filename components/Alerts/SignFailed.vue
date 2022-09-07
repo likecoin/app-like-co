@@ -13,6 +13,14 @@
     >
       {{ $t('IscnRegisterForm.error.buy') }}
     </Link>
+
+    <Link
+      v-else-if="errorType === 'USER_NOT_WHITELISTED'"
+      :class="['text-white', 'ml-[2px]']"
+      href="https://forms.gle/GFbp9SNwSWdmmnQQ6"
+    >
+      {{ $t('IscnRegisterForm.error.notWhitelisted') }}
+    </Link>
   </Snackbar>
 </template>
 
