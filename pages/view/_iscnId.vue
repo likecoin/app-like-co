@@ -341,13 +341,11 @@
                 class="w-[50%] my-[12px]"
               >
                 <Link
-                  v-if="stakeholderInfo.authorWalletAddresses.length"
                   :class="'text-[16px] cursor-pointer'"
                   :to="localeLocation({ name: 'search-keyword', query: { stakeholder_name: stakeholderInfo.authorName }})"
                 >
                   {{ stakeholderInfo.authorName }}
                 </Link>
-                <Label v-else :text="stakeholderInfo.authorName" tag="div" preset="p4" />
               </FormField>
               <FormField
                 v-if="stakeholderInfo.likerId"
