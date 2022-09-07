@@ -259,7 +259,7 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = false
       this.balance = await getAccountBalance(this.address) as string
       if (this.balance === '0') {
-        logTrackerEvent(this, 'IscnMintNFT', 'GetAccountBalanceError', ErrorType.INSUFFICIENT_BALANCE, 1);
+        logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
       this.isLoading = true
@@ -268,13 +268,13 @@ export default class NFTTestMintPage extends Vue {
         case 'create': {
           const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
           if (!isAllowed) {
-            logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelistedError', ErrorType.USER_NOT_WHITELISTED, 1);
+            logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
             this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
             break
           }
 
           if (!this.isUserISCNOwner) {
-            logTrackerEvent(this, 'IscnMintNFT', 'CheckIsWhitelistedError', ErrorType.USER_NOT_ISCN_OWNER, 1);
+            logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_ISCN_OWNER, 1);
             throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
           }
 
@@ -367,8 +367,11 @@ export default class NFTTestMintPage extends Vue {
   async getOgImage() {
     try {
       const url = this.iscnData.contentMetadata?.url
-      logTrackerEvent(this, 'IscnMintNFT', 'GetOgImage', url, 1);
-      if (!url) return
+      if (!url) {
+        logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', '', 1);
+        return
+      }
+      logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
       const { data, headers } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`)
       this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
     } catch (error) {
@@ -407,11 +410,11 @@ export default class NFTTestMintPage extends Vue {
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     if (!this.signer) {
-      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxSignerError', 'SIGNER_NOT_INITED', 1);
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxError', 'SIGNER_NOT_INITED', 1);
       throw new Error('SIGNER_NOT_INITED')
     }
     if (!to) {
-      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxTargetError', 'TARGET_ADDRESS_NOT_SET', 1);
+      logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxError', 'TARGET_ADDRESS_NOT_SET', 1);
       throw new Error('TARGET_ADDRESS_NOT_SET')
     }
     try {
