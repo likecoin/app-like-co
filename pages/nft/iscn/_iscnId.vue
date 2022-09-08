@@ -241,7 +241,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get NftName() {
-    return `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
+    return `${this.isWritingNFT ? 'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
   }
 
   get createNftClassPayload() {
