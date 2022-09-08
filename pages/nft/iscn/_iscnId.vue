@@ -240,6 +240,10 @@ export default class NFTTestMintPage extends Vue {
     return this.walletType === 'likerland_app'
   }
 
+  get NftName() {
+    return `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
+  }
+
   get createNftClassPayload() {
     let metadata = {
       image: this.ogImageUri,
@@ -253,9 +257,8 @@ export default class NFTTestMintPage extends Vue {
         nft_meta_collection_descrption: 'Writing NFT by Liker Land',
       })
     }
-    const name = `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
-    let payload = { name, metadata };
-    if(this.isWritingNFT) {
+    let payload = { name: this.NftName, metadata };
+    if (this.isWritingNFT) {
       payload = Object.assign(payload, {
         symbol: 'WRITING',
         uri: getNftClassUriViaIscnId(this.iscnId),
@@ -342,12 +345,11 @@ export default class NFTTestMintPage extends Vue {
   }
 
   getMintNftPayload(id: string) {
-    const name = `${this.isWritingNFT ?'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
     return {
       id,
       uri: this.isWritingNFT ? getNftUriViaNftId(this.classId, id) : '',
       metadata: {
-        name,
+        name: this.NftName,
         image: this.ogImageUri,
       },
     }
