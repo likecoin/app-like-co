@@ -178,7 +178,15 @@
             :label="$t('iscn.meta.owner')"
             class="mb-[12px]"
           >
-            <Label :text="owner" tag="div" preset="p6" />
+            <Link
+              :class="[
+                'text-[14px]',
+                'break-all',
+                'cursor-pointer',
+              ]"
+              :to="localeLocation({ name: 'search-keyword', query: { owner } })">
+              {{ owner }}
+            </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
             <Link
@@ -247,7 +255,7 @@
               tag="div"
               text-preset="h6"
               type="button"
-              :text="(stakeholders[index].entity || {}).name"
+              :text="stakeholders[index].entity.name || stakeholders[index].entity['@id'] | ellipsis"
               @click="showStakeholder(index)"
             />
           </FormField>
@@ -332,14 +340,19 @@
                 :label="$t('iscn.meta.creator.name')"
                 class="w-[50%] my-[12px]"
               >
-                <Label :text="stakeholderInfo.authorName" tag="div" preset="p4" />
+                <Link
+                  :class="'text-[16px] cursor-pointer'"
+                  :to="localeLocation({ name: 'search-keyword', query: { stakeholder_name: stakeholderInfo.authorName }})"
+                >
+                  {{ stakeholderInfo.authorName }}
+                </Link>
               </FormField>
               <FormField
                 v-if="stakeholderInfo.likerId"
                 :label="$t('iscn.meta.stakeholders.likerId')"
-                class="w-[50%] my-[12px]"
+                class="w-[50%] my-[12px] cursor-pointer"
               >
-                <Link :href="stakeholderInfo.likerId">{{
+                <Link :to="localeLocation({ name: 'search-keyword', query: { stakeholder_id: stakeholderInfo.likerId } })">{{
                   stakeholderInfo.likerId
                 }}</Link>
               </FormField>

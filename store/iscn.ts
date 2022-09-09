@@ -5,6 +5,8 @@ import Vue from 'vue';
 import { ISCNRecord } from '@likecoin/iscn-js';
 import axios from 'axios';
 import _ from 'lodash';
+import qs from 'querystring'
+
 import getQueryClient from '~/utils/cosmos/iscn/query';
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type';
 import network from '~/constant/network'
@@ -136,13 +138,36 @@ export default class ISCN extends VuexModule {
 
   @Action
   async queryISCNByField({
+    iscnId,
+    owner,
+    contentFingerprint,
+    stakeholderId,
+    stakeholderName,
     keyword,
-  }: { keyword: string }): Promise<ISCNRecordWithID[]> {
+  }: {
+    iscnId?: string,
+    owner?: string,
+    contentFingerprint?: string,
+    stakeholderId?: string,
+    stakeholderName?: string,
+    keyword?: string,
+  }): Promise<ISCNRecordWithID[]> {
     this.context.commit('clearRecords');
     let result: ISCNRecord[] = ([] as ISCNRecord[])
     try {
       this.context.commit('setIsLoading', true)
-      const { data } = await axios.get(`${network.apiURL}/iscn/records?keyword=${encodeURIComponent(keyword)}`)
+
+      const searchParams: any = {}
+      if (iscnId) searchParams.iscn_id = iscnId
+      if (owner) searchParams.owner = owner
+      if (contentFingerprint) searchParams.fingerprint = contentFingerprint
+      if (stakeholderId) searchParams['stakeholder.id'] = stakeholderId
+      if (stakeholderName) searchParams['stakeholder.name'] = stakeholderName
+      if (keyword) searchParams.keyword = keyword
+      const { data } = await axios.get(`${network.apiURL}/iscn/records`, {
+        params: searchParams,
+        paramsSerializer: (params) => qs.stringify(params),
+      })
       if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {

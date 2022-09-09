@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger'
@@ -134,7 +134,14 @@ export default class SearchPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   @iscnModule.Action queryISCNByField!: (
-    arg0: { keyword: string }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
+    arg0: { 
+      iscnId?: string,
+      owner?: string,
+      contentFingerprint?: string,
+      stakeholderId?: string,
+      stakeholderName?: string,
+      keyword?: string, 
+  }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   pageNumber = 0
   closeWarning = false
@@ -153,14 +160,35 @@ export default class SearchPage extends Vue {
     return !!this.errorMessage
   }
 
-  async mounted() {
+  mounted() {
+    this.search()
+  }
+
+  @Watch('$route.query')
+  onQueryChange() {
+    this.search()
+  }
+
+  async search(){
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.queryAllTerm, 1)
     if (this.queryAllTerm)  {
       await this.queryISCNByKeyword(this.queryAllTerm)
     } else {
-      const { keyword, keywords } = this.$route.query;
+      const { 
+        iscnId,
+        owner,
+        content_fingerprint: contentFingerprint,
+        stakeholder_id: stakeholderId,
+        stakeholder_name: stakeholderName, 
+        keyword,
+      } = this.$route.query;
       const searchObject = {
-        keyword: (keyword || keywords) as string,
+        iscnId: iscnId as string,
+        owner: owner as string,
+        contentFingerprint: contentFingerprint as string,
+        stakeholderId: stakeholderId as string,
+        stakeholderName: stakeholderName as string,
+        keyword: keyword as string,
       };
       if (Object.keys(searchObject).filter(k => !!k).length) {
         await this.queryISCNByField(searchObject)
