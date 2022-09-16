@@ -255,7 +255,7 @@
               tag="div"
               text-preset="h6"
               type="button"
-              :text="stakeholders[index].entity.name || stakeholders[index].entity['@id'] | ellipsis"
+              :text="stakeholders[index].entity && (stakeholders[index].entity.name || stakeholders[index].entity['@id'] || '') | ellipsis"
               @click="showStakeholder(index)"
             />
           </FormField>
@@ -707,22 +707,24 @@ export default class ViewIscnIdPage extends Vue {
       }
     } else {
       const authorWalletAddresses: any = []
-      if (stakeholders['@id']) {
-        authorWalletAddresses.push({
-          type: 'cosmos',
-          address: stakeholders['@id'],
-        })
-      }
       const authorUrls: any = []
-      if (stakeholders.url) {
-        authorUrls.push(stakeholders.url)
+      if (stakeholders) {
+        if (stakeholders['@id']) {
+          authorWalletAddresses.push({
+            type: 'cosmos',
+            address: stakeholders['@id'],
+          })
+        }
+        if (stakeholders.url) {
+          authorUrls.push(stakeholders.url)
+        }
       }
       this.stakeholderInfo = {
         likerId: '',
         authorDescription: '',
         authorWalletAddresses,
         authorUrls,
-        authorName: stakeholders.name,
+        authorName: stakeholders?.name,
       }
     }
   }
