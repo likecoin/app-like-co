@@ -208,7 +208,7 @@ export default class UploadForm extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
-      if (files[0].size < 20000000) {
+      if (files[0].size < 30000000) {
         this.fileName = files[0].name
         this.fileSize = files[0].size
         this.fileType = `${files[0].type}`
