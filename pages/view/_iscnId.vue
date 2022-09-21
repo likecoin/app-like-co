@@ -536,8 +536,7 @@ export default class ViewIscnIdPage extends Vue {
   ) => Promise<{ records: ISCNRecordWithID[] }>
 
   get isShowMintButton() {
-    const { mint } = this.$route.query;
-    return !this.isPreminted && mint && mint !== '0'
+    return !this.isPreminted
   }
 
   get isPopupLayout() {
