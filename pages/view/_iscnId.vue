@@ -13,7 +13,7 @@
         preset="plain"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
         class="text-like-green"
-        :text="$t('NFTPortal.button.notPreminted')"
+        :text="$t('NFTPortal.button.notMinted')"
       />
     </div>
     <Page>
@@ -64,17 +64,17 @@
         preset="plain"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
         class="text-like-green"
-        :text="$t('NFTPortal.button.notPreminted')"
+        :text="$t('NFTPortal.button.notMinted')"
       />
     </div>
   </div>
   <div v-else>
-    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
+    <div v-if="isShowMintButton" class="flex justify-end w-full">
       <Button
-        preset="plain"
+        preset="secondary"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
         class="text-like-green"
-        :text="$t('NFTPortal.button.preminted')"
+        :text="$t('NFTPortal.button.mint')"
       />
     </div>
     <Page
