@@ -579,7 +579,7 @@ export default class NFTTestMintPage extends Vue {
       if ((error as Error).message?.includes('code 11')) {
         throw new Error('MINT_NFT_TX_RUNS_OUT_OF_GAS')
       }
-      throw new Error(`CANNOT_MINT_NFT, Error: ${((error as Error).message).substring(0,20)}`)
+      throw new Error(`CANNOT_MINT_NFT, Error: ${((error as Error).message).substring(0,200)}`)
     }
   }
 
