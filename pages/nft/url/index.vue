@@ -425,7 +425,7 @@ export default class FetchIndex extends Vue {
       logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
-      throw new Error('CANNOT_REGISTER_ISCN')
+      throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
     }
   }
 
