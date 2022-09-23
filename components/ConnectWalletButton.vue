@@ -43,7 +43,7 @@
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { logTrackerEvent, updateSentryUser, setTrackerUser } from '~/utils/logger'
+import { logTrackerEvent, updateSentryUser, setLoggerUser } from '~/utils/logger'
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
@@ -108,7 +108,7 @@ export default class ConnectWalletButton extends Vue {
       signer: this.signer,
       address: this.walletAddress,
     });
-    setTrackerUser(this, { wallet: this.walletAddress });
+    setLoggerUser(this, { wallet: this.walletAddress });
     updateSentryUser(this, { wallet: this.walletAddress });
     logTrackerEvent(this, 'General', 'ConnectWalletSuccess', this.walletAddress, 1);
   }
