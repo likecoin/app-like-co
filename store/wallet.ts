@@ -164,6 +164,7 @@ export default class Wallet extends VuexModule {
       });
       await window.keplr.enable(network.id);
 
+      if (!window.getOfflineSigner) throw new Error('CANNOT_FIND_OFFLINE_SIGNER');
       const offlineSigner = window.getOfflineSigner(network.id);
       const accounts = await offlineSigner.getAccounts();
       this.context.commit('setType', 'keplr')

@@ -42,7 +42,7 @@ export function amountToLIKE(likecoin: Coin) {
 
 export function configToKeplrCoin(denom: string) {
   const c = config.coinLookup.find(coin => coin.viewDenom === denom);
-  if (!c) return {};
+  if (!c) throw new Error('CANNOT_FIND_COIN_WIH_DENOM')
   return {
     coinDenom: c.viewDenom,
     coinMinimalDenom: c.chainDenom,
