@@ -148,7 +148,7 @@ import {
     } as MetaInfo
   },
   fetch({ redirect }) {
-    redirect('airdrop/claim')
+    redirect('claim')
   },
 })
 export default class AirdropCheckPage extends Vue {
