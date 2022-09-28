@@ -412,8 +412,8 @@ export default class NFTTestMintPage extends Vue {
         return
       }
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
-      const { data, headers } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`)
-      this.ogImageBlob = new Blob([data], { type: headers['content-type'] })
+      const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}, { responseType: 'blob' }`)
+      this.ogImageBlob = data
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
       // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
