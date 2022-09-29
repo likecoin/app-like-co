@@ -543,7 +543,7 @@ export default class NFTTestMintPage extends Vue {
       if ((error as Error).message?.includes('code 11')) {
         throw new Error('CREATE_NFT_CLASS_TX_RUNS_OUT_OF_GAS')
       }
-      throw new Error('CANNOT_CREATE_NFT_CLASS')
+      throw new Error(`CANNOT_CREATE_NFT_CLASS, Error: ${((error as Error).message).substring(0,200)}`)
     }
 
     logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1);
