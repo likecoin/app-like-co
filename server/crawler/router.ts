@@ -11,7 +11,7 @@ router.get('/', async (req, res, next) => {
       res.status(400).send('MISSING_URL')
       return
     }
-    if (decodeURI(url) === url) {
+    if (decodeURI(url as string) === url) {
       url = encodeURI(url);
     }
     const data = await getCralwerData(url as string)
