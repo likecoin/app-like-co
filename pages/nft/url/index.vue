@@ -149,6 +149,12 @@ export default class FetchIndex extends Vue {
     return this.url.startsWith('iscn://likecoin-chain')
   }
 
+  get encodedURL(): string {
+    const { url } = this;
+    if (decodeURI(url) !== url) return url;
+    return encodeURI(url);
+  }
+
   get formData(): FormData | null {
     if (!this.crawledData?.body) { return null }
     const body = new Blob([this.crawledData.body], { type: "text/html" })
@@ -316,7 +322,7 @@ export default class FetchIndex extends Vue {
   async crawlUrlData() {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
-      const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.url)}`)
+      const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}`)
       this.crawledData = data
       if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
       if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }

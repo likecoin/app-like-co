@@ -207,7 +207,7 @@ async function getBrowser(): Promise<any> {
 async function getContentFromUrl(url: string) {
   let content
   try {
-    const { data } = await axios.get(encodeURI(url as string))
+    const { data } = await axios.get(url)
     content = data
   } catch (error: any) {
     if (error?.response?.status === 403) {
