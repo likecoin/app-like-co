@@ -6,10 +6,13 @@ const router = Router()
 
 router.get('/', async (req, res, next) => {
   try {
-    const { url } = req.query
+    let { url } = req.query
     if (!url) {
       res.status(400).send('MISSING_URL')
       return
+    }
+    if (decodeURI(url) === url) {
+      url = encodeURI(url);
     }
     const data = await getCralwerData(url as string)
     res.send(data)
