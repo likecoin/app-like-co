@@ -2056,12 +2056,14 @@
     methods "^1.1.2"
     path-to-regexp "^6.1.0"
 
-"@likecoin/iscn-js@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.2.1.tgz#bab4c00aa10ff8d09714357b652dd9eaae0fd8a4"
-  integrity sha512-rXSanM0xsshD2DSMrj6466zhzFVmZ11r8VK+84xBoLC4GWJDqdG8bCheHrQkmJQz1iWxk3eQTQRf8EppzxKe2Q==
+"@likecoin/iscn-js@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.3.0.tgz#2c940d240d0475f6324c8b11d0bd73f74d191ed7"
+  integrity sha512-SUlXYj7fcIBsH9JgFGd6hv3x5zhZVmAIT97+/g2cc4oZd6KzCjpgaJl/9oig1/X47lg2894bVHZRjAlSwTYHjw==
   dependencies:
     "@likecoin/iscn-message-types" "0.0.3"
+    axios "^0.27.2"
+    bech32 "^2.0.0"
     bignumber.js "^9.0.1"
     buffer "^6.0.3"
     fast-json-stable-stringify "^2.1.0"

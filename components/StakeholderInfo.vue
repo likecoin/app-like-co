@@ -21,17 +21,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-
-const { bech32 } = require('bech32')
-
-function isValidAddress(address:any) {
-  try {
-    bech32.decode(address);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
+import { getLikeWalletAddress } from '@likecoin/iscn-js/dist/iscn/addressParsing'
 
 @Component
 export default class StakeholderInfo extends Vue {
@@ -40,13 +30,8 @@ export default class StakeholderInfo extends Vue {
   @Prop(String) readonly url: string | undefined
 
   get walletAddress() {
-    if (this.id && this.id.startsWith('did:like:')) {
-      return `like${this.id.slice('did:like:'.length)}`
-    } if (this.id && this.id.startsWith('did:cosmos:')) {
-      return `cosmos${this.id.slice('did:cosmos:'.length)}`
-    }
-    if (isValidAddress(this.id)) {
-      return this.id
+    if (this.id) {
+      return getLikeWalletAddress(this.id)
     }
     return ''
   }
