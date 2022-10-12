@@ -20,6 +20,7 @@
         'z-0',
         'object-cover',
       ]"
+      loading='lazy'
       src="/images/airdrop/image.png"
     />
     <div
