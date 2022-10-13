@@ -330,6 +330,11 @@ export async function getCralwerData(url: string) {
   return { title, description, keywords, author, body, ogImage, images }
 }
 
+function encodedURL(url:string): string{
+  if (decodeURI(url) !== url) return url;
+  return encodeURI(url);
+}
+
 export async function crawlOgImage(url: string) {
   const content = await getContentFromUrl(url)
   const $ = cheerio.load(content)
@@ -342,6 +347,6 @@ export async function crawlOgImage(url: string) {
     }
   })
   if (!ogImageUrl) return null;
-  const res = await axios.get(encodeURI(ogImageUrl), { responseType: 'stream' })
+  const res = await axios.get(encodedURL(ogImageUrl), { responseType: 'stream' })
   return res;
 }
