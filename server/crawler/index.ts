@@ -319,6 +319,8 @@ export async function getCralwerData(url: string) {
         author = value
       } else if (property === 'og:image') {
         ogImage = value
+      } else if (name === 'msapplication-TileImage') {
+        ogImage = ogImage || value
       }
     })
     body = $('body').html() || ''
