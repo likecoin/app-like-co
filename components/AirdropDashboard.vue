@@ -204,7 +204,7 @@
           'font-bold',
           'text-medium-gray',
         ]"
-        :text="$t( decay.started ? 'AirDrop.label.end' : 'AirDrop.label.decay')"
+        :text="$t('AirDrop.label.end')"
         preset="p6"
       />
     </div>

@@ -115,9 +115,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-import BigNumber from 'bignumber.js'
 import {
-  AIRDROP_URL,
   COSMOS_ADDRESS_REGEX,
   OSMOSIS_ADDRESS_REGEX,
 } from '~/constant'
@@ -161,19 +159,6 @@ export default class AirdropCheckPage extends Vue {
   claimmingAddress: string = ''
   errorMessage: string = ''
 
-  async fetchClaimmableAmount(address: string) {
-      const res: any = await this.$axios.get(
-        `${AIRDROP_URL}/api/overview?address=${address}`,
-      )
-      this.$emit('claimmingAddress')
-      this.claimmableAmount = new BigNumber(res.data.allocatedAmount)
-        .shiftedBy(-9)
-        .toFixed(0, BigNumber.ROUND_DOWN)
-      this.isQualifiedForAtom = !!res.data.atomAmount
-      this.isQualifiedForOsmo = !!res.data.osmosisAmount
-      this.isQualifiedForCivic = !!res.data.civicLikerAmount
-    }
-
   handleSubmitAddress() {
     this.errorMessage = ''
     if (
@@ -184,7 +169,6 @@ export default class AirdropCheckPage extends Vue {
       return;
     }
     this.claimmingAddress = this.inputAddress
-    this.fetchClaimmableAmount(this.claimmingAddress)
   }
 
   initChecker() {
