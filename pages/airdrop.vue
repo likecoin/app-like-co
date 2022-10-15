@@ -141,42 +141,8 @@
         </div>
         <!-- SubscriptionCard -->
         <SubscriptionCard
-          v-if="!shouldShowSubscriptionCard"
           class="mb-[48px]"
-          :preset="subscriptionCardPreset"
-        />
-        <div
-          v-else
-          :class="[
-            'flex',
-            'justify-center',
-            'mb-[48px]',
-          ]"
-        >
-          <Button
-            preset="outline"
-            :style="{ border: '2px solid #D1AB79', color: '#D1AB79' }"
-            :text="$t('AirDrop.button.checker')"
-            :to="localeLocation({ name: 'airdrop-check' })"
-          >
-            <template #prepend>
-              <IconMissionButtonMini />
-            </template>
-          </Button>
-        </div>
-        <Label
-          v-if="!!shouldShowTentative"
-          :class="[
-            'text-center',
-            'mb-[120px]',
-            'w-full',
-            'max-w-[800px]',
-            'mx-auto',
-            'text-medium-gray',
-            'sm:mb-[120px]',
-          ]"
-          :text="$t('AirDrop.content.tentative')"
-          preset="p5"
+          :preset="'both'"
         />
       </div>
     </div>
@@ -187,10 +153,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-import { namespace } from 'vuex-class'
 import { SITE_URL } from '~/constant'
-
-const signerModule = namespace('signer')
 
 @Component({
   head() {
@@ -206,23 +169,5 @@ const signerModule = namespace('signer')
   },
 })
 export default class AirdropCheckPage extends Vue {
-  @signerModule.Getter('getAddress') currentAddress!: string
-
-  get shouldShowSubscriptionCard() {
-    return this.$route.name === this.localeRoute({ name: 'airdrop' })?.name
-  }
-
-  get subscriptionCardPreset() {
-    return this.$route.name ===
-      this.localeRoute({ name: 'airdrop-check' })?.name
-      ? 'community'
-      : 'both'
-  }
-
-  get shouldShowTentative() {
-    return (
-      this.$route.name === this.localeRoute({ name: 'airdrop-check' })?.name
-    )
-  }
 }
 </script>
