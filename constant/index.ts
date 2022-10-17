@@ -69,8 +69,6 @@ export const COSMOS_ADDRESS_REGEX = /^cosmos1[ac-hj-np-z02-9]{38}$/
 
 export const OSMOSIS_ADDRESS_REGEX = /^osmo1[ac-hj-np-z02-9]{38}$/
 
-export const AIRDROP_URL = IS_TESTNET ? 'https://airdrop.rinkeby.like.co' : 'https://airdrop.like.co';
-
 export const IS_CHAIN_UPGRADING = false;
 
 export const LIKER_NFT_API_WALLET = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
