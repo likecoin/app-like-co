@@ -39,7 +39,11 @@
         'rounded-[16px]',
       ]"
     >
+      <div v-if="isLoading" class="w-full">
+        <ProgressIndicator preset="thin" />
+      </div>
       <div
+        v-else
         :class="[
           'flex',
           'flex-col',
@@ -48,7 +52,7 @@
           'overflow-hidden',
         ]"
       >
-        <img id="imgElement" alt="og image" src="" />
+        <img alt="og image" :src="imgSrc" />
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
           <Label preset="h5" :text="name" />
           <Label preset="p6" class="mt-[8px]">{{
@@ -79,5 +83,9 @@ export default class NFTPreviewCard extends Vue {
   @Prop(String) readonly name!: string | undefined
 
   @Prop(String) readonly description!: string | undefined
+
+  @Prop(String) readonly imgSrc!: string | undefined
+
+  @Prop({ default: false }) readonly isLoading!: boolean | undefined
 }
 </script>

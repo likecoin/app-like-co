@@ -40,12 +40,12 @@
           'w-full',
         ]">
           <div class="my-[16px]">
-            <ProgressIndicator v-show="isLoadingPreviewOG" preset="thin" />
             <NFTPreviewCard
-              v-show="!isLoadingPreviewOG"
               class="w-[90%]"
               :name="NftName"
               :description="NftDescription"
+              :img-src="imgSrc"
+              :is-loading="isLoadingPreviewOG"
             />
           </div>
           <FormField :label="$t('NFTPortal.label.Iscn')" class="mb-[12px]">
@@ -157,7 +157,7 @@ export default class NFTTestMintPage extends Vue {
   iscnData: any = null
   apiData: any = null
   ogImageBlob: Blob | null = null
-  imgElement: any = null
+  imgSrc: string = ''
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
 
@@ -258,7 +258,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get isLoadingPreviewOG() {
-    return !this.imgElement?.src
+    return !this.imgSrc
   }
 
   get createNftClassPayload() {
@@ -294,7 +294,6 @@ export default class NFTTestMintPage extends Vue {
         this.getISCNInfo(),
         this.getMintInfo(),
       ])
-      this.imgElement = document.querySelector('img#imgElement') as HTMLImageElement;
       await this.getOgImage()
     } catch (error) {
       this.setError(error)
@@ -433,7 +432,7 @@ export default class NFTTestMintPage extends Vue {
       const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
       this.ogImageBlob = data
       const objectURL = URL.createObjectURL(data);
-      if (this.imgElement) { this.imgElement.src = objectURL };
+      this.imgSrc = objectURL
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
       // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
