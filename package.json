@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@cosmjs/stargate": "^0.28.4",
+    "@ipld/car": "^4.1.6",
     "@keplr-wallet/types": "^0.11.4",
     "@likecoin/iscn-js": "^0.3.0",
     "@likecoin/iscn-message-types": "^0.0.3",
