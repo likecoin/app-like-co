@@ -1,5 +1,6 @@
-import { IPFS } from 'ipfs-core-types';
-import { create } from 'ipfs-http-client';
+import { create, IPFSHTTPClient } from 'ipfs-http-client';
+import { CarReader } from '@ipld/car';
+import { Web3Storage } from 'web3.storage';
 import { ArweaveFile } from '../arweave/types';
 
 const hash = require('ipfs-only-hash');
@@ -9,12 +10,13 @@ const config = require('../config/config');
 const {
   IPFS_ENDPOINT,
   REPLICA_IPFS_ENDPOINTS = [],
+  WEB3_STORAGE_API_TOKEN,
 } = config;
 
 const IPFS_TIMEOUT = 60000;
 
 const getInstance = (() => {
-  let instances: { primary: IPFS, replicas: IPFS[] } | null = null;
+  let instances: { primary: IPFSHTTPClient, replicas: IPFSHTTPClient[] } | null = null;
   return () => {
     if (!instances) {
       instances = {
@@ -26,16 +28,30 @@ const getInstance = (() => {
   };
 })();
 
+const getWeb3StorageClient = (() => {
+  let client: Web3Storage | null = null;
+  return () => {
+    if (!client) {
+      client = new Web3Storage({ token: WEB3_STORAGE_API_TOKEN });
+    }
+    return client
+  };
+})();
+
 export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } = {}) {
-  const client = getInstance()
+  const ipfsHttpClient = getInstance();
   const fileBlob = file.buffer;
   // eslint-disable-next-line no-console
-  if (!onlyHash) client.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
-  const res = await client.primary.add(fileBlob, { onlyHash });
+  if (!onlyHash) ipfsHttpClient.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
+  const res = await ipfsHttpClient.primary.add(fileBlob, { onlyHash });
+  const out = ipfsHttpClient.primary.dag.export(res.cid);
+  const reader = await CarReader.fromIterable(out);
+  const web3StorageClient = getWeb3StorageClient();
+  await web3StorageClient.putCar(reader);
   return res.cid.toString();
 }
 
-async function internalUploadAll(client: IPFS, files: ArweaveFile[], { directoryName = 'tmp', onlyHash = false } = {}) {
+async function internalUploadAll(client: IPFSHTTPClient, files: ArweaveFile[], { directoryName = 'tmp', onlyHash = false } = {}) {
   const promises = client.addAll(
     files.map(f => ({
       content: f.buffer,
@@ -47,12 +63,19 @@ async function internalUploadAll(client: IPFS, files: ArweaveFile[], { directory
   for await (const result of promises) {
     results.push(result);
   }
+  const web3StorageClient = getWeb3StorageClient();
+  const web3StoragePromises = results.map(async (result) => {
+    const out = client.dag.export(result.cid);
+    const reader = await CarReader.fromIterable(out);
+    await web3StorageClient.putCar(reader);
+  });
+  await Promise.all(web3StoragePromises);
   return results;
 }
 
 export async function uploadFilesToIPFS(files: ArweaveFile[], { onlyHash = false } = {}) {
   if (files.length === 1) return uploadFileToIPFS(files[0]);
-  const client = getInstance()
+  const client = getInstance();
   const directoryName = 'tmp';
   if (!onlyHash) {
     // eslint-disable-next-line no-console
