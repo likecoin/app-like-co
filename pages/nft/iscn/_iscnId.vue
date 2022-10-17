@@ -316,6 +316,7 @@ export default class NFTTestMintPage extends Vue {
           }
           this.classId = await this.createNftClass()
           if (!this.classId) break
+          this.$router.replace({ query: { class_id: this.classId }})
         }
         case 'mint': {
           await this.mintNFT()
@@ -375,6 +376,9 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async getMintInfo() {
+    if (this.$route.query.class_id) {
+      this.classId = this.$route.query.class_id as string
+    }
     try {
       const { data } = await this.$axios.get(API_LIKER_NFT_MINT, {
         params: {
