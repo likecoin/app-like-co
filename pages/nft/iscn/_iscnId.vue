@@ -157,7 +157,6 @@ export default class NFTTestMintPage extends Vue {
   iscnData: any = null
   apiData: any = null
   ogImageBlob: Blob | null = null
-  imgSrc: string = ''
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
 
@@ -286,6 +285,13 @@ export default class NFTTestMintPage extends Vue {
 
   get premintAmount() {
     return this.isWritingNFT ? 500 : 100;
+  }
+
+  get imgSrc() {
+    if (this.ogImageBlob) {
+      return URL.createObjectURL(this.ogImageBlob)
+    }
+    return undefined
   }
 
   async mounted() {
@@ -431,8 +437,6 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
       const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
       this.ogImageBlob = data
-      const objectURL = URL.createObjectURL(data);
-      this.imgSrc = objectURL
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
       // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
