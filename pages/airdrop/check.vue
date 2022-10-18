@@ -1,6 +1,5 @@
 <template>
-  <div>
-  </div>
+  <ProgressIndicator />
 </template>
 
 <script lang="ts">
