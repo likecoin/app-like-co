@@ -31,12 +31,24 @@ const getInstance = (() => {
 const getWeb3StorageClient = (() => {
   let client: Web3Storage | null = null;
   return () => {
-    if (!client) {
+    if (!client && WEB3_STORAGE_API_TOKEN) {
       client = new Web3Storage({ token: WEB3_STORAGE_API_TOKEN });
     }
     return client
   };
 })();
+
+async function uploadCARToIPFSByWeb3Storage(car: AsyncIterable<Uint8Array>) {
+  try {
+    const web3StorageClient = getWeb3StorageClient();
+    if (web3StorageClient) {
+      const reader = await CarReader.fromIterable(car);
+      await web3StorageClient.putCar(reader);
+    }
+  } catch (error) {
+    // no-op
+  }
+}
 
 export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } = {}) {
   const ipfsHttpClient = getInstance();
@@ -45,9 +57,7 @@ export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } =
   if (!onlyHash) ipfsHttpClient.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
   const res = await ipfsHttpClient.primary.add(fileBlob, { onlyHash });
   const out = ipfsHttpClient.primary.dag.export(res.cid);
-  const reader = await CarReader.fromIterable(out);
-  const web3StorageClient = getWeb3StorageClient();
-  await web3StorageClient.putCar(reader);
+  await uploadCARToIPFSByWeb3Storage(out);
   return res.cid.toString();
 }
 
@@ -58,13 +68,11 @@ async function internalUploadAll(client: IPFSHTTPClient, files: ArweaveFile[], {
       path: `/${directoryName}/${f.key}`,
     })), { onlyHash },
   );
-  const web3StorageClient = getWeb3StorageClient();
   const results = [];
   // eslint-disable-next-line no-restricted-syntax
   for await (const result of promises) {
     const out = client.dag.export(result.cid);
-    const reader = await CarReader.fromIterable(out);
-    await web3StorageClient.putCar(reader);
+    await uploadCARToIPFSByWeb3Storage(out);
     results.push(result);
   }
   return results;
