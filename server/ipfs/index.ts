@@ -1,4 +1,4 @@
-import { create, IPFSHTTPClient } from 'ipfs-http-client';
+import { create, CID, IPFSHTTPClient } from 'ipfs-http-client';
 import { CarReader } from '@ipld/car';
 import { Web3Storage } from 'web3.storage';
 import { ArweaveFile } from '../arweave/types';
@@ -38,10 +38,11 @@ const getWeb3StorageClient = (() => {
   };
 })();
 
-async function uploadCARToIPFSByWeb3Storage(car: AsyncIterable<Uint8Array>) {
+async function uploadCARToIPFSByWeb3Storage(ipfsHttpClient: IPFSHTTPClient, cid: CID) {
   try {
     const web3StorageClient = getWeb3StorageClient();
     if (web3StorageClient) {
+      const car = ipfsHttpClient.dag.export(cid);
       const reader = await CarReader.fromIterable(car);
       await web3StorageClient.putCar(reader);
     }
@@ -57,8 +58,7 @@ export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } =
   // eslint-disable-next-line no-console
   if (!onlyHash) ipfsHttpClient.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
   const res = await ipfsHttpClient.primary.add(fileBlob, { onlyHash });
-  const out = ipfsHttpClient.primary.dag.export(res.cid);
-  await uploadCARToIPFSByWeb3Storage(out);
+  await uploadCARToIPFSByWeb3Storage(ipfsHttpClient.primary, res.cid);
   return res.cid.toString();
 }
 
@@ -72,8 +72,7 @@ async function internalUploadAll(client: IPFSHTTPClient, files: ArweaveFile[], {
   const results = [];
   // eslint-disable-next-line no-restricted-syntax
   for await (const result of promises) {
-    const out = client.dag.export(result.cid);
-    await uploadCARToIPFSByWeb3Storage(out);
+    await uploadCARToIPFSByWeb3Storage(client, result.cid);
     results.push(result);
   }
   return results;
