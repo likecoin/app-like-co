@@ -58,18 +58,15 @@ async function internalUploadAll(client: IPFSHTTPClient, files: ArweaveFile[], {
       path: `/${directoryName}/${f.key}`,
     })), { onlyHash },
   );
+  const web3StorageClient = getWeb3StorageClient();
   const results = [];
   // eslint-disable-next-line no-restricted-syntax
   for await (const result of promises) {
-    results.push(result);
-  }
-  const web3StorageClient = getWeb3StorageClient();
-  const web3StoragePromises = results.map(async (result) => {
     const out = client.dag.export(result.cid);
     const reader = await CarReader.fromIterable(out);
     await web3StorageClient.putCar(reader);
-  });
-  await Promise.all(web3StoragePromises);
+    results.push(result);
+  }
   return results;
 }
 
