@@ -53,12 +53,12 @@ async function uploadCARToIPFSByWeb3Storage(ipfsHttpClient: IPFSHTTPClient, cid:
 }
 
 export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } = {}) {
-  const ipfsHttpClient = getInstance();
+  const client = getInstance();
   const fileBlob = file.buffer;
   // eslint-disable-next-line no-console
-  if (!onlyHash) ipfsHttpClient.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
-  const res = await ipfsHttpClient.primary.add(fileBlob, { onlyHash });
-  await uploadCARToIPFSByWeb3Storage(ipfsHttpClient.primary, res.cid);
+  if (!onlyHash) client.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
+  const res = await client.primary.add(fileBlob, { onlyHash });
+  await uploadCARToIPFSByWeb3Storage(client.primary, res.cid);
   return res.cid.toString();
 }
 
