@@ -52,7 +52,7 @@
           'overflow-hidden',
         ]"
       >
-        <img alt="og image" :src="imgSrc" />
+        <img :alt="name" :src="imgSrc" />
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
           <Label preset="h5" :text="name" />
           <Label preset="p6" class="mt-[8px]">{{
