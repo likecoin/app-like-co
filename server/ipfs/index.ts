@@ -46,7 +46,8 @@ async function uploadCARToIPFSByWeb3Storage(car: AsyncIterable<Uint8Array>) {
       await web3StorageClient.putCar(reader);
     }
   } catch (error) {
-    // no-op
+    // eslint-disable-next-line no-console
+    console.error();
   }
 }
 
