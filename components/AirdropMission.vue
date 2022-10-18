@@ -29,9 +29,7 @@
         'text-like-cyan-extralight',
         'mb-[16px]',
       ]"
-      :text="errorMessage || !hasConnectedWallet
-        ? $t('AirDrop.mission.viewOnly')
-        : $t('AirDrop.label.missions')"
+      :text="$t('AirDrop.mission.viewOnly')"
       preset="h2"
     />
     <div
@@ -53,7 +51,7 @@
         'rounded-[24px]',
         'border-[1px]',
         'border-like-cyan-light',
-        { 'border-opacity-50': mission.isClaimed || errorMessage || !hasConnectedWallet },
+        { 'border-opacity-50': false },
         
         'bg-like-green',
         'hover:bg-like-dark-green',
@@ -82,8 +80,7 @@
           'font-bold',
           'text-white',
           {
-            'text-like-cyan-light text-opacity-50':
-              mission.isClaimed || errorMessage || !hasConnectedWallet,
+            'text-like-cyan-light text-opacity-50': true,
           },
           'mx-[24px]',
           'w-[100%]',
@@ -97,8 +94,7 @@
           'font-bold',
           'text-white',
           {
-            'text-like-cyan-light text-opacity-50':
-              mission.isClaimed || errorMessage || !hasConnectedWallet,
+            'text-like-cyan-light text-opacity-50': true,
           },
           'mx-[24px]',
           'w-[100%]',
@@ -107,28 +103,7 @@
         preset="h2"
         align="center"
       />
-      <IconMissionDone
-        v-if="mission.isClaimed && !errorMessage"
-        :class="[
-          'mt-[24px]',
-          'sm:mt-0',
-          
-          'w-[56px]',
-          'h-[56px]',
-        ]"
-      />
-      <IconMissionButton
-        v-else-if="!mission.isClaimed && !errorMessage"
-        :class="[
-          'mt-[24px]',
-          'sm:mt-0',
-
-          'w-[56px]',
-          'h-[56px]',
-        ]"
-      />
       <IconMissionViewOnly
-        v-else
         :class="[
           'mt-[24px]',
           'sm:mt-0',
@@ -147,13 +122,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component
 export default class AirdropMission extends Vue {
 
-  // Error message from empty or ineligible address
-  @Prop(String) readonly errorMessage!: string | undefined
-
   // Contains all information in four missions
   @Prop(Array) readonly missionsOverview!: string[] | undefined
-
-  // Show connect wallet button if not connected
-  @Prop({ default: false }) readonly hasConnectedWallet!: boolean
 }
 </script>
