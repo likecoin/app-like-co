@@ -36,10 +36,18 @@
           'flex',
           'flex-col',
           'justify-center',
-          'items-center',
+          'items-start',
           'w-full',
-          'my-[64px]',
         ]">
+          <div class="my-[16px]">
+            <NFTPreviewCard
+              class="w-[90%]"
+              :name="NftName"
+              :description="NftDescription"
+              :img-src="imgSrc"
+              :is-loading="isLoadingPreviewOG"
+            />
+          </div>
           <FormField :label="$t('NFTPortal.label.Iscn')" class="mb-[12px]">
             <Label :text="iscnId" tag="div" preset="p6" />
           </FormField>
@@ -241,7 +249,15 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get NftName() {
-    return `${this.isWritingNFT ? 'Writing NFT - ' : ''}${this.iscnData.contentMetadata?.name || 'NFT'}`;
+    return `${this.isWritingNFT ? 'Writing NFT - ' : ''}${this.iscnData?.contentMetadata?.name || 'NFT'}`;
+  }
+
+  get NftDescription() {
+    return `${this.iscnData?.contentMetadata?.description || undefined}`;
+  }
+
+  get isLoadingPreviewOG() {
+    return !this.imgSrc
   }
 
   get createNftClassPayload() {
@@ -269,6 +285,13 @@ export default class NFTTestMintPage extends Vue {
 
   get premintAmount() {
     return this.isWritingNFT ? 500 : 100;
+  }
+
+  get imgSrc() {
+    if (this.ogImageBlob) {
+      return URL.createObjectURL(this.ogImageBlob)
+    }
+    return undefined
   }
 
   async mounted() {
