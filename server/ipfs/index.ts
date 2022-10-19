@@ -13,7 +13,7 @@ const {
   WEB3_STORAGE_API_TOKEN,
 } = config;
 
-const IPFS_TIMEOUT = 60000;
+const IPFS_TIMEOUT = 30000;
 
 const getInstance = (() => {
   let instances: { primary: IPFSHTTPClient, replicas: IPFSHTTPClient[] } | null = null;
