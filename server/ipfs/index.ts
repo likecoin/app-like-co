@@ -58,7 +58,7 @@ export async function uploadFileToIPFS(file: ArweaveFile, { onlyHash = false } =
   // eslint-disable-next-line no-console
   if (!onlyHash) client.replicas.map(c => c.add(fileBlob).catch((e) => console.error(e)));
   const res = await client.primary.add(fileBlob, { onlyHash });
-  await uploadCARToIPFSByWeb3Storage(client.primary, res.cid);
+  if (!onlyHash) await uploadCARToIPFSByWeb3Storage(client.primary, res.cid);
   return res.cid.toString();
 }
 
@@ -72,8 +72,10 @@ async function internalUploadAll(client: IPFSHTTPClient, files: ArweaveFile[], {
   const results = [];
   // eslint-disable-next-line no-restricted-syntax
   for await (const result of promises) {
-    await uploadCARToIPFSByWeb3Storage(client, result.cid);
     results.push(result);
+  }
+  if (!onlyHash) {
+    await Promise.all(results.map(r => uploadCARToIPFSByWeb3Storage(client, r.cid)));
   }
   return results;
 }
