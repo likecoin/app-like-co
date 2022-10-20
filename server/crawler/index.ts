@@ -6,6 +6,16 @@ import UaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
 
 puppeteer.use(UaPlugin())
 puppeteer.use(StealthPlugin())
+
+async function checkDomainExists(domain: string): Promise<boolean> {
+  try {
+    const { data } = await axios.get(`https://dns.google.com/resolve?name=${domain}`);
+    return data.Status === 0;
+  } catch (err) {
+    return false;
+  }
+}
+
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
   content,
@@ -266,8 +276,9 @@ export async function getCralwerData(url: string) {
   let images: any = []
 
   try {
+    const { protocol, host, hostname } = new URL(url)
+    if (!(await checkDomainExists(hostname))) throw new Error('URL_NOT_REACHABLE');
     const content = await getContentFromUrl(url)
-    const { protocol, host } = new URL(url)
     const $ = cheerio.load(content)
     ;[
       'script',
