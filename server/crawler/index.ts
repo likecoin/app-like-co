@@ -273,6 +273,7 @@ export async function getCralwerData(url: string) {
   let title = ''
   let body = ''
   let ogImage = ''
+  let tileImage = ''
   let images: any = []
 
   try {
@@ -323,17 +324,18 @@ export async function getCralwerData(url: string) {
     Object.keys(metas).forEach((key: any) => {
       const { name, property, content: value } = metas[key].attribs || {}
       if (name === 'description' || property === 'og:description') {
-        description = value
+        description = description || value
       } else if (name === 'keywords') {
-        keywords = value
+        keywords = keywords || value
       } else if (name === 'author') {
-        author = value
+        author = author || value
       } else if (property === 'og:image') {
-        ogImage = value
-      } else if (name === 'msapplication-TileImage') {
         ogImage = ogImage || value
+      } else if (name === 'msapplication-TileImage') {
+        tileImage = tileImage || value
       }
     })
+    if (!ogImage) ogImage = tileImage
     body = $('body').html() || ''
     body = formatBody({ content: body, title, author, description })
   } catch (error) {
@@ -353,13 +355,16 @@ export async function crawlOgImage(url: string) {
   const $ = cheerio.load(content)
   const metas = $('meta')
   let ogImageUrl = ''
+  let tileImage = ''
   Object.keys(metas).forEach((key: any) => {
-    const { property, content: value } = metas[key].attribs || {}
+    const { name, property, content: value } = metas[key].attribs || {}
     if (property === 'og:image') {
-      ogImageUrl = value
+      ogImageUrl = ogImageUrl || value
+    } else if (name === 'msapplication-TileImage') {
+      tileImage = tileImage || value
     }
   })
-  if (!ogImageUrl) return null;
-  const res = await axios.get(encodedURL(ogImageUrl), { responseType: 'stream' })
+  if (!ogImageUrl && !tileImage) return null;
+  const res = await axios.get(encodedURL(ogImageUrl || tileImage), { responseType: 'stream' })
   return res;
 }
