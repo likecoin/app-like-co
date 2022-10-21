@@ -335,7 +335,7 @@ export async function getCralwerData(url: string) {
         tileImage = tileImage || value
       }
     })
-    if (!ogImage) ogImage = tileImage
+    ogImage = ogImage || tileImage
     body = $('body').html() || ''
     body = formatBody({ content: body, title, author, description })
   } catch (error) {
