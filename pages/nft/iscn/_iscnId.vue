@@ -435,7 +435,7 @@ export default class NFTTestMintPage extends Vue {
     try {
       const url = this.iscnData.contentMetadata?.url
       if (!url) {
-        logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', '', 1);
+        logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', this.iscnId, 1);
         return
       }
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
@@ -451,7 +451,7 @@ export default class NFTTestMintPage extends Vue {
 
   async checkArweaveIdExistsAndEstimateFee() {
     try {
-      logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFee', '', 1);
+      logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFee', this.iscnId, 1);
       const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
         this.ogImageFormData,
@@ -533,7 +533,7 @@ export default class NFTTestMintPage extends Vue {
           paramsSerializer: (params) => qs.stringify(params),
         },
       )
-      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', data, 1);
+      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', this.classId, 1);
       this.postInfo = data
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
@@ -597,7 +597,7 @@ export default class NFTTestMintPage extends Vue {
       let messages = mintMessages;
       if (this.isWritingNFT) messages = messages.concat(sendMessages);
 
-      logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', '', 1);
+      logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
       this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);

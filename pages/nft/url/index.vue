@@ -336,7 +336,7 @@ export default class FetchIndex extends Vue {
 
   async checkArweaveIdExistsAndEstimateFee() {
     try {
-      logTrackerEvent(this, 'NFTUrlMint', 'CheckArweaveIdExistsAndEstimateFee', '', 1);
+      logTrackerEvent(this, 'NFTUrlMint', 'CheckArweaveIdExistsAndEstimateFee', this.url, 1);
       const { address, arweaveId, LIKE, ipfsHash, memo } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
         this.formData,
