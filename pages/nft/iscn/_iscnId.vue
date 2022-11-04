@@ -263,7 +263,6 @@ export default class NFTTestMintPage extends Vue {
   get createNftClassPayload() {
     let metadata = {
       image: this.ogImageUri,
-      description: this.iscnData.contentMetadata?.description,
       external_url: this.iscnData.contentMetadata?.url,
     };
     if (this.isWritingNFT) {
@@ -273,7 +272,11 @@ export default class NFTTestMintPage extends Vue {
         nft_meta_collection_descrption: 'Writing NFT by Liker Land',
       })
     }
-    let payload = { name: this.NftName, metadata };
+    let payload = {
+      name: this.NftName,
+      description: this.iscnData.contentMetadata?.description,
+      metadata,
+    };
     if (this.isWritingNFT) {
       payload = Object.assign(payload, {
         symbol: 'WRITING',
