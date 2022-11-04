@@ -151,7 +151,9 @@ export default class FetchIndex extends Vue {
 
   get encodedURL(): string {
     const { url } = this;
-    if (decodeURI(url) !== url) return url;
+    if (/^[ -~]+$/.test(url)) {
+      return url;
+    }
     return encodeURI(url);
   }
 

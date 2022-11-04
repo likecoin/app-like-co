@@ -16,6 +16,13 @@ async function checkDomainExists(domain: string): Promise<boolean> {
   }
 }
 
+function encodedURL(url:string): string{
+  if (/^[ -~]+$/.test(url)) {
+    return url;
+  }
+  return encodeURI(url);
+}
+
 // refer to https://github.com/thematters/matters-html-formatter/blob/main/src/makeHtmlBundle/formatHTML/articleTemplate.ts
 function formatBody({
   content,
@@ -217,7 +224,7 @@ async function getBrowser(): Promise<any> {
 async function getContentFromUrl(url: string) {
   let content
   try {
-    const { data } = await axios.get(url)
+    const { data } = await axios.get(encodedURL(url))
     content = data
   } catch (error: any) {
     if (error?.response?.status === 403) {
@@ -301,7 +308,7 @@ export async function getCralwerData(url: string) {
         }
         promiseImg.push(
           axios
-            .get(`${srcUrl}`, { responseType: 'arraybuffer' })
+            .get(`${encodedURL(srcUrl)}`, { responseType: 'arraybuffer' })
             .then((element) => {
               const newFileName = `image_${i}`
               $(e).attr('src', `./${newFileName}`)
@@ -343,11 +350,6 @@ export async function getCralwerData(url: string) {
     console.error(error)
   }
   return { title, description, keywords, author, body, ogImage, images }
-}
-
-function encodedURL(url:string): string{
-  if (decodeURI(url) !== url) return url;
-  return encodeURI(url);
 }
 
 export async function crawlOgImage(url: string) {
