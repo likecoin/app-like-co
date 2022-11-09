@@ -19,8 +19,8 @@
           </template>
         </Label>
         <div :class="['flex', 'flex-col', 'items-end']">
-          <Stepper :step="1" :total-step="3" />
-          <Label preset="p6" :text="$t('Registration.step', { step: 1, total: 3 })" class="text-medium-gray" />
+          <Stepper :step="1" :total-step="4" />
+          <Label preset="p6" :text="$t('Registration.step', { step: 1, total: 4 })" class="text-medium-gray" />
         </div>
       </div>
       <!-- guide text -->
