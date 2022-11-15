@@ -294,14 +294,14 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get loadingText(): string {
+    if (!this.ogImageArweaveId)
+      return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+
     if (this.state === State.MINT)
       return this.$t('NFTPortal.loadingMessage.mint') as string
 
     if (this.state === State.CREATE)
       return this.$t('NFTPortal.loadingMessage.createClass') as string
-
-    if (this.ogImageBlob && !this.ogImageArweaveId)
-      return this.$t('NFTPortal.loadingMessage.uploadImg') as string
 
     return this.$t('NFTPortal.loadingMessage.createClass') as string
   }

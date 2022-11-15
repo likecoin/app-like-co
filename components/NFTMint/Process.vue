@@ -26,7 +26,7 @@
         align="center"
         :text="formattedStatusTitle"
       />
-      <FormField v-if="nftLink" :label="$t('NFTPortal.label.nf')">
+      <FormField v-if="nftLink" :label="$t('NFTPortal.label.nft')">
         <div
           class="
             w-full
