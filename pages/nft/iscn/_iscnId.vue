@@ -1,96 +1,84 @@
 <template>
-  <Page :class="[
-    'flex',
-    'flex-col',
-    'relative',
-    'items-center',
-    'justify-center',
-    'px-[20px]',
-    'pt-[38px]',
-    'lg:p-[16px]',
-  ]">
-    <Card
-      v-if="currentPage === 'NFTPreview' || currentPage === 'Done'"
-      :class="['p-[32px]', 'w-full', 'max-w-[600px]']"
-      :has-padding="false"
+  <Page
+    :class="[
+      'flex',
+      'flex-col',
+      'relative',
+      'items-center',
+      'justify-center',
+      'px-[20px]',
+      'pt-[38px]',
+      'lg:p-[16px]',
+    ]"
+  >
+    <ContentCard
+      class="max-w-[600px]"
+      :title="pageTitle"
+      :step="currentStep"
+      :total-step="4"
     >
-      <!-- header -->
-      <div :class="['flex', 'justify-between', 'items-center','mb-[16px]']">
-        <Label class="w-min" :text="labelText" tag="div" preset="p5" valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green" prepend-class="text-like-green">
-          <template #prepend>
-            <IconRegister />
-          </template>
-        </Label>
-        <div :class="['flex', 'flex-col', 'items-end']">
-          <Stepper :step="step" :total-step="4" />
-          <Label preset="p6" :text="$t('Registration.step', { step: step, total: 4 })" class="text-medium-gray" />
-        </div>
-      </div>
-      <!-- guide text -->
-      <!-- body -->
-      <div :class="[
-        'flex',
-        'flex-col',
-        'justify-center',
-        'items-center',
-        'w-full',
-      ]">
-        <div :class="[
-          'flex',
-          'flex-col',
-          'justify-center',
-          'items-start',
-          'w-full',
-        ]">
-          <div v-if="currentPage === 'NFTPreview'">
-            <NFTPreviewCard
-              class="w-[90%]"
-              :name="NftName"
-              :description="NftDescription"
-              :img-src="imgSrc"
-              :is-loading="isLoadingPreviewOG"
-            />
-          </div>
-          <FormField :label="$t('NFTPortal.label.Iscn')" class="my-[12px]">
-            <Label :text="iscnId" tag="div" preset="p6" />
-          </FormField>
-          <FormField v-if="classId" :label="$t('NFTPortal.label.classId')" class="mb-[12px]">
-            <Label :text="classId" tag="div" preset="p6" />
-          </FormField>
-          <FormField v-if="state === 'done'" :label="$t('NFTPortal.label.detailsPage')" class="mb-[12px]">
-            <Link :href="detailsPageURL">{{ detailsPageURL }}</Link>
-          </FormField>
-        </div>
-        <Label
-          v-if="iscnOwner && !isUserISCNOwner"
-          :text="$t('NFTPortal.errorMessage.notIscnOwner', { ownerWallet: iscnOwner })"
-        />
-        <div class="flex flex-col self-end">
-          <div v-if="isLoading" class="flex flex-col justify-center">
-            <ProgressIndicator />
-            <Label class="text-[8px] text-medium-gray text-center mt-[8px]" align="center">{{ loadingText }}</Label>
-          </div>
+      <!-- header Icon -->
+      <template #label-prepend>
+        <IconAddToISCN v-if="currentPage !== 'MintProcess'" class="w-[20px]" />
+        <IconStar v-else class="w-[20px]" />
+      </template>
 
+      <!-- body  -->
+
+      <NFTMintPreview
+        v-if="currentPage === 'NFTPreview'"
+        class="w-[90%] mx-auto mb-[32px]"
+        :name="NftName"
+        :description="NftDescription"
+        :img-src="imgSrc"
+        :is-loading="isLoadingPreviewOG"
+      />
+
+      <NFTMintWriterMessage
+        v-if="currentPage === 'MessagePreview'"
+        :address="address"
+        @handle-message-change="(value) => (message = value)"
+      />
+
+      <NFTMintProcess
+        v-if="currentPage === 'MintProcess'"
+        :iscn-id="iscnId"
+        :ar-id="ogImageArweaveId"
+        :class-id="classId"
+        :nft-link="apiData && detailsPageURL"
+        :has-error="hasError"
+        :tx-status="txStatus"
+        :is-uploading="isUploading"
+        :is-creating-class="isCreatingClass"
+        :is-minting="isMinting"
+      />
+
+      <!-- footer -->
+
+      <template #footer>
+        <div v-if="isLoading" class="flex flex-col items-end w-full">
+          <ProgressIndicator class="w-min" />
+          <Label
+            class="text-[8px] text-medium-gray text-center mt-[8px] w-min whitespace-nowrap"
+            >{{ loadingText }}</Label
+          >
+        </div>
+        <div v-else class="ml-auto w-min">
+          <Button v-if="hasError" preset="outline" text="Retry" />
           <Button
             v-else
-            preset="outline"
-            :is-disabled="!iscnData || !isUserISCNOwner"
-            class="my-[12px]"
-            @click="doAction"
+            preset="secondary"
+            :text="buttonText"
+            @click="handleClickButton"
           >
-            {{ buttonText }}
+            <template v-if="state !== 'done'" #append>
+              <IconArrowRight />
+            </template>
           </Button>
         </div>
-      </div>
-    </Card>
-    <NFTMessagePreviewCard
-      v-else-if="currentPage === 'MessagePreview'"
-      :address="address"
-      :is-loading="isLoading"
-      :loading-text="loadingText"
-      @post-mint-info="handleConfirmMessage"
-    />
+      </template>
+    </ContentCard>
+
     <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
     <AttentionsLedger v-else />
     <AlertsSignFailed />
@@ -139,10 +127,24 @@ export enum ErrorType {
   USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED'
 }
 
+export enum State {
+  PREVIEW = 'preview',
+  MESSAGE = 'message',
+  CREATE = 'create',
+  MINT = 'mint',
+  DONE = 'done'
+}
+
 export enum CurrentPage {
   NFT_PREVIEW = 'NFTPreview',
   MESSAGE_PREVIEW = 'MessagePreview',
-  DONE = 'Done',
+  MINT_PROCESS = 'MintProcess',
+}
+
+export enum TxStatus {
+  SIGN = 'sign',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
 }
 
 @Component({
@@ -163,9 +165,7 @@ export default class NFTTestMintPage extends Vue {
     latestVersion: Long.Long
   } | null>
 
-  @walletModule.Action toggleSnackbar!: (
-    error: string,
-  ) => void
+  @walletModule.Action toggleSnackbar!: (error: string) => void
 
   @walletModule.Getter('getType') walletType!: string | null
 
@@ -182,10 +182,15 @@ export default class NFTTestMintPage extends Vue {
   postInfo: any = null
 
   isLoading = false
-  isSkipMessage = false
+  isUploading = false
+  isCreatingClass = false
+  isMinting = false
+  isPreviewChecked = false
+  isMessageChecked = false
 
   hasError = false
   balance: string = ''
+  txStatus: string = ''
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
@@ -215,39 +220,89 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get state(): string {
-    if (this.apiData) return 'done'
-    if (this.message || this.isSkipMessage) return 'mint'
-    if (this.classId) return 'message'
-    return 'create'
+    if (this.apiData) return State.DONE
+    if (this.classId) return State.MINT
+    if (this.isMessageChecked) return State.CREATE
+    if (this.isPreviewChecked) return State.MESSAGE
+    return State.PREVIEW
+  }
+
+  get currentPage() {
+    switch (this.state) {
+      case State.PREVIEW:
+        return CurrentPage.NFT_PREVIEW
+
+      case State.MESSAGE:
+        return CurrentPage.MESSAGE_PREVIEW
+
+      case State.CREATE:
+      case State.MINT:
+      case State.DONE:
+        return CurrentPage.MINT_PROCESS
+
+      default:
+        return CurrentPage.NFT_PREVIEW
+    }
+  }
+
+  get pageTitle() {
+    switch (this.currentPage) {
+      case CurrentPage.NFT_PREVIEW:
+      case CurrentPage.MESSAGE_PREVIEW:
+        return 'Preview'
+
+      case CurrentPage.MINT_PROCESS:
+        return 'Sign'
+
+      default:
+        return 'Writing NFT Preview'
+    }
   }
 
   get buttonText(): string {
     if (this.hasError) return 'Retry'
-    if (this.state === 'done') return 'View NFT'
-    if (this.state === 'message') return 'Next'
-    if (this.state === 'mint') return 'Next'
-    return 'Create NFT Class'
+    if (this.state === State.DONE) return 'View NFT'
+    if (this.state === State.MINT) return 'Mint'
+    if (this.state === State.CREATE) return 'Create'
+    if (this.state === State.MESSAGE) return 'Next'
+    return 'Next'
   }
 
   get labelText(): string {
-    if (this.state === 'done') return 'Done'
-    if (this.state === 'message') return 'Message'
-    if (this.state === 'mint') return 'Mint'
+    if (this.state === State.DONE) return 'Done'
+    if (this.state === State.MESSAGE) return 'Message'
+    if (this.state === State.MINT) return 'Mint'
     return 'Mint NFT'
   }
 
-  get step(): number {
-    if (this.state === 'done') return 4
-    if (this.state === 'mint') return 3
-    if (this.state === 'message') return 3
-    return 2
+  get currentStep(): number {
+    switch (this.state) {
+      case State.PREVIEW:
+        return 2
+
+      case State.MESSAGE:
+        return 3
+
+      case State.CREATE:
+      case State.MINT:
+      case State.DONE:
+        return 4
+
+      default:
+        return 2
+    }
   }
 
   get loadingText(): string {
-    if (this.state === 'done') return ''
-    if (this.state === 'mint') return this.$t('NFTPortal.loadingMessage.mint') as string
-    if (this.state === 'message') return ''
-    if (this.ogImageBlob && !this.ogImageArweaveId) return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+    if (this.state === State.MINT)
+      return this.$t('NFTPortal.loadingMessage.mint') as string
+
+    if (this.state === State.CREATE)
+      return this.$t('NFTPortal.loadingMessage.createClass') as string
+
+    if (this.ogImageBlob && !this.ogImageArweaveId)
+      return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+
     return this.$t('NFTPortal.loadingMessage.createClass') as string
   }
 
@@ -288,7 +343,8 @@ export default class NFTTestMintPage extends Vue {
     let metadata = {
       image: this.ogImageUri,
       external_url: this.iscnData.contentMetadata?.url,
-    };
+      message: this.message || '',
+    }
     if (this.isWritingNFT) {
       metadata = Object.assign(metadata, {
         nft_meta_collection_id: 'likerland_writing_nft',
@@ -321,23 +377,6 @@ export default class NFTTestMintPage extends Vue {
     return undefined
   }
 
-  get currentPage() {
-    switch (this.state) {
-      case 'create':
-        return CurrentPage.NFT_PREVIEW
-
-      case 'message':
-      case 'mint':
-        return CurrentPage.MESSAGE_PREVIEW
-
-      case 'done':
-        return CurrentPage.DONE
-
-      default:
-        return CurrentPage.NFT_PREVIEW
-    }
-  }
-
   async mounted() {
     try {
       await Promise.all([
@@ -350,10 +389,18 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  handleConfirmMessage(message: string){
-    if (message) { this.message = message }
-    else this.isSkipMessage = true
-    this.doAction()
+  handleClickButton() {
+    switch (this.state) {
+      case 'preview':
+        this.isPreviewChecked = true
+        break
+      case 'message':
+        this.isMessageChecked = true
+        this.doAction()
+        break
+      default:
+        this.doAction()
+    }
   }
 
   async doAction() {
@@ -381,23 +428,22 @@ export default class NFTTestMintPage extends Vue {
           }
 
           if (this.ogImageBlob) {
+          this.isUploading = true
             const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
             if (!this.ogImageArweaveId) {
               if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
               await this.submitToArweave()
             }
           }
+          this.isCreatingClass = true
           this.classId = await this.createNftClass()
+          this.isCreatingClass = false
           if (!this.classId) break
-          this.$router.replace({ query: { class_id: this.classId }})
-          this.isLoading = false
-          break;
-        }
-        case 'message': {
-          break
+          this.$router.replace({ query: { class_id: this.classId } })
         }
         case 'mint': {
           this.isLoading = true
+          this.isMinting = true
           await this.mintNFT()
           if (!this.mintNFTResult) break
           if (this.isWritingNFT) {
@@ -405,7 +451,9 @@ export default class NFTTestMintPage extends Vue {
             if (!this.postInfo) break
             await this.getMintInfo()
           }
+          this.txStatus = TxStatus.COMPLETED
           this.isLoading = false
+          this.isMinting = false
           break
         }
         case 'done':
@@ -415,6 +463,9 @@ export default class NFTTestMintPage extends Vue {
       /* eslint-enable no-fallthrough */
     } catch (error) {
       this.hasError = true
+      this.isUploading = false
+      this.isCreatingClass = false
+      this.isMinting = false
       this.setError(error)
     }
   }
@@ -431,6 +482,7 @@ export default class NFTTestMintPage extends Vue {
       metadata: {
         name: this.NftName,
         image: this.ogImageUri,
+        message: this.message,
       },
     }
   }
@@ -606,10 +658,13 @@ export default class NFTTestMintPage extends Vue {
       const signingClient = await getSigningClient()
       await signingClient.setSigner(this.signer)
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
+      this.txStatus = TxStatus.PROCESSING
       const res = await signingClient.createNFTClass(
         this.address,
         this.iscnId,
         this.createNftClassPayload,
+        // undefined,
+        // { broadcast: false },
       )
       const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
       const event = rawLogs[0].events.find(

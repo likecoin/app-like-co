@@ -26,7 +26,7 @@
         <EditableForm
           class="my-[18px]"
           :placeholder="$t('NFTPortal.placeholder.message')"
-          @message="(value) => (message = value)"
+          @message="(value) => $emit('handleMessageChange', value)"
         />
         <div class="flex justify-end">
           <UserAvatar :url="avatar" :size="42" />

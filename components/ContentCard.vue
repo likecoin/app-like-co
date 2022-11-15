@@ -3,6 +3,7 @@
     <!-- header -->
     <div :class="['flex', 'justify-between', 'items-center','mb-[32px]']">
       <Label
+        v-if="title"
         class="w-min"
         :text="title"
         tag="div"
@@ -15,6 +16,7 @@
           <slot name="label-prepend" />
         </template>
       </Label>
+      <slot name="title" />
       <div v-if="step && totalStep" :class="['flex', 'flex-col', 'items-end']">
         <Stepper :step="step" :total-step="totalStep" />
         <Label
@@ -24,9 +26,10 @@
         />
       </div>
     </div>
-    <!-- guide text -->
     <!-- body -->
     <slot />
+    <!-- footer -->
+    <slot name="footer" />
   </Card>
 </template>
 

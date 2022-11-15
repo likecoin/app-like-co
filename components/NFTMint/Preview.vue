@@ -69,7 +69,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 @Component({
   filters: {
     ellipsis(value: any) {
-      const len: number = value.length
+      const len: number = value?.length
       const dots = '...'
       if (!value) return ''
       if (value.length > 50) {
@@ -79,7 +79,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
     },
   },
 })
-export default class NFTPreviewCard extends Vue {
+export default class NFTMintPreview extends Vue {
   @Prop(String) readonly name!: string | undefined
 
   @Prop(String) readonly description!: string | undefined
