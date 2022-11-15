@@ -42,18 +42,24 @@
             :error-message="errorMessage" />
           {{ iscnId }}
         </div>
-        <div class="flex flex-row self-end">
-          <ProgressIndicator v-if="isLoading" />
-          <Button v-else-if="state === 'INIT'" :text="$t('NFTPortal.button.register')" preset="outline"
+        <div v-if="isLoading" class="flex flex-col items-end w-full">
+          <ProgressIndicator class="ml-auto w-min" />
+          <Label
+            class="text-[8px] text-medium-gray text-center mt-[8px] whitespace-nowrap w-min"
+            >{{ loadingText }}</Label
+          >
+        </div>
+        <div v-else-if="state === 'INIT'" class="ml-auto w-min">
+          <Button :text="$t('NFTPortal.button.register')" preset="secondary"
             @click="onSubmit">
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
           </Button>
-          <div v-else class="flex">
-            <Button preset="outline" @click="onSkip">Skip & Continue</Button>
-            <Button preset="outline" @click="onSubmit">Retry</Button>
-          </div>
+        </div>
+        <div v-else class="flex gap-[12px] ml-auto w-min">
+            <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
+            <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
         </div>
       </div>
     </Card>
@@ -155,6 +161,28 @@ export default class FetchIndex extends Vue {
       return url;
     }
     return encodeURI(url);
+  }
+
+  get loadingText(): string {
+    switch (this.state) {
+      case State.INIT:
+        return this.$t('NFTPortal.url.loadingMessage.init') as string
+
+      case State.TO_CRAWL_URL:
+        return this.$t('NFTPortal.url.loadingMessage.crawl') as string
+
+      case State.TO_ESTIMATE_ARWEAVE_FEE:
+        return this.$t('NFTPortal.url.loadingMessage.estimate') as string
+
+      case State.TO_UPLOAD_TO_ARWEAVE:
+        return this.$t('NFTPortal.url.loadingMessage.upload') as string
+
+      case State.TO_REGISTER_ISCN:
+        return this.$t('NFTPortal.url.loadingMessage.register') as string
+
+      default:
+        return '';
+    }
   }
 
   get formData(): FormData | null {
