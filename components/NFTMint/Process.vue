@@ -63,7 +63,7 @@
         {{ arIdStatusText | ellipsis }}
         <template #prepend>
           <IconCheck v-if="arId" />
-          <IconEdit v-else-if="isUploading" />
+          <IconEdit v-else-if="state === 'uploading'" />
         </template>
       </Label>
     </div>
@@ -74,7 +74,7 @@
         {{ classIdStatusText | ellipsis }}
         <template #prepend>
           <IconCheck v-if="classId" />
-          <IconEdit v-else-if="isCreatingClass" />
+          <IconEdit v-else-if="state === 'creating'" />
         </template>
       </Label>
     </div>
@@ -85,7 +85,7 @@
         {{ nftIdStatusText | ellipsis }}
         <template #prepend>
           <IconCheck v-if="nftLink" />
-          <IconEdit v-else-if="isMinting" />
+          <IconEdit v-else-if="state === 'minting'" />
         </template>
       </Label>
     </div>
@@ -95,22 +95,19 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { ellipsis } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
 
+export enum MintState {
+  UPLOADING = 'uploading',
+  CREATING = 'creating',
+  MINTING = 'minting',
+  DONE = ''
+}
+
 @Component({
-  filters: {
-    ellipsis(value: any) {
-      const len: number = value.length
-      const dots = '...'
-      if (!value) return ''
-      if (value.length > 20) {
-        return value.substring(0, 12) + dots + value.substring(len - 5, len)
-      }
-      return value
-    },
-  },
-})
+  filters: { ellipsis }})
 export default class UploadForm extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
 
@@ -124,29 +121,25 @@ export default class UploadForm extends Vue {
 
   @Prop(String) readonly txStatus!: string
 
+  @Prop(String) readonly state!: MintState
+
   @Prop({ default: false }) readonly hasError!: boolean
-
-  @Prop({ default: false }) readonly isUploading!: boolean
-
-  @Prop({ default: false }) readonly isCreatingClass!: boolean
-
-  @Prop({ default: false }) readonly isMinting!: boolean
 
   get arIdStatusText() {
     if (this.arId) return ` ar://${this.arId}`
-    if (!this.arId && this.isUploading) return this.$t('NFTPortal.loadingMessage.preparing')
+    if (!this.arId && this.state === MintState.UPLOADING) return this.$t('NFTPortal.loadingMessage.preparing')
     return this.$t('NFTPortal.loadingMessage.wait')
   }
 
   get classIdStatusText() {
     if (this.classId) return this.classId
-    if (!this.classId && this.isCreatingClass) return this.$t('NFTPortal.loadingMessage.preparing')
+    if (!this.classId && this.state === MintState.CREATING) return this.$t('NFTPortal.loadingMessage.preparing')
     return this.$t('NFTPortal.loadingMessage.wait')
   }
 
   get nftIdStatusText() {
-    if (this.nftLink) return 'Done'
-    if (!this.nftLink && this.isMinting) return this.$t('NFTPortal.loadingMessage.preparing')
+    if (this.nftLink) return this.$t('NFTPortal.url.loadingMessage.done')
+    if (!this.nftLink && this.state === MintState.MINTING) return this.$t('NFTPortal.loadingMessage.preparing')
     return this.$t('NFTPortal.loadingMessage.wait')
   }
 
@@ -191,7 +184,7 @@ export default class UploadForm extends Vue {
     return [
       'text-medium-gray',
       '!text-[14px]',
-      'w-[70px]',
+      'w-[90px]',
     ]
   }
 }

@@ -70,18 +70,10 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { getAddressLikerIdMinApi } from '~/constant/api'
 
+import { ellipsis } from '~/utils/ui'
+
 @Component({
-  filters: {
-    ellipsis(value: any) {
-      const len: number = value.length
-      const dots = '...'
-      if (!value) return ''
-      if (value.length > 20) {
-        return value.substring(0, 8) + dots + value.substring(len - 3, len)
-      }
-      return value
-    },
-  },
+  filters: { ellipsis },
 })
 export default class UploadForm extends Vue {
   @Prop(String) readonly address!: string

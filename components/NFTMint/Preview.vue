@@ -66,19 +66,10 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+import { ellipsisDescription } from '~/utils/ui'
+
 @Component({
-  filters: {
-    ellipsis(value: any) {
-      const len: number = value?.length
-      const dots = '...'
-      if (!value) return ''
-      if (value.length > 50) {
-        return value.substring(0, 40) + dots + value.substring(len - 5, len)
-      }
-      return value
-    },
-  },
-})
+  filters: { ellipsisDescription }})
 export default class NFTMintPreview extends Vue {
   @Prop(String) readonly name!: string | undefined
 

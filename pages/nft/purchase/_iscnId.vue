@@ -88,6 +88,7 @@ import { getAccountBalance } from '~/utils/cosmos'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
+import { ellipsis } from '~/utils/ui'
 
 const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
@@ -102,17 +103,7 @@ export enum ErrorType {
       redirect({ name: 'index' })
     }
   },
-  filters: {
-    ellipsis(value: any) {
-      const len: number = value.length
-      const dots = '...'
-      if (!value) return ''
-      if (value.length > 15) {
-        return value.substring(0, 10) + dots + value.substring(len - 5, len)
-      }
-      return value
-    },
-  },
+  filters: { ellipsis },
   layout: 'wallet',
 })
 export default class NFTTestButtonPage extends Vue {
