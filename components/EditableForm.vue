@@ -29,7 +29,7 @@
       v-model="isOpenDialog"
       :has-padding="false"
       preset="custom"
-      @close="tempMessage = ''"
+      @close="messageInput = ''"
     >
       <ContentCard
         class="w-[480px] min-w-full"
@@ -45,9 +45,9 @@
         >
           <TextField
             :value="message"
-            :error-message="validateField(message, 256, true)"
+            :error-message="errorMessage"
             :placeholder="placeholder"
-            @input="(value) => (tempMessage = value)"
+            @input="(value) => (messageInput = value)"
           />
         </FormField>
 
@@ -69,7 +69,7 @@ export default class UploadForm extends Vue {
 
   isOpenDialog: boolean = false
   message: string = ''
-  tempMessage: string = ''
+  messageInput: string = ''
 
   get guideMessage() {
     return this.message
@@ -77,23 +77,18 @@ export default class UploadForm extends Vue {
       : this.$t('NFTPortal.textfield.guide.add')
   }
 
-  validateField(val: any, limit: number, least: number = 0) {
-    if (val && val.length > limit) {
+  get errorMessage() {
+    if (this.message.length > 256) {
       return this.$t('IscnRegisterForm.warning.exceeded', {
-        current: val.length,
-        limit,
-      })
-    }
-    if (val && least > 0 && val.length < least) {
-      return this.$t('IscnRegisterForm.warning.shortage', {
-        least,
+        current: this.message.length,
+        limit: 256,
       })
     }
     return undefined
   }
 
   handleClickConfirm() {
-    this.message = this.tempMessage
+    this.message = this.messageInput
     this.isOpenDialog = false
     this.$emit('message', this.message)
   }

@@ -12,21 +12,19 @@
     ]"
     :src="imageSrc"
     :style="imageStyle"
-    :loading="loadingType"
   />
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { DEFAULT_AVATAR } from '../constant'
 
 @Component
 export default class UserAvatar extends Vue {
   @Prop({ default: 40 }) readonly size: any | undefined
-  @Prop(String) readonly url: string | undefined
+  @Prop(String) readonly url!: string
 
   get imageSrc() {
-    return this.getLikeCoResizedImageUrl(this.url || DEFAULT_AVATAR, this.size)
+    return this.getLikeCoResizedImageUrl(this.url, this.size)
   }
 
   get imageStyle() {

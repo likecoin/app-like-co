@@ -37,7 +37,7 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
-        @handle-message-change="(value) => (message = value)"
+        @message-change="(value) => (message = value)"
       />
 
       <NFTMintProcess
@@ -48,9 +48,7 @@
         :nft-link="apiData && detailsPageURL"
         :has-error="hasError"
         :tx-status="txStatus"
-        :is-uploading="isUploading"
-        :is-creating-class="isCreatingClass"
-        :is-minting="isMinting"
+        :state="mintState"
       />
 
       <!-- footer -->
@@ -64,7 +62,7 @@
           >
         </div>
         <div v-else class="ml-auto w-min">
-          <Button v-if="hasError" preset="outline" text="Retry" />
+          <Button v-if="hasError" preset="outline" text="Retry" @click="handleClickButton" />
           <Button
             v-else
             preset="secondary"
@@ -147,6 +145,13 @@ export enum TxStatus {
   COMPLETED = 'completed',
 }
 
+export enum MintState {
+  UPLOADING = 'uploading',
+  CREATING = 'creating',
+  MINTING = 'minting',
+  DONE = ''
+}
+
 @Component({
   fetch({ params, redirect }) {
     if (!params.iscnId) {
@@ -182,9 +187,7 @@ export default class NFTTestMintPage extends Vue {
   postInfo: any = null
 
   isLoading = false
-  isUploading = false
-  isCreatingClass = false
-  isMinting = false
+  mintState = MintState.UPLOADING
   isPreviewChecked = false
   isMessageChecked = false
 
@@ -261,18 +264,18 @@ export default class NFTTestMintPage extends Vue {
 
   get buttonText(): string {
     if (this.hasError) return 'Retry'
-    if (this.state === State.DONE) return 'View NFT'
-    if (this.state === State.MINT) return 'Mint'
-    if (this.state === State.CREATE) return 'Create'
-    if (this.state === State.MESSAGE) return 'Next'
-    return 'Next'
+    if (this.state === State.DONE) return this.$t('NFTPortal.button.view') as string
+    if (this.state === State.MINT) return this.$t('NFTPortal.button.mint') as string
+    if (this.state === State.CREATE) return this.$t('NFTPortal.button.create') as string
+    if (this.state === State.MESSAGE) return this.$t('NFTPortal.button.next') as string
+    return this.$t('NFTPortal.button.next') as string
   }
 
   get labelText(): string {
-    if (this.state === State.DONE) return 'Done'
-    if (this.state === State.MESSAGE) return 'Message'
-    if (this.state === State.MINT) return 'Mint'
-    return 'Mint NFT'
+    if (this.state === State.DONE) return this.$t('NFTPortal.title.done') as string
+    if (this.state === State.MESSAGE) return this.$t('NFTPortal.title.message') as string
+    if (this.state === State.MINT) return this.$t('NFTPortal.title.mint') as string
+    return this.$t('NFTPortal.title.mint') as string
   }
 
   get currentStep(): number {
@@ -428,22 +431,22 @@ export default class NFTTestMintPage extends Vue {
           }
 
           if (this.ogImageBlob) {
-          this.isUploading = true
+          this.mintState = MintState.UPLOADING
             const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
             if (!this.ogImageArweaveId) {
               if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
               await this.submitToArweave()
             }
           }
-          this.isCreatingClass = true
+          this.mintState = MintState.CREATING
           this.classId = await this.createNftClass()
-          this.isCreatingClass = false
+          this.mintState = MintState.DONE
           if (!this.classId) break
           this.$router.replace({ query: { class_id: this.classId } })
         }
         case 'mint': {
           this.isLoading = true
-          this.isMinting = true
+          this.mintState = MintState.MINTING
           await this.mintNFT()
           if (!this.mintNFTResult) break
           if (this.isWritingNFT) {
@@ -453,7 +456,7 @@ export default class NFTTestMintPage extends Vue {
           }
           this.txStatus = TxStatus.COMPLETED
           this.isLoading = false
-          this.isMinting = false
+          this.mintState = MintState.DONE
           break
         }
         case 'done':
@@ -463,9 +466,7 @@ export default class NFTTestMintPage extends Vue {
       /* eslint-enable no-fallthrough */
     } catch (error) {
       this.hasError = true
-      this.isUploading = false
-      this.isCreatingClass = false
-      this.isMinting = false
+      this.mintState = MintState.DONE
       this.setError(error)
     }
   }
@@ -663,8 +664,6 @@ export default class NFTTestMintPage extends Vue {
         this.address,
         this.iscnId,
         this.createNftClassPayload,
-        // undefined,
-        // { broadcast: false },
       )
       const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
       const event = rawLogs[0].events.find(
