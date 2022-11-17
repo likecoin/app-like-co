@@ -33,7 +33,7 @@
     >
       <ContentCard
         class="w-[480px] min-w-full"
-        :title="$t('NFTPortal.label.message')"
+        :title="$t('NFTPortal.label.message.dialog')"
       >
         <template #label-prepend>
           <IconEdit />

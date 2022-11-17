@@ -13,13 +13,19 @@
         <IconEye />
       </template>
     </Label>
-    <div class="w-full mx-auto max-w-[80%]">
-      <EditableForm
-        class="my-[18px]"
-        :placeholder="$t('NFTPortal.placeholder.message')"
-        @message="(value) => $emit('message-change', value)"
-      />
-      <div class="flex justify-end">
+    <div class="flex-col items-center justify-center">
+      <div class="h-[24px] w-[2px] bg-shade-gray mx-auto my-[16px]" />
+      <div class="w-full mx-auto max-w-[80%]">
+        <div class="text-[12px] text-center text-medium-gray">
+          {{ $t('NFTPortal.label.message') }}
+        </div>
+        <EditableForm
+          class="mt-[8px] mb-[18px]"
+          :placeholder="$t('NFTPortal.placeholder.message')"
+          @message="(value) => $emit('message-change', value)"
+        />
+      </div>
+      <div class="flex mx-auto w-min">
         <UserAvatar :url="avatar" :size="42" />
         <div class="flex-col justify-start ml-[16px]">
           <div class="text-[12px] text-medium-gray">
