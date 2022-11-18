@@ -453,7 +453,8 @@ import {
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
 } from '~/constant'
-import { logTrackerEvent } from '~/utils/logger';
+import { logTrackerEvent } from '~/utils/logger'
+import { ellipsis } from '~/utils/ui'
 
 const iscnModule = namespace('iscn')
 
@@ -485,17 +486,7 @@ export enum ExifList {
       title,
     } as MetaInfo
   },
-  filters: {
-    ellipsis(value: any) {
-      const len: number = value.length
-      const dots = '...'
-      if (!value) return ''
-      if (value.length > 15) {
-        return value.substring(0, 10) + dots + value.substring(len - 5, len)
-      }
-      return value
-    },
-  },
+  filters: { ellipsis },
   layout({ query }) {
     switch (query.layout) {
       case 'popup':
