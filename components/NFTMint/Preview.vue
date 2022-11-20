@@ -37,9 +37,10 @@
         'bg-white',
         'border-shade-gray',
         'rounded-[16px]',
+        'w-full'
       ]"
     >
-      <div v-if="isLoading" class="w-full">
+      <div v-if="isLoading">
         <ProgressIndicator preset="thin" />
       </div>
       <div
@@ -52,7 +53,10 @@
           'overflow-hidden',
         ]"
       >
-        <img :alt="name" :src="imgSrc" />
+        <img v-if="imgSrc" :alt="name" :src="imgSrc" />
+        <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
+          <img class="w-[30px]" :alt="name" src="~assets/images/no-image.png" />
+        </div>
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
           <Label preset="h5" :text="name" />
           <Label preset="p6" class="mt-[8px]">{{
