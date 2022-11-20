@@ -245,6 +245,7 @@
   "NFTPortal.button.retry":"Retry",
   "NFTPortal.button.view":"View NFT",
   "NFTPortal.errorMessage.notIscnOwner": "Please use {ownerWallet} to sign this transaction",
+  "NFTPortal.errorMessage.urlNotExists": "Get OgImage Not Exists",
   "NFTPortal.label.classId": "CLASS ID",
   "NFTPortal.label.creator": "Creator",
   "NFTPortal.label.detailsPage": "NFT Details Page :",

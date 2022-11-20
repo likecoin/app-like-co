@@ -187,6 +187,7 @@ export default class NFTTestMintPage extends Vue {
   postInfo: any = null
 
   isLoading = false
+  isLoadingPreviewOG = true
   mintState = MintState.UPLOADING
   isPreviewChecked = false
   isMessageChecked = false
@@ -336,10 +337,6 @@ export default class NFTTestMintPage extends Vue {
 
   get NftDescription() {
     return `${this.iscnData?.contentMetadata?.description || undefined}`;
-  }
-
-  get isLoadingPreviewOG() {
-    return !this.imgSrc
   }
 
   get createNftClassPayload() {
@@ -542,19 +539,21 @@ export default class NFTTestMintPage extends Vue {
 
   async getOgImage() {
     try {
+      this.isLoadingPreviewOG = true
       const url = this.iscnData.contentMetadata?.url
       if (!url) {
         logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', this.iscnId, 1);
-        return
+        throw new Error(this.$t('NFTPortal.errorMessage.urlNotExists') as string);
       }
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
       const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
       this.ogImageBlob = data
+      this.isLoadingPreviewOG = false
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
-      // TODO: ignore image fetch error e.g. CORS for now, handle with UI later
       // eslint-disable-next-line no-console
       console.error(error)
+      this.isLoadingPreviewOG = false
     }
   }
 
