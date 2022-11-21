@@ -336,7 +336,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get NftDescription() {
-    return `${this.iscnData?.contentMetadata?.description || undefined}`;
+    return `${this.iscnData?.contentMetadata?.description || ''}`;
   }
 
   get createNftClassPayload() {
