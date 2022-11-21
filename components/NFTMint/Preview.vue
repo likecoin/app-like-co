@@ -55,11 +55,11 @@
       >
         <img v-if="imgSrc" :alt="name" :src="imgSrc" />
         <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
-          <img class="w-[30px]" :alt="name" src="~assets/images/no-image.png" />
+          <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
         </div>
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
           <Label preset="h5" :text="name" />
-          <Label preset="p6" class="mt-[8px]">{{
+          <Label v-if="description" preset="p6" class="mt-[8px]">{{
             description | ellipsis
           }}</Label>
         </div>
