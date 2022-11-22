@@ -51,7 +51,15 @@
               {{ $t('iscn.meta.rawData') }}
             </Button>
             <Button
+              v-if="isShowMintButton"
+              :class="['w-min', 'mr-[8px]']"
               preset="secondary"
+              :text="$t('NFTPortal.button.mint')"
+              :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
+            />
+            <Button
+              preset="outline"
+              :class="['w-min', 'mr-[8px]']"
               :text="$t('general.closeWindow')"
               @click="closeWindow"
             />
@@ -59,14 +67,6 @@
         </template>
       </IscnUploadedInfo>
     </Page>
-    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
-      <Button
-        preset="plain"
-        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
-        class="text-like-green"
-        :text="$t('NFTPortal.button.notMinted')"
-      />
-    </div>
   </div>
   <div v-else>
     <div v-if="isShowMintButton" class="flex justify-end w-full">
