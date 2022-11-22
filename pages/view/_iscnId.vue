@@ -59,7 +59,7 @@
             />
             <Button
               preset="outline"
-              :class="['w-min', 'mr-[8px]']"
+              class="w-min"
               :text="$t('general.closeWindow')"
               @click="closeWindow"
             />
