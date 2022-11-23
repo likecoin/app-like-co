@@ -87,6 +87,7 @@
 import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
+import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing';
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { v4 as uuidv4 } from 'uuid'
@@ -109,7 +110,7 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET } from '~/constant'
+import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -672,6 +673,7 @@ export default class NFTTestMintPage extends Vue {
         (a: { key: string }) => a.key === 'class_id',
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
+      this.createRoyltyConfig(classId);
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -685,6 +687,51 @@ export default class NFTTestMintPage extends Vue {
     logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1);
     // eslint-disable-next-line consistent-return
     return classId
+  }
+
+  async createRoyltyConfig(classId: string) {
+    try {
+      if (!this.signer) return
+      const rateBasisPoints = 1000; // 10% as in current chain config
+      const feeAmount = 25000; // 2.5%
+      const totalAmount = 975000; // 1000000 - fee
+      const rewardMap = await parseAndCalculateStakeholderRewards(this.iscnData.stakeholders, this.iscnOwner, {
+        precision: 0,
+        totalAmount,
+      });
+      const rewards = Array.from(rewardMap.entries());
+      const stakeholders = rewards.map((r) => {
+        const [
+          address,
+          { amount },
+        ] = r;
+        return {
+          account: address,
+          weight: parseInt(amount, 10),
+        };
+      });
+      stakeholders.push({
+          account: LIKER_NFT_FEE_WALLET,
+          weight: feeAmount,
+      })
+
+      const signingClient = await getSigningClient()
+      await signingClient.setSigner(this.signer)
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
+      this.txStatus = TxStatus.PROCESSING
+      await signingClient.createRoyaltyConfig(
+        this.address,
+        classId,
+        {
+          rateBasisPoints,
+          stakeholders,
+        },
+      )
+    } catch (err) {
+      // Don't throw on royalty create, not critical for now
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   }
 
   async mintNFT() {
