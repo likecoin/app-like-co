@@ -673,7 +673,7 @@ export default class NFTTestMintPage extends Vue {
         (a: { key: string }) => a.key === 'class_id',
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
-      this.createRoyltyConfig(classId);
+      await this.createRoyltyConfig(classId);
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -694,10 +694,10 @@ export default class NFTTestMintPage extends Vue {
       if (!this.signer) return
       const rateBasisPoints = 1000; // 10% as in current chain config
       const feeAmount = 25000; // 2.5%
-      const totalAmount = 975000; // 1000000 - fee
+      const userAmount = 1000000 - feeAmount; // 1000000 - fee
       const rewardMap = await parseAndCalculateStakeholderRewards(this.iscnData.stakeholders, this.iscnOwner, {
         precision: 0,
-        totalAmount,
+        totalAmount: userAmount,
       });
       const rewards = Array.from(rewardMap.entries());
       const stakeholders = rewards.map((r) => {
