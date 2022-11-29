@@ -51,7 +51,12 @@
           />
         </FormField>
 
-        <Button class="ml-auto" preset="secondary" @click="handleClickConfirm">
+        <Button
+          :is-disabled="errorMessage"
+          class="ml-auto"
+          :preset="errorMessage ? 'tertiary' : 'secondary'"
+          @click="handleClickConfirm"
+        >
           {{ $t('UploadForm.button.confirm') }}
         </Button>
       </ContentCard>
@@ -66,6 +71,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 export default class UploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
   @Prop(String) readonly placeholder: string | undefined
+  @Prop({ default: 256 }) readonly maxLength: number | undefined
 
   isOpenDialog: boolean = false
   message: string = ''
@@ -78,10 +84,10 @@ export default class UploadForm extends Vue {
   }
 
   get errorMessage() {
-    if (this.message.length > 256) {
+    if (this.maxLength && Buffer.byteLength(this.messageInput, 'utf8') > this.maxLength) {
       return this.$t('IscnRegisterForm.warning.exceeded', {
-        current: this.message.length,
-        limit: 256,
+        current: Buffer.byteLength(this.messageInput, 'utf8'),
+        limit: this.maxLength,
       })
     }
     return undefined
