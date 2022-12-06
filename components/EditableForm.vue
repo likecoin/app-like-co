@@ -48,6 +48,7 @@
             :error-message="errorMessage"
             :placeholder="placeholder"
             @input="(value) => (messageInput = value)"
+            @input.once="onInputOnce"
           />
         </FormField>
 
@@ -66,6 +67,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import logTrackerEvent from '~/utils/logger'
 
 @Component
 export default class UploadForm extends Vue {
@@ -91,6 +93,10 @@ export default class UploadForm extends Vue {
       })
     }
     return undefined
+  }
+
+  onInputOnce() {
+    logTrackerEvent(this, 'IscnMintNFT', 'UpdateCreatorMessage', '', 1);
   }
 
   handleClickConfirm() {
