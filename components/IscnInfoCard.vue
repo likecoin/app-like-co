@@ -75,7 +75,7 @@
         <Button
           :text="$t('HomePage.button.learnmore')"
           preset="outline"
-          :class="['text-like-cyan-light', 'w-max','z-10',]"
+          :class="['!text-like-cyan-light', 'w-max','z-10',]"
           :style="{ border: '2px solid #AAF1E7' }"
           href="https://docs.like.co/developer/international-standard-content-number-iscn"
         >
