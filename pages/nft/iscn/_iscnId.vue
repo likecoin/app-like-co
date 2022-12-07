@@ -416,15 +416,15 @@ export default class NFTTestMintPage extends Vue {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
+      if (this.isUsingLikerLandApp) {
+        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
+        throw new Error(ErrorType.USE_WALLET_CONNECT)
+      }
       /* eslint-disable no-fallthrough */
       switch (this.state) {
         case 'create': {
           this.isLoading = true
           const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
-          if (this.isUsingLikerLandApp) {
-            this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
-            throw new Error(ErrorType.USE_WALLET_CONNECT)
-          }
           if (!isAllowed) {
             logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
             this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
