@@ -1,16 +1,25 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { ISCNSigningClient, ISCNSignPayload } from '@likecoin/iscn-js';
+import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER } from '~/constant'
 
 let client: ISCNSigningClient | null = null;
+let iscnLib: any = null;
+
+export async function getISCNLib() {
+  if (!iscnLib) {
+    iscnLib = await import(/* webpackChunkName: "iscn_js" */ '@likecoin/iscn-js');
+  }
+  return iscnLib;
+}
 
 export async function getSigningClient() {
   if (!client) {
-    const c = new ISCNSigningClient();
+    const iscn = await getISCNLib();
+    const c = new iscn.ISCNSigningClient() as ISCNSigningClient;
     await c.connect(network.rpcURL);
     client = c;
   }
