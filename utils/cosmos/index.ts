@@ -1,18 +1,42 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
-import { QueryClient, setupBankExtension, BankExtension, Coin } from "@cosmjs/stargate";
+import { QueryClient, BankExtension, Coin } from "@cosmjs/stargate";
 import BigNumber from 'bignumber.js';
 
 import config from '~/constant/network';
 import { COSMOS_DENOM } from '~/constant';
 
+let cosmRpcLib: any = null
+let cosmLib: any = null;
+
+async function getCosmRpcLib() {
+  if (!cosmRpcLib) {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    cosmRpcLib = await import(/* webpackChunkName: "cosmjs" */ '@cosmjs/tendermint-rpc');
+  }
+  return cosmRpcLib;
+}
+async function getCosmLib() {
+  if (!cosmLib) {
+    cosmLib = await import(/* webpackChunkName: "cosmjs" */ '@cosmjs/stargate');
+  }
+  return cosmLib;
+}
+
 let queryClient: QueryClient & BankExtension;
 
 async function initQueryClient() {
-  const tendermintClient = await Tendermint34Client.connect(config.rpcURL);
-  queryClient = QueryClient.withExtensions(
+  const [
+    cosmRpc,
+    cosm,
+  ] = await Promise.all([
+    getCosmRpcLib(),
+    getCosmLib(),
+  ]);
+  const tendermintClient = await cosmRpc.Tendermint34Client.connect(config.rpcURL) as Tendermint34Client;
+  queryClient = cosm.QueryClient.withExtensions(
     tendermintClient,
-    setupBankExtension,
+    cosm.setupBankExtension,
   );
   return queryClient;
 }
