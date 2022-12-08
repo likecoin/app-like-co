@@ -1,3 +1,5 @@
+import path from 'path';
+
 const siteDefaultDescription =
   'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
 
@@ -144,6 +146,13 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    extend(config, ctx) {
+      /* eslint-disable no-param-reassign */
+      if (!ctx.isDev) {
+        config.resolve.alias['bn.js'] = path.join(__dirname, './node_modules/bn.js');
+      }
+      /* eslint-enable no-param-reassign */
+    },
   },
   server: {
     host: process.env.NODE_ENV === 'production' ? '0' : 'localhost',
