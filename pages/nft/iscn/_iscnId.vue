@@ -47,6 +47,7 @@
         :class-id="classId"
         :nft-link="apiData && detailsPageURL"
         :has-error="hasError"
+        :error-message="errorMessage"
         :tx-status="txStatus"
         :state="mintState"
       />
@@ -123,7 +124,8 @@ export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
   USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER',
-  USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED'
+  USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
+  USE_WALLET_CONNECT = 'WALLET_CONNECT_NOT_ALLOW',
 }
 
 export enum State {
@@ -194,6 +196,7 @@ export default class NFTTestMintPage extends Vue {
   isMessageChecked = false
 
   hasError = false
+  errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
 
@@ -407,10 +410,15 @@ export default class NFTTestMintPage extends Vue {
   async doAction() {
     try {
       this.hasError = false
+      this.errorMessage = ''
       this.balance = await getAccountBalance(this.address) as string
       if (this.balance === '0') {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
+      }
+      if (this.isUsingLikerLandApp) {
+        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
+        throw new Error(ErrorType.USE_WALLET_CONNECT)
       }
       /* eslint-disable no-fallthrough */
       switch (this.state) {

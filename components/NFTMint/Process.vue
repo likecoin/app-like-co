@@ -5,8 +5,8 @@
     <div class="flex flex-col items-center justify-center mb-[32px]">
       <Label
         v-if="hasError"
-        :text="$t('SearchPage.error')"
-        class="text-red w-min whitespace-nowrap"
+        :text="errorMessage ? errorMessage : $t('SearchPage.error')"
+        class="w-full break-normal whitespace-normal text-red"
         align="center"
       >
         <template #prepend>
@@ -120,6 +120,8 @@ export default class UploadForm extends Vue {
   @Prop(String) readonly nftLink!: string
 
   @Prop(String) readonly txStatus!: string
+
+  @Prop(String) readonly errorMessage!: string
 
   @Prop(String) readonly state!: MintState
 

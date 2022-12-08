@@ -189,6 +189,7 @@
   "IscnRegisterForm.error.timeout": "Oops, the server connection timeout, please try again.",
   "IscnRegisterForm.error.titleIsEmpty": "Please enter the ISCN title",
   "IscnRegisterForm.error.notWhitelisted": "Register whitelist",
+  "IscnRegisterForm.error.walletConnect": "Wallet Connect is temporarily unavailable for minting. Please try the other signing methods",
   "IscnRegisterForm.guide.review": "Review and edit metadata",
   "IscnRegisterForm.ipfs.link": "ipfs://{hash}",
   "IscnRegisterForm.label.author": "Author",
