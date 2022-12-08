@@ -33,16 +33,16 @@ export default class UIStore extends VuexModule {
   init() {
     let mode: any = ''
     mode =
-      window.localStorage?.getItem(CURRENT_VIEW_MODE_KEY) === ViewMode.Desktop ||
+      window.sessionStorage?.getItem(CURRENT_VIEW_MODE_KEY) === ViewMode.Desktop ||
       ViewMode.Mobile
-        ? window.localStorage?.getItem(CURRENT_VIEW_MODE_KEY)
+        ? window.sessionStorage?.getItem(CURRENT_VIEW_MODE_KEY)
         : ViewMode.Mobile
     this.setViewMode(mode)
   }
 
   @Action
   changeViewMode(mode: ViewMode) {
-    window.localStorage?.setItem(CURRENT_VIEW_MODE_KEY, mode)
+    window.sessionStorage?.setItem(CURRENT_VIEW_MODE_KEY, mode)
     this.setViewMode(mode)
   }
 
