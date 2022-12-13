@@ -1,4 +1,6 @@
 import path from 'path';
+import { getSitemapRoutes } from './config/sitemap';
+import { SITE_URL } from './constant';
 
 const siteDefaultDescription =
   'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
@@ -105,6 +107,8 @@ export default {
     // https://sentry.nuxtjs.org
     '@nuxtjs/sentry',
 
+    '@nuxtjs/sitemap',
+
     // https://portal-vue.linusb.org/guide/installation.html#nuxt-module
     'portal-vue/nuxt',
   ],
@@ -140,6 +144,10 @@ export default {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
     },
+  },
+  sitemap: {
+    hostname: SITE_URL,
+    routes: getSitemapRoutes,
   },
 
   serverMiddleware: [{ path: '/api', handler: '~/server/index.ts' }],
