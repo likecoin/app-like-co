@@ -4,7 +4,7 @@ import axios from 'axios';
 const { IS_TESTNET } = process.env;
 const LIKECOIN_CHAIN_API = IS_TESTNET
   ? 'https://node.testnet.like.co'
-  : 'https://mainnet-node.like.co';;
+  : 'https://mainnet-node.like.co';
 const getLatestISCN = `${LIKECOIN_CHAIN_API}/iscn/records?reverse=true`;
 const getEarlyISCN = `${LIKECOIN_CHAIN_API}/iscn/records`;
 
