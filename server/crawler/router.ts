@@ -7,6 +7,7 @@ const router = Router()
 router.get('/', async (req, res, next) => {
   try {
     let { url } = req.query
+    const { wallet } = req.query
     if (!url) {
       res.status(400).send('MISSING_URL')
       return
@@ -14,7 +15,7 @@ router.get('/', async (req, res, next) => {
     if (decodeURI(url as string) === url) {
       url = encodeURI(url);
     }
-    const data = await getCralwerData(url as string)
+    const data = await getCralwerData(url as string, wallet as string)
     res.send(data)
   } catch (error) {
     next(error)
