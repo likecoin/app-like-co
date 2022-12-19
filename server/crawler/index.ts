@@ -29,11 +29,13 @@ function formatBody({
   title,
   author,
   description,
+  wallet,
 }: {
   content: string
   title: string
-  author: string
-  description: string
+  author?: string
+  description?: string
+  wallet?: string
 }) {
   let meta = ''
   if (description) {
@@ -41,6 +43,10 @@ function formatBody({
     <meta name="description" content="${description}" />
     <meta property="og:description" content="${description}">
     <meta name="twitter:description" content="${description}">`
+  }
+  if (wallet) {
+    meta += `
+    <meta name="likecoin:address" content="${wallet}">`
   }
   if (author) {
     meta += `
@@ -273,7 +279,7 @@ async function getContentFromUrl(url: string) {
   return content
 }
 
-export async function getCralwerData(url: string) {
+export async function getCralwerData(url: string, wallet?: string) {
   let description = ''
   let keywords = ''
   let author = ''
@@ -344,7 +350,7 @@ export async function getCralwerData(url: string) {
     })
     ogImage = ogImage || tileImage
     body = $('body').html() || ''
-    body = formatBody({ content: body, title, author, description })
+    body = formatBody({ content: body, title, author, description, wallet })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

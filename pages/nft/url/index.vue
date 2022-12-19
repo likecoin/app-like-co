@@ -358,7 +358,7 @@ export default class FetchIndex extends Vue {
   async crawlUrlData() {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
-      const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}`)
+      const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}&wallet=${this.address}`)
       this.crawledData = data
       if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
       if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
