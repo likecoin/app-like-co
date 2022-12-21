@@ -29,14 +29,6 @@
       href="https://about.like.co/"
       :text="$t('HomePage.button.likecoin')"
     />
-    <Button
-      class="md:mr-[24px]"
-      preset="tertiary"
-      text-preset="h6"
-      size="mini"
-      href="https://medium.com/likecoin/proposal-to-fairdrop-likecoin-to-the-cosmos-community-and-civic-likers-d64d841287d8"
-      :text="$t('HomePage.button.airdrop')"
-    />
     <IconDot class="md:mr-[24px] lg:hidden"/>
     <Button
       class="lg:hidden"
