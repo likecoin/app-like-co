@@ -32,14 +32,6 @@
       href="https://app.osmosis.zone/?from=ATOM&to=LIKE"
       :text="$t('HomePage.button.osmosis')"
     />
-    <Button
-      class="mr-[24px]"
-      preset="tertiary"
-      text-preset="h6"
-      size="mini"
-      href="https://app.liquid.com/exchange/LIKEUSDT"
-      :text="$t('HomePage.button.liquid')"
-    />
     <!-- help button -->
     <IconDot class="mr-[24px]"/>
     <Button
