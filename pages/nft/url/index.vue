@@ -38,8 +38,13 @@
       ]">
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
           <Label preset="p6" :text="$t('NFTPortal.label.register')" />
-          <TextField v-model="url" class="flex flex-col" :placeholder="$t('NFTPortal.placeholder.register')"
-            :error-message="errorMessage" />
+          <TextField
+            v-model="url"
+            class="flex flex-col"
+            :placeholder="$t('NFTPortal.placeholder.register')"
+            :error-message="errorMessage"
+            @input="onInputURL"
+          />
           {{ iscnId }}
         </div>
         <div v-if="isLoading" class="flex flex-col items-end w-full">
@@ -50,8 +55,12 @@
           >
         </div>
         <div v-else-if="state === 'INIT'" class="ml-auto w-min">
-          <Button :text="$t('NFTPortal.button.register')" preset="secondary"
-            @click="onSubmit">
+          <Button
+            :text="$t('NFTPortal.button.register')"
+            :preset="isInputValueValid ? 'secondary' : 'tertiary'"
+            :is-disabled="!isInputValueValid"
+            @click="onSubmit"
+          >
             <template #prepend>
               <IconAddToISCN class="w-[20px]" />
             </template>
@@ -90,6 +99,7 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
+import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX } from '~/constant'
 
 const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
@@ -151,10 +161,7 @@ export default class FetchIndex extends Vue {
   isLoading = false
   avatar = null
   balance: string = ''
-
-  get isUrlIscnId(): boolean {
-    return this.url.startsWith('iscn://likecoin-chain')
-  }
+  isInputValueValid: boolean = false
 
   get encodedURL(): string {
     const { url } = this;
@@ -235,6 +242,16 @@ export default class FetchIndex extends Vue {
     return this.walletType === 'likerland_app'
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get crawlURLRegex() {
+      return new RegExp(CRAWL_URL_REGEX);
+  }
+
+    // eslint-disable-next-line class-methods-use-this
+  get iscnPrefixRegex() {
+      return new RegExp(ISCN_PREFIX_REGEX);
+  }
+
   async mounted() {
     if (this.iscnId) {
       this.$router.push(
@@ -306,7 +323,7 @@ export default class FetchIndex extends Vue {
           this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
           break
         }
-        if (this.isUrlIscnId) {
+        if (this.iscnPrefixRegex.test(this.url)) {
           this.iscnId = this.url;
           this.$router.push(
             this.localeLocation({
@@ -482,6 +499,24 @@ export default class FetchIndex extends Vue {
     } else {
       this.toggleSnackbar((err as Error).toString())
     }
+  }
+
+  onInputURL(url: string) {
+    this.errorMessage = ''
+    if(this.iscnPrefixRegex.test(url)) {
+      this.isInputValueValid = true
+      return
+    }
+    if(this.crawlURLRegex.test(url)) {
+      if(url.includes('https://liker.land')){
+        this.errorMessage = this.$t('NFTPortal.errorMessage.url.notAllowToCrawl') as string
+        this.isInputValueValid = false
+        return
+      }
+        this.isInputValueValid = true
+        return
+    }
+    this.isInputValueValid = false
   }
 }
 </script>
