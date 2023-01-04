@@ -99,7 +99,7 @@ import {
   API_POST_ARWEAVE_UPLOAD,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
-import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX } from '~/constant'
+import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, LIKER_LAND_URL } from '~/constant'
 
 const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
@@ -503,18 +503,20 @@ export default class FetchIndex extends Vue {
 
   onInputURL(url: string) {
     this.errorMessage = ''
-    if(this.iscnPrefixRegex.test(url)) {
+    if (this.iscnPrefixRegex.test(url)) {
       this.isInputValueValid = true
       return
     }
-    if(this.crawlURLRegex.test(url)) {
-      if(url.includes('https://liker.land')){
-        this.errorMessage = this.$t('NFTPortal.errorMessage.url.notAllowToCrawl') as string
+    if (this.crawlURLRegex.test(url)) {
+      if (url.includes(LIKER_LAND_URL)) {
+        this.errorMessage = this.$t(
+          'NFTPortal.errorMessage.url.notAllowToCrawl',
+        ) as string
         this.isInputValueValid = false
         return
       }
-        this.isInputValueValid = true
-        return
+      this.isInputValueValid = true
+      return
     }
     this.isInputValueValid = false
   }
