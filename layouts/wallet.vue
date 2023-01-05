@@ -4,7 +4,7 @@
       <AppHeader />
       <Nuxt class="min-h-full" />
       <AppFooter
-        :class="{ hidden: $route.path.includes('/nft/purchase/') }"
+        :class="{ hidden: isHideFooter }"
       />
     </template>
   </RootLayout>
@@ -31,6 +31,10 @@ export default class WalletLayout extends Vue {
   ) => void
 
   @signerModule.Getter('getAddress') currentAddress!: string
+
+  get isHideFooter() {
+    return this.$route.path.includes('/nft/purchase/') || this.$route.query.layout === 'popup';
+  }
 
   mounted() {
     if (!this.currentAddress) {
