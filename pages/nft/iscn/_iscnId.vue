@@ -456,10 +456,12 @@ export default class NFTTestMintPage extends Vue {
         case 'mint': {
           this.isLoading = true
           this.mintState = MintState.MINTING
-          await this.checkIsNFTIdListExist()
-          if (!this.chainNFTIdList) {
-            await this.mintNFT()
-            if (!this.mintNFTResult) break
+          if (!this.mintNFTResult) {
+            await this.checkIsNFTIdListExist()
+            if (!this.chainNFTIdList) {
+              await this.mintNFT()
+              if (!this.mintNFTResult) break
+            }
           }
           if (this.isWritingNFT) {
             await this.postMintInfo()
