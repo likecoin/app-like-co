@@ -535,12 +535,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   get mintQueries() {
-    const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      layout: _,
-      querys,
-    } = this.$route.query;
-    return querys;
+    return this.$route.query;
   }
 
   get record() {
