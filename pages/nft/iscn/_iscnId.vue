@@ -652,8 +652,15 @@ export default class NFTTestMintPage extends Vue {
       )
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', this.classId, 1);
       this.postInfo = data
-    } catch (error) {
+    } catch (error: any) {
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
+      // If the API returns a status of 409, it indicates that the request may have already successful
+      // and a duplicate request was made.
+      if (error.response!.status === 409) {
+        // Instead of throwing an error, perform the next step in the process
+        await this.getMintInfo();
+        return;
+      }
       // eslint-disable-next-line no-console
       console.error(error)
       throw new Error('CANNOT_POST_MINT_INFO')
