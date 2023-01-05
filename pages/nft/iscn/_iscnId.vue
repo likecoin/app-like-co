@@ -211,7 +211,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get NFTPrefix(): string {
-    return (this.$route.query.nft_prefix as string) || 'Writing NFT';
+    return (this.$route.query.nft_prefix as string) || `${this.isWritingNFT ? 'Writing NFT' : ''}`;
   }
 
   get hasOpener(): boolean {
@@ -340,7 +340,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get NftName() {
-    const prefix = this.NFTPrefix || `${this.isWritingNFT ? 'Writing NFT' : ''}`;
+    const prefix = this.NFTPrefix;
     return `${prefix ? `${prefix} - ` : ''}${this.iscnData?.contentMetadata?.name || 'NFT'}`;
   }
 
