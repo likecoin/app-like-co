@@ -238,6 +238,20 @@ export default class FetchIndex extends Vue {
     return params
   }
 
+  get queryParams() {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    // Remove qs used by this page but not next page
+    // Pass through other qs
+    const {
+      url: _,
+      iscn_id: _iscnId,
+      liker_id: _likerId,
+      ...querys
+    } = this.$route.query;
+    return querys;
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+  }
+
   get isUsingLikerLandApp() {
     return this.walletType === 'likerland_app'
   }
@@ -258,6 +272,7 @@ export default class FetchIndex extends Vue {
         this.localeLocation({
           name: 'nft-iscn-iscnId',
           params: this.iscnParams,
+          query: this.queryParams,
         })!,
       )
     }
@@ -329,6 +344,7 @@ export default class FetchIndex extends Vue {
             this.localeLocation({
               name: 'nft-iscn-iscnId',
               params: this.iscnParams,
+              query: this.queryParams,
             })!,
           )
           break
@@ -477,6 +493,7 @@ export default class FetchIndex extends Vue {
           this.localeLocation({
             name: 'nft-iscn-iscnId',
             params: this.iscnParams,
+            query: this.queryParams,
           })!,
         )
       }
