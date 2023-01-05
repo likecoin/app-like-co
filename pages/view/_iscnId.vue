@@ -11,7 +11,7 @@
     <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
       <Button
         preset="plain"
-        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
+        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQuerys })"
         class="text-like-green"
         :text="$t('NFTPortal.button.notMinted')"
       />
@@ -55,7 +55,7 @@
               :class="['w-min', 'mr-[8px]']"
               preset="secondary"
               :text="$t('NFTPortal.button.mint')"
-              :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
+              :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQuerys })"
             />
             <Button
               preset="outline"
@@ -72,7 +72,7 @@
     <div v-if="isShowMintButton" class="flex justify-end w-full">
       <Button
         preset="secondary"
-        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId } })"
+        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQuerys })"
         class="text-like-green"
         :text="$t('NFTPortal.button.mint')"
       />
@@ -532,6 +532,15 @@ export default class ViewIscnIdPage extends Vue {
 
   get isPopupLayout() {
     return this.$route.query.layout === 'popup'
+  }
+
+  get mintQuerys() {
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      layout: _,
+      querys,
+    } = this.$route.query;
+    return querys;
   }
 
   get record() {
