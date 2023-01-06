@@ -101,6 +101,7 @@ import BigNumber from 'bignumber.js'
 import axios, { AxiosError } from 'axios'
 
 import {
+  LIKER_NFT_TARGET_ADDRESS,
   API_LIKER_NFT_MINT,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
@@ -108,6 +109,7 @@ import {
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
+  getChainNFTIdList,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -185,6 +187,7 @@ export default class NFTTestMintPage extends Vue {
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
+  chainNFTIdList: any = null
 
   mintNFTResult: any = null
   postInfo: any = null
@@ -458,8 +461,13 @@ export default class NFTTestMintPage extends Vue {
         case 'mint': {
           this.isLoading = true
           this.mintState = MintState.MINTING
-          await this.mintNFT()
-          if (!this.mintNFTResult) break
+          if (!this.mintNFTResult) {
+            await this.checkIsNFTIdListExist()
+            if (!this.chainNFTIdList) {
+              await this.mintNFT()
+              if (!this.mintNFTResult) break
+            }
+          }
           if (this.isWritingNFT) {
             await this.postMintInfo()
             if (!this.postInfo) break
@@ -479,6 +487,16 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = true
       this.mintState = MintState.DONE
       this.setError(error)
+    }
+  }
+
+  async checkIsNFTIdListExist() {
+    try {
+      const { data } = await this.$axios.get(getChainNFTIdList(this.classId))
+      const { nfts } = data.owners.find((owner: any) => owner.owner === LIKER_NFT_TARGET_ADDRESS);
+      this.chainNFTIdList = nfts;
+    } catch (error) {
+      // no need to handle
     }
   }
 
@@ -657,10 +675,17 @@ export default class NFTTestMintPage extends Vue {
       )
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', this.classId, 1);
       this.postInfo = data
-    } catch (error) {
-      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
+    } catch (error: any) {
+      // If the API returns a status of 409, it indicates that the request may have already successful
+      // and a duplicate request was made.
+      if (error.response!.status === 409) {
+        // Instead of throwing an error, perform the next step in the process
+        await this.getMintInfo();
+        return;
+      }
       // eslint-disable-next-line no-console
       console.error(error)
+      logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
       throw new Error('CANNOT_POST_MINT_INFO')
     }
   }
