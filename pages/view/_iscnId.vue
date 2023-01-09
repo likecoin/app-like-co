@@ -255,7 +255,7 @@
               tag="div"
               text-preset="h6"
               type="button"
-              :text="(stakeholders[index].entity && (stakeholders[index].entity.name || stakeholders[index].entity['@id'])) || '' | ellipsis"
+              :text="getStakeholderDisplayName(index) | ellipsis"
               @click="showStakeholder(index)"
             />
           </FormField>
@@ -511,6 +511,7 @@ export default class ViewIscnIdPage extends Vue {
     likerId: '',
     authorName: '',
     authorUrls: [],
+    contributionType: '',
   }
 
   isPreminted = !this.isPopupLayout // assume popup is not preminted
@@ -677,48 +678,48 @@ export default class ViewIscnIdPage extends Vue {
     return exif
   }
 
+  getStakeholderDisplayName(index: number) {
+    const stakeholder = this.stakeholders[index].entity || this.stakeholders[index];
+    return stakeholder.name
+      || stakeholder['@id']
+      || stakeholder.contributionType?.replace('http://schema.org/', '')
+      || 'unknown';
+  }
+
   showStakeholder(index: number) {
     logTrackerEvent(this, 'ISCNView', 'ShowStakeholder', this.iscnId, 1);
     this.isOpenAuthorDialog = true
-    const stakeholders = this.stakeholders[index].entity
+    const stakeholder = this.stakeholders[index].entity || this.stakeholders[index]
 
-    if (this.stakeholders[index].entity?.identifier) {
-      const { description: authorDescription, name: authorName } = stakeholders
-      const likerId = stakeholders.url?.includes('like.co')
-        ? stakeholders.url.slice(16)
+    if (stakeholder) {
+      const { contributionType, description: authorDescription, name: authorName } = stakeholder
+      const likerId = stakeholder.url?.includes('like.co') || ''
+        ? stakeholder.url.slice(16)
         : ''
-      const authorWalletAddresses = stakeholders.identifier.map((a: any) => ({
+
+      const authorWalletAddresses = stakeholder.identifier?.map((a: any) => ({
         address: a.value,
         type: this.getKeyByValue(WALLET_TYPE_REPLACER, a.propertyID),
-      }))
-      const authorUrls = stakeholders.sameAs || []
+      })) || []
+
+      if (!authorWalletAddresses.length && stakeholder['@id']) {
+        authorWalletAddresses.push({
+          type: 'cosmos',
+          address: stakeholder['@id'],
+        })
+      }
+
+      const authorUrls = stakeholder.sameAs || []
+      if (stakeholder.url) {
+        authorUrls.push(stakeholder.url)
+      }
       this.stakeholderInfo = {
         likerId,
         authorDescription,
         authorWalletAddresses,
         authorUrls,
         authorName,
-      }
-    } else {
-      const authorWalletAddresses: any = []
-      const authorUrls: any = []
-      if (stakeholders) {
-        if (stakeholders['@id']) {
-          authorWalletAddresses.push({
-            type: 'cosmos',
-            address: stakeholders['@id'],
-          })
-        }
-        if (stakeholders.url) {
-          authorUrls.push(stakeholders.url)
-        }
-      }
-      this.stakeholderInfo = {
-        likerId: '',
-        authorDescription: '',
-        authorWalletAddresses,
-        authorUrls,
-        authorName: stakeholders?.name,
+        contributionType: contributionType?.replace('http://schema.org/', ''),
       }
     }
   }
