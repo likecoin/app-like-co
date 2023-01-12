@@ -456,7 +456,10 @@ export default class NFTTestMintPage extends Vue {
           this.classId = await this.createNftClass()
           this.mintState = MintState.DONE
           if (!this.classId) break
-          this.$router.replace({ query: { class_id: this.classId } })
+          this.$router.replace({ query: {
+            ...this.$route.query,
+            class_id: this.classId,
+          } })
         }
         case 'mint': {
           this.isLoading = true
