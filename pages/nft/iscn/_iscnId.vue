@@ -113,7 +113,7 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
+import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET, WHITELISTED_PLATFORM } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -178,6 +178,8 @@ export default class NFTTestMintPage extends Vue {
   @walletModule.Action toggleSnackbar!: (error: string) => void
 
   @walletModule.Getter('getType') walletType!: string | null
+
+  platform = this.$route.query.platform as string || ''
 
   classId: string = ''
   iscnOwner: string = ''
@@ -501,6 +503,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async checkIsWhitelisted() {
+    if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
     const { data } = await this.$axios.get(getWhitelistApi(this.address))
     return data.isWhitelisted;
   }
