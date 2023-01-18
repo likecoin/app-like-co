@@ -296,6 +296,9 @@ export default class FetchIndex extends Vue {
         console.error(err);
       }
     }
+    if (this.url) {
+      this.onInputURL(this.url);
+    }
   }
 
   @Watch('url')
