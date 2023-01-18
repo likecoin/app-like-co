@@ -361,6 +361,10 @@ export default class FetchIndex extends Vue {
           this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
           break
         }
+        this.$router.replace({ query: {
+            ...this.$route.query,
+            url: this.url,
+        } })
         this.state = State.TO_CRAWL_URL
       case State.TO_CRAWL_URL:
         await this.crawlUrlData()
