@@ -112,7 +112,7 @@
       >
         <ClientOnly>
           <LazyIscnCard
-            :key="record.id"
+            :key="`${record.id}-portrait`"
             :class="[
               'hidden',
               'sm:block',
@@ -124,7 +124,7 @@
             :is-animated="true"
           />
           <LazyIscnCard
-            :key="record.id"
+            :key="`${record.id}-landscape`"
             :class="[
               'w-full',
               'sm:absolute',
@@ -480,10 +480,29 @@ export enum ExifList {
     if (this.$route.query.layout === 'popup') {
       title = this.$t('page.iscnId.popup.title') as string
     } else {
-      title = this.$t('page.iscnId.default.title') as string
+      title = (this as ViewIscnIdPage).name || this.$t('page.iscnId.default.title') as string
     }
+    const description =
+      (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
     return {
       title,
+      meta: [
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: title,
+        },
+        {
+          hid: 'description',
+          name: 'description',
+          content: description,
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content: description,
+        },
+      ],
     } as MetaInfo
   },
   filters: { ellipsis },
@@ -494,6 +513,13 @@ export enum ExifList {
 
       default:
         return 'default'
+    }
+  },
+  async fetch({ params, store, error }) {
+    try {
+      await store.dispatch('iscn/fetchISCNById', params.iscnId)
+    } catch (err) {
+      error(err as Error)
     }
   },
 })
@@ -623,6 +649,7 @@ export default class ViewIscnIdPage extends Vue {
     }
     if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404, message: ErrorMessage.statusCode404 })
+      return
     }
     this.exifInfo = this.showExifInfo()
     this.fetchTxHash().then(txHash => { this.txHash = txHash; });
