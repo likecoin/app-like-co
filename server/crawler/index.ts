@@ -307,9 +307,11 @@ export async function getCralwerData(url: string, wallet?: string) {
     const img = $('img')
     img.each((i, e) => {
       const src = $(e).attr('src')
-      if (src) {
-        let srcUrl = src
-        if (!src.startsWith('http')) {
+      const dataSrc = $(e).attr('data-src')
+      if (src || dataSrc) {
+        const data: string = (src || dataSrc) as string;
+        let srcUrl = data;
+        if (!data.startsWith('http')) {
           srcUrl = `${protocol}//${host}${src}`
         }
         promiseImg.push(
