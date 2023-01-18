@@ -290,6 +290,7 @@
   "page.airdrop.title": "LikeCoin Airdrop",
   "page.iscnId.popup.title": "LikeCoin DePub Widget",
   "page.iscnId.default.title": "ISCN App",
+  "page.iscnId.default.description": "Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.",
   "Registration.step": "Step {step}/{total}",
   "SearchPage.empty.label": "No record",
   "SearchPage.error": "Oops, something went wrong please try again",
