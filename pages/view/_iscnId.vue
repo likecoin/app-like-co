@@ -13,7 +13,7 @@
         preset="plain"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
         class="text-like-green"
-        :text="$t('NFTPortal.button.notMinted')"
+        :text="$t('NFTPortal.button.mintContinueLong')"
       />
     </div>
     <Page>
@@ -54,10 +54,11 @@
               v-if="isShowMintButton"
               :class="['w-min', 'mr-[8px]']"
               preset="secondary"
-              :text="$t('NFTPortal.button.mint')"
+              :text="$t('NFTPortal.button.mintContinue')"
               :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
             />
             <Button
+              v-else
               preset="outline"
               class="w-min"
               :text="$t('general.closeWindow')"
