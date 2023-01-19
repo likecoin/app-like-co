@@ -32,6 +32,7 @@
         :description="NftDescription"
         :img-src="imgSrc"
         :is-loading="isLoadingPreviewOG"
+        @edit-image="onEditOgImage"
       />
 
       <NFTMintWriterMessage
@@ -186,6 +187,7 @@ export default class NFTTestMintPage extends Vue {
   iscnData: any = null
   apiData: any = null
   message: string = ''
+  isCustomOgimage = false
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
@@ -354,7 +356,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get createNftClassPayload() {
-    let metadata = {
+    let metadata: {[key: string]: any} = {
       image: this.ogImageUri,
       external_url: this.iscnData.contentMetadata?.url,
       message: this.message || '',
@@ -371,6 +373,7 @@ export default class NFTTestMintPage extends Vue {
       description: this.iscnData.contentMetadata?.description,
       metadata,
     };
+    if (this.isCustomOgimage) payload.metadata.is_custom_image = 'true';
     if (this.isWritingNFT) {
       payload = Object.assign(payload, {
         symbol: 'WRITING',
@@ -573,6 +576,11 @@ export default class NFTTestMintPage extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  onEditOgImage(imageData: File) {
+    this.ogImageBlob = imageData;
+    this.isCustomOgimage = true;
   }
 
   async getOgImage() {

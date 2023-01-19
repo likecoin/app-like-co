@@ -53,9 +53,24 @@
           'overflow-hidden',
         ]"
       >
-        <img v-if="imgSrc" :alt="name" :src="imgSrc" />
-        <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
-          <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
+        <div class="relative">
+          <img v-if="imgSrc" :alt="name" :src="imgSrc" />
+          <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
+            <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
+          </div>
+          <button
+            class="absolute right-3 bottom-3"
+            @click="openImagePicker"
+          >
+            <IconEdit />
+          </button>
+          <input
+            ref="imagePicker"
+            class="hidden"
+            type="file"
+            accept="image/*"
+            @change="onEditImage"
+          >
         </div>
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
           <Label preset="h5" :text="name" />
@@ -82,5 +97,19 @@ export default class NFTMintPreview extends Vue {
   @Prop(String) readonly imgSrc!: string | undefined
 
   @Prop({ default: false }) readonly isLoading!: boolean | undefined
+
+
+  openImagePicker() {
+    (this.$refs.imagePicker as HTMLBaseElement)?.click();
+  }
+
+  onEditImage(event: Event) {
+    if (!event.target) return;
+    const { files } = event.target as HTMLInputElement;
+    if (files && files[0]) {
+      const [file] = Object.values(files);
+      this.$emit('edit-image', file);
+    }
+  }
 }
 </script>
