@@ -58,12 +58,15 @@
           <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
             <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
           </div>
-          <button
-            class="absolute right-3 bottom-3"
+          <Button
+            class="absolute right-3 top-3"
+            preset="secondary"
+            size="mini"
+            :circle="true"
             @click="openImagePicker"
           >
             <IconEdit />
-          </button>
+          </Button>
           <input
             ref="imagePicker"
             class="hidden"
