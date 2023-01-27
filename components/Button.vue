@@ -168,7 +168,7 @@ export default class Button extends Vue {
 
       case Size.mini:
         return this.circle
-          ? ''
+          ? 'h-[32px] w-[32px] rounded-[50%]'
           : 'h-30px w-min rounded-[16px]'
 
       default:
