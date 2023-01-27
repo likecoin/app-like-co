@@ -54,7 +54,7 @@
         ]"
       >
         <div class="relative">
-          <img v-if="imgSrc" :alt="name" :src="imgSrc" />
+          <img v-if="imgSrc" class="w-full bg-black" :alt="name" :src="imgSrc" />
           <div v-else class="flex py-[60px] items-center justify-center bg-shade-gray">
             <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
           </div>
