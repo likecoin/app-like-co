@@ -97,9 +97,10 @@ import {
   getAddressLikerIdMinApi,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
+  getWhitelistApi,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
-import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, LIKER_LAND_URL } from '~/constant'
+import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
 
 const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
@@ -124,6 +125,7 @@ export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
   USE_WALLET_CONNECT = 'WALLET_CONNECT_NOT_ALLOW',
+  USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
 }
 
 enum State {
@@ -149,6 +151,7 @@ export default class FetchIndex extends Vue {
 
   state = State.INIT
   url = this.$route.query.url as string || ''
+  platform = this.$route.query.platform as string || ''
   ownerWallet = ''
   errorMessage = ''
   crawledData: any
@@ -276,6 +279,7 @@ export default class FetchIndex extends Vue {
         })!,
       )
     }
+
     const { liker_id: likerId, wallet } = this.$route.query;
     if (wallet) {
       this.ownerWallet = wallet as string;
@@ -336,7 +340,13 @@ export default class FetchIndex extends Vue {
     this.errorMessage = ''
     /* eslint-disable no-fallthrough */
     switch (this.state) {
-      case State.INIT:
+      case State.INIT: {
+        const isAllowed =  await this.checkIsWhitelisted();
+        if (!isAllowed) {
+          logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
+          this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
+          break
+        }
         if (this.ownerWallet && this.address !== this.ownerWallet) {
           this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
           break
@@ -369,6 +379,7 @@ export default class FetchIndex extends Vue {
             url: this.url,
         } })
         this.state = State.TO_CRAWL_URL
+      }
       case State.TO_CRAWL_URL:
         await this.crawlUrlData()
         this.state = State.TO_ESTIMATE_ARWEAVE_FEE
@@ -510,6 +521,12 @@ export default class FetchIndex extends Vue {
       console.error(err)
       throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
     }
+  }
+
+  async checkIsWhitelisted() {
+    if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
+    const { data } = await this.$axios.get(getWhitelistApi(this.address))
+    return data.isWhitelisted;
   }
 
   setError(err: any) {
