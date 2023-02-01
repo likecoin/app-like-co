@@ -52,6 +52,11 @@
             />
             <MenuButtonDivider />
             <MenuButton
+              :text="$t('AppHeader.tabBar.button.mint')"
+              :to="localeLocation({ name: 'nft' })"
+            />
+            <MenuButtonDivider />
+            <MenuButton
               :text="$t('AppHeader.tabBar.button.publishing')"
               :to="localeLocation({ name: 'works' })"
             />

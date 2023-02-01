@@ -112,6 +112,28 @@
         <div
           :class="[
             'p-[8px]',
+            'rounded-[20px]',
+            'my-[12px]'
+          ]"
+        >
+          <Button
+            preset="secondary"
+            :text="$t('HomePage.mint.button')"
+            :to="localeLocation({ name: 'nft' })"
+            class="text-like-green"
+            :style="{ backgroundColor: '#AAF1E7', color: '#28646E' }"
+          >
+            <template #prepend>
+              <IconMint class="w-[20px]" />
+            </template>
+            <template #append>
+              <IconArrowRight class="w-[20px]" />
+            </template>
+          </Button>
+        </div>
+        <div
+          :class="[
+            'p-[8px]',
             'my-[12px]'
           ]"
         >

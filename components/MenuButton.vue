@@ -31,9 +31,12 @@ export default class MenuButton extends Vue {
   @Prop({ default: null }) readonly to: Location | null | undefined
 
   get isSelected() {
+    if (!this.to) return false
+    const toNameWithoutLocale = this.to?.name?.split('___')[0] || '';
+    const routeNameWithoutLocale = this.$route.name?.split('___')[0] || '';
     return (
-      (this.to && this.to.name === this.$route.name) ||
-      (this.to && this.to.name === Router.index && this.$route.name === Router.search)
+      routeNameWithoutLocale.startsWith(toNameWithoutLocale) ||
+      (this.to.name === Router.index && this.$route.name === Router.search)
     )
   }
 
