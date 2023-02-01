@@ -11,7 +11,7 @@
       :class="['text-white', 'ml-[2px]']"
       href="https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7"
     >
-      {{ $t('IscnRegisterForm.error.buy') }}
+      , {{ $t('IscnRegisterForm.error.buy') }}
     </Link>
 
     <Link
@@ -19,7 +19,7 @@
       :class="['text-white', 'ml-[2px]']"
       href="https://forms.gle/GFbp9SNwSWdmmnQQ6"
     >
-      {{ $t('IscnRegisterForm.error.notWhitelisted') }}
+      , {{ $t('IscnRegisterForm.error.notWhitelisted') }}
     </Link>
   </Snackbar>
 </template>
