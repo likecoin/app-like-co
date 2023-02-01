@@ -244,6 +244,7 @@
   "NFTPortal.button.skip":"Skip & Continue",
   "NFTPortal.button.retry":"Retry",
   "NFTPortal.button.view":"View NFT",
+  "NFTPortal.button.viewContent": "View Content",
   "NFTPortal.errorMessage.notIscnOwner": "Please use {ownerWallet} to sign this transaction",
   "NFTPortal.errorMessage.noImage": "No Image",
   "NFTPortal.errorMessage.url.notAllowToCrawl": "Do not use https://liker.land/ as the target URL for minting NFT.",

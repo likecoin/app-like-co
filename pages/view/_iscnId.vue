@@ -112,30 +112,51 @@
         ]"
       >
         <ClientOnly>
-          <LazyIscnCard
-            :key="`${record.id}-portrait`"
-            :class="[
-              'hidden',
-              'sm:block',
-              'flex-shrink-0',
-              'w-[280px]',
-            ]"
-            :record="record"
-            orientation="portrait"
-            :is-animated="true"
-          />
-          <LazyIscnCard
-            :key="`${record.id}-landscape`"
-            :class="[
-              'w-full',
-              'sm:absolute',
-              'sm:opacity-0',
-              'sm:pointer-events-none',
-            ]"
-            :record="record"
-            :is-animated="true"
-            orientation="landscape"
-          />
+          <div>
+            <LazyIscnCard
+              :key="`${record.id}-portrait`"
+              :class="[
+                'hidden',
+                'sm:block',
+                'flex-shrink-0',
+                'w-[280px]',
+              ]"
+              :record="record"
+              orientation="portrait"
+              :is-animated="true"
+            />
+            <LazyIscnCard
+              :key="`${record.id}-landscape`"
+              :class="[
+                'w-full',
+                'sm:absolute',
+                'sm:opacity-0',
+                'sm:pointer-events-none',
+              ]"
+              :record="record"
+              :is-animated="true"
+              orientation="landscape"
+            />
+            <div
+              v-if="viewContentURL"
+              :class="[
+                'flex',
+                'items-center',
+                'justify-center',
+                'mt-[16px]',
+              ]"
+            >
+              <Button
+                preset="outline"
+                :text="$t('NFTPortal.button.viewContent')"
+                @click="onClickViewContent"
+              >
+                <template #append>
+                  <IconOpenInNew class="w-[12px]" />
+                </template>
+            </Button>
+            </div>
+          </div>
         </ClientOnly>
         <MetadataCard
           v-if="type ==='Image' || type === 'Photo'"
@@ -453,6 +474,7 @@ import {
   ISCN_RAW_DATA_ENDPOINT,
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
+  IPFS_VIEW_GATEWAY_URL,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
@@ -612,6 +634,16 @@ export default class ViewIscnIdPage extends Vue {
     return this.recordData?.recordVersion
   }
 
+  get viewContentURL() {
+    const arURL = this.recordData.contentFingerprints.find(a => a.startsWith('ar://'));
+    if (arURL) return `https://arweave.net/${arURL.slice(5)}`
+    const ipfsURL = this.recordData.contentFingerprints.find(a => a.startsWith('ipfs://'));
+    if (ipfsURL) return `${IPFS_VIEW_GATEWAY_URL}/${ipfsURL.slice(7)}`
+    const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
+    if (httpsURL) return httpsURL;
+    return '';
+  }
+
   created() {
     const { iscnId } = this.$route.params
     if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
@@ -668,6 +700,10 @@ export default class ViewIscnIdPage extends Vue {
       return undefined;
     }
     return data?.data?.tx_responses[0]?.txhash;
+  }
+
+  onClickViewContent() {
+    window.open(this.viewContentURL, '_blank');
   }
 
   showExifInfo() {
