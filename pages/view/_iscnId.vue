@@ -7,105 +7,119 @@
       <Label :text="$t('general.loading')" />
     </Card>
   </Page>
-  <div v-else-if="isPopupLayout">
-    <div v-if="isShowMintButton" class="flex justify-center w-full bg-like-cyan-light">
-      <Button
-        preset="plain"
-        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-        class="text-like-green"
-        :text="$t('NFTPortal.button.mintContinueLong')"
-      />
-    </div>
-    <Page>
-      <IscnUploadedInfo
-        :class="[
-          'w-full',
-          'max-w-[640px]',
-        ]"
-        :owner="owner"
-        :iscn-id="iscnId"
-        :iscn-hash="txHash"
-        :record="record"
-        :exif-info="exifInfo"
-      >
-        <template #footer>
-          <div
-            :class="[
-              'flex',
-              'justify-end',
-            ]"
+  <Page
+    v-else-if="isPopupLayout"
+    :class="[
+      'gap-[16px]',
+      'w-full',
+      'max-w-[640px]',
+      'mx-auto',
+    ]"
+  >
+    <Button
+      v-if="isShowMintButton"
+      preset="secondary"
+      class="w-full"
+      :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
+      :text="$t('NFTPortal.button.mintContinueLong')"
+    />
+    <IscnUploadedInfo
+      class="w-full"
+      :owner="owner"
+      :iscn-id="iscnId"
+      :iscn-hash="txHash"
+      :record="record"
+      :exif-info="exifInfo"
+    >
+      <template #footer>
+        <div
+          :class="[
+            'flex',
+            'justify-end',
+          ]"
+        >
+          <Button
+            :class="['w-min', 'mr-[8px]']"
+            preset="outline"
+            tag="a"
+            text-preset="h5"
+            type="button"
+            content-class="font-medium ml-[-4px]"
+            prepend-class="font-bold"
+            :href="rawDataURL"
           >
-            <Button
-              :class="['w-min', 'mr-[8px]']"
-              preset="outline"
-              tag="a"
-              text-preset="h5"
-              type="button"
-              content-class="font-medium ml-[-4px]"
-              prepend-class="font-bold"
-              :href="rawDataURL"
-            >
-              <template #prepend>
-                <IconInfo />
-              </template>
-              {{ $t('iscn.meta.rawData') }}
-            </Button>
-            <Button
-              v-if="isShowMintButton"
-              :class="['w-min', 'mr-[8px]']"
-              preset="secondary"
-              :text="$t('NFTPortal.button.mintContinue')"
-              :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-            />
-            <Button
-              v-else
-              preset="outline"
-              class="w-min"
-              :text="$t('general.closeWindow')"
-              @click="closeWindow"
-            />
-          </div>
-        </template>
-      </IscnUploadedInfo>
-    </Page>
-  </div>
-  <div v-else class="max-w-[960px] w-full mx-auto">
-    <div v-if="isShowMintButton" class="flex justify-end">
+            <template #prepend>
+              <IconInfo />
+            </template>
+            {{ $t('iscn.meta.rawData') }}
+          </Button>
+          <Button
+            v-if="isShowMintButton"
+            :class="['w-min', 'mr-[8px]']"
+            preset="secondary"
+            :text="$t('NFTPortal.button.mintContinue')"
+            :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
+          />
+          <Button
+            v-else
+            preset="outline"
+            class="w-min"
+            :text="$t('general.closeWindow')"
+            @click="closeWindow"
+          />
+        </div>
+      </template>
+    </IscnUploadedInfo>
+  </Page>
+  <Page
+    v-else
+    :class="[
+      'gap-[16px]',
+      'w-full',
+      'max-w-[960px]',
+      'mx-auto',
+      'px-[8px]',
+      'lg:px-0',
+    ]"
+  >
+    <div
+      v-if="isShowMintButton"
+      :class="[
+        'flex',
+        'justify-end',
+        'w-full',
+        'pt-[24px]',
+        'lg:pt-0',
+      ]"
+    >
       <Button
         preset="secondary"
+        class="w-full lg:w-auto"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-        class="text-like-green"
         :text="$t('NFTPortal.button.mint')"
       />
     </div>
-    <Page
+    <div
       :class="[
-        'mt-[16px]',
-        'mx-auto',
-        'mb-[32px]',
-      ]"
-      :flex-layout-class="[
+        'flex',
         'flex-nowrap',
         'flex-col',
         'items-start',
         'lg:flex-row',
+        'gap-[32px]',
+        'w-full',
       ]"
-      >
+    >
       <div
         :class="[
           'relative',
-
           'flex',
           'lg:block',
-
           'flex-col',
-
           'items-center',
-
           'w-full',
           'max-w-full',
           'lg:max-w-[280px]',
-          'lg:mr-[32px]',
         ]"
       >
         <ClientOnly>
@@ -158,13 +172,7 @@
           ]"
         />
       </div>
-      <div
-        :class="[
-          'w-full',
-          'mt-[16px]',
-          'lg:mt-0',
-        ]"
-      >
+      <div class="w-full">
         <InfoCard :label-text="type" :timestamp="recordData.recordTimestamp">
           <template #icon>
             <ISCNTypeIcon :type="type" />
@@ -443,8 +451,8 @@
           </template>
         </Snackbar>
       </div>
-    </Page>
-  </div>
+    </div>
+  </Page>
 </template>
 
 <script lang="ts">

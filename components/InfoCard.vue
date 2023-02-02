@@ -12,8 +12,10 @@
       :class="[
         'flex',
         'flex-row',
+        'flex-wrap',
+        'gap-[16px]',
         'justify-between',
-        'mb-[28px]',
+        'mb-[24px]',
       ]"
     >
       <Label
