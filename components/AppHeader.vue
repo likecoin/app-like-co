@@ -65,7 +65,7 @@
               :text="$t('AppHeader.tabBar.button.stake')"
               target="_blank"
               rel="noopener"
-              href="https://stake.like.co"
+              href="https://dao.like.co/validators"
             >
               <template #append>
                 <IconOpenInNew class="w-[12px]" />
