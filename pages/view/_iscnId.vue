@@ -101,62 +101,51 @@
           'lg:block',
 
           'flex-col',
-          'sm:flex-row',
 
           'items-center',
-          'sm:items-stretch',
 
+          'w-full',
           'max-w-full',
           'lg:max-w-[280px]',
           'lg:mr-[32px]',
         ]"
       >
         <ClientOnly>
-          <div>
-            <LazyIscnCard
-              :key="`${record.id}-portrait`"
-              :class="[
-                'hidden',
-                'sm:block',
-                'flex-shrink-0',
-                'w-[280px]',
-              ]"
-              :record="record"
-              orientation="portrait"
-              :is-animated="true"
-            />
-            <LazyIscnCard
-              :key="`${record.id}-landscape`"
-              :class="[
-                'w-full',
-                'sm:absolute',
-                'sm:opacity-0',
-                'sm:pointer-events-none',
-              ]"
-              :record="record"
-              :is-animated="true"
-              orientation="landscape"
-            />
-            <div
-              v-if="viewContentURL"
-              :class="[
-                'flex',
-                'items-center',
-                'justify-center',
-                'mt-[16px]',
-              ]"
-            >
-              <Button
-                preset="outline"
-                :text="$t('NFTPortal.button.viewContent')"
-                @click="onClickViewContent"
-              >
-                <template #append>
-                  <IconOpenInNew class="w-[12px]" />
-                </template>
-            </Button>
-            </div>
-          </div>
+          <LazyIscnCard
+            :key="`${record.id}-portrait`"
+            :class="[
+              'hidden',
+              'lg:block',
+              'flex-shrink-0',
+              'w-[280px]',
+            ]"
+            :record="record"
+            orientation="portrait"
+            :is-animated="true"
+          />
+          <LazyIscnCard
+            :key="`${record.id}-landscape`"
+            :class="[
+              'w-full',
+              'lg:absolute',
+              'lg:opacity-0',
+              'lg:pointer-events-none',
+            ]"
+            :record="record"
+            :is-animated="true"
+            orientation="landscape"
+          />
+          <Button
+            v-if="viewContentURL"
+            class="mx-auto mt-[16px]"
+            preset="outline"
+            :text="$t('NFTPortal.button.viewContent')"
+            @click="onClickViewContent"
+          >
+            <template #append>
+              <IconOpenInNew class="w-[12px]" />
+            </template>
+          </Button>
         </ClientOnly>
         <MetadataCard
           v-if="type ==='Image' || type === 'Photo'"
@@ -171,11 +160,13 @@
           ]"
         />
       </div>
-      <div :class="[
-        'w-full',
-        'mt-[16px]',
-        'lg:mt-0',
-      ]">
+      <div
+        :class="[
+          'w-full',
+          'mt-[16px]',
+          'lg:mt-0',
+        ]"
+      >
         <InfoCard :label-text="type" :timestamp="recordData.recordTimestamp">
           <template #icon>
             <ISCNTypeIcon :type="type" />
