@@ -69,8 +69,8 @@
       </IscnUploadedInfo>
     </Page>
   </div>
-  <div v-else>
-    <div v-if="isShowMintButton" class="flex justify-end w-full">
+  <div v-else class="max-w-[960px] w-full mx-auto">
+    <div v-if="isShowMintButton" class="flex justify-end">
       <Button
         preset="secondary"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
@@ -80,8 +80,6 @@
     </div>
     <Page
       :class="[
-        'w-full',
-        'max-w-[960px]',
         'mt-[16px]',
         'mx-auto',
         'mb-[32px]',
