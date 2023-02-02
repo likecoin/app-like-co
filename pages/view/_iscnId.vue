@@ -99,11 +99,10 @@
           'lg:block',
 
           'flex-col',
-          'sm:flex-row',
 
           'items-center',
-          'sm:items-stretch',
 
+          'w-full',
           'max-w-full',
           'lg:max-w-[280px]',
           'lg:mr-[32px]',
@@ -114,7 +113,7 @@
             :key="`${record.id}-portrait`"
             :class="[
               'hidden',
-              'sm:block',
+              'lg:block',
               'flex-shrink-0',
               'w-[280px]',
             ]"
@@ -126,14 +125,25 @@
             :key="`${record.id}-landscape`"
             :class="[
               'w-full',
-              'sm:absolute',
-              'sm:opacity-0',
-              'sm:pointer-events-none',
+              'lg:absolute',
+              'lg:opacity-0',
+              'lg:pointer-events-none',
             ]"
             :record="record"
             :is-animated="true"
             orientation="landscape"
           />
+          <Button
+            v-if="viewContentURL"
+            class="mx-auto mt-[16px]"
+            preset="outline"
+            :text="$t('NFTPortal.button.viewContent')"
+            @click="onClickViewContent"
+          >
+            <template #append>
+              <IconOpenInNew class="w-[12px]" />
+            </template>
+          </Button>
         </ClientOnly>
         <MetadataCard
           v-if="type ==='Image' || type === 'Photo'"
@@ -148,11 +158,13 @@
           ]"
         />
       </div>
-      <div :class="[
-        'w-full',
-        'mt-[16px]',
-        'lg:mt-0',
-      ]">
+      <div
+        :class="[
+          'w-full',
+          'mt-[16px]',
+          'lg:mt-0',
+        ]"
+      >
         <InfoCard :label-text="type" :timestamp="recordData.recordTimestamp">
           <template #icon>
             <ISCNTypeIcon :type="type" />
@@ -451,6 +463,7 @@ import {
   ISCN_RAW_DATA_ENDPOINT,
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
+  IPFS_VIEW_GATEWAY_URL,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
@@ -610,6 +623,16 @@ export default class ViewIscnIdPage extends Vue {
     return this.recordData?.recordVersion
   }
 
+  get viewContentURL() {
+    const arURL = this.recordData.contentFingerprints.find(a => a.startsWith('ar://'));
+    if (arURL) return `https://arweave.net/${arURL.slice(5)}`
+    const ipfsURL = this.recordData.contentFingerprints.find(a => a.startsWith('ipfs://'));
+    if (ipfsURL) return `${IPFS_VIEW_GATEWAY_URL}/${ipfsURL.slice(7)}`
+    const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
+    if (httpsURL) return httpsURL;
+    return '';
+  }
+
   created() {
     const { iscnId } = this.$route.params
     if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
@@ -666,6 +689,10 @@ export default class ViewIscnIdPage extends Vue {
       return undefined;
     }
     return data?.data?.tx_responses[0]?.txhash;
+  }
+
+  onClickViewContent() {
+    window.open(this.viewContentURL, '_blank');
   }
 
   showExifInfo() {
