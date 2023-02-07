@@ -11,7 +11,7 @@ router.get('/whitelist', (req, res) => {
     return;
   }
   res.json({
-    isWhitelisted: NFT_WHITELIST_ADDRESSES.includes(wallet),
+    isWhitelisted: !NFT_WHITELIST_ADDRESSES.length || NFT_WHITELIST_ADDRESSES.includes(wallet),
   })
 })
 
