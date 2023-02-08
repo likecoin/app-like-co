@@ -63,7 +63,10 @@ export const CONNECT_WALLET_TYPES = [
   'likerland_app',
 ];
 
-export const WHITELISTED_PLATFORM = ['wordpress'];
+export const WHITELISTED_PLATFORM = [
+  'wordpress',
+  'illustbuy',
+];
 
 export const EMAIL_REGEX = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/
 
