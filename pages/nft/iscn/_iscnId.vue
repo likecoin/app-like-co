@@ -79,8 +79,7 @@
       </template>
     </ContentCard>
 
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
-    <AttentionsLedger v-else />
+    <AttentionsLedger />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -384,6 +383,9 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get premintAmount() {
+    if (this.isUsingLikerLandApp) {
+      return 35;
+    }
     return this.isWritingNFT ? 500 : 100;
   }
 
@@ -428,10 +430,6 @@ export default class NFTTestMintPage extends Vue {
       if (this.balance === '0') {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
-      }
-      if (this.isUsingLikerLandApp) {
-        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
-        throw new Error(ErrorType.USE_WALLET_CONNECT)
       }
       /* eslint-disable no-fallthrough */
       switch (this.state) {
@@ -802,11 +800,20 @@ export default class NFTTestMintPage extends Vue {
       const sendMessages = nfts.map((i) =>
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
       )
-      let messages = mintMessages;
-      if (this.isWritingNFT) messages = messages.concat(sendMessages);
-
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-      this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
+      if (this.isUsingLikerLandApp) {
+        let res;
+        res = await signingClient.sendMessages(this.address, mintMessages)
+        if (this.isWritingNFT) res = await signingClient.sendMessages(this.address, sendMessages)
+        this.mintNFTResult = res;
+      } else {
+        let messages = mintMessages;
+
+        if (this.isWritingNFT) messages = messages.concat(sendMessages);
+
+        logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
+        this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
+      }
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
