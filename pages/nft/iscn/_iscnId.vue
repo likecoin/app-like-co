@@ -811,7 +811,6 @@ export default class NFTTestMintPage extends Vue {
 
         if (this.isWritingNFT) messages = messages.concat(sendMessages);
 
-        logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
         this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
       }
     } catch (error) {
