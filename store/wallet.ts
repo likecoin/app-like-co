@@ -2,7 +2,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
 import WalletConnect from '@walletconnect/client';
-import { payloadId } from '@walletconnect/utils';
+import { isMobile, saveMobileLinkInfo, payloadId } from '@walletconnect/utils';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { timeout } from '~/utils/misc';
@@ -190,6 +190,14 @@ export default class Wallet extends VuexModule {
         qrcodeModal: {
           open: (uri: string) => {
             this.context.commit('setWalletConnectURI', uri);
+            if (isMobile()) {
+              saveMobileLinkInfo({
+                name: 'Liker Land App',
+                href: 'com.oice://wcV1',
+              });
+              const navigateToAppURL = `com.oice://wcV1?${uri}`;
+              window.location.href = navigateToAppURL;
+            }
           },
           close: () => {
             this.context.commit('setWalletConnectURI', '');
