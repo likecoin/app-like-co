@@ -79,7 +79,9 @@
       </template>
     </ContentCard>
 
-    <AttentionsLedger />
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
+
+    <AttentionsLedger v-if="!isUsingLikerLandApp" />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -127,7 +129,6 @@ export enum ErrorType {
   MISSING_SIGNER = 'MISSING_SIGNER',
   USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER',
   USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
-  USE_WALLET_CONNECT = 'WALLET_CONNECT_NOT_ALLOW',
 }
 
 export enum State {
@@ -324,6 +325,13 @@ export default class NFTTestMintPage extends Vue {
       return this.$t('NFTPortal.loadingMessage.createClass') as string
 
     return this.$t('NFTPortal.loadingMessage.createClass') as string
+  }
+
+  get isStateTransaction() {
+    return ([
+      State.MINT,
+      State.CREATE,
+    ].includes(this.state as State));
   }
 
   get ogImageUri(): string {

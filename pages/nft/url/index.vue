@@ -72,8 +72,10 @@
         </div>
       </div>
     </Card>
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
-    <AttentionsLedger v-else />
+
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
+
+    <AttentionsLedger v-if="!isUsingLikerLandApp" />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -124,7 +126,6 @@ const walletModule = namespace('wallet')
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
-  USE_WALLET_CONNECT = 'WALLET_CONNECT_NOT_ALLOW',
   USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
 }
 
@@ -194,6 +195,13 @@ export default class FetchIndex extends Vue {
       default:
         return '';
     }
+  }
+
+  get isStateTransaction() {
+    return ([
+      State.TO_UPLOAD_TO_ARWEAVE,
+      State.TO_REGISTER_ISCN,
+    ].includes(this.state as State));
   }
 
   get formData(): FormData | null {
@@ -318,10 +326,6 @@ export default class FetchIndex extends Vue {
   async onSubmit() {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'OnSubmit', this.state, 1);
-      if (this.isUsingLikerLandApp) {
-        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
-        throw new Error(ErrorType.USE_WALLET_CONNECT)
-      }
       this.isLoading = true
       await this.doAction()
     } catch (err) {

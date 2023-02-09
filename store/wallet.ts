@@ -2,12 +2,13 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
 import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
 import WalletConnect from '@walletconnect/client';
-import { payloadId } from '@walletconnect/utils';
+import { isMobile, saveMobileLinkInfo, payloadId } from '@walletconnect/utils';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { timeout } from '~/utils/misc';
 import { configToKeplrCoin } from '~/utils/cosmos';
 import network from '~/constant/network';
+import { LIKER_LAND_APP_URI } from '~/constant';
 
 const KEY_CONNECTED_WALLET_TYPE = 'KEY_CONNECTED_WALLET_TYPE';
 const KEY_WALLET_CONNECT = 'walletconnect';
@@ -190,6 +191,14 @@ export default class Wallet extends VuexModule {
         qrcodeModal: {
           open: (uri: string) => {
             this.context.commit('setWalletConnectURI', uri);
+            if (isMobile()) {
+              saveMobileLinkInfo({
+                name: 'Liker Land App',
+                href: `${LIKER_LAND_APP_URI}wcV1`,
+              });
+              const navigateToAppURL = `${LIKER_LAND_APP_URI}wcV1?${uri}`;
+              window.location.href = navigateToAppURL;
+            }
           },
           close: () => {
             this.context.commit('setWalletConnectURI', '');
