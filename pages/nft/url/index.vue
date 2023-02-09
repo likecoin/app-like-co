@@ -29,13 +29,52 @@
         <img v-if="avatar" :src="avatar">
         <Label :text="$t('NFTPortal.errorMessage.notIscnOwner', { ownerWallet })" />
       </div>
-      <div :class="[
-        'flex',
-        'flex-col',
-        'justify-center',
-        'items-center',
-        'w-full',
-      ]">
+
+      <div v-if="!isReady" class="flex justify-center items-center py-[64px]">
+        <ProgressIndicator />
+      </div>
+      <!-- Not Whitelisted -->
+      <div
+        v-else-if="!isAllowed"
+        class="flex flex-col my-[64px]"
+      >
+        <div
+          :class="[
+            'flex',
+            'items-start',
+            'justify-start',
+            'gap-[8px]',
+            'px-[12px]',
+            'py-[8px]',
+            'bg-[#F8EBE6]',
+            'border-[1px]',
+            'border-red',
+            'rounded-[4px]',
+            'mb-[20px]'
+          ]"
+        >
+          <IconClose class="flex-shrink-0 text-red" />
+          <div class="flex flex-col items-start">
+            <Label preset="h5" :text="$t('IscnRegisterForm.error.notWhitelisted.title')" class="mb-[6px]" />
+            <Label preset="p6" class="whitespace-pre-line" :text="$t('IscnRegisterForm.error.notWhitelisted')" />
+          </div>
+        </div>
+        <div class="flex self-end justify-end gap-[12px]">
+          <Button preset="plain" :to="localeLocation({ name: 'index' })" :text="$t('IscnRegisterForm.button.back')" />
+          <Button preset="outline" href="https://forms.gle/GFbp9SNwSWdmmnQQ6" :text="$t('IscnRegisterForm.button.whitelist')" />
+        </div>
+      </div>
+      <!-- URL Input -->
+      <div
+        v-else
+        :class="[
+          'flex',
+          'flex-col',
+          'justify-center',
+          'items-center',
+          'w-full',
+        ]"
+      >
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
           <Label preset="p6" :text="$t('NFTPortal.label.register')" />
           <TextField
@@ -67,8 +106,8 @@
           </Button>
         </div>
         <div v-else class="flex gap-[12px] ml-auto w-min">
-            <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
-            <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
+          <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
+          <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
         </div>
       </div>
     </Card>
@@ -166,6 +205,8 @@ export default class FetchIndex extends Vue {
   avatar = null
   balance: string = ''
   isInputValueValid: boolean = false
+  isReady: boolean = false
+  isAllowed: boolean = false
 
   get encodedURL(): string {
     const { url } = this;
@@ -278,6 +319,7 @@ export default class FetchIndex extends Vue {
   }
 
   async mounted() {
+    this.isReady = false
     if (this.iscnId) {
       this.$router.push(
         this.localeLocation({
@@ -311,6 +353,12 @@ export default class FetchIndex extends Vue {
     if (this.url) {
       this.onInputURL(this.url);
     }
+
+    this.isAllowed = await this.checkIsWhitelisted();
+    if (!this.isAllowed) {
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
+    }
+    this.isReady = true
   }
 
   @Watch('url')
@@ -345,12 +393,6 @@ export default class FetchIndex extends Vue {
     /* eslint-disable no-fallthrough */
     switch (this.state) {
       case State.INIT: {
-        const isAllowed =  await this.checkIsWhitelisted();
-        if (!isAllowed) {
-          logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
-          this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
-          break
-        }
         if (this.ownerWallet && this.address !== this.ownerWallet) {
           this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
           break
