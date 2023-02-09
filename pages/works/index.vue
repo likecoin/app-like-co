@@ -116,6 +116,13 @@ export default class WorksIndexPageextends extends Vue {
     this.refreshWorks()
   }
 
+  @Watch('pageNumber')
+  onPageNumberChanged() {
+    this.$router.replace({
+      query: { ...this.$route.query, page: this.pageNumber.toString() },
+    });
+  }
+
   mounted() {
     this.refreshWorks()
   }
@@ -132,30 +139,18 @@ export default class WorksIndexPageextends extends Vue {
 
   nextPage() {
     this.pageNumber = Math.min(this.pageNumber + 1, this.pages?.length || 1 - 1)
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   firstPage() {
     this.pageNumber = 0
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   lastPage() {
     this.pageNumber = this.pages.length - 1
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 }
 </script>

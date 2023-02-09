@@ -170,6 +170,13 @@ export default class SearchPage extends Vue {
     this.search()
   }
 
+  @Watch('pageNumber')
+  onPageNumberChanged() {
+    this.$router.replace({
+      query: { ...this.$route.query, page: this.pageNumber.toString() },
+    });
+  }
+
   async search(){
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.queryAllTerm, 1)
     if (this.queryAllTerm)  {
@@ -201,30 +208,18 @@ export default class SearchPage extends Vue {
 
   nextPage() {
     this.pageNumber = Math.min(this.pageNumber + 1, this.pages?.length || 1 - 1)
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   firstPage() {
     this.pageNumber = 0
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   lastPage() {
     this.pageNumber = this.pages.length - 1
-    this.$router.replace({
-      query: { ...this.$route.query, page: this.pageNumber.toString() },
-    });
   }
 
   handleWarningClose() {
