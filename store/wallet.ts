@@ -8,6 +8,7 @@ import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { timeout } from '~/utils/misc';
 import { configToKeplrCoin } from '~/utils/cosmos';
 import network from '~/constant/network';
+import { LIKER_LAND_APP_URI } from '~/constant';
 
 const KEY_CONNECTED_WALLET_TYPE = 'KEY_CONNECTED_WALLET_TYPE';
 const KEY_WALLET_CONNECT = 'walletconnect';
@@ -193,9 +194,9 @@ export default class Wallet extends VuexModule {
             if (isMobile()) {
               saveMobileLinkInfo({
                 name: 'Liker Land App',
-                href: 'com.oice://wcV1',
+                href: `${LIKER_LAND_APP_URI}wcV1`,
               });
-              const navigateToAppURL = `com.oice://wcV1?${uri}`;
+              const navigateToAppURL = `${LIKER_LAND_APP_URI}wcV1?${uri}`;
               window.location.href = navigateToAppURL;
             }
           },
