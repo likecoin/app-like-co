@@ -700,6 +700,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   onClickViewContent() {
+    logTrackerEvent(this, 'ISCNView', 'ViewContent', this.iscnId, 1);
     window.open(this.viewContentURL, '_blank');
   }
 
