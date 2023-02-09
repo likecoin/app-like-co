@@ -68,6 +68,7 @@ export const CONNECT_WALLET_TYPES = [
 export const WHITELISTED_PLATFORM = [
   'wordpress',
   'illustbuy',
+  'likersocial',
 ];
 
 export const EMAIL_REGEX = /(\S)+[@]{1}(\S)+[.]{1}(\w)+/
