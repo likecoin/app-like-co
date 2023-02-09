@@ -35,8 +35,8 @@
       </div>
       <!-- Not Whitelisted -->
       <div
-        v-else-if="!isAllowed"
-        class="flex flex-col my-[64px]"
+        v-else-if="isAllowed"
+        class="flex flex-col"
       >
         <div
           :class="[
@@ -49,8 +49,8 @@
             'bg-[#FCF1DC]',
             'border-[1px]',
             'border-[#F3C267]',
-            'rounded-[4px]',
-            'mb-[12px]'
+            'rounded-[12px]',
+            'my-[64px]'
           ]"
         >
           <IconAttention class="flex-shrink-0 text-[#F3C267]" />
@@ -319,8 +319,6 @@ export default class FetchIndex extends Vue {
   }
 
   async mounted() {
-    this.isReady = false
-
     if (this.iscnId) {
       this.$router.push(
         this.localeLocation({
