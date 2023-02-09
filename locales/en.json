@@ -191,7 +191,7 @@
   "IscnRegisterForm.error.timeout": "Oops, the server connection timeout, please try again.",
   "IscnRegisterForm.error.titleIsEmpty": "Please enter the ISCN title",
   "IscnRegisterForm.error.notWhitelisted.title": "Whitelist Required",
-  "IscnRegisterForm.error.notWhitelisted": "Thank you for your interest in mint Writing NFT. Unfortunately, it is currently available to whitelisted users.\nIf you would like to apply for Writing NFT whitelist access, please click the 'Apply for Whitelist' button below.",
+  "IscnRegisterForm.error.notWhitelisted": "Thank you for your interest in Writing NFT. Unfortunately, minting is currently only available to whitelisted users.\nIf you would like to apply for Writing NFT whitelist access, please click the 'Apply for Whitelist' button below.",
   "IscnRegisterForm.error.walletConnect": "Wallet Connect is temporarily unavailable for minting. Please try the other signing methods",
   "IscnRegisterForm.guide.review": "Review and edit metadata",
   "IscnRegisterForm.ipfs.link": "ipfs://{hash}",
