@@ -79,8 +79,7 @@
       </template>
     </ContentCard>
 
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
-    <AttentionsLedger v-else />
+    <AttentionsLedger />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -183,6 +182,7 @@ export default class NFTTestMintPage extends Vue {
   platform = this.$route.query.platform as string || ''
 
   classId: string = ''
+  nftsIds: string[] = []
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
@@ -194,6 +194,7 @@ export default class NFTTestMintPage extends Vue {
   chainNFTIdList: any = null
 
   mintNFTResult: any = null
+  sendNFTResult: any = null
   postInfo: any = null
 
   isLoading = false
@@ -384,6 +385,9 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get premintAmount() {
+    if (this.isUsingLikerLandApp) {
+      return 35;
+    }
     return this.isWritingNFT ? 500 : 100;
   }
 
@@ -429,10 +433,6 @@ export default class NFTTestMintPage extends Vue {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
-      if (this.isUsingLikerLandApp) {
-        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
-        throw new Error(ErrorType.USE_WALLET_CONNECT)
-      }
       /* eslint-disable no-fallthrough */
       switch (this.state) {
         case 'create': {
@@ -469,11 +469,11 @@ export default class NFTTestMintPage extends Vue {
         case 'mint': {
           this.isLoading = true
           this.mintState = MintState.MINTING
-          if (!this.mintNFTResult) {
+          if (!this.mintNFTResult || (this.isWritingNFT && !this.sendNFTResult)) {
             await this.checkIsNFTIdListExist()
             if (!this.chainNFTIdList) {
               await this.mintNFT()
-              if (!this.mintNFTResult) break
+              if (!this.mintNFTResult || this.isWritingNFT && !this.sendNFTResult) break
             }
           }
           if (this.isWritingNFT) {
@@ -792,21 +792,33 @@ export default class NFTTestMintPage extends Vue {
       const signingClient = await getSigningClient()
       await signingClient.setSigner(this.signer)
 
-      const nfts = [...Array(this.premintAmount).keys()].map((_) => {
-        const id = `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`
-        return this.getMintNftPayload(id);
-      })
+      if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
+        .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
+      const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
       const mintMessages = nfts.map((i) =>
         formatMsgMintNFT(this.address, this.classId, i),
       )
       const sendMessages = nfts.map((i) =>
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
       )
-      let messages = mintMessages;
-      if (this.isWritingNFT) messages = messages.concat(sendMessages);
-
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-      this.mintNFTResult = await signingClient.sendMessages(this.address, messages)
+      if (this.isUsingLikerLandApp) {
+        if (!this.mintNFTResult) {
+          this.mintNFTResult = await signingClient.sendMessages(this.address, mintMessages)
+        }
+        if (this.isWritingNFT && !this.sendNFTResult) {
+          this.sendNFTResult = await signingClient.sendMessages(this.address, sendMessages)
+        }
+      } else {
+        let messages = mintMessages;
+
+        if (this.isWritingNFT) messages = messages.concat(sendMessages);
+
+        const res = await signingClient.sendMessages(this.address, messages)
+        this.mintNFTResult = res
+        // mint and send are in a same tx result
+        if (this.isWritingNFT) this.sendNFTResult = res;
+      }
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
