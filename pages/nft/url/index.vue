@@ -124,7 +124,6 @@ const walletModule = namespace('wallet')
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
-  USE_WALLET_CONNECT = 'WALLET_CONNECT_NOT_ALLOW',
   USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
 }
 
@@ -318,10 +317,6 @@ export default class FetchIndex extends Vue {
   async onSubmit() {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'OnSubmit', this.state, 1);
-      if (this.isUsingLikerLandApp) {
-        this.errorMessage = this.$t('IscnRegisterForm.error.walletConnect') as string
-        throw new Error(ErrorType.USE_WALLET_CONNECT)
-      }
       this.isLoading = true
       await this.doAction()
     } catch (err) {
