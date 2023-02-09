@@ -72,8 +72,10 @@
         </div>
       </div>
     </Card>
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
-    <AttentionsLedger v-else />
+
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
+
+    <AttentionsLedger v-if="!isUsingLikerLandApp" />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -193,6 +195,13 @@ export default class FetchIndex extends Vue {
       default:
         return '';
     }
+  }
+
+  get isStateTransaction() {
+    return ([
+      State.TO_UPLOAD_TO_ARWEAVE,
+      State.TO_REGISTER_ISCN,
+    ].includes(this.state as State));
   }
 
   get formData(): FormData | null {

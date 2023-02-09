@@ -47,6 +47,8 @@ export const ISCN_TX_RAW_DATA_ENDPOINTS = IS_TESTNET
 
 export const BIG_DIPPER_TX_BASE_URL = 'https://likecoin.bigdipper.live/transactions/';
 
+export const LIKER_LAND_APP_URI = 'com.oice://';
+
 export const WALLET_TYPE_REPLACER: any = { cosmos: 'Cosmos Wallet', like:'LikeCoin Wallet', eth: 'Ethereum Wallet' }
 
 export const WALLET_TYPES = [

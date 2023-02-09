@@ -79,7 +79,9 @@
       </template>
     </ContentCard>
 
-    <AttentionsLedger />
+    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
+
+    <AttentionsLedger v-if="!isUsingLikerLandApp" />
     <AlertsSignFailed />
   </Page>
 </template>
@@ -323,6 +325,13 @@ export default class NFTTestMintPage extends Vue {
       return this.$t('NFTPortal.loadingMessage.createClass') as string
 
     return this.$t('NFTPortal.loadingMessage.createClass') as string
+  }
+
+  get isStateTransaction() {
+    return ([
+      State.MINT,
+      State.CREATE,
+    ].includes(this.state as State));
   }
 
   get ogImageUri(): string {
