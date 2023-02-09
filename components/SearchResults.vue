@@ -10,7 +10,6 @@
           name: 'view-iscnId',
           params: { iscnId: record.id },
         })"
-        target="_blank"
       >
         <SearchResult :record="record" />
       </NuxtLink>
