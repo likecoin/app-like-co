@@ -691,6 +691,7 @@ export default class NFTTestMintPage extends Vue {
           params: {
             iscn_id: this.iscnId,
             class_id: this.classId,
+            platform: this.platform,
           },
           paramsSerializer: (params) => qs.stringify(params),
         },
