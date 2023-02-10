@@ -535,12 +535,22 @@ export enum ExifList {
         return 'default'
     }
   },
-  async fetch({ params, store, error }) {
+  async asyncData({ params, store, error }) {
     try {
-      await store.dispatch('iscn/fetchISCNById', params.iscnId)
+      const { iscnId } = params
+      if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
+        const res = await store.dispatch('iscn/fetchISCNById', iscnId)
+        if (res) {
+          return {
+            iscnId: res.records[0].id,
+            owner: res.owner,
+          };
+        }
+      }
     } catch (err) {
       error(err as Error)
     }
+    return {}
   },
 })
 export default class ViewIscnIdPage extends Vue {
@@ -639,13 +649,6 @@ export default class ViewIscnIdPage extends Vue {
     const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
     if (httpsURL) return httpsURL;
     return '';
-  }
-
-  created() {
-    const { iscnId } = this.$route.params
-    if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
-      this.iscnId = iscnId
-    }
   }
 
   async mounted() {
