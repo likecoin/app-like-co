@@ -29,13 +29,52 @@
         <img v-if="avatar" :src="avatar">
         <Label :text="$t('NFTPortal.errorMessage.notIscnOwner', { ownerWallet })" />
       </div>
-      <div :class="[
-        'flex',
-        'flex-col',
-        'justify-center',
-        'items-center',
-        'w-full',
-      ]">
+
+      <div v-if="!isReady" class="flex justify-center items-center py-[64px]">
+        <ProgressIndicator />
+      </div>
+      <!-- Not Whitelisted -->
+      <div
+        v-else-if="isAllowed"
+        class="flex flex-col"
+      >
+        <div
+          :class="[
+            'flex',
+            'items-start',
+            'justify-start',
+            'gap-[8px]',
+            'px-[12px]',
+            'py-[8px]',
+            'bg-[#FCF1DC]',
+            'border-[1px]',
+            'border-[#F3C267]',
+            'rounded-[12px]',
+            'my-[64px]'
+          ]"
+        >
+          <IconAttention class="flex-shrink-0 text-[#F3C267]" />
+          <div class="flex flex-col items-start">
+            <Label preset="h5" class="text-dark-gray mb-[6px]" :text="$t('IscnRegisterForm.error.notWhitelisted.title')" />
+            <Label preset="p6" class="whitespace-pre-line" :text="$t('IscnRegisterForm.error.notWhitelisted')" />
+          </div>
+        </div>
+        <div class="flex self-end justify-end gap-[12px]">
+          <Button preset="plain" class="hover:bg-light-gray" :to="localeLocation({ name: 'index' })" :text="$t('IscnRegisterForm.button.back')" />
+          <Button preset="outline" href="https://forms.gle/GFbp9SNwSWdmmnQQ6" :text="$t('IscnRegisterForm.button.whitelist')" />
+        </div>
+      </div>
+      <!-- URL Input -->
+      <div
+        v-else
+        :class="[
+          'flex',
+          'flex-col',
+          'justify-center',
+          'items-center',
+          'w-full',
+        ]"
+      >
         <div :class="['flex', 'flex-col', 'justify-center', 'w-full', 'my-[64px]']" @submit.prevent="onSubmit">
           <Label preset="p6" :text="$t('NFTPortal.label.register')" />
           <TextField
@@ -67,8 +106,8 @@
           </Button>
         </div>
         <div v-else class="flex gap-[12px] ml-auto w-min">
-            <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
-            <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
+          <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
+          <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
         </div>
       </div>
     </Card>
@@ -166,6 +205,8 @@ export default class FetchIndex extends Vue {
   avatar = null
   balance: string = ''
   isInputValueValid: boolean = false
+  isReady: boolean = false
+  isAllowed: boolean = false
 
   get encodedURL(): string {
     const { url } = this;
@@ -289,27 +330,29 @@ export default class FetchIndex extends Vue {
     }
 
     const { liker_id: likerId, wallet } = this.$route.query;
-    if (wallet) {
-      this.ownerWallet = wallet as string;
-      try {
+
+    try {
+      if (wallet) {
+        this.ownerWallet = wallet as string;
         const { data } = await this.$axios.get(getAddressLikerIdMinApi(wallet as string));
         this.avatar = data.avatar;
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    } else if (likerId) {
-      try {
+      } else if (likerId) {
         const { data } = await this.$axios.get(getLikerIdMinApi(likerId as string));
         this.ownerWallet = data.likeWallet;
         this.avatar = data.avatar;
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
       }
-    }
-    if (this.url) {
-      this.onInputURL(this.url);
+      this.isAllowed = await this.checkIsWhitelisted();
+      if (!this.isAllowed) {
+        logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
+      }
+      if (this.url) {
+        this.onInputURL(this.url);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-unused-expressions
+      console.error(error)
+    } finally {
+      this.isReady = true
     }
   }
 
@@ -345,12 +388,6 @@ export default class FetchIndex extends Vue {
     /* eslint-disable no-fallthrough */
     switch (this.state) {
       case State.INIT: {
-        const isAllowed =  await this.checkIsWhitelisted();
-        if (!isAllowed) {
-          logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
-          this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
-          break
-        }
         if (this.ownerWallet && this.address !== this.ownerWallet) {
           this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
           break
