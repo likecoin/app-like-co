@@ -15,7 +15,7 @@
         class="text-medium-gray mt-[12px] mb-[28px]"
       />
       <!-- ISCN card -->
-      <ClientOnly v-if="record">
+      <ClientOnly v-if="isMounted && record">
         <LazyIscnCard
           class="mb-[16px]"
           :record="record"
@@ -189,6 +189,9 @@ export default class IscnUploadedInfo extends Vue {
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop(Number) readonly step: number | undefined
 
+  // force iscn card to be client side only
+  isMounted = false;
+
   get recordData() {
     return this.record?.data
   }
@@ -223,6 +226,10 @@ export default class IscnUploadedInfo extends Vue {
 
   get recordTimestamp() {
     return this.recordData?.recordTimestamp || ''
+  }
+
+  mounted() {
+    this.isMounted = true;
   }
 }
 </script>

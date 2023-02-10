@@ -1,6 +1,6 @@
 <template>
   <div class="w-min">
-    <ClientOnly>
+    <ClientOnly v-if="isMounted && record">
       <LazyIscnCard
         class="w-[220px] mb-[16px]"
         :record="record"
@@ -40,6 +40,9 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 export default class SearchResults extends Vue {
   @Prop() readonly record!: any
 
+  // force iscn card to be client side only
+  isMounted = false;
+
   get metadata() {
     return this.record.data.contentMetadata
   }
@@ -50,6 +53,10 @@ export default class SearchResults extends Vue {
 
   get keywords(): Array<String> {
     return this.metadata.keywords ? this.metadata.keywords.split(',') : []
+  }
+
+  mounted() {
+    this.isMounted = true;
   }
 }
 </script>

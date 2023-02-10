@@ -122,7 +122,7 @@
           'lg:max-w-[280px]',
         ]"
       >
-        <ClientOnly>
+        <ClientOnly v-if="isMounted && record">
           <LazyIscnCard
             :key="`${record.id}-portrait`"
             :class="[
@@ -570,6 +570,8 @@ export default class ViewIscnIdPage extends Vue {
     contributionType: '',
   }
 
+  // force iscn card to be client side only
+  isMounted = false;
   isPreminted = !this.isPopupLayout // assume popup is not preminted
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
@@ -686,6 +688,7 @@ export default class ViewIscnIdPage extends Vue {
     }
     this.exifInfo = this.showExifInfo()
     this.fetchTxHash().then(txHash => { this.txHash = txHash; });
+    this.isMounted = true;
   }
 
   async fetchTxHash() {
