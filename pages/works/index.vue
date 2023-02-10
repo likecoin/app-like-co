@@ -30,7 +30,7 @@
           size="small"
           :text="$t('WorksPage.pagination.button.first')"
           :is-disabled="pageNumber === 0"
-          @click="pageNumber = 0"
+          @click="firstPage"
         />
         <Button
           class="text-dark-gray"
@@ -73,7 +73,7 @@
           size="small"
           :text="$t('WorksPage.pagination.button.last')"
           :is-disabled="pageNumber >= pages.length - 1"
-          @click="pageNumber = pages.length - 1"
+          @click="lastPage"
         />
       </div>
     </nav>
@@ -82,6 +82,7 @@
       mode="out-in"
     >
       <SearchResults
+        v-if="pages[pageNumber]"
         :key="pages[pageNumber][0].id"
         :records="pages[pageNumber]"
       />
@@ -101,7 +102,7 @@ const iscnModule = namespace('iscn')
   layout: 'wallet',
 })
 export default class WorksIndexPageextends extends Vue {
-  pageNumber = 0
+  pageNumber = Number(this.$route.query.page) || 0
 
   @signerModule.Getter('getAddress') currentAddress!: string
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
@@ -113,6 +114,13 @@ export default class WorksIndexPageextends extends Vue {
   @Watch('currentAddress')
   onCurrentAddressChanged() {
     this.refreshWorks()
+  }
+
+  @Watch('pageNumber')
+  onPageNumberChanged() {
+    this.$router.replace({
+      query: { ...this.$route.query, page: this.pageNumber.toString() },
+    });
   }
 
   mounted() {
@@ -135,6 +143,14 @@ export default class WorksIndexPageextends extends Vue {
 
   previousPage() {
     this.pageNumber = Math.max(this.pageNumber - 1, 0)
+  }
+
+  firstPage() {
+    this.pageNumber = 0
+  }
+
+  lastPage() {
+    this.pageNumber = this.pages.length - 1
   }
 }
 </script>
