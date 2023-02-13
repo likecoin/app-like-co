@@ -82,13 +82,19 @@
                 preset="plain"
                 size="mini"
                 :circle="true"
-                @click="isEditingName = true"
+                @click="onClickEditName"
               >
                 <IconEdit />
               </Button>
             </template>
           </Label>
-          <input v-else :value="name" @keydown="onEnterBlur" @blur="onInputName" />
+          <input
+            v-else
+            ref="nameInput"
+            :value="name"
+            @keydown="onEnterBlur"
+            @blur="onInputName"
+          />
           <Label v-if="!isEditingDescription" preset="p6" class="mt-[8px]">
             {{ (description || defaultDescription) | ellipsisDescription }}
             <template #append>
@@ -96,13 +102,18 @@
                 preset="plain"
                 size="mini"
                 :circle="true"
-                @click="isEditingDescription = true"
+                @click="onClickEditDescription"
               >
                 <IconEdit />
               </Button>
             </template>
           </Label>
-          <input v-else :value="description" @keydown="onEnterBlur" @blur="onInputDescrption" />
+          <textarea
+            v-else
+            ref="descriptionInput"
+            :value="description"
+            @blur="onInputDescrption"
+          />
         </div>
       </div>
     </div>
@@ -136,6 +147,16 @@ export default class NFTMintPreview extends Vue {
     if (e.keyCode === 13) {
       e.target.blur();
     }
+  }
+
+  onClickEditName() {
+    this.isEditingName = true
+    this.$nuxt.$nextTick(() => (this.$refs.nameInput as HTMLInputElement)?.focus())
+  }
+
+  onClickEditDescription() {
+    this.isEditingDescription = true;
+    this.$nuxt.$nextTick(() => (this.$refs.descriptionInput as HTMLInputElement)?.focus())
   }
 
   onInputName(e: any) {
