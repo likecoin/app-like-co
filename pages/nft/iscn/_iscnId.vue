@@ -588,15 +588,18 @@ export default class NFTTestMintPage extends Vue {
 
   onEditNftName(name: string) {
     this.NftName = name;
+    logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftName', this.iscnId, 1);
   }
 
   onEditNftDescription(description: string) {
     this.NftDescription = description;
+    logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftDescription', this.iscnId, 1);
   }
 
   onEditOgImage(imageData: File) {
     this.ogImageBlob = imageData;
     this.isCustomOgimage = true;
+    logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftImage', this.iscnId, 1);
   }
 
   async getOgImage() {
