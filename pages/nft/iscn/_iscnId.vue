@@ -32,6 +32,8 @@
         :description="NftDescription"
         :img-src="imgSrc"
         :is-loading="isLoadingPreviewOG"
+        @edit-name="onEditNftName"
+        @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
       />
 
@@ -187,7 +189,12 @@ export default class NFTTestMintPage extends Vue {
   iscnOwner: string = ''
   iscnData: any = null
   apiData: any = null
+
+  NftName: string = '';
+  NftDescription: string  = '';
+
   message: string = ''
+
   isCustomOgimage = false
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
@@ -355,15 +362,6 @@ export default class NFTTestMintPage extends Vue {
     return this.walletType === 'likerland_app'
   }
 
-  get NftName() {
-    const prefix = this.NFTPrefix;
-    return `${prefix ? `${prefix} - ` : ''}${this.iscnData?.contentMetadata?.name || 'NFT'}`;
-  }
-
-  get NftDescription() {
-    return `${this.iscnData?.contentMetadata?.description || ''}`;
-  }
-
   get createNftClassPayload() {
     let metadata: {[key: string]: any} = {
       image: this.ogImageUri,
@@ -379,7 +377,7 @@ export default class NFTTestMintPage extends Vue {
     }
     let payload = {
       name: this.NftName,
-      description: this.iscnData.contentMetadata?.description,
+      description: this.NftDescription,
       metadata,
     };
     if (this.isCustomOgimage) payload.metadata.is_custom_image = 'true';
@@ -540,6 +538,8 @@ export default class NFTTestMintPage extends Vue {
       if (res) {
         this.iscnData = res.records[0].data
         this.iscnOwner = res.owner
+        this.NftName =`${this.NFTPrefix ? `${this.NFTPrefix} - ` : ''}${this.iscnData?.contentMetadata?.name || 'NFT'}`;
+        this.NftDescription =`${this.iscnData?.contentMetadata?.description || ''}`;
         if (!this.iscnData.contentMetadata?.url) {
           logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoWarning', 'No URL in ISCN\'s metadata', 1);
           this.toggleSnackbar('Warning: No URL in ISCN\'s metadata')
@@ -584,6 +584,14 @@ export default class NFTTestMintPage extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  onEditNftName(name: string) {
+    this.NftName = name;
+  }
+
+  onEditNftDescription(description: string) {
+    this.NftDescription = description;
   }
 
   onEditOgImage(imageData: File) {

@@ -76,10 +76,33 @@
           >
         </div>
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
-          <Label preset="h5" :text="name" />
-          <Label v-if="description" preset="p6" class="mt-[8px]">{{
-            description | ellipsis
-          }}</Label>
+          <Label v-if="!isEditingName" preset="h5" :text="name">
+            <template #append>
+              <Button
+                preset="plain"
+                size="mini"
+                :circle="true"
+                @click="isEditingName = true"
+              >
+                <IconEdit />
+              </Button>
+            </template>
+          </Label>
+          <input v-else :value="name" @keydown="onEnterBlur" @blur="onInputName" />
+          <Label v-if="!isEditingDescription" preset="p6" class="mt-[8px]">
+            {{ (description || defaultDescription) | ellipsisDescription }}
+            <template #append>
+              <Button
+                preset="plain"
+                size="mini"
+                :circle="true"
+                @click="isEditingDescription = true"
+              >
+                <IconEdit />
+              </Button>
+            </template>
+          </Label>
+          <input v-else :value="description" @keydown="onEnterBlur" @blur="onInputDescrption" />
         </div>
       </div>
     </div>
@@ -101,6 +124,29 @@ export default class NFTMintPreview extends Vue {
 
   @Prop({ default: false }) readonly isLoading!: boolean | undefined
 
+  isEditingName = false
+  isEditingDescription = false
+
+  get defaultDescription() {
+    return this.$t('NFTPortal.label.defaultDescription');
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onEnterBlur(e: any) {
+    if (e.keyCode === 13) {
+      e.target.blur();
+    }
+  }
+
+  onInputName(e: any) {
+    this.$emit('edit-name', e.target?.value);
+    this.isEditingName = false;
+  }
+
+  onInputDescrption(e: any) {
+    this.$emit('edit-description', e.target?.value);
+    this.isEditingDescription = false;
+  }
 
   openImagePicker() {
     (this.$refs.imagePicker as HTMLBaseElement)?.click();

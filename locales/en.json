@@ -256,6 +256,7 @@
   "NFTPortal.errorMessage.urlNotExists": "Cannot obtain image preview",
   "NFTPortal.label.classId": "Class ID",
   "NFTPortal.label.creator": "Creator",
+  "NFTPortal.label.defaultDescription": "(no description)",
   "NFTPortal.label.detailsPage": "NFT Details Page :",
   "NFTPortal.label.Iscn": "ISCN ID",
   "NFTPortal.label.AR": "Arweave ID",
