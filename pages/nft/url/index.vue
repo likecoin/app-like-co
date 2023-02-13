@@ -141,7 +141,7 @@ import {
   getWhitelistApi,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
-import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
+import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, IS_TESTNET, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
 
 const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
@@ -341,18 +341,25 @@ export default class FetchIndex extends Vue {
         this.ownerWallet = data.likeWallet;
         this.avatar = data.avatar;
       }
-      this.isAllowed = await this.checkIsWhitelisted();
+    } catch (error) {
+      if ((error as any).response?.status !== 404) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    }
+    try {
+      this.isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
       if (!this.isAllowed) {
         logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
       }
-      if (this.url) {
-        this.onInputURL(this.url);
-      }
     } catch (error) {
-      // eslint-disable-next-line no-unused-expressions
+      // eslint-disable-next-line no-console
       console.error(error)
     } finally {
       this.isReady = true
+    }
+    if (this.url) {
+      this.onInputURL(this.url);
     }
   }
 
