@@ -35,7 +35,7 @@
       </div>
       <!-- Not Whitelisted -->
       <div
-        v-else-if="isAllowed"
+        v-else-if="!isAllowed"
         class="flex flex-col"
       >
         <div
