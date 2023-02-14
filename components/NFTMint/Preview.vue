@@ -76,10 +76,44 @@
           >
         </div>
         <div class="flex flex-col m-0 p-[16px] bg-shade-gray">
-          <Label preset="h5" :text="name" />
-          <Label v-if="description" preset="p6" class="mt-[8px]">{{
-            description | ellipsis
-          }}</Label>
+          <Label v-if="!isEditingName" preset="h5" :text="name">
+            <template #append>
+              <Button
+                preset="plain"
+                size="mini"
+                :circle="true"
+                @click="onClickEditName"
+              >
+                <IconEdit />
+              </Button>
+            </template>
+          </Label>
+          <input
+            v-else
+            ref="nameInput"
+            :value="name"
+            @keydown="onEnterBlur"
+            @blur="onInputName"
+          />
+          <Label v-if="!isEditingDescription" preset="p6" class="mt-[8px]">
+            {{ (description || defaultDescription) | ellipsisDescription }}
+            <template #append>
+              <Button
+                preset="plain"
+                size="mini"
+                :circle="true"
+                @click="onClickEditDescription"
+              >
+                <IconEdit />
+              </Button>
+            </template>
+          </Label>
+          <textarea
+            v-else
+            ref="descriptionInput"
+            :value="description"
+            @blur="onInputDescrption"
+          />
         </div>
       </div>
     </div>
@@ -101,6 +135,39 @@ export default class NFTMintPreview extends Vue {
 
   @Prop({ default: false }) readonly isLoading!: boolean | undefined
 
+  isEditingName = false
+  isEditingDescription = false
+
+  get defaultDescription() {
+    return this.$t('NFTPortal.label.defaultDescription');
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onEnterBlur(e: any) {
+    if (e.keyCode === 13) {
+      e.target.blur();
+    }
+  }
+
+  onClickEditName() {
+    this.isEditingName = true
+    this.$nuxt.$nextTick(() => (this.$refs.nameInput as HTMLInputElement)?.focus())
+  }
+
+  onClickEditDescription() {
+    this.isEditingDescription = true;
+    this.$nuxt.$nextTick(() => (this.$refs.descriptionInput as HTMLInputElement)?.focus())
+  }
+
+  onInputName(e: any) {
+    this.$emit('edit-name', e.target?.value);
+    this.isEditingName = false;
+  }
+
+  onInputDescrption(e: any) {
+    this.$emit('edit-description', e.target?.value);
+    this.isEditingDescription = false;
+  }
 
   openImagePicker() {
     (this.$refs.imagePicker as HTMLBaseElement)?.click();
