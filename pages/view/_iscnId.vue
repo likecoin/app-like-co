@@ -30,6 +30,7 @@
       :iscn-hash="txHash"
       :record="record"
       :exif-info="exifInfo"
+      :is-mounted="isMounted"
     >
       <template #footer>
         <div
@@ -535,16 +536,23 @@ export enum ExifList {
         return 'default'
     }
   },
-  async asyncData({ params, store, error }) {
+  async asyncData({ params, query, store, error }) {
     try {
       const { iscnId } = params
+      const { layout } = query
       if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
-        const res = await store.dispatch('iscn/fetchISCNById', iscnId)
-        if (res) {
+        if (layout !== 'popup') {
+          const res = await store.dispatch('iscn/fetchISCNById', iscnId)
+          if (res) {
+            return {
+              iscnId: res.records[0].id,
+              owner: res.owner,
+            };
+          }
+        } else {
           return {
-            iscnId: res.records[0].id,
-            owner: res.owner,
-          };
+            iscnId,
+          }
         }
       }
     } catch (err) {
