@@ -1,72 +1,74 @@
 <template>
-  <div
-    :key="encodedIDInHex"
-    v-bind="rootProps"
-  >
-    <div :class="containerClasses">
-      <div
-        ref="canvas"
-        :class="canvasWrapperClasses"
-        :style="rootStyle"
-        @resize="handleResize"
-      />
-      <svg
-        ref="svg"
-        class="relative"
-        xmlns="http://www.w3.org/2000/svg"
-        :viewBox="viewBox"
-      >
-        <g :class="infoWrapperClasses">
-          <rect
-            x="9"
-            y="9"
-            v-bind="borderProps"
-            rx="12"
-            fill="none"
-            stroke="#fff"
-            stroke-linejoin="round"
-            stroke-opacity="0.6"
-            stroke-width="18"
-          />
-          <text
-            v-bind="upperTextProps"
-            font-size="10"
-            fill="#28646e"
-            alignment-baseline="middle"
-            text-anchor="middle"
-            font-family="PT Mono, monospace"
-          >{{ recordID }}</text>
-          <text
-            v-bind="lowerTextProps"
-            font-size="10"
-            fill="#28646e"
-            alignment-baseline="middle"
-            text-anchor="middle"
-            font-family="PT Mono, monospace"
-          >{{ recordInfoText }}</text>
-        </g>
-        <g :class="qrCodeWrapperClasses">
-          <rect
-            v-bind="qrCodeSizeProps"
-            rx="4"
-            fill="#fff"
-          />
-          <foreignObject v-bind="qrCodeSizeProps">
-            <div
-              ref="qrcode"
-              :class="[
-                'flex',
-                'items-center',
-                'justify-center',
-                'w-full',
-                'h-full',
-              ]"
+  <ClientOnly>
+    <div
+      :key="encodedIDInHex"
+      v-bind="rootProps"
+    >
+      <div :class="containerClasses">
+        <div
+          ref="canvas"
+          :class="canvasWrapperClasses"
+          :style="rootStyle"
+          @resize="handleResize"
+        />
+        <svg
+          ref="svg"
+          class="relative"
+          xmlns="http://www.w3.org/2000/svg"
+          :viewBox="viewBox"
+        >
+          <g :class="infoWrapperClasses">
+            <rect
+              x="9"
+              y="9"
+              v-bind="borderProps"
+              rx="12"
+              fill="none"
+              stroke="#fff"
+              stroke-linejoin="round"
+              stroke-opacity="0.6"
+              stroke-width="18"
             />
-          </foreignObject>
-        </g>
-      </svg>
+            <text
+              v-bind="upperTextProps"
+              font-size="10"
+              fill="#28646e"
+              alignment-baseline="middle"
+              text-anchor="middle"
+              font-family="PT Mono, monospace"
+            >{{ recordID }}</text>
+            <text
+              v-bind="lowerTextProps"
+              font-size="10"
+              fill="#28646e"
+              alignment-baseline="middle"
+              text-anchor="middle"
+              font-family="PT Mono, monospace"
+            >{{ recordInfoText }}</text>
+          </g>
+          <g :class="qrCodeWrapperClasses">
+            <rect
+              v-bind="qrCodeSizeProps"
+              rx="4"
+              fill="#fff"
+            />
+            <foreignObject v-bind="qrCodeSizeProps">
+              <div
+                ref="qrcode"
+                :class="[
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'w-full',
+                  'h-full',
+                ]"
+              />
+            </foreignObject>
+          </g>
+        </svg>
+      </div>
     </div>
-  </div>
+  </ClientOnly>
 </template>
 
 <script lang="ts">
@@ -344,6 +346,7 @@ export default class IscnCard extends Vue {
   }
 
   detectCardSize() {
+    if (!this.$refs.svg) return;
     const {
       width = 0,
       height = 0,
@@ -374,7 +377,7 @@ export default class IscnCard extends Vue {
   }
 
   @Watch('record')
-  sketchGraph() {
+  async sketchGraph() {
     if (!this.record) return
 
     this.detectCardSize()
@@ -556,7 +559,8 @@ export default class IscnCard extends Vue {
     }
 
     if (!this.canvas && window) {
-      this.canvas = new P5(sketch, this.$refs.canvas as HTMLElement)
+      const P5Default = (await import('p5')).default;
+      this.canvas = new P5Default(sketch, this.$refs.canvas as HTMLElement)
     }
 
     if (!this.qrcode) {

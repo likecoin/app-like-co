@@ -1,8 +1,6 @@
 <template>
   <div v-if="record">
-    <ClientOnly v-if="isMounted && record">
-      <LazyIscnCard v-bind="cardProps" />
-    </ClientOnly>
+    <IscnCard v-bind="cardProps" />
     <pre
       v-if="isShowAdjustableProps"
       class="p-[16px] text-[10px] font-mono"
@@ -20,11 +18,12 @@ import { ISCN_PREFIX } from '~/constant'
 
 const iscnModule = namespace('iscn')
 
-@Component({ layout: 'blank' })
+@Component({
+  layout: 'blank',
+  components: { IscnCard: () => import('~/components/IscnCard.vue') },
+})
 export default class CardIscnIdPage extends Vue {
   iscnId = ''
-  // force iscn card to be client side only
-  isMounted = false;
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
 
@@ -101,7 +100,6 @@ export default class CardIscnIdPage extends Vue {
     if (!this.getISCNById(this.iscnId)) {
       this.$nuxt.error({ statusCode: 404 })
     }
-    this.isMounted = true;
   }
 }
 </script>
