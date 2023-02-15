@@ -30,6 +30,7 @@
       :iscn-hash="txHash"
       :record="record"
       :exif-info="exifInfo"
+      :is-mounted="isMounted"
     >
       <template #footer>
         <div
