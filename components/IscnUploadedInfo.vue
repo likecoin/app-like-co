@@ -15,15 +15,14 @@
         class="text-medium-gray mt-[12px] mb-[28px]"
       />
       <!-- ISCN card -->
-      <ClientOnly v-if="isMounted && record">
-        <LazyIscnCard
-          :key="`${record.id}-landscape`"
-          class="mb-[16px]"
-          :record="record"
-          :is-animated="true"
-          orientation="landscape"
-        />
-      </ClientOnly>
+      <IscnCard
+        v-if="record"
+        :key="`${record.id}-landscape`"
+        class="mb-[16px]"
+        :record="record"
+        :is-animated="true"
+        orientation="landscape"
+      />
       <!--
       <div class="flex flex-row justify-center items-center my-[16px]">
         <Button circle size="small" preset="tertiary" class="mx-[8px]">
@@ -181,13 +180,14 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
 
-@Component
+@Component({
+  components: { IscnCard: () => import('~/components/IscnCard.vue') },
+})
 export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly owner!: string
   @Prop(String) readonly iscnId!: string
   @Prop(String) readonly iscnHash!: string
   @Prop({ default: null }) readonly record: ISCNRecordWithID | null | undefined
-  @Prop(Boolean) readonly isMounted: boolean = false
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop(Number) readonly step: number | undefined
 

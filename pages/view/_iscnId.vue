@@ -30,7 +30,6 @@
       :iscn-hash="txHash"
       :record="record"
       :exif-info="exifInfo"
-      :is-mounted="isMounted"
     >
       <template #footer>
         <div
@@ -123,43 +122,41 @@
           'lg:max-w-[280px]',
         ]"
       >
-        <ClientOnly v-if="isMounted && record">
-          <LazyIscnCard
-            :key="`${record.id}-portrait`"
-            :class="[
-              'hidden',
-              'lg:block',
-              'flex-shrink-0',
-              'w-[280px]',
-            ]"
-            :record="record"
-            orientation="portrait"
-            :is-animated="true"
-          />
-          <LazyIscnCard
-            :key="`${record.id}-landscape`"
-            :class="[
-              'w-full',
-              'lg:absolute',
-              'lg:opacity-0',
-              'lg:pointer-events-none',
-            ]"
-            :record="record"
-            :is-animated="true"
-            orientation="landscape"
-          />
-          <Button
-            v-if="viewContentURL"
-            class="mx-auto mt-[16px]"
-            preset="outline"
-            :text="$t('NFTPortal.button.viewContent')"
-            @click="onClickViewContent"
-          >
-            <template #append>
-              <IconOpenInNew class="w-[12px]" />
-            </template>
-          </Button>
-        </ClientOnly>
+        <IscnCard
+          :key="`${record.id}-portrait`"
+          :class="[
+            'hidden',
+            'lg:block',
+            'flex-shrink-0',
+            'w-[280px]',
+          ]"
+          :record="record"
+          orientation="portrait"
+          :is-animated="true"
+        />
+        <IscnCard
+          :key="`${record.id}-landscape`"
+          :class="[
+            'w-full',
+            'lg:absolute',
+            'lg:opacity-0',
+            'lg:pointer-events-none',
+          ]"
+          :record="record"
+          :is-animated="true"
+          orientation="landscape"
+        />
+        <Button
+          v-if="viewContentURL"
+          class="mx-auto mt-[16px]"
+          preset="outline"
+          :text="$t('NFTPortal.button.viewContent')"
+          @click="onClickViewContent"
+        >
+          <template #append>
+            <IconOpenInNew class="w-[12px]" />
+          </template>
+        </Button>
         <MetadataCard
           v-if="type ==='Image' || type === 'Photo'"
           :img-src="imgSrc"
@@ -496,6 +493,7 @@ export enum ExifList {
 }
 
 @Component({
+  components: { IscnCard: () => import('~/components/IscnCard.vue') },
   head() {
     let title = ''
     if (this.$route.query.layout === 'popup') {
@@ -578,8 +576,6 @@ export default class ViewIscnIdPage extends Vue {
     contributionType: '',
   }
 
-  // force iscn card to be client side only
-  isMounted = false;
   isPreminted = !this.isPopupLayout // assume popup is not preminted
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
@@ -696,7 +692,6 @@ export default class ViewIscnIdPage extends Vue {
     }
     this.exifInfo = this.showExifInfo()
     this.fetchTxHash().then(txHash => { this.txHash = txHash; });
-    this.isMounted = true;
   }
 
   async fetchTxHash() {
