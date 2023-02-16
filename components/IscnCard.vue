@@ -346,11 +346,10 @@ export default class IscnCard extends Vue {
   }
 
   detectCardSize() {
-    if (!this.$refs.svg) return;
     const {
       width = 0,
       height = 0,
-    } = (this.$refs.svg as HTMLElement).getBoundingClientRect() || {}
+    } = (this.$refs.svg as HTMLElement)?.getBoundingClientRect() || {}
     this.width = width
     this.height = height
   }
