@@ -855,11 +855,13 @@ export default class NFTTestMintPage extends Vue {
     // eslint-disable-next-line no-console
     console.error(err)
     if (axios.isAxiosError(err)) {
-      this.toggleSnackbar(
-        (err as AxiosError).response?.data || (err as Error).toString(),
-      )
+      const message = (err as AxiosError).response?.data || (err as Error).toString();
+      this.errorMessage = message;
+      this.toggleSnackbar(message)
     } else {
-      this.toggleSnackbar((err as Error).toString())
+      const message = (err as Error).toString();
+      this.errorMessage = message;
+      this.toggleSnackbar(message)
     }
   }
 }
