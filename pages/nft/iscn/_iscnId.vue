@@ -697,7 +697,7 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfo', this.classId, 1);
       const { data } = await this.$axios.post(
         API_LIKER_NFT_MINT,
-        {},
+        { contentUrl: this.iscnData.contentMetadata?.url },
         {
           params: {
             iscn_id: this.iscnId,
