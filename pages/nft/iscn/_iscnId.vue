@@ -35,6 +35,7 @@
         @edit-name="onEditNftName"
         @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
+        @generate-image="onGenerateImage"
       />
 
       <NFTMintWriterMessage
@@ -107,6 +108,7 @@ import axios, { AxiosError } from 'axios'
 import {
   LIKER_NFT_TARGET_ADDRESS,
   API_LIKER_NFT_MINT,
+  API_LIKER_NFT_MINT_IMAGE,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
   getWhitelistApi,
@@ -596,7 +598,7 @@ export default class NFTTestMintPage extends Vue {
     logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftDescription', this.iscnId, 1);
   }
 
-  onEditOgImage(imageData: File) {
+  onEditOgImage(imageData: File | Blob) {
     this.ogImageBlob = imageData;
     this.isCustomOgimage = true;
     logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftImage', this.iscnId, 1);
@@ -690,6 +692,23 @@ export default class NFTTestMintPage extends Vue {
       console.error(err)
       throw new Error('CANNOT_UPLOAD_TO_ARWEAVE')
     }
+  }
+
+  async onGenerateImage() {
+    const res = await this.$axios.post(
+        API_LIKER_NFT_MINT_IMAGE,
+        {},
+        {
+          params: {
+            iscn_id: this.iscnId,
+            platform: this.platform,
+            from: this.address,
+          },
+          paramsSerializer: (params) => qs.stringify(params),
+          responseType: 'arraybuffer',
+        },
+      );
+    this.onEditOgImage(new Blob([res.data], {type: res.headers['content-type']}));
   }
 
   async postMintInfo() {

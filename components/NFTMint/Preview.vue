@@ -59,6 +59,15 @@
             <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
           </div>
           <Button
+            class="absolute right-12 top-3"
+            preset="secondary"
+            size="mini"
+            :circle="true"
+            @click="onGenerateImage"
+          >
+            <IconCreativeWork />
+          </Button>
+          <Button
             class="absolute right-3 top-3"
             preset="secondary"
             size="mini"
@@ -180,6 +189,10 @@ export default class NFTMintPreview extends Vue {
       const [file] = Object.values(files);
       this.$emit('edit-image', file);
     }
+  }
+
+  onGenerateImage() {
+    this.$emit('generate-image');
   }
 }
 </script>
