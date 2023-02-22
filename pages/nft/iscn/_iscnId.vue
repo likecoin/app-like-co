@@ -696,6 +696,7 @@ export default class NFTTestMintPage extends Vue {
 
   async onGenerateImage() {
     this.isLoadingPreviewOG = true
+    logTrackerEvent(this, 'IscnMintNFT', 'GenerationRandomImage', this.iscnId, 1);
     const res = await this.$axios.post(
         API_LIKER_NFT_MINT_IMAGE,
         {},
