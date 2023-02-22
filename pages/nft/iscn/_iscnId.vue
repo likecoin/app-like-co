@@ -695,6 +695,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async onGenerateImage() {
+    this.isLoadingPreviewOG = true
     const res = await this.$axios.post(
         API_LIKER_NFT_MINT_IMAGE,
         {},
@@ -709,6 +710,7 @@ export default class NFTTestMintPage extends Vue {
         },
       );
     this.onEditOgImage(new Blob([res.data], {type: res.headers['content-type']}));
+    this.isLoadingPreviewOG = false
   }
 
   async postMintInfo() {

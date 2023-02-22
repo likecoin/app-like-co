@@ -59,23 +59,36 @@
             <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
           </div>
           <Button
-            class="absolute right-12 top-3"
-            preset="secondary"
-            size="mini"
-            :circle="true"
-            @click="onGenerateImage"
-          >
-            <IconCreativeWork />
-          </Button>
-          <Button
+            v-if="!isShowEditImageToolbar"
             class="absolute right-3 top-3"
             preset="secondary"
             size="mini"
             :circle="true"
-            @click="openImagePicker"
+            @click="isShowEditImageToolbar = true"
           >
             <IconEdit />
           </Button>
+          <template v-else>
+            <Button
+              v-if="!isGenerated"
+              class="absolute right-12 top-3"
+              preset="secondary"
+              size="mini"
+              :circle="true"
+              @click="onGenerateImage"
+            >
+              <IconDice />
+            </Button>
+            <Button
+              class="absolute right-3 top-3"
+              preset="secondary"
+              size="mini"
+              :circle="true"
+              @click="openImagePicker"
+            >
+              <IconUploadMini />
+            </Button>
+          </template>
           <input
             ref="imagePicker"
             class="hidden"
@@ -129,7 +142,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 import { ellipsisDescription } from '~/utils/ui'
 
@@ -146,9 +159,16 @@ export default class NFTMintPreview extends Vue {
 
   isEditingName = false
   isEditingDescription = false
+  isShowEditImageToolbar = false
+  isGenerated = false
 
   get defaultDescription() {
     return this.$t('NFTPortal.label.defaultDescription');
+  }
+
+  @Watch('imgSrc')
+  onImgSrcChange() {
+    this.isShowEditImageToolbar = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -192,6 +212,7 @@ export default class NFTMintPreview extends Vue {
   }
 
   onGenerateImage() {
+    this.isGenerated = true;
     this.$emit('generate-image');
   }
 }
