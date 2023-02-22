@@ -59,7 +59,17 @@
             <img class="w-[30px]" :alt="$t('NFTPortal.errorMessage.noImage')" src="~assets/images/no-image.png" />
           </div>
           <Button
-            v-if="!isShowEditImageToolbar"
+            v-if="isImageEdited"
+            class="absolute right-3 top-3"
+            preset="secondary"
+            size="mini"
+            :circle="true"
+            @click="onResetImage"
+          >
+            <IconCloseMini />
+          </Button>
+          <Button
+            v-else-if="!isShowEditImageToolbar"
             class="absolute right-3 top-3"
             preset="secondary"
             size="mini"
@@ -160,6 +170,7 @@ export default class NFTMintPreview extends Vue {
   isEditingName = false
   isEditingDescription = false
   isShowEditImageToolbar = false
+  isImageEdited = false
   isGenerated = false
 
   get defaultDescription() {
@@ -202,17 +213,24 @@ export default class NFTMintPreview extends Vue {
     (this.$refs.imagePicker as HTMLBaseElement)?.click();
   }
 
+  onResetImage() {
+    this.$emit('reset-image');
+    this.isImageEdited = false;
+  }
+
   onEditImage(event: Event) {
     if (!event.target) return;
     const { files } = event.target as HTMLInputElement;
     if (files && files[0]) {
       const [file] = Object.values(files);
       this.$emit('edit-image', file);
+      this.isImageEdited = true;
     }
   }
 
   onGenerateImage() {
     this.isGenerated = true;
+    this.isImageEdited = true;
     this.$emit('generate-image');
   }
 }

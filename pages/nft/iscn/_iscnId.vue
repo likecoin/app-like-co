@@ -36,6 +36,7 @@
         @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
         @generate-image="onGenerateImage"
+        @reset-image="onResetImage"
       />
 
       <NFTMintWriterMessage
@@ -198,6 +199,7 @@ export default class NFTTestMintPage extends Vue {
   message: string = ''
 
   isCustomOgimage = false
+  defaultOgImageBlob: Blob | null = null
   ogImageBlob: Blob | null = null
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
@@ -458,7 +460,7 @@ export default class NFTTestMintPage extends Vue {
           }
 
           if (this.ogImageBlob) {
-          this.mintState = MintState.UPLOADING
+            this.mintState = MintState.UPLOADING
             const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
             if (!this.ogImageArweaveId) {
               if (!this.ogImageArweaveFeeTxHash) { await this.sendArweaveFeeTx(arweaveFeeInfo) }
@@ -615,6 +617,7 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
       const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
       this.ogImageBlob = data
+      this.defaultOgImageBlob = data
       this.isLoadingPreviewOG = false
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
@@ -692,6 +695,11 @@ export default class NFTTestMintPage extends Vue {
       console.error(err)
       throw new Error('CANNOT_UPLOAD_TO_ARWEAVE')
     }
+  }
+
+  onResetImage() {
+    this.ogImageBlob = this.defaultOgImageBlob;
+    this.isCustomOgimage = false;
   }
 
   async onGenerateImage() {
