@@ -11,6 +11,7 @@ const LIKE_CO_API_ROOT = IS_TESTNET ? 'https://api.rinkeby.like.co' : 'https://a
 const LIKECOIN_CHAIN_API = IS_TESTNET ? 'https://node.testnet.like.co' : 'https://mainnet-node.like.co';
 export const LIKER_NFT_TARGET_ADDRESS = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
 export const API_LIKER_NFT_MINT = `${LIKE_CO_API_ROOT}/likernft/mint`;
+export const API_LIKER_NFT_MINT_IMAGE = `${LIKE_CO_API_ROOT}/likernft/mint/image`;
 export const API_LIKER_NFT_PURCHASE = `${LIKE_CO_API_ROOT}/likernft/purchase`;
 export const API_LIKER_NFT_HISTORY = `${LIKE_CO_API_ROOT}/likernft/history`;
 export const API_LIKER_NFT_METADATA = `${LIKE_CO_API_ROOT}/likernft/metadata`;
