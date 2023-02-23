@@ -66,7 +66,7 @@
             :circle="true"
             @click="onResetImage"
           >
-            <IconCloseMini />
+            <IconUndo />
           </Button>
           <Button
             v-else-if="!isShowEditImageToolbar"
