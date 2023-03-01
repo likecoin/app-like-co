@@ -45,7 +45,10 @@ export default {
     SENTRY_DSN,
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['~/assets/css/global.css'],
+  css: [
+    { src: '@likecoin/wallet-connector/dist/style.css', lang: 'css' },
+    { src: '~/assets/css/global.css', lang: 'css' },
+  ],
 
   render: {
     csp: {

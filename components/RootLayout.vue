@@ -15,19 +15,9 @@
       @close="isOpenChainUpgradeBlockingDialog"
     />
 
-    <DialogContainer>
-      <ConnectWalletDialog
-        :is-opened="isShowConnectWalletDialog"
-        @quit="handleConnectWalletDialogQuit"
-        @close="handleConnectWalletDialogClose"
-      />
-      <ConnectLikerIdDialog @quit="toggleConnectWalletDialog(true)" />
+<DialogContainer>
+      <Dialog />
     </DialogContainer>
-    
-    <AlertsKeplrNotFound
-      v-model="isShowKeplrWarning"
-      @close="handleKeplrWarningClose"
-    />
 
   </div>
 </template>

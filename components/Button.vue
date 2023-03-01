@@ -114,18 +114,30 @@ export default class Button extends Vue {
     switch (this.preset) {
       case Preset.primary:
         return [
+          {'!bg-like-green': [
+              'button',
+              'submit',
+            ].includes(this.$attrs.type)},
           'bg-like-green',
           'text-like-cyan-light',
         ]
 
       case Preset.secondary:
         return [
+          {'!bg-like-cyan-light': [
+              'button',
+              'submit',
+            ].includes(this.$attrs.type)},
           'bg-like-cyan-light',
           'text-like-green',
         ]
 
       case Preset.tertiary:
         return [
+          {'!bg-shade-gray': [
+              'button',
+              'submit',
+            ].includes(this.$attrs.type)},
           'bg-shade-gray',
           this.circle ? 'text-like-green' : 'text-dark-gray',
         ]
@@ -145,6 +157,10 @@ export default class Button extends Vue {
         ]
       case Preset.gradient:
         return [
+          {'!bg-gradient-to-r from-[#D2F0F0] to-[#F0E6B4]': [
+              'button',
+              'submit',
+            ].includes(this.$attrs.type)},
           'bg-gradient-to-r from-[#D2F0F0] to-[#F0E6B4]',
           'text-like-green',
         ]
