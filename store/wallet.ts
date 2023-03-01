@@ -1,63 +1,71 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators';
-import { OfflineSigner, AccountData } from '@cosmjs/proto-signing';
-import WalletConnect from '@walletconnect/client';
-import { isMobile, saveMobileLinkInfo, payloadId } from '@walletconnect/utils';
-import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
+import axios from 'axios'
+import { OfflineSigner } from '@cosmjs/proto-signing'
+import { catchAxiosError } from '~/utils/misc'
+import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
+import { getUserInfoMinByAddress } from '~/constant/api'
 
-import { timeout } from '~/utils/misc';
-import { configToKeplrCoin } from '~/utils/cosmos';
-import network from '~/constant/network';
-import { LIKER_LAND_APP_URI } from '~/constant';
+let likecoinWalletLib: any = null
+let connectorInstance: any = null
 
-const KEY_CONNECTED_WALLET_TYPE = 'KEY_CONNECTED_WALLET_TYPE';
-const KEY_WALLET_CONNECT = 'walletconnect';
-const KEY_WALLET_CONNECT_ACCOUNT_PREFIX = 'KEY_WALLET_CONNECT_ACCOUNT_PREFIX';
+async function getLikeCoinWalletLib() {
+  if (!likecoinWalletLib) {
+    likecoinWalletLib = await import(
+      /* webpackChunkName: "likecoin_wallet" */ '@likecoin/wallet-connector'
+    )
+  }
+  return likecoinWalletLib
+}
+
+async function getConnector() {
+  if (connectorInstance) {
+    return connectorInstance
+  }
+  const lib = await getLikeCoinWalletLib()
+  connectorInstance = new lib.LikeCoinWalletConnector({
+    ...LIKECOIN_WALLET_CONNECTOR_CONFIG,
+  })
+  return connectorInstance
+}
 
 @Module({
   name: 'wallet',
   stateFactory: true,
   namespaced: true,
 })
-
 export default class Wallet extends VuexModule {
-  type = '';
-  signer: OfflineSigner | null = null;
-  walletConnectURI = '';
-  accounts: readonly AccountData[] = [];
-  isShowConnectDialog = false;
-  isShowKeplrWarning = false;
-  isOpenSnackbar = false;
-  errorType = '';
+  type = ''
+  address = ''
+  signer: OfflineSigner | null = null
+  isShowKeplrWarning = false
+  isOpenSnackbar = false
+  likerInfo = null
+  errorType = ''
 
   @Mutation
   setType(type: string) {
-    this.type = type;
+    this.type = type
+  }
+
+  @Mutation
+  setLikerInfo(info: any) {
+    this.likerInfo = info
+  }
+
+  @Mutation
+  setAddress(address: string) {
+    this.address = address
   }
 
   @Mutation
   setSigner(signer: any) {
-    this.signer = signer;
-  }
-
-  @Mutation
-  setAccounts(accounts: readonly AccountData[]) {
-    this.accounts = accounts;
-  }
-
-  @Mutation
-  setWalletConnectURI(uri: string) {
-    this.walletConnectURI = uri;
-  }
-
-  @Mutation
-  setIsShowConnectDialog(isShow: boolean) {
-    this.isShowConnectDialog = isShow;
+    this.signer = signer
   }
 
   @Mutation
   setKeplrWarning(isShow: boolean) {
-    this.isShowKeplrWarning = isShow;
+    this.isShowKeplrWarning = isShow
   }
 
   @Mutation
@@ -73,12 +81,7 @@ export default class Wallet extends VuexModule {
 
   @Action
   toggleKeplrWarning(isShow: boolean) {
-    this.setKeplrWarning(isShow);
-  }
-
-  @Action
-  toggleConnectDialog(isShow: boolean) {
-    this.setIsShowConnectDialog(isShow);
+    this.setKeplrWarning(isShow)
   }
 
   @Action
@@ -93,222 +96,87 @@ export default class Wallet extends VuexModule {
 
   @Action
   async initIfNecessary() {
-    const connectedWalletType = window.localStorage?.getItem(KEY_CONNECTED_WALLET_TYPE);
-    let res = false;
-    if (!this.type && connectedWalletType) {
-      switch (connectedWalletType) {
-        case 'keplr':
-          res = await this.initKeplr();
-          break;
-
-        case 'likerland_app':
-          res = await this.initWalletConnect();
-          break;
-
-        default:
-          break;
-      }
-      if (!res) {
-        window.localStorage?.removeItem(KEY_CONNECTED_WALLET_TYPE);
-      }
+    const connector = await getConnector()
+    const connection = await connector.initIfNecessary()
+    if (connection) {
+      const { accounts, offlineSigner, method } = connection
+      await this.initWallet({ accounts, offlineSigner, method })
     }
-    return res;
   }
 
   @Action
-  async initKeplr(): Promise<boolean> {
-    if (window.keplr && this.type === 'keplr') return true;
-      let tries = 0;
-      const TRY_COUNT = 1;
-      while (!window.keplr && TRY_COUNT > tries) {
-        // eslint-disable-next-line no-await-in-loop
-        await timeout(1000);
-        tries += 1;
-      }
-    if (!window.keplr?.experimentalSuggestChain) {
-      this.toggleKeplrWarning(true);
-      return false
-    }
-    try {
-      await window.keplr.experimentalSuggestChain({
-        chainId: network.id,
-        chainName: network.name,
-        rpc: network.rpcURL,
-        rest: network.apiURL,
-        stakeCurrency: configToKeplrCoin(network.stakingDenom),
-        walletUrlForStaking: network.stakingWalletURL,
-        bip44: {
-          coinType: 118,
-        },
-        bech32Config: {
-          bech32PrefixAccAddr: network.addressPrefix,
-          bech32PrefixAccPub: `${network.addressPrefix}pub`,
-          bech32PrefixValAddr: `${network.addressPrefix}valoper`,
-          bech32PrefixValPub: `${network.addressPrefix}valoperpub`,
-          bech32PrefixConsAddr: `${network.addressPrefix}valcons`,
-          bech32PrefixConsPub: `${network.addressPrefix}valconspub`,
-        },
-        currencies: network.coinLookup.map(({ viewDenom }) => configToKeplrCoin(viewDenom)),
-        feeCurrencies: network.coinLookup.map(({ viewDenom }) => ({
-          ...configToKeplrCoin(viewDenom),
-          gasPriceStep: {
-            low: 1,
-            average: 10,
-            high: 1000,
-          },
-        })),
-        coinType: 118,
-        features: [
-          'stargate',
-          'ibc-transfer',
-          'no-legacy-stdTx',
-          'ibc-go',
-        ],
-      });
-      await window.keplr.enable(network.id);
+  async initWallet({
+    method,
+    accounts,
+    offlineSigner,
+  }: {
+    method: any
+    accounts: any
+    offlineSigner?: any
+  }) {
+    if (!accounts[0]) return false
+    const connector = await getConnector()
+    // Listen once per account
+    connector.once('account_change', async (currentMethod: any) => {
+      const connection = await connector.init(currentMethod)
+      this.disconnectWallet()
+      this.initWallet(connection)
+    })
+    this.context.commit('setType', method)
+    this.context.commit('setLikerInfo', null)
 
-      if (!window.getOfflineSigner) throw new Error('CANNOT_FIND_OFFLINE_SIGNER');
-      const offlineSigner = window.getOfflineSigner(network.id);
-      const accounts = await offlineSigner.getAccounts();
-      this.context.commit('setType', 'keplr')
-      this.context.commit('setSigner', offlineSigner)
-      this.context.commit('setAccounts', accounts)
-      window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'keplr')
-      return true;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-    return false;
-  }
+    const { address, bech32Address } = accounts[0]
+    const walletAddress = bech32Address || address
+    this.context.commit('setAddress', walletAddress)
+    this.context.commit('setSigner', offlineSigner)
 
-  @Action({ rawError: true })
-  async initWalletConnect(): Promise<boolean> {
-    if (this.type === 'likerland_app') return true;
-    try {
-      const connector = new WalletConnect({
-        bridge: 'https://bridge.walletconnect.org',
-        qrcodeModal: {
-          open: (uri: string) => {
-            this.context.commit('setWalletConnectURI', uri);
-            if (isMobile()) {
-              saveMobileLinkInfo({
-                name: 'Liker Land App',
-                href: `${LIKER_LAND_APP_URI}wcV1`,
-              });
-              const navigateToAppURL = `${LIKER_LAND_APP_URI}wcV1?${uri}`;
-              window.location.href = navigateToAppURL;
-            }
-          },
-          close: () => {
-            this.context.commit('setWalletConnectURI', '');
-          },
-        },
-      });
-      connector.on('disconnect', () => {
-        window.localStorage?.removeItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`);
-        connector.killSession();
-        this.reset();
-      });
-
-      let account: any
-      if (!connector.connected) {
-        await connector.connect();
-        ([account] = await connector.sendCustomRequest({
-          id: payloadId(),
-          jsonrpc: '2.0',
-          method: 'cosmos_getAccounts',
-          params: [network.id],
-        }));
-        window.localStorage?.setItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`, JSON.stringify(account));
-      } else {
-        const serializedAccount = window.localStorage?.getItem(`${KEY_WALLET_CONNECT_ACCOUNT_PREFIX}_${connector.peerId}`);
-        if (serializedAccount) {
-          account = JSON.parse(serializedAccount);
-        }
-      }
-      if (!account) return false;
-
-      const {
-        bech32Address: address,
-        algo,
-        pubKey: pubKeyInHex,
-      } = account;
-      if (!address || !algo || !pubKeyInHex) return false;
-      const pubkey = new Uint8Array(Buffer.from(pubKeyInHex, "hex"));
-      const accounts: readonly AccountData[] = [{ address, pubkey, algo }];
-      const offlineSigner: OfflineSigner = {
-        getAccounts: () => Promise.resolve(accounts),
-        signDirect: async (signerAddress, signDoc) => {
-          const signDocInJSON = SignDoc.toJSON(signDoc);
-          const resInJSON = await connector.sendCustomRequest({
-            id: payloadId(),
-            jsonrpc: '2.0',
-            method: 'cosmos_signDirect',
-            params: [
-              signerAddress,
-              signDocInJSON,
-            ],
-          });
-          return {
-            signed: SignDoc.fromJSON(resInJSON.signed),
-            signature: resInJSON.signature,
-          };
-        },
-        signAmino: async (signerAddress, data) => {
-          const [resInObject] = await connector.sendCustomRequest({
-            id: payloadId(),
-            jsonrpc: '2.0',
-            method: 'cosmos_signAmino',
-            params: [
-'',
-signerAddress,
-data,
-],
-          });
-          return {
-            signed: resInObject.signed,
-            signature: resInObject.signature,
-          };
-        },
-      }
-      this.context.commit('setType', 'likerland_app');
-      this.context.commit('setSigner', offlineSigner);
-      this.context.commit('setAccounts', accounts);
-      window.localStorage?.setItem(KEY_CONNECTED_WALLET_TYPE, 'likerland_app');
-      return true
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
-    return false
+    catchAxiosError(
+      axios.get(getUserInfoMinByAddress(walletAddress)).then((userInfo) => {
+        this.context.commit('setLikerInfo', userInfo)
+      }),
+    )
+    return true
   }
 
   @Action
-  reset() {
-    this.context.commit('setType', '');
-    this.context.commit('setSigner', null);
-    this.context.commit('setAccounts', []);
-    window.localStorage?.removeItem(KEY_CONNECTED_WALLET_TYPE);
-    // HACK: Force remove WalletConnect session
-    window.localStorage?.removeItem(KEY_WALLET_CONNECT);
+  async restoreSession() {
+    const connector = await getConnector()
+    const session = connector.restoreSession()
+    if (session) {
+      const { accounts, method } = session
+      await this.context.dispatch('initWallet', { method, accounts })
+      await this.initWallet({ accounts, method })
+    }
+  }
+
+  @Action
+  // eslint-disable-next-line class-methods-use-this
+  async openConnectWalletModal({ language }: { language: string }) {
+    const connector = await getConnector()
+    const connection = await connector.openConnectionMethodSelectionDialog({
+      language,
+    })
+    return connection
+  }
+
+  @Action
+  disconnectWallet() {
+    connectorInstance.disconnect()
+    this.context.commit('setAddress', '')
+    this.context.commit('setLikerInfo', null)
+    this.context.commit('setType', '')
+    this.context.commit('setSigner', null)
   }
 
   get getType() {
-    return this.type;
+    return this.type
   }
 
   get getSigner() {
-    return this.signer;
+    return this.signer
   }
 
   get getWalletAddress() {
-    const [wallet] = this.accounts;
-    if (!wallet) return '';
-    return wallet.address;
-  }
-
-  get getWalletConnectURI() {
-    return this.walletConnectURI;
+    return this.address
   }
 }
