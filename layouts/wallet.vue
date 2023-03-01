@@ -1,6 +1,6 @@
 <template>
   <RootLayout @connect-wallet-dialog-quit="$router.go(-1)">
-    <template v-if="currentAddress">
+    <template v-if="walletAddress">
       <AppHeader />
       <Nuxt class="min-h-full" />
       <AppFooter
@@ -13,16 +13,16 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import logTrackerEvent from '~/utils/logger'
 
-const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 @Component
 export default class WalletLayout extends Vue {
-  @walletModule.State('isShowConnectDialog') isShowConnectWalletDialog!: boolean
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
-    isShow: boolean
-  ) => void
+  @walletModule.Getter('getWalletAddress') walletAddress!: string
+  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('restoreSession') restoreSession!: () => Promise<any>
 
   @walletModule.Action toggleAlert!: (
     isShow: boolean,
@@ -30,23 +30,31 @@ export default class WalletLayout extends Vue {
     severity: string
   ) => void
 
-  @signerModule.Getter('getAddress') currentAddress!: string
-
   get isHideFooter() {
     return this.$route.path.includes('/nft/purchase/') || this.$route.query.layout === 'popup';
   }
 
-  mounted() {
-    if (!this.currentAddress) {
-      this.toggleConnectWalletDialog(true)
+  async mounted() {
+    await this.restoreSession()
+    if (!this.walletAddress) {
+      const connection = await this.openConnectWalletModal({ language: this.$i18n.locale.split('-')[0] })
+      if (!connection) return this.$router.go(-1);
+      const { method } = connection;
+      logTrackerEvent(
+        this,
+        'user',
+        `connected_wallet_${method}`,
+        'connected_wallet',
+        1,
+      );
+      return this.initWallet(connection);
     }
+    return true
   }
 
-  @Watch('currentAddress')
+  @Watch('walletAddress')
   handleWalletAddressChange(walletAddress: string) {
-    if (walletAddress) {
-      this.toggleConnectWalletDialog(false)
-    } else {
+    if (!walletAddress) {
       this.$router.replace(this.localeLocation({ name: 'index' })!)
     }
   }

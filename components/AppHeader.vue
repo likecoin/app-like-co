@@ -152,20 +152,19 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import logTrackerEvent from '~/utils/logger'
 
 import { IS_TESTNET } from '~/constant'
 
-const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 @Component
 export default class AppHeader extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (isShow: boolean) => void
-  @walletModule.Action('reset') resetWallet!: () => void
-
-  @signerModule.Getter('getAddress') currentAddress!: string
-  @signerModule.Action('reset') resetSigner!: () => void
+  @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
+  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
@@ -173,16 +172,25 @@ export default class AppHeader extends Vue {
   }
 
   get isWalletFromLikerLikerApp() {
-    return this.walletType === 'likerland_app';
+    return this.walletType === 'liker-id';
   }
 
   handleClickSignOutButton() {
-    this.resetWallet();
-    this.resetSigner();
+    this.disconnectWallet();
   }
 
-  handleConnectWalletButtonClick() {
-    this.toggleConnectWalletDialog(true)
+  async handleConnectWalletButtonClick() {
+    const connection = await this.openConnectWalletModal({ language: this.$i18n.locale.split('-')[0] })
+    if (!connection) return false;
+      const { method } = connection;
+      logTrackerEvent(
+        this,
+        'user',
+        `connected_wallet_${method}`,
+        'connected_wallet',
+        1,
+      );
+      return this.initWallet(connection);
   }
 }
 </script>

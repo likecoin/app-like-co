@@ -38,9 +38,9 @@ import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { IS_CHAIN_UPGRADING } from '~/constant'
+import { setLoggerUser } from '~/utils/logger'
 
 const walletModule = namespace('wallet')
-const signerModule = namespace('signer')
 const uiModule = namespace('ui')
 
 @Component({
@@ -60,24 +60,10 @@ const uiModule = namespace('ui')
   },
 })
 export default class RootLayout extends Vue {
-  @walletModule.State('isShowConnectDialog') isShowConnectWalletDialog!: boolean
-  @walletModule.State isShowKeplrWarning!: boolean
   @walletModule.Getter('getWalletAddress') walletAddress!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
-  @walletModule.Action initIfNecessary!: () => Promise<boolean>
-  @walletModule.Action('reset') resetWallet!: () => void
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
-    isShow: boolean
-  ) => void
-
-  @walletModule.Action('toggleKeplrWarning') toggleKeplrWarningSnackbar!: (
-    isShow: boolean
-  ) => void
-
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
+  @walletModule.Getter('getType') loginMethod!: string
+  @walletModule.Action('restoreSession') restoreSession!: () => Promise<any>
 
   @uiModule.Action('init') initUIStore!: () => void
 
@@ -86,12 +72,12 @@ export default class RootLayout extends Vue {
   isOpenChainUpgradeBlockingDialog = false
 
   async mounted() {
-    this.initUIStore();
-    const isInited = await this.initIfNecessary();
-    if (isInited) {
-      this.updateSignerInfo({
-        address: this.walletAddress,
-        signer: this.signer,
+    this.initUIStore()
+    await this.restoreSession()
+    if (this.walletAddress) {
+      await setLoggerUser(this, {
+        wallet: this.walletAddress,
+        method: this.loginMethod,
       })
     }
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
@@ -101,17 +87,7 @@ export default class RootLayout extends Vue {
     this.isOpenChainUpgradeBlockingDialog = false
   }
 
-  handleConnectWalletDialogClose() {
-    this.toggleConnectWalletDialog(false)
-  }
-
-  handleConnectWalletDialogQuit() {
-    this.handleConnectWalletDialogClose()
-    this.$emit('connect-wallet-dialog-quit')
-  }
-
   handleKeplrWarningClose() {
-    this.toggleKeplrWarningSnackbar(false)
     this.$router.go(-1)
   }
 }
