@@ -90,7 +90,6 @@ import { LIKER_NFT_API_WALLET, COSMOS_DENOM, LIKER_LAND_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
 
-const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 export enum ErrorType {
@@ -107,9 +106,9 @@ export enum ErrorType {
   layout: 'wallet',
 })
 export default class NFTTestButtonPage extends Vue {
-  @signerModule.Getter('getAddress') address!: string
-  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Getter('getType') walletType!: string | null
+  @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
@@ -140,7 +139,7 @@ export default class NFTTestButtonPage extends Vue {
   }
 
   get isUsingLikerLandApp() {
-    return this.walletType === 'likerland_app'
+    return this.walletType === 'liker-id'
   }
 
   async mounted() {

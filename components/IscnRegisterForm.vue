@@ -193,7 +193,7 @@
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
-              @click="handleOpenAuthorDialog()"
+              @click="handleOpenAuthorDialog"
             >
               <IconAddMini />
             </Button>
@@ -523,7 +523,7 @@ import {
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 
-const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 
 export enum CharactersLimit {
   name = 100,
@@ -551,8 +551,10 @@ export default class IscnRegisterForm extends Vue {
   @Prop(String) readonly arweaveId!: string
   @Prop(Number) readonly step: number | undefined
 
-  @signerModule.Getter('getAddress') address!: string
-  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+
 
   authors: Author[] = []
   name: string = ''
@@ -1013,6 +1015,7 @@ export default class IscnRegisterForm extends Vue {
 
   async sendArweaveFeeTx(): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
+    await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = 'signing';
@@ -1113,6 +1116,7 @@ export default class IscnRegisterForm extends Vue {
     this.isOpenSignDialog = true;
     this.uploadStatus = 'loading'
     this.onOpenKeplr()
+    await this.initIfNecessary()
     await this.calculateISCNFee()
     if (this.balance.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
