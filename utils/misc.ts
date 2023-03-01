@@ -24,3 +24,12 @@ export function readImageType(buffer: ArrayBuffer) {
   if (buffer) return imageType(Buffer.from(buffer));
   return null;
 }
+
+export function catchAxiosError(promise: Promise<any>) {
+  return promise.catch(e => {
+    if (e.response?.status !== 404) {
+      // eslint-disable-next-line no-console
+      console.error(JSON.stringify(e));
+    }
+  });
+}
