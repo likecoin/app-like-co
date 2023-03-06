@@ -87,12 +87,25 @@
         :records="pages[pageNumber]"
       />
     </Transition>
+    <div
+      class="mt-[24px]"
+    >
+      <a
+        :class="['underline', 'text-[12px]']"
+        :href="portfolioURL"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ $t('WorksPage.label.portfolio') }}
+      </a>
+    </div>
   </Page>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { LIKER_LAND_URL } from '~/constant'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const signerModule = namespace('signer')
@@ -151,6 +164,10 @@ export default class WorksIndexPageextends extends Vue {
 
   lastPage() {
     this.pageNumber = this.pages.length - 1
+  }
+
+  get portfolioURL(): string {
+    return `${LIKER_LAND_URL}/${this.currentAddress}`
   }
 }
 </script>

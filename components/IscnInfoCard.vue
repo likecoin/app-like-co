@@ -72,17 +72,36 @@
             </Label>
           </div>
         </div>
-        <Button
-          :text="$t('HomePage.button.learnmore')"
-          preset="outline"
-          :class="['!text-like-cyan-light', 'w-max','z-10',]"
-          :style="{ border: '2px solid #AAF1E7' }"
-          href="https://docs.like.co/developer/international-standard-content-number-iscn"
+        <div
+          :class="[
+            'grid',
+            'grid-cols-2',
+            'gap-x-[8px]',
+          ]"
         >
-          <template #append>
-            <IconOpenInNew class="w-[12px]" />
-          </template>
-        </Button>
+          <Button
+            :text="$t('HomePage.button.learnmore')"
+            preset="outline"
+            :class="['!text-like-cyan-light', 'w-max','z-10',]"
+            :style="{ border: '2px solid #AAF1E7' }"
+            href="https://docs.like.co/developer/international-standard-content-number-iscn"
+          >
+            <template #append>
+              <IconOpenInNew class="w-[12px]" />
+            </template>
+          </Button>
+          <Button
+            :text="$t('HomePage.button.writingNft')"
+            preset="outline"
+            :class="['!text-like-cyan-light', 'w-max','z-10',]"
+            :style="{ border: '2px solid #AAF1E7' }"
+            href="https://liker.land"
+          >
+            <template #append>
+              <IconOpenInNew class="w-[12px]" />
+            </template>
+          </Button>
+        </div>
       </div>
       <div class="ml-[76px] z-10">
         <div

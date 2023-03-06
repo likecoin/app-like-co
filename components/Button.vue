@@ -1,6 +1,7 @@
 <template>
   <component
     :is="tag"
+    :ref="$attrs.href ? 'noopener' : null"
     :class="rootClasses"
     :to="to || null"
     :disabled="isDisabled"
