@@ -146,9 +146,6 @@ export default class UploadForm extends Vue {
   }
 
   get formattedStatusTitle() {
-    if (this.iscnId && this.arId &&  this.classId && this.nftLink) {
-      return this.$t('NFTPortal.loadingMessage.completed')
-    }
     switch (this.txStatus) {
       // the sign case is used when separating sign from broadcast
       case 'sign':

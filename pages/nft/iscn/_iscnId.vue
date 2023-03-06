@@ -570,23 +570,28 @@ export default class NFTTestMintPage extends Vue {
       })
       this.classId = data.classId
       this.apiData = data
+      if (data.classId) {
+        this.txStatus = TxStatus.COMPLETED
 
-      if (this.hasOpener) {
-        try {
-          window.opener.postMessage(JSON.stringify({
-            action: 'NFT_MINT_DATA',
-            data,
-          }), this.redirectOrigin)
-        } catch (error) {
-          logTrackerEvent(this, 'IscnMintNFT', 'PostMessageNFTMintDataError',  (error as Error).toString(), 1);
-          // eslint-disable-next-line no-console
-          console.error(error);
+        if (this.hasOpener) {
+          try {
+            window.opener.postMessage(JSON.stringify({
+              action: 'NFT_MINT_DATA',
+              data,
+            }), this.redirectOrigin)
+          } catch (error) {
+            logTrackerEvent(this, 'IscnMintNFT', 'PostMessageNFTMintDataError',  (error as Error).toString(), 1);
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
         }
       }
     } catch (err) {
-      logTrackerEvent(this, 'IscnMintNFT', 'GetMintInfoError', (err as Error).toString(), 1);
-      // eslint-disable-next-line no-console
-      console.error(err)
+      if (!axios.isAxiosError(err) || (err as AxiosError).response?.status !== 404) {
+        logTrackerEvent(this, 'IscnMintNFT', 'GetMintInfoError', (err as Error).toString(), 1);
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
     }
   }
 
