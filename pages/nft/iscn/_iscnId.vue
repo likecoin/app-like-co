@@ -51,6 +51,7 @@
         :ar-id="ogImageArweaveId"
         :class-id="classId"
         :nft-link="apiData && detailsPageURL"
+        :nft-model-url="apiData && modelURL"
         :has-error="hasError"
         :error-message="errorMessage"
         :tx-status="txStatus"
@@ -117,6 +118,7 @@ import {
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
   getChainNFTIdList,
+  getNftModelApi,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -168,6 +170,26 @@ export enum MintState {
     if (!params.iscnId) {
       redirect({ name: 'index' })
     }
+  },
+  head() {
+    return {
+      link: [
+        {
+          rel: 'modulepreload',
+          href:
+            'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
+          as: 'script',
+        },
+      ],
+      script: [
+        {
+          type: 'module',
+          src:
+            'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
+          asyc: 'true',
+        },
+      ],
+    };
   },
   layout: 'wallet',
 })
@@ -360,6 +382,10 @@ export default class NFTTestMintPage extends Vue {
 
   get detailsPageURL(): string {
     return `${LIKER_LAND_URL}/nft/class/${encodeURIComponent(this.classId)}`
+  }
+
+  get modelURL(): string {
+    return getNftModelApi(this.classId);
   }
 
   get isUsingLikerLandApp() {
