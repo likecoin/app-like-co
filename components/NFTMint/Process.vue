@@ -26,6 +26,18 @@
         align="center"
         :text="formattedStatusTitle"
       />
+      <model-viewer
+        v-if="nftModelUrl"
+        :alt="$t('NFTPortal.label.modelViewer')"
+        :src="nftModelUrl"
+        class="mb-[12px]"
+        auto-rotate
+        auto-rotate-delay="500"
+        xr-environment
+        shadow-intensity="1"
+        camera-controls
+        camera-orbit="315deg 60deg 100m"
+      />
       <FormField v-if="nftLink" :label="$t('NFTPortal.label.nft')">
         <div
           class="
@@ -118,6 +130,8 @@ export default class UploadForm extends Vue {
   @Prop(String) readonly classId!: string
 
   @Prop(String) readonly nftLink!: string
+
+  @Prop(String) readonly nftModelUrl!: string
 
   @Prop(String) readonly txStatus!: string
 

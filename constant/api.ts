@@ -22,6 +22,7 @@ export const getNftUriViaNftId = (classId: string, nftId: string): string => `${
 export const getNftClassImage = (classId: string): string => `${LIKE_CO_API_ROOT}/likernft/metadata/image/class_${encodeURIComponent(classId)}.png`;
 export const getLikerIdMinApi = (likerId: string): string => `${LIKE_CO_API_ROOT}/users/id/${likerId}/min`;
 export const getAddressLikerIdMinApi = (wallet: string): string => `${LIKE_CO_API_ROOT}/users/addr/${wallet}/min`;
+export const getNftModelApi = (classId: string): string => `${LIKE_CO_API_ROOT}/likernft/metadata/model/class_${encodeURIComponent(classId)}.gltf`;
 export const getLIKEPrice = () => `https://api.coingecko.com/api/v3/simple/price?ids=likecoin&vs_currencies=usd`;
 export const getNFTMetadata = (iscnId: string) => {
   const qsPayload = {
