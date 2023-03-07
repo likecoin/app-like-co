@@ -29,6 +29,14 @@
       href="https://about.like.co/"
       :text="$t('HomePage.button.likecoin')"
     />
+    <Button
+      class="md:mr-[24px]"
+      preset="tertiary"
+      text-preset="h6"
+      size="mini"
+      href="https://liker.land/"
+      :text="$t('HomePage.button.writingNft')"
+    />
     <IconDot class="md:mr-[24px] lg:hidden"/>
     <Button
       class="lg:hidden"
