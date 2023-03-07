@@ -74,9 +74,9 @@
         </div>
         <div
           :class="[
-            'grid',
-            'grid-cols-2',
-            'gap-x-[8px]',
+            'flex',
+            'flex-wrap',
+            'gap-[8px]',
           ]"
         >
           <Button
