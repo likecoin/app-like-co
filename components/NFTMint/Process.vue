@@ -37,6 +37,7 @@
         shadow-intensity="1"
         camera-controls
         camera-orbit="315deg 60deg 100m"
+        @click.once="onClickModelViewer"
       />
       <FormField v-if="nftLink" :label="$t('NFTPortal.label.nft')">
         <div
@@ -107,6 +108,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import logTrackerEvent from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
@@ -199,6 +201,10 @@ export default class UploadForm extends Vue {
       '!text-[14px]',
       'w-[90px]',
     ]
+  }
+
+  onClickModelViewer() {
+    logTrackerEvent(this, 'IscnMintNFT', 'ClickModelViewer', this.classId, 1);
   }
 }
 </script>
