@@ -35,3 +35,13 @@ export const getNFTMetadata = (iscnId: string) => {
 export const getChainNFTIdList = (classId: string): string => `${LIKECOIN_CHAIN_API}/likechain/likenft/v1/owner?class_id=${classId}`
 export const getUserInfoMinByAddress = (addr: string) =>
   `${LIKE_CO_API_ROOT}/users/addr/${addr}/min`;
+export const getUserIsSubscribedMinterApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/status?wallet=${wallet}`;
+export const getNewSubscriptionApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/stripe/new?wallet=${wallet}`;
+export const getNewSubscriberMintInstanceApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/new?wallet=${wallet}`;
+export const getSubscriberMintArweaveApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/arweave?wallet=${wallet}`;
+export const getSubscriberMintIscnApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/iscn?wallet=${wallet}`;
+export const getSubscriberMintNftCoverApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/nft/cover?wallet=${wallet}`;
+export const getSubscriberMintNftClassApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/nft/class?wallet=${wallet}`;
+export const getSubscriberMintNftMintApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/nft/mint?wallet=${wallet}`;
+export const getSubscriberMintDoneApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/done?wallet=${wallet}`;
+
