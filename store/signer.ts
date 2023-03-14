@@ -25,12 +25,14 @@ export default class SignerStore extends VuexModule {
   updateSignerInfo({ signer, address } : { signer: OfflineSigner | null, address: string}) {
     this.context.commit('setSigner', signer)
     this.context.commit('setAddress', address)
+    this.context.dispatch('subscription/fetchCurrentWalletIsSubscriber', null, { root: true });
   }
 
   @Action
   reset() {
     this.context.commit('setAddress', '')
     this.context.commit('setSigner', null)
+    this.context.dispatch('subscription/resetAllStatus', null, { root: true });
   }
 
   get getAddress() {
