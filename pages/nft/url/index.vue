@@ -190,6 +190,7 @@ const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) =
 }
 
 const walletModule = namespace('wallet')
+const subscriptionModule = namespace('subscription')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -219,6 +220,16 @@ export default class FetchIndex extends Vue {
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
+  @subscriptionModule.Action newMintInstance!: () => Promise<any>
+  @subscriptionModule.Action updateMintInstance!: (arg0: {
+    status: string
+    payload: any
+    options?: any
+  }) => Promise<any>
+
+  @subscriptionModule.Getter('getAddressIsSubscriber') isSubscriber!: boolean
+  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: boolean
+
   state = State.INIT
   url = this.$route.query.url as string || ''
   platform = this.$route.query.platform as string || ''
@@ -238,6 +249,7 @@ export default class FetchIndex extends Vue {
   isReady: boolean = false
   isAllowed: boolean = false
   hasError: boolean = false
+  isSubscriptionMint: boolean = false
 
   get encodedURL(): string {
     const { url } = this;
@@ -394,6 +406,11 @@ export default class FetchIndex extends Vue {
     }
   }
 
+  @Watch('isSubscriber', { immediate: true })
+  onIsSubscriberChange() {
+    this.isSubscriptionMint = this.isSubscriber;
+  }
+
   @Watch('url')
   reset() {
     this.crawledData = null
@@ -461,12 +478,16 @@ export default class FetchIndex extends Vue {
           await this.crawlUrlData()
           this.state = State.TO_ESTIMATE_ARWEAVE_FEE
         case State.TO_ESTIMATE_ARWEAVE_FEE:
-          await this.checkArweaveIdExistsAndEstimateFee()
+          if (!this.isSubscriptionMint) {
+            await this.checkArweaveIdExistsAndEstimateFee()
+          } else if (!this.mintStatusId) {
+            await this.newMintInstance()
+          }
           this.state = this.arweaveId
             ? State.TO_REGISTER_ISCN
             : State.TO_UPLOAD_TO_ARWEAVE
         case State.TO_UPLOAD_TO_ARWEAVE:
-          if (!this.arweaveFeeTxHash) {
+          if (!this.isSubscriptionMint && !this.arweaveFeeTxHash) {
             await this.sendArweaveFeeTx(this.arweaveFeeInfo)
           }
           await this.submitToArweave()
@@ -552,17 +573,33 @@ export default class FetchIndex extends Vue {
   async submitToArweave(): Promise<void> {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweave', this.arweaveFeeTxHash, 1);
-      if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
-      const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
-        this.formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+      let arweaveId;
+      if (this.isSubscriptionMint) {
+        ({ arweaveId } = await this.updateMintInstance(
+          {
+            status: 'arweave',
+            payload: this.formData,
+            options: {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+              timeout: 90000,
+            },
           },
-          timeout: 90000,
-        },
-      )
+        ));
+      } else {
+        if (!this.arweaveFeeTxHash) { throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET') }
+        ({ arweaveId } = await this.$axios.$post(
+          `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
+          this.formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            timeout: 90000,
+          },
+        ));
+      }
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
     } catch (err) {
@@ -578,19 +615,33 @@ export default class FetchIndex extends Vue {
     if (!this.signer) {
       throw new Error('MISSING_SIGNER')
     }
-    try {
-      logTrackerEvent(this, 'NFTUrlMint', 'SignISCNTx', this.url, 1);
-      const res = await signISCNTx(
-        formatISCNTxPayload(this.iscnPayload),
-        this.signer,
-        this.address,
-      )
-      this.iscnId = res.iscnId
-      if (this.url && this.likerId) {
-        logTrackerEvent(this, 'NFTUrlMint', 'PostMappingWithCosmosWallet', this.iscnId, 1);
-        await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+    if (this.isSubscriptionMint) {
+      const { iscnId } = await this.updateMintInstance({
+        status: 'iscn',
+        payload: { metadata: formatISCNTxPayload(this.iscnPayload) },
+      });
+      this.iscnId = iscnId
+    } else {
+      try {
+        logTrackerEvent(this, 'NFTUrlMint', 'SignISCNTx', this.url, 1);
+        const res = await signISCNTx(
+          formatISCNTxPayload(this.iscnPayload),
+          this.signer,
+          this.address,
+        )
+        this.iscnId = res.iscnId
+        if (this.url && this.likerId) {
+          logTrackerEvent(this, 'NFTUrlMint', 'PostMappingWithCosmosWallet', this.iscnId, 1);
+          await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+        }
+      } catch (err) {
+        logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
+        // eslint-disable-next-line no-console
+        console.error(err)
+        throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
       }
-      if (res) {
+    }
+    if (this.iscnId) {
       logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNSuccess', this.iscnId, 1);
         this.$router.push(
           this.localeLocation({
@@ -600,12 +651,6 @@ export default class FetchIndex extends Vue {
           })!,
         )
       }
-    } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
-      // eslint-disable-next-line no-console
-      console.error(err)
-      throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
-    }
   }
 
   async checkIsWhitelisted() {

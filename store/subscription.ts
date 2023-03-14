@@ -11,6 +11,7 @@ import {
   getSubscriberMintNftMintApi,
   getUserIsSubscribedMinterApi,
 } from '@/constant/api'
+import signNewSubscriberMintWithCosmosWallet from '~/utils/cosmos/subscription'
 
 @Module({
   name: 'subscription',
@@ -64,9 +65,16 @@ export default class SubscriptionStore extends VuexModule {
 
   @Action
   async newMintInstance() {
-    const { address: wallet } = this.context.rootState.signer
+    const { address: wallet, signer } = this.context.rootState.signer
     try {
-      const { data } = await axios.post(getNewSubscriberMintInstanceApi(wallet))
+      const payload = await signNewSubscriberMintWithCosmosWallet(
+        signer,
+        wallet,
+      );
+      const { data } = await axios.post(
+        getNewSubscriberMintInstanceApi(wallet),
+        payload,
+      )
       const { statusId, statusSecret } = data;
       this.context.commit('setCurrentMintStatusId', statusId)
       this.context.commit('setMintStatusSecret', statusSecret)
