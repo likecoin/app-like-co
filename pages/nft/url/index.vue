@@ -155,8 +155,8 @@ import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
-import postMappingWithCosmosWallet from '@/utils/mapping';
 import axios, { AxiosError } from 'axios'
+import postMappingWithCosmosWallet from '~/utils/cosmos/mapping';
 
 import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
