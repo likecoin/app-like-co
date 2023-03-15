@@ -95,6 +95,15 @@
         </div>
         <div v-else-if="state === 'INIT' && !hasError" class="ml-auto w-min">
           <Button
+            v-if="!isSubscriber"
+            :text="$t('NFTPortal.button.subscribe')"
+            :preset="'tertiary'"
+            @click="onSubscribe"
+          />
+          <span v-else>
+            Subscription mode on
+          </span>
+          <Button
             :text="$t('NFTPortal.button.register')"
             :preset="isInputValueValid ? 'secondary' : 'tertiary'"
             :is-disabled="!isInputValueValid"
@@ -169,6 +178,7 @@ import {
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
   getWhitelistApi,
+getNewSubscriptionApi,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
 import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, IS_TESTNET, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
@@ -657,6 +667,11 @@ export default class FetchIndex extends Vue {
     if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
     const { data } = await this.$axios.get(getWhitelistApi(this.address))
     return data.isWhitelisted;
+  }
+
+  async onSubscribe() {
+    const { data } = await this.$axios.post(getNewSubscriptionApi(this.address));
+    window.location.href = data.url
   }
 
   setError(err: any) {
