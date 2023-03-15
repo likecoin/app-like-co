@@ -479,7 +479,7 @@ export default class FetchIndex extends Vue {
           }
 
           this.balance = (await getAccountBalance(this.address)) as string
-          if (this.balance === '0') {
+          if (!this.isSubscriptionMint && this.balance === '0') {
             throw new Error('INSUFFICIENT_BALANCE')
           }
 

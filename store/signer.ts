@@ -17,6 +17,18 @@ export default class SignerStore extends VuexModule {
   }
 
   @Mutation
+  setMessageSigningMode(enabled: boolean) {
+    if ((this.signer as any)?.keplr) {
+      (this.signer as any).keplr.defaultOptions = {
+        sign: {
+            preferNoSetFee: enabled,
+            preferNoSetMemo: enabled,
+        },
+      }
+    };
+  }
+
+  @Mutation
   setAddress(address: string) {
     this.address = address;
   }

@@ -505,7 +505,7 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = false
       this.errorMessage = ''
       this.balance = await getAccountBalance(this.address) as string
-      if (this.balance === '0') {
+      if (!this.isSubscriptionMint && this.balance === '0') {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }

@@ -87,10 +87,12 @@ export default class SubscriptionStore extends VuexModule {
   async newMintInstance() {
     const { address: wallet, signer } = this.context.rootState.signer
     try {
+      this.context.commit('signer/setMessageSigningMode', true, { root: true })
       const payload = await signNewSubscriberMintWithCosmosWallet(
         signer,
         wallet,
       );
+      this.context.commit('signer/setMessageSigningMode', false, { root: true })
       const { data } = await axios.post(
         getNewSubscriberMintInstanceApi(wallet),
         payload,
