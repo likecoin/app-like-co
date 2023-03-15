@@ -245,7 +245,7 @@ export default class FetchIndex extends Vue {
   }) => Promise<any>
 
   @subscriptionModule.Getter('getAddressIsSubscriber') isSubscriber!: boolean
-  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: boolean
+  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: string
 
   state = State.INIT
   url = this.$route.query.url as string || ''
@@ -499,6 +499,10 @@ export default class FetchIndex extends Vue {
             await this.checkArweaveIdExistsAndEstimateFee()
           } else if (!this.mintStatusId) {
             await this.newMintInstance()
+            this.$router.replace({ query: {
+                ...this.$route.query,
+                mint_status_id: this.mintStatusId,
+            } })
           }
           this.state = this.arweaveId
             ? State.TO_REGISTER_ISCN

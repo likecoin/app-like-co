@@ -50,6 +50,26 @@ export default class SubscriptionStore extends VuexModule {
     this.context.commit('setCurrentMintStatusId', '');
     this.context.commit('setMintStatusSecret', '');
     this.context.commit('setMintStatus', '');
+    if (window.sessionStorage) {
+      window.sessionStorage.removeItem('mintStatus');
+    }
+  }
+
+  @Action
+  tryRecoverMintStatus(targetStatusId: string) {
+    if (window.sessionStorage) {
+      const data = window.sessionStorage.getItem('mintStatus');
+      try {
+        const { statusId, statusSecret } = JSON.parse(data || '');
+        if (statusId && statusId === targetStatusId && statusSecret) {
+          this.context.commit('setCurrentMintStatusId', statusId);
+          this.context.commit('setMintStatusSecret', statusSecret);
+        }
+      } catch (_) {
+        // no op
+      }
+    }
+    return false;
   }
 
   @Action
@@ -79,6 +99,15 @@ export default class SubscriptionStore extends VuexModule {
       this.context.commit('setCurrentMintStatusId', statusId)
       this.context.commit('setMintStatusSecret', statusSecret)
       this.context.commit('setMintStatus', 'new')
+      if (window.sessionStorage) {
+        window.sessionStorage.setItem(
+          'mintStatus',
+          JSON.stringify({
+            statusId,
+            statusSecret,
+          }),
+        );
+      }
       return data;
     } catch (_) {
       // no op

@@ -229,8 +229,10 @@ export default class NFTTestMintPage extends Vue {
     options?: any
   }) => Promise<any>
 
+  @subscriptionModule.Action tryRecoverMintStatus!: (arg0: string) => void
+
   @subscriptionModule.Getter('getAddressIsSubscriber') isSubscriber!: boolean
-  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: boolean
+  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: string
 
   platform = this.$route.query.platform as string || ''
   isSubscriptionMint: boolean = false
@@ -470,6 +472,9 @@ export default class NFTTestMintPage extends Vue {
       await this.getOgImage()
       if (!this.isUserISCNOwner) {
         throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
+      }
+      if (this.$route.query.mint_status_id && !this.mintStatusId) {
+        this.tryRecoverMintStatus(this.$route.query.mint_status_id as string)
       }
       if (this.isSubscriber && this.mintStatusId) {
         this.isSubscriptionMint = true;
