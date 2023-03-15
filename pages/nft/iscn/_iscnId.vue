@@ -841,7 +841,7 @@ export default class NFTTestMintPage extends Vue {
     } catch (error: any) {
       // If the API returns a status of 409, it indicates that the request may have already successful
       // and a duplicate request was made.
-      if (error.response!.status === 409) {
+      if (error?.response?.status === 409) {
         // Instead of throwing an error, perform the next step in the process
         await this.getMintInfo();
         return;
