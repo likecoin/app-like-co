@@ -97,12 +97,19 @@
           <Button
             v-if="!isSubscriber"
             :text="$t('NFTPortal.button.subscribe')"
-            :preset="'tertiary'"
+            preset="tertiary"
             @click="onSubscribe"
           />
-          <span v-else>
-            Subscription mode on
-          </span>
+          <div v-else>
+            <Button
+              :is-disabled="state !== 'INIT'"
+              preset="tertiary"
+              @click="onToggleSubscription"
+            >
+              <span v-if="isSubscriptionMint">Subscription mode is on</span>
+              <span v-else>Subscription mode is off</span>
+            </Button>
+          </div>
           <Button
             :text="$t('NFTPortal.button.register')"
             :preset="isInputValueValid ? 'secondary' : 'tertiary'"
@@ -672,6 +679,10 @@ export default class FetchIndex extends Vue {
   async onSubscribe() {
     const { data } = await this.$axios.post(getNewSubscriptionApi(this.address));
     window.location.href = data.url
+  }
+
+  onToggleSubscription() {
+    this.isSubscriptionMint = !this.isSubscriptionMint
   }
 
   setError(err: any) {
