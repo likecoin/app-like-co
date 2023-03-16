@@ -5,7 +5,7 @@ import {
   LIKECOIN_CHAIN_API,
   LIKECOIN_CHAIN_DENOM,
   LIKECOIN_CHAIN_MIN_DENOM,
-  CIVIC_LIKER_V3_STAKING_ENDPOINT,
+  LIKECOIN_CHAIN_STAKING_ENDPOINT,
 } from '.'
 
 const mainConfig = {
@@ -54,7 +54,7 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
   coinMinimalDenom: LIKECOIN_CHAIN_MIN_DENOM,
   coinDecimals: 9,
   coinGeckoId: IS_TESTNET ? '' : 'likecoin',
-  walletURLForStaking: CIVIC_LIKER_V3_STAKING_ENDPOINT,
+  walletURLForStaking: LIKECOIN_CHAIN_STAKING_ENDPOINT,
   bech32PrefixAccAddr: 'like',
   bech32PrefixAccPub: 'likepub',
   bech32PrefixValAddr: 'likevaloper',
