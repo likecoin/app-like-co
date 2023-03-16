@@ -1,4 +1,6 @@
 import imageType from 'image-type';
+import { AxiosPromise }  from 'axios'
+
 
 export function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -25,7 +27,7 @@ export function readImageType(buffer: ArrayBuffer) {
   return null;
 }
 
-export function catchAxiosError(promise: Promise<any>) {
+export function catchAxiosError(promise: Promise<any> | AxiosPromise<any>) {
   return promise.catch(e => {
     if (e.response?.status !== 404) {
       // eslint-disable-next-line no-console
