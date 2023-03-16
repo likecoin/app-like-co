@@ -284,6 +284,7 @@
   "NFTPortal.loadingMessage.uploadImg": "Uploading display image ...",
   "NFTPortal.loadingMessage.keplr": "Pending approval on Keplr extension",
   "NFTPortal.loadingMessage.likerId": "Pending approval on Liker Land app",
+  "NFTPortal.loadingMessage.cosmostation": "Pending approval on Cosmostation extension",
   "NFTPortal.loadingMessage.processing": "Pending network confirmation, stay tuned until the transaction is finished.",
   "NFTPortal.loadingMessage.completed": "Completed !",
   "NFTPortal.mint.error":"Oops, something went wrong when {error}, please try again.",

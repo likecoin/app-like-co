@@ -160,6 +160,9 @@ export default class UploadForm extends Vue {
           case 'liker-id':
             return this.$t('NFTPortal.loadingMessage.likerId')
 
+          case 'cosmostation':
+            return this.$t('NFTPortal.loadingMessage.cosmostation')
+
           default:
             return undefined
         }
