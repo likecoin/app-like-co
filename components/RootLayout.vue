@@ -25,10 +25,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { IS_CHAIN_UPGRADING } from '~/constant'
-import { setLoggerUser } from '~/utils/logger'
 
 const walletModule = namespace('wallet')
 const uiModule = namespace('ui')
@@ -50,9 +47,6 @@ const uiModule = namespace('ui')
   },
 })
 export default class RootLayout extends Vue {
-  @walletModule.Getter('getWalletAddress') walletAddress!: string
-  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
-  @walletModule.Getter('getType') loginMethod!: string
   @walletModule.Action('restoreSession') restoreSession!: () => Promise<any>
 
   @uiModule.Action('init') initUIStore!: () => void
@@ -64,12 +58,6 @@ export default class RootLayout extends Vue {
   async mounted() {
     this.initUIStore()
     await this.restoreSession()
-    if (this.walletAddress) {
-      await setLoggerUser(this, {
-        wallet: this.walletAddress,
-        method: this.loginMethod,
-      })
-    }
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
   }
 

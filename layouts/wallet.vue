@@ -13,7 +13,8 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import logTrackerEvent from '~/utils/logger'
+import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
+
 
 const walletModule = namespace('wallet')
 
@@ -37,17 +38,26 @@ export default class WalletLayout extends Vue {
   async mounted() {
     await this.restoreSession()
     if (!this.walletAddress) {
-      const connection = await this.openConnectWalletModal({ language: this.$i18n.locale.split('-')[0] })
-      if (!connection) return this.$router.go(-1);
-      const { method } = connection;
-      logTrackerEvent(
-        this,
-        'user',
-        `connected_wallet_${method}`,
-        'connected_wallet',
-        1,
-      );
-      return this.initWallet(connection);
+      const connection = await this.openConnectWalletModal({
+        language: this.$i18n.locale.split('-')[0],
+      })
+      // Re-login
+      if (connection) {
+        const { method, accounts } = connection
+        logTrackerEvent(
+          this,
+          'user',
+          `connected_wallet_${method}`,
+          'connected_wallet',
+          1,
+        )
+        setLoggerUser(this, {
+          wallet: accounts[0].address,
+          method,
+        })
+        return this.initWallet(connection)
+      }
+      return this.$router.go(-1)
     }
     return true
   }

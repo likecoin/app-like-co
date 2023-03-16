@@ -152,7 +152,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import logTrackerEvent from '~/utils/logger'
+import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
 
 import { IS_TESTNET } from '~/constant'
 
@@ -180,17 +180,25 @@ export default class AppHeader extends Vue {
   }
 
   async handleConnectWalletButtonClick() {
-    const connection = await this.openConnectWalletModal({ language: this.$i18n.locale.split('-')[0] })
-    if (!connection) return false;
-      const { method } = connection;
+    const connection = await this.openConnectWalletModal({
+      language: this.$i18n.locale.split('-')[0],
+    })
+    if (connection) {
+      const { method, accounts } = connection
       logTrackerEvent(
         this,
         'user',
         `connected_wallet_${method}`,
         'connected_wallet',
         1,
-      );
-      return this.initWallet(connection);
+      )
+      setLoggerUser(this, {
+        wallet: accounts[0].address,
+        method,
+      })
+      return this.initWallet(connection)
+    }
+    return false
   }
 }
 </script>
