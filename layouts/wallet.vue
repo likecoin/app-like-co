@@ -20,10 +20,10 @@ const walletModule = namespace('wallet')
 
 @Component
 export default class WalletLayout extends Vue {
+  @walletModule.Getter('getIsRestoredSession') isRestoredSession!: boolean
   @walletModule.Getter('getWalletAddress') walletAddress!: string
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
-  @walletModule.Action('restoreSession') restoreSession!: () => Promise<any>
 
   @walletModule.Action toggleAlert!: (
     isShow: boolean,
@@ -35,9 +35,9 @@ export default class WalletLayout extends Vue {
     return this.$route.path.includes('/nft/purchase/') || this.$route.query.layout === 'popup';
   }
 
-  async mounted() {
-    await this.restoreSession()
-    if (!this.walletAddress) {
+  @Watch('isRestoredSession')
+  async handleRequestLogin(isRestoredSession: boolean) {
+    if (isRestoredSession && !this.walletAddress) {
       const connection = await this.openConnectWalletModal({
         language: this.$i18n.locale.split('-')[0],
       })
