@@ -15,10 +15,9 @@
       @close="isOpenChainUpgradeBlockingDialog"
     />
 
-<DialogContainer>
+    <DialogContainer>
       <Dialog />
     </DialogContainer>
-
   </div>
 </template>
 
