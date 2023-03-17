@@ -46,7 +46,7 @@ const uiModule = namespace('ui')
   },
 })
 export default class RootLayout extends Vue {
-  @walletModule.Action('restoreSession') restoreSession!: () => Promise<any>
+  @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
 
   @uiModule.Action('init') initUIStore!: () => void
 
@@ -56,7 +56,7 @@ export default class RootLayout extends Vue {
 
   async mounted() {
     this.initUIStore()
-    await this.restoreSession()
+    await this.restoreSessionIfNecessary()
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
   }
 

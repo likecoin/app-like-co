@@ -8,6 +8,7 @@ import { getUserInfoMinByAddress } from '~/constant/api'
 
 let likecoinWalletLib: any = null
 let connectorInstance: any = null
+let restoreSessionPromise: any = null
 
 async function getLikeCoinWalletLib() {
   if (!likecoinWalletLib) {
@@ -42,7 +43,6 @@ export default class Wallet extends VuexModule {
   isOpenSnackbar = false
   likerInfo = null
   errorType = ''
-  isRestoredSession = false
 
   @Mutation
   setType(type: string) {
@@ -78,11 +78,6 @@ export default class Wallet extends VuexModule {
   @Mutation
   setCloseSnackbar() {
     this.isOpenSnackbar = false
-  }
-
-  @Mutation
-  setRestoredSession(isRestored: boolean) {
-    this.isRestoredSession = isRestored
   }
 
   @Action
@@ -149,7 +144,6 @@ export default class Wallet extends VuexModule {
 
   @Action
   async restoreSession() {
-    this.context.commit('setRestoredSession', false)
     const connector = await getConnector()
     const session = connector.restoreSession()
     if (session) {
@@ -157,7 +151,18 @@ export default class Wallet extends VuexModule {
       await this.context.dispatch('initWallet', { method, accounts })
       await this.initWallet({ accounts, method })
     }
-    this.context.commit('setRestoredSession', true)
+  }
+
+  @Action
+  async restoreSessionIfNecessary() {
+    if (restoreSessionPromise) {
+      return restoreSessionPromise;
+    }
+
+    restoreSessionPromise =  this.context.dispatch('restoreSession');
+    await restoreSessionPromise;
+
+    return restoreSessionPromise;
   }
 
   @Action
@@ -189,9 +194,5 @@ export default class Wallet extends VuexModule {
 
   get getWalletAddress() {
     return this.address
-  }
-
-  get getIsRestoredSession() {
-    return this.isRestoredSession
   }
 }
