@@ -3,7 +3,7 @@ import { getSitemapRoutes } from './config/sitemap';
 import { SITE_URL } from './constant';
 
 const siteDefaultDescription =
-  'Register an ISCN for your content, mark an immutable record on blockchain for better authenticity.'
+  'Register a Writing NFT for your content, publish your work on blockchain.'
 
 const {
   IS_TESTNET,
@@ -15,14 +15,14 @@ const {
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'ISCN App',
+    title: 'Writing NFT - Decentralized Publishing - LikeCoin',
     meta: [
       { charset: 'utf-8' },
       { hid: 'viewport', name: 'viewport', content: 'width=device-width' },
       { hid: 'description', name: 'description', content: siteDefaultDescription },
       { hid: 'theme-color', name: 'theme-color', content: '#28646e' },
-      { hid: 'og:site_name', property: 'og:site_name', content: 'ISCN App'},
-      { hid: 'og:title', property: 'og:title', content: 'ISCN App' },
+      { hid: 'og:site_name', property: 'og:site_name', content: 'Writing NFT - Decentralized Publishing - LikeCoin'},
+      { hid: 'og:title', property: 'og:title', content: 'Writing NFT - Decentralized Publishing - LikeCoin' },
       { hid: 'og:image', property: 'og:image', content: 'https://app.like.co/images/og/default.png' },
       { hid: 'og:description', property: 'og:description', content: siteDefaultDescription },
       { hid: 'og:image_alt', property: 'og:image:alt', content: '#DePub' },
