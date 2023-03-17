@@ -32,7 +32,7 @@ export function catchAxiosError(promise: AxiosPromise<any>) {
     if (e.response?.status !== 404) {
       // eslint-disable-next-line no-console
       console.error(JSON.stringify(e));
+      throw e;
     }
-    return Promise.resolve();
   });
 }

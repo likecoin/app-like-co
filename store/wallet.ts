@@ -133,7 +133,9 @@ export default class Wallet extends VuexModule {
 
     catchAxiosError(axios.get(getUserInfoMinByAddress(walletAddress)))
       .then((userInfo) => {
-        this.context.commit('setLikerInfo', userInfo)
+        if (userInfo) {
+          this.context.commit('setLikerInfo', userInfo)
+        }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
