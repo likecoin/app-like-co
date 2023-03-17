@@ -156,13 +156,13 @@ export default class Wallet extends VuexModule {
   @Action
   async restoreSessionIfNecessary() {
     if (restoreSessionPromise) {
-      return restoreSessionPromise;
+      return restoreSessionPromise
     }
 
-    restoreSessionPromise =  this.context.dispatch('restoreSession');
-    await restoreSessionPromise;
-
-    return restoreSessionPromise;
+    restoreSessionPromise = this.context.dispatch('restoreSession')
+    const result = await restoreSessionPromise
+    restoreSessionPromise = null
+    return result
   }
 
   @Action

@@ -55,9 +55,9 @@ export default class RootLayout extends Vue {
   isOpenChainUpgradeBlockingDialog = false
 
   async mounted() {
+    this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
     this.initUIStore()
     await this.restoreSessionIfNecessary()
-    this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
   }
 
   handleChainUpgradeBlockingDialogClose() {
