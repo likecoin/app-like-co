@@ -27,11 +27,12 @@ export function readImageType(buffer: ArrayBuffer) {
   return null;
 }
 
-export function catchAxiosError(promise: Promise<any> | AxiosPromise<any>) {
-  return promise.catch(e => {
+export function catchAxiosError(promise: AxiosPromise<any>) {
+  return promise.catch((e) => {
     if (e.response?.status !== 404) {
       // eslint-disable-next-line no-console
       console.error(JSON.stringify(e));
     }
+    return Promise.resolve();
   });
 }
