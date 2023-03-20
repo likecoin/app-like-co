@@ -1,14 +1,5 @@
 <template>
-  <Page :class="[
-    'flex',
-    'flex-col',
-    'relative',
-    'items-center',
-    'justify-center',
-    'px-[20px]',
-    'pt-[38px]',
-    'lg:p-[16px]',
-  ]">
+  <MintPageContainer>
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -110,12 +101,7 @@
         </div>
       </div>
     </Card>
-
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-
-    <AttentionsLedger v-if="!isUsingLikerLandApp" />
-    <AlertsSignFailed />
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">
@@ -235,13 +221,6 @@ export default class FetchIndex extends Vue {
     }
   }
 
-  get isStateTransaction() {
-    return ([
-      State.TO_UPLOAD_TO_ARWEAVE,
-      State.TO_REGISTER_ISCN,
-    ].includes(this.state as State));
-  }
-
   get formData(): FormData | null {
     if (!this.crawledData?.body) { return null }
     const body = new Blob([this.crawledData.body], { type: "text/html" })
@@ -299,10 +278,6 @@ export default class FetchIndex extends Vue {
     } = this.$route.query;
     return querys;
     /* eslint-enable @typescript-eslint/no-unused-vars */
-  }
-
-  get isUsingLikerLandApp() {
-    return this.walletType === 'liker-id'
   }
 
   // eslint-disable-next-line class-methods-use-this

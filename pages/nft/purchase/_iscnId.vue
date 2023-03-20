@@ -60,11 +60,7 @@
           </i18n>
         </Label>
       </Card>
-
-      <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
-      <AttentionsLedger v-else />
     </div>
-    <AlertsSignFailed />
   </Page>
 </template>
 

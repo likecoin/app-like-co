@@ -1,16 +1,5 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <MintPageContainer>
     <ContentCard
       class="max-w-[600px]"
       :title="pageTitle"
@@ -102,12 +91,7 @@
         </div>
       </template>
     </ContentCard>
-
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-
-    <AttentionsLedger v-if="!isUsingLikerLandApp" />
-    <AlertsSignFailed />
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">

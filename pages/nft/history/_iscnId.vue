@@ -1,16 +1,5 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <MintPageContainer>
     <table>
       <tr v-for="r in records" :key="r.txHash">
         <td>Price: {{r.price}} LIKE </td>
@@ -18,7 +7,7 @@
         <td>Time: {{new Date(r.timestamp)}}</td>
       </tr>
     </table>
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">
