@@ -1,8 +1,13 @@
-import axios from 'axios'
+import Axios from 'axios'
 import cheerio from 'cheerio'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import UaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
+
+const axios = Axios.create({ timeout: 10000 });
+
+const RESOURCES_TIMEOUT = 20000; // 20s
+const SUBRESOURCES_TIMEOUT = 10000; // 10s
 
 puppeteer.use(UaPlugin())
 puppeteer.use(StealthPlugin())
@@ -236,6 +241,9 @@ async function getContentFromUrl(url: string) {
     if (error?.response?.status === 403) {
       const browser = await getBrowser()
       const page = await browser.newPage()
+      await page.setViewport({ width: 1024, height: 768 });
+      page.setDefaultNavigationTimeout(RESOURCES_TIMEOUT);
+      page.setDefaultTimeout(SUBRESOURCES_TIMEOUT);
       const blockedResources = [
         'image',
         'stylesheet',
