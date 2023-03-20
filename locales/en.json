@@ -261,6 +261,8 @@
   "NFTPortal.label.creator": "Creator",
   "NFTPortal.label.defaultDescription": "(no description)",
   "NFTPortal.label.detailsPage": "NFT Details Page :",
+  "NFTPortal.label.input.email": "To analyze and understand customer requirements, so as to provide better products and services, {link}",
+  "NFTPortal.label.input.link": "please leave your email.",
   "NFTPortal.label.Iscn": "ISCN ID",
   "NFTPortal.label.AR": "Arweave ID",
   "NFTPortal.label.mint": "Mint NFT",
