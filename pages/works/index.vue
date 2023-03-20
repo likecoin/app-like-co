@@ -95,16 +95,16 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
-const signerModule = namespace('signer')
 const iscnModule = namespace('iscn')
+const walletModule = namespace('wallet')
 
 @Component({
   layout: 'wallet',
 })
-export default class WorksIndexPageextends extends Vue {
+export default class WorksIndexPageExtends extends Vue {
   pageNumber = Number(this.$route.query.page) || 0
 
-  @signerModule.Getter('getAddress') currentAddress!: string
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
   @iscnModule.Getter('getIsLoading') isLoading!: boolean
   @iscnModule.Action queryISCNByAddress!: (
