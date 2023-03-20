@@ -441,6 +441,9 @@ export default class NFTTestMintPage extends Vue {
         this.getMintInfo(),
       ])
       await this.getOgImage()
+      if (!this.isUserISCNOwner) {
+        throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
+      }
     } catch (error) {
       this.setError(error)
     }
