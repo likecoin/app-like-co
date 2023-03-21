@@ -69,7 +69,7 @@
           >
         </div>
         <div v-else class="ml-auto w-min">
-          <Button v-if="hasError" preset="outline" text="Retry" @click="handleClickButton" />
+          <Button v-if="hasError" preset="outline" :text="$t('IscnRegisterForm.signDialog.retry')" @click="handleClickButton" />
           <Button
             v-else
             preset="secondary"
@@ -172,22 +172,18 @@ export enum MintState {
   },
   head() {
     return {
-      link: [
-        {
+      link: [{
           rel: 'modulepreload',
           href:
             'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
           as: 'script',
-        },
-      ],
-      script: [
-        {
+        }],
+      script: [{
           type: 'module',
           src:
             'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
           asyc: 'true',
-        },
-      ],
+        }],
     };
   },
   layout: 'wallet',
@@ -450,6 +446,8 @@ export default class NFTTestMintPage extends Vue {
   }
 
   handleClickButton() {
+    this.hasError = false
+    this.errorMessage = ''
     switch (this.state) {
       case 'preview':
         this.isPreviewChecked = true
@@ -531,7 +529,6 @@ export default class NFTTestMintPage extends Vue {
       }
       /* eslint-enable no-fallthrough */
     } catch (error) {
-      this.hasError = true
       this.mintState = MintState.DONE
       this.setError(error)
     }
@@ -811,7 +808,7 @@ export default class NFTTestMintPage extends Vue {
         (a: { key: string }) => a.key === 'class_id',
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
-      await this.createRoyltyConfig(classId);
+      await this.createRoyaltyConfig(classId);
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -827,8 +824,7 @@ export default class NFTTestMintPage extends Vue {
     return classId
   }
 
-  async createRoyltyConfig(classId: string) {
-    await this.initIfNecessary()
+  async createRoyaltyConfig(classId: string) {
     try {
       if (!this.signer) return
       const rateBasisPoints = 1000; // 10% as in current chain config
@@ -920,6 +916,7 @@ export default class NFTTestMintPage extends Vue {
 
   setError(err: any) {
     this.isLoading = false
+    this.hasError = true
     // eslint-disable-next-line no-console
     console.error(err)
     if (axios.isAxiosError(err)) {
