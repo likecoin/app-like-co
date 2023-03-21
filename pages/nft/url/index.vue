@@ -93,7 +93,7 @@
             >{{ loadingText }}</Label
           >
         </div>
-        <div v-else-if="state === 'INIT'" class="ml-auto w-min">
+        <div v-else-if="state === 'INIT' && !hasError" class="ml-auto w-min">
           <Button
             :text="$t('NFTPortal.button.register')"
             :preset="isInputValueValid ? 'secondary' : 'tertiary'"
@@ -105,9 +105,38 @@
             </template>
           </Button>
         </div>
-        <div v-else class="flex gap-[12px] ml-auto w-min">
-          <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
-          <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
+        <div v-if="hasError" class="flex flex-col items-end ml-auto">
+          <div class="flex items-center gap-[12px]">
+            <Button
+              preset="outline"
+              :text="$t('NFTPortal.button.retry')"
+              :is-disabled="!isInputValueValid"
+              @click="onSubmit"
+            />
+            <Button
+              v-if="state !== 'INIT'"
+              preset="secondary"
+              :text="$t('NFTPortal.button.skip')"
+              :is-disabled="!isInputValueValid"
+              @click="onSkip"
+            />
+          </div>
+          <div class="flex w-full justify-end mt-[20px]">
+            <div class="flex items-center rounded-[3px] text-medium-gray">
+              <Label class="mr-[8px]" :text="$t('NFTPortal.label.encountered.issue')">
+                <template #prepend>
+                  <IconDiscord />
+                </template>
+              </Label>
+              <a
+                class="flex items-center underline"
+                href="https://discord.com/channels/763001015712350231/814761730349596712"
+                @click.prevent="onReport"
+              >
+                <span>{{ $t('NFTPortal.label.report') }}</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -616,6 +645,10 @@ export default class FetchIndex extends Vue {
       return
     }
     this.isInputValueValid = false
+  }
+
+  onReport() {
+    logTrackerEvent(this, 'NFTUrlMint', 'onClickReportIssue', this.state, 1);
   }
 }
 </script>

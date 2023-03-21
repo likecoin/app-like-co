@@ -265,6 +265,8 @@
   "NFTPortal.label.message.preview": "Creator Message Preview",
   "NFTPortal.label.message.dialog": "Message To Your Collector",
   "NFTPortal.label.message": "Creator Message",
+  "NFTPortal.label.encountered.issue":"Encountered an issue?",
+  "NFTPortal.label.report":"Let us know!",
   "NFTPortal.label.modelViewer": "NFT Model",
   "NFTPortal.label.owning": "You have owned {count} already",
   "NFTPortal.label.preview": "Writing NFT Preview",
