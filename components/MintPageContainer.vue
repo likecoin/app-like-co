@@ -11,7 +11,9 @@
       'lg:p-[16px]',
     ]"
   >
+    <!-- Email block -->
     <div
+      v-if="!hasProvidedEmail"
       :class="[
         'flex',
         'items-start',
@@ -58,15 +60,30 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import axios from 'axios'
 
 const walletModule = namespace('wallet')
 
 @Component
 export default class Min5PageContainer extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
+  @walletModule.Getter('getWalletAddress') address!: string | null
+
+  hasProvidedEmail: boolean = false
+  currentAddress: string = ''
 
   get isUsingLikerLandApp() {
     return this.walletType === 'likerland_app'
+  }
+
+  async mounted() {
+    try {
+      const url = `https://script.google.com/macros/s/AKfycbzZlwu9-Ct1r28LYD-ONrp7i41EEGKwH_wULwgOIOIF6u2oOSRzYLEzNR5cIOSz1-HHaA/exec?walletAddress=${this.address}`
+      const { data } = await axios.get(url)
+      if (data) {
+        this.hasProvidedEmail = data.hasEmail
+      }
+    } catch (error) {}
   }
 }
 </script>
