@@ -5,6 +5,7 @@ import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER } from '~/constant'
+import { getPublisherISCNPayload } from '.';
 
 let client: ISCNSigningClient | null = null;
 let iscnLib: any = null;
@@ -43,9 +44,18 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     contentFingerprints = [],
     stakeholders = [],
     recordNotes,
+    publisher,
     ...data
   } = payload;
 
+  if (publisher) {
+    const {
+      stakeholders: publisherStakeholders = [],
+      contentFingerprints: publisherContentFingerprints = [],
+    } = getPublisherISCNPayload(publisher)
+    stakeholders.push(...publisherStakeholders);
+    contentFingerprints.push(...publisherContentFingerprints);
+  }
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
   if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);

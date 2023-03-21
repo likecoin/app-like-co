@@ -27,3 +27,33 @@ export function getIPFSUrlFromISCN(record: ISCNRecord): string{
   const ipfsHash = ipfsUrl.replace('ipfs://','');
   return getIPFSURLFromHash(ipfsHash);
 }
+
+export function getPublisherISCNPayload(publisher: string | any) {
+  const stakeholders = [];
+  let contentFingerprints = [];
+  if (!publisher) return {};
+  if (typeof publisher === 'object') {
+    const {
+      contentFingerprints: publisherContentFingerprints,
+      ...actualPublisher
+    } = publisher;
+    contentFingerprints = publisherContentFingerprints;
+    stakeholders.push({
+      rewardProportion: 0.025,
+      contributionType: 'http://schema.org/publisher',
+      ...actualPublisher,
+    });
+  } else {
+    stakeholders.push({
+      entity: {
+        '@id': publisher,
+      },
+      rewardProportion: 0,
+      contributionType: 'http://schema.org/publisher',
+    });
+  }
+  return {
+    stakeholders,
+    contentFingerprints: contentFingerprints || [],
+  };
+}

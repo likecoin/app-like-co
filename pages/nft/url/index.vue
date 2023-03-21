@@ -303,6 +303,7 @@ export default class FetchIndex extends Vue {
       contentFingerprints = [],
       stakeholders = [],
       recordNotes,
+      publisher,
       type = 'CreativeWork',
     } = this.iscnData
     let { description = '' } = this.iscnData
@@ -315,6 +316,7 @@ export default class FetchIndex extends Vue {
       url: this.iscnData.url || this.url,
       exifInfo: {},
       license,
+      publisher,
       ipfsHash: this.ipfsHash,
       arweaveId: this.arweaveId,
       fileSHA256: '',
