@@ -255,6 +255,8 @@
   "NFTPortal.errorMessage.noImage": "No Image",
   "NFTPortal.errorMessage.url.notAllowToCrawl": "Do not use https://liker.land/ as the target URL for minting NFT.",
   "NFTPortal.errorMessage.urlNotExists": "Cannot obtain image preview",
+  "NFTPortal.errorMessage.metadata.noURL": "Warning: No URL in ISCN's metadata {more}.",
+  "NFTPortal.errorMessage.metadata.noURL.learnMore": "learn more",
   "NFTPortal.label.classId": "Class ID",
   "NFTPortal.label.creator": "Creator",
   "NFTPortal.label.defaultDescription": "(no description)",
