@@ -69,10 +69,8 @@
             >{{ loadingText }}</Label
           >
         </div>
-        <div v-else class="ml-auto w-min">
-          <Button v-if="hasError" preset="outline" :text="$t('IscnRegisterForm.signDialog.retry')" @click="handleClickButton" />
+        <div v-else-if="!hasError" class="ml-auto w-min">
           <Button
-            v-else
             preset="secondary"
             :text="buttonText"
             @click="handleClickButton"
@@ -81,6 +79,26 @@
               <IconArrowRight />
             </template>
           </Button>
+        </div>
+        <div v-else-if="hasError" class="flex flex-col items-end ml-auto">
+          <Button preset="outline" :text="$t('IscnRegisterForm.signDialog.retry')" @click="handleClickButton" />
+          <div class="flex w-full justify-end mt-[20px]">
+            <div class="flex items-center rounded-[3px] text-medium-gray">
+              <Label class="mr-[8px]" :text="$t('NFTPortal.label.encountered.issue')">
+                <template #prepend>
+                  <IconDiscord />
+                </template>
+              </Label>
+              <a
+                class="flex items-center underline"
+                href="https://discord.com/channels/763001015712350231/814761730349596712"
+                target="_blank"
+                @click.native.prevent="onReport"
+              >
+                <span>{{ $t('NFTPortal.label.report') }}</span>
+              </a>
+            </div>
+          </div>
         </div>
       </template>
     </ContentCard>
@@ -930,6 +948,10 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  onReport() {
+    logTrackerEvent(this, 'IscnMintNFT', 'onClickReportIssue', this.mintState, 1);
   }
 }
 </script>

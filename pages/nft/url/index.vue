@@ -131,7 +131,8 @@
               <a
                 class="flex items-center underline"
                 href="https://discord.com/channels/763001015712350231/814761730349596712"
-                @click.prevent="onReport"
+                target="_blank"
+                @click.native.prevent="onReport"
               >
                 <span>{{ $t('NFTPortal.label.report') }}</span>
               </a>
