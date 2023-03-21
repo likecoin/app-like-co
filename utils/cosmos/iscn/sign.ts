@@ -38,21 +38,22 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorWallets,
     likerIds,
     likerIdsAddresses,
-    descriptions,
+    authorDescriptions,
     numbersProtocolAssetId,
+    contentFingerprints = [],
+    stakeholders = [],
+    recordNotes,
     ...data
   } = payload;
 
-  const contentFingerprints = []
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
   if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
   if (numbersProtocolAssetId) contentFingerprints.push(`num://${numbersProtocolAssetId}`);
-  const stakeholders: any = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
-      const description = descriptions[i]
+      const description = authorDescriptions[i]
       const url: string = (likerIds[i] && likerIdsAddresses[i])
         ? `https://like.co/${likerIds[i]}`
         : authorUrls[i][0] || authorName
@@ -98,6 +99,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     usageInfo: license,
     contentFingerprints,
     stakeholders,
+    recordNotes,
   }
 }
 
@@ -111,9 +113,10 @@ export async function signISCN(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
+  memo?: string,
 ) {
   const signingClient = await getSigningClient();
   await signingClient.connectWithSigner(network.rpcURL, signer);
-  const res = await signingClient.createISCNRecord(address, tx, { memo: 'app.like.co' });
+  const res = await signingClient.createISCNRecord(address, tx, { memo: memo || 'app.like.co' });
   return res as DeliverTxResponse;
 }

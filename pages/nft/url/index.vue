@@ -150,6 +150,7 @@
 </template>
 
 <script lang="ts">
+import mime from 'mime-types';
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -172,20 +173,21 @@ import {
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
 import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, IS_TESTNET, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
+import { ISCN_LICENSES, ISCN_PUBLISHERS } from '~/constant/iscn'
 
-const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) => {
+const base64toBlob = (base64Data: string, contentType: string, sliceSize = 512) => {
   const byteCharacters = atob(base64Data);
   const byteArrays = [];
   for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
     const slice = byteCharacters.slice(offset, offset + sliceSize);
     const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i+=1) {
+    for (let i = 0; i < slice.length; i += 1) {
       byteNumbers[i] = slice.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
     byteArrays.push(byteArray);
   }
-  const blob = new Blob(byteArrays, {type: contentType});
+  const blob = new Blob(byteArrays, { type: contentType });
   return blob;
 }
 
@@ -224,13 +226,15 @@ export default class FetchIndex extends Vue {
   platform = this.$route.query.platform as string || ''
   ownerWallet = ''
   errorMessage = ''
-  crawledData: any
+  iscnFiles: any[] = []
+  iscnData: any
   ipfsHash = ''
   arweaveId = ''
   arweaveFeeInfo: any
   arweaveFeeTxHash = ''
   iscnId = this.$route.query.iscn_id as string || ''
   likerId = this.$route.query.liker_id as string || ''
+  opener = !!this.$route.query.opener && this.$route.query.opener !== '0'
   isLoading = false
   avatar = null
   balance: string = ''
@@ -277,29 +281,40 @@ export default class FetchIndex extends Vue {
   }
 
   get formData(): FormData | null {
-    if (!this.crawledData?.body) { return null }
-    const body = new Blob([this.crawledData.body], { type: "text/html" })
+    if (!this.iscnFiles?.length) { return null }
     const formData = new FormData()
-    formData.append('index.html', body, 'index.html')
-    const { images } = this.crawledData
-    images.forEach((element:any) => {
-      formData.append(`${element.key}`, base64toBlob(element.data, element.type), `${element.key}`)
+    this.iscnFiles.forEach((element: any) => {
+      if (element.blob) {
+        formData.append(`${element.key}`, element.blob, `${element.key}`)
+      } else {
+        formData.append(`${element.key}`, base64toBlob(element.data, element.type), `${element.key}`)
+      }
     });
     return formData
   }
 
   get iscnPayload(): ISCNRegisterPayload {
-    const { title = '', keywords = '', author = '' } = this.crawledData
-    let { description = '' } = this.crawledData
+    const {
+      title = '',
+      keywords = '',
+      author = '',
+      authorDescription = '',
+      license = '',
+      contentFingerprints = [],
+      stakeholders = [],
+      recordNotes,
+      type = 'CreativeWork',
+    } = this.iscnData
+    let { description = '' } = this.iscnData
     description = this.truncate(description, 200)
     return {
-      type: 'CreativeWork',
+      type,
       name: title,
       description,
       tagsString: keywords,
-      url: this.url,
+      url: this.iscnData.url || this.url,
       exifInfo: {},
-      license: '',
+      license,
       ipfsHash: this.ipfsHash,
       arweaveId: this.arweaveId,
       fileSHA256: '',
@@ -311,8 +326,11 @@ export default class FetchIndex extends Vue {
       }]],
       likerIds: [],
       likerIdsAddresses: [],
-      descriptions: [description],
+      authorDescriptions: [authorDescription],
       numbersProtocolAssetId: '',
+      contentFingerprints,
+      stakeholders,
+      recordNotes,
     }
   }
 
@@ -335,18 +353,25 @@ export default class FetchIndex extends Vue {
     /* eslint-enable @typescript-eslint/no-unused-vars */
   }
 
+  get redirectOrigin(): string {
+    const redirectUri: string = this.$route.query.redirect_uri as string;
+    if (!redirectUri) return '';
+    const url = new URL(redirectUri);
+    return url.origin;
+  }
+
   get isUsingLikerLandApp() {
     return this.walletType === 'liker-id'
   }
 
   // eslint-disable-next-line class-methods-use-this
   get crawlURLRegex() {
-      return new RegExp(CRAWL_URL_REGEX);
+    return new RegExp(CRAWL_URL_REGEX);
   }
 
-    // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line class-methods-use-this
   get iscnPrefixRegex() {
-      return new RegExp(ISCN_PREFIX_REGEX);
+    return new RegExp(ISCN_PREFIX_REGEX);
   }
 
   async mounted() {
@@ -392,16 +417,139 @@ export default class FetchIndex extends Vue {
     if (this.url) {
       this.onInputURL(this.url);
     }
+    window.addEventListener(
+      'message',
+      this.onWindowMessage,
+      false,
+    );
+    if (this.opener) {
+      try {
+        const message = JSON.stringify({
+          action: 'ISCN_WIDGET_READY',
+        });
+        window.opener.postMessage(message, this.redirectOrigin);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   }
 
   @Watch('url')
   reset() {
-    this.crawledData = null
+    this.iscnData = null
+    this.iscnFiles = []
     this.ipfsHash = ''
     this.arweaveId = ''
     this.arweaveFeeTxHash = ''
     this.iscnId = ''
     this.state = State.INIT
+  }
+
+  onWindowMessage(event: WindowEventHandlersEventMap['message']) {
+    if (event && event.data && typeof event.data === 'string') {
+      if (this.redirectOrigin && event.origin !== this.redirectOrigin) {
+        return;
+      }
+      const { action, data } = JSON.parse(event.data);
+      if (action === 'SUBMIT_ISCN_DATA') {
+        // eslint-disable-next-line no-console
+        console.info('Received SUBMIT_ISCN_DATA');
+        const {
+          metadata = {},
+          files = [],
+        } = data;
+        this.onReceiveISCNData(metadata);
+        this.onReceiveISCNFiles(files);
+        if (files && files.length) {
+          this.state = State.TO_ESTIMATE_ARWEAVE_FEE
+        } else {
+          this.state = State.TO_REGISTER_ISCN
+        }
+        this.doAction();
+      }
+    }
+  }
+
+  onReceiveISCNData(data: any) {
+    const {
+      fingerprints: contentFingerprints = [],
+      stakeholders,
+      name,
+      description,
+      author,
+      authorDescription,
+      url,
+      recordNotes,
+      memo,
+    } = data;
+    let {
+      type = 'article',
+      publisher,
+      license,
+      tags = [],
+    } = data;
+    switch (type) {
+      case 'message':
+      case 'image':
+      case 'photo':
+      case 'article': {
+        type = type[0].toUpperCase().concat(type.slice(1));
+        break;
+      }
+      default: type = 'CreativeWork';
+    }
+
+    if (publisher) {
+      if (typeof publisher === 'string' && ISCN_PUBLISHERS[publisher]) {
+        license = ISCN_PUBLISHERS[publisher].license || license;
+        publisher = ISCN_PUBLISHERS[publisher];
+      }
+    }
+    if (license) {
+      if (typeof license === 'string') {
+        license = ISCN_LICENSES[license] || license;
+      }
+    }
+    if (!tags) {
+      tags = [];
+    } else if (typeof tags === 'string') {
+      tags = tags.split(',');
+    }
+    this.iscnData = {
+      tagsString: tags.join(','),
+      type,
+      contentFingerprints,
+      stakeholders,
+      publisher,
+      license,
+      name,
+      description,
+      author,
+      authorDescription,
+      url,
+      recordNotes,
+      memo,
+    };
+  }
+
+  onReceiveISCNFiles(files: any[]) {
+    if (!files || !files.length) {
+      // eslint-disable-next-line no-console
+      console.info('Received no files for upload');
+
+    }
+    // eslint-disable-next-line no-console
+    console.info(`Received ${files.length} files for upload`);
+    const filteredFiles = files.filter(d => d.filename && d.data);
+    const filesWithType = filteredFiles.map((d) => {
+      const mimeType = d.mimeType || mime.lookup(d.filename) || 'text/plain';
+      return {
+        key: d.filename,
+        data: d.data,
+        type: mimeType,
+      };
+    })
+    this.iscnFiles = filesWithType;
   }
 
   async onSubmit() {
@@ -494,9 +642,14 @@ export default class FetchIndex extends Vue {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}&wallet=${this.address}`)
-      this.crawledData = data
-      if (!this.crawledData?.body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
-      if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
+      const { title, description, keywords, author, body, images = [] } = data
+      if (!body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
+      if (title === 'patreon.com' && description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
+      this.iscnData = { title, description, keywords, author }
+      this.iscnFiles = [{
+        key: 'index.html',
+        blob: new Blob([body], { type: "text/html" }),
+      }].concat(images);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
@@ -553,7 +706,7 @@ export default class FetchIndex extends Vue {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweave', this.arweaveFeeTxHash, 1);
       if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
-      const { arweaveId } = await this.$axios.$post(
+      const arweaveResult = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
         this.formData,
         {
@@ -563,8 +716,20 @@ export default class FetchIndex extends Vue {
           timeout: 90000,
         },
       )
+      const { arweaveId } = arweaveResult;
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
+      if (this.opener) {
+        try {
+          const message = JSON.stringify({
+            action: 'ARWEAVE_SUBMITTED',
+            data: arweaveResult,
+          });
+          window.opener.postMessage(message, this.redirectOrigin);
+        } catch (err) {
+          console.error(err);
+        }
+      }
     } catch (err) {
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -584,6 +749,7 @@ export default class FetchIndex extends Vue {
         formatISCNTxPayload(this.iscnPayload),
         this.signer,
         this.address,
+        this.iscnPayload.memo,
       )
       this.iscnId = res.iscnId
       if (this.url && this.likerId) {
@@ -591,7 +757,25 @@ export default class FetchIndex extends Vue {
         await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
       }
       if (res) {
-      logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNSuccess', this.iscnId, 1);
+        if (this.opener) {
+          try {
+            const {
+              txHash,
+              iscnId,
+            } = res;
+            const message = JSON.stringify({
+              action: 'ISCN_SUBMITTED',
+              data: {
+                txHash,
+                iscnId,
+              },
+            });
+            window.opener.postMessage(message, this.redirectOrigin);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+        logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNSuccess', this.iscnId, 1);
         this.$router.push(
           this.localeLocation({
             name: 'nft-iscn-iscnId',
@@ -604,7 +788,7 @@ export default class FetchIndex extends Vue {
       logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
-      throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
+      throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0, 200)}`)
     }
   }
 
