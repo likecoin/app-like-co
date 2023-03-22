@@ -46,6 +46,24 @@
         @message-change="(value) => (message = value)"
       />
 
+      <!-- Reserve NFTs Input -->
+      <div
+        v-if="currentPage === 'MintProcess' && mintState === 'reserving'"
+        class="flex justify-start gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] px-[6px] py-[4px]"
+      >
+        <IconGift />
+        <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
+        <input
+          ref="nameInput"
+          :placeholder="reservePlaceholder"
+          type="number"
+          :max="premintAmount"
+          min="0"
+          class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
+          @change="handleInputReserveNft"
+        />
+      </div>
+
       <NFTMintProcess
         v-if="currentPage === 'MintProcess'"
         :iscn-id="iscnId"
@@ -58,6 +76,16 @@
         :tx-status="txStatus"
         :state="mintState"
       />
+
+      <!-- Reserve NFTs Result -->
+      <div
+        v-if="currentPage === 'MintProcess' && mintState !== 'reserving'"
+        class="flex justify-start mt-[-28px]"
+      >
+        <div class="flex text-[#BBBBBB] text-[12px] items-center border-2 border-[#E6F4F2] rounded-[4px] px-[6px] py-[2px]">
+          <span>{{ $t('NFTPortal.label.reserve.result', { num: reserveNft })}}</span>
+        </div>
+      </div>
 
       <!-- footer -->
 
@@ -257,6 +285,8 @@ export default class NFTTestMintPage extends Vue {
   errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
+
+  reserveNft: number = 0
   shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
@@ -449,6 +479,10 @@ export default class NFTTestMintPage extends Vue {
       return URL.createObjectURL(this.ogImageBlob)
     }
     return undefined
+  }
+
+  get reservePlaceholder() {
+    return `0 - ${this.premintAmount}`
   }
 
   async mounted() {
@@ -949,6 +983,13 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  handleInputReserveNft(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = Number(inputElement.value);
+    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount));
+    logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
   onReport() {
