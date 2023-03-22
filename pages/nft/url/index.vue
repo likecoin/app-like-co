@@ -93,7 +93,7 @@
             >{{ loadingText }}</Label
           >
         </div>
-        <div v-else-if="state === 'INIT'" class="ml-auto w-min">
+        <div v-else-if="state === 'INIT' && !hasError" class="ml-auto w-min">
           <Button
             :text="$t('NFTPortal.button.register')"
             :preset="isInputValueValid ? 'secondary' : 'tertiary'"
@@ -105,9 +105,39 @@
             </template>
           </Button>
         </div>
-        <div v-else class="flex gap-[12px] ml-auto w-min">
-          <Button preset="secondary" :text="$t('NFTPortal.button.skip')" @click="onSkip" />
-          <Button preset="outline" :text="$t('NFTPortal.button.retry')" @click="onSubmit" />
+        <div v-if="hasError" class="flex flex-col items-end ml-auto">
+          <div class="flex items-center gap-[12px]">
+            <Button
+              preset="outline"
+              :text="$t('NFTPortal.button.retry')"
+              :is-disabled="!isInputValueValid"
+              @click="onSubmit"
+            />
+            <Button
+              v-if="state !== 'INIT'"
+              preset="secondary"
+              :text="$t('NFTPortal.button.skip')"
+              :is-disabled="!isInputValueValid"
+              @click="onSkip"
+            />
+          </div>
+          <div class="flex w-full justify-end mt-[20px]">
+            <div class="flex items-center rounded-[3px] text-medium-gray">
+              <Label class="mr-[8px]" :text="$t('NFTPortal.label.encountered.issue')">
+                <template #prepend>
+                  <IconDiscord />
+                </template>
+              </Label>
+              <a
+                class="flex items-center underline"
+                href="https://discord.gg/likecoin"
+                target="_blank"
+                @click.native.prevent="onReport"
+              >
+                <span>{{ $t('NFTPortal.label.report') }}</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -207,6 +237,7 @@ export default class FetchIndex extends Vue {
   isInputValueValid: boolean = false
   isReady: boolean = false
   isAllowed: boolean = false
+  hasError: boolean = false
 
   get encodedURL(): string {
     const { url } = this;
@@ -374,6 +405,7 @@ export default class FetchIndex extends Vue {
   }
 
   async onSubmit() {
+    this.hasError = false
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'OnSubmit', this.state, 1);
       this.isLoading = true
@@ -392,56 +424,60 @@ export default class FetchIndex extends Vue {
 
   async doAction() {
     this.errorMessage = ''
+    this.hasError = false
     /* eslint-disable no-fallthrough */
-    switch (this.state) {
-      case State.INIT: {
-        if (this.ownerWallet && this.address !== this.ownerWallet) {
-          this.errorMessage = 'PLEASE_USE_OWNER_WALLET_TO_SIGN'
-          break
-        }
-        if (this.iscnPrefixRegex.test(this.url)) {
-          this.iscnId = this.url;
-          this.$router.push(
-            this.localeLocation({
-              name: 'nft-iscn-iscnId',
-              params: this.iscnParams,
-              query: this.queryParams,
-            })!,
-          )
-          break
-        }
+    try {
+      switch (this.state) {
+        case State.INIT: {
+          if (this.ownerWallet && this.address !== this.ownerWallet) {
+            throw new Error('PLEASE_USE_OWNER_WALLET_TO_SIGN')
+          }
+          if (this.iscnPrefixRegex.test(this.url)) {
+            this.iscnId = this.url
+            this.$router.push(
+              this.localeLocation({
+                name: 'nft-iscn-iscnId',
+                params: this.iscnParams,
+                query: this.queryParams,
+              })!,
+            )
+            break
+          }
 
-        this.balance = await getAccountBalance(this.address) as string
-        if (this.balance === '0') {
-          this.toggleSnackbar('INSUFFICIENT_BALANCE')
-          break
-        }
+          this.balance = (await getAccountBalance(this.address)) as string
+          if (this.balance === '0') {
+            throw new Error('INSUFFICIENT_BALANCE')
+          }
 
-        this.errorMessage = ''
-        if (!this.url) {
-          this.errorMessage = this.$t('HomePage.search.errormessage.empty') as string
-          break
+          this.$router.replace({
+            query: {
+              ...this.$route.query,
+              url: this.url,
+            },
+          })
+          this.state = State.TO_CRAWL_URL
         }
-        this.$router.replace({ query: {
-            ...this.$route.query,
-            url: this.url,
-        } })
-        this.state = State.TO_CRAWL_URL
+        case State.TO_CRAWL_URL:
+          await this.crawlUrlData()
+          this.state = State.TO_ESTIMATE_ARWEAVE_FEE
+        case State.TO_ESTIMATE_ARWEAVE_FEE:
+          await this.checkArweaveIdExistsAndEstimateFee()
+          this.state = this.arweaveId
+            ? State.TO_REGISTER_ISCN
+            : State.TO_UPLOAD_TO_ARWEAVE
+        case State.TO_UPLOAD_TO_ARWEAVE:
+          if (!this.arweaveFeeTxHash) {
+            await this.sendArweaveFeeTx(this.arweaveFeeInfo)
+          }
+          await this.submitToArweave()
+          this.state = State.TO_REGISTER_ISCN
+        case State.TO_REGISTER_ISCN:
+          await this.registerISCN()
+        default:
+          break
       }
-      case State.TO_CRAWL_URL:
-        await this.crawlUrlData()
-        this.state = State.TO_ESTIMATE_ARWEAVE_FEE
-      case State.TO_ESTIMATE_ARWEAVE_FEE:
-        await this.checkArweaveIdExistsAndEstimateFee()
-        this.state = this.arweaveId ? State.TO_REGISTER_ISCN : State.TO_UPLOAD_TO_ARWEAVE
-      case State.TO_UPLOAD_TO_ARWEAVE:
-        if (!this.arweaveFeeTxHash) { await this.sendArweaveFeeTx(this.arweaveFeeInfo) }
-        await this.submitToArweave()
-        this.state = State.TO_REGISTER_ISCN
-      case State.TO_REGISTER_ISCN:
-        await this.registerISCN()
-      default:
-        break
+    } catch (error) {
+      this.setError(error)
     }
     /* eslint-enable no-fallthrough */
   }
@@ -463,8 +499,8 @@ export default class FetchIndex extends Vue {
       if (this.crawledData?.title === 'patreon.com' && this.crawledData?.description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
     } catch (err) {
       // eslint-disable-next-line no-console
-      logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlError', (err as Error).toString(), 1);
       console.error(err)
+      logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlError', (err as Error).toString(), 1);
       throw new Error('CANNOT_CRAWL_THIS_URL')
     }
   }
@@ -540,8 +576,7 @@ export default class FetchIndex extends Vue {
   async registerISCN(): Promise<void> {
     await this.initIfNecessary()
     if (!this.signer) {
-      this.errorMessage = 'MISSING_SIGNER'
-      return
+      throw new Error('MISSING_SIGNER')
     }
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'SignISCNTx', this.url, 1);
@@ -581,6 +616,7 @@ export default class FetchIndex extends Vue {
 
   setError(err: any) {
     this.isLoading = false
+    this.hasError = true
     // eslint-disable-next-line no-console
     console.error(err)
     if (axios.isAxiosError(err)) {
@@ -610,6 +646,10 @@ export default class FetchIndex extends Vue {
       return
     }
     this.isInputValueValid = false
+  }
+
+  onReport() {
+    logTrackerEvent(this, 'NFTUrlMint', 'onClickReportIssue', this.state, 1);
   }
 }
 </script>

@@ -32,6 +32,7 @@
         :description="NftDescription"
         :img-src="imgSrc"
         :is-loading="isLoadingPreviewOG"
+        :should-show-no-url-warning="shouldShowNoUrlWarning"
         @edit-name="onEditNftName"
         @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
@@ -68,10 +69,8 @@
             >{{ loadingText }}</Label
           >
         </div>
-        <div v-else class="ml-auto w-min">
-          <Button v-if="hasError" preset="outline" text="Retry" @click="handleClickButton" />
+        <div v-else-if="!hasError" class="ml-auto w-min">
           <Button
-            v-else
             preset="secondary"
             :text="buttonText"
             @click="handleClickButton"
@@ -80,6 +79,26 @@
               <IconArrowRight />
             </template>
           </Button>
+        </div>
+        <div v-else-if="hasError" class="flex flex-col items-end ml-auto">
+          <Button preset="outline" :text="$t('IscnRegisterForm.signDialog.retry')" @click="handleClickButton" />
+          <div class="flex w-full justify-end mt-[20px]">
+            <div class="flex items-center rounded-[3px] text-medium-gray">
+              <Label class="mr-[8px]" :text="$t('NFTPortal.label.encountered.issue')">
+                <template #prepend>
+                  <IconDiscord />
+                </template>
+              </Label>
+              <a
+                class="flex items-center underline"
+                href="https://discord.gg/likecoin"
+                target="_blank"
+                @click.native.prevent="onReport"
+              >
+                <span>{{ $t('NFTPortal.label.report') }}</span>
+              </a>
+            </div>
+          </div>
         </div>
       </template>
     </ContentCard>
@@ -172,22 +191,18 @@ export enum MintState {
   },
   head() {
     return {
-      link: [
-        {
+      link: [{
           rel: 'modulepreload',
           href:
             'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
           as: 'script',
-        },
-      ],
-      script: [
-        {
+        }],
+      script: [{
           type: 'module',
           src:
             'https://unpkg.com/@google/model-viewer@3.0.2/dist/model-viewer.min.js',
           asyc: 'true',
-        },
-      ],
+        }],
     };
   },
   layout: 'wallet',
@@ -241,6 +256,7 @@ export default class NFTTestMintPage extends Vue {
   errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
+  shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
@@ -450,6 +466,8 @@ export default class NFTTestMintPage extends Vue {
   }
 
   handleClickButton() {
+    this.hasError = false
+    this.errorMessage = ''
     switch (this.state) {
       case 'preview':
         this.isPreviewChecked = true
@@ -531,7 +549,6 @@ export default class NFTTestMintPage extends Vue {
       }
       /* eslint-enable no-fallthrough */
     } catch (error) {
-      this.hasError = true
       this.mintState = MintState.DONE
       this.setError(error)
     }
@@ -575,7 +592,7 @@ export default class NFTTestMintPage extends Vue {
         this.NftDescription =`${this.iscnData?.contentMetadata?.description || ''}`;
         if (!this.iscnData.contentMetadata?.url) {
           logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoWarning', 'No URL in ISCN\'s metadata', 1);
-          this.toggleSnackbar('Warning: No URL in ISCN\'s metadata')
+          this.shouldShowNoUrlWarning = true
         }
       }
     } catch (error) {
@@ -811,7 +828,7 @@ export default class NFTTestMintPage extends Vue {
         (a: { key: string }) => a.key === 'class_id',
       )
       classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
-      await this.createRoyltyConfig(classId);
+      await this.createRoyaltyConfig(classId);
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -827,8 +844,7 @@ export default class NFTTestMintPage extends Vue {
     return classId
   }
 
-  async createRoyltyConfig(classId: string) {
-    await this.initIfNecessary()
+  async createRoyaltyConfig(classId: string) {
     try {
       if (!this.signer) return
       const rateBasisPoints = 1000; // 10% as in current chain config
@@ -920,6 +936,7 @@ export default class NFTTestMintPage extends Vue {
 
   setError(err: any) {
     this.isLoading = false
+    this.hasError = true
     // eslint-disable-next-line no-console
     console.error(err)
     if (axios.isAxiosError(err)) {
@@ -931,6 +948,10 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  onReport() {
+    logTrackerEvent(this, 'IscnMintNFT', 'onClickReportIssue', this.mintState, 1);
   }
 }
 </script>
