@@ -163,7 +163,7 @@ import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
-import { ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
+import { ISCNRecordWithID, ISCNRegisterPayload } from '~/utils/cosmos/iscn/iscn.type'
 import {
   getLikerIdMinApi,
   getAddressLikerIdMinApi,
@@ -191,12 +191,14 @@ const base64toBlob = (base64Data: string, contentType: string, sliceSize = 512) 
   return blob;
 }
 
+const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
   USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
+  USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER'
 }
 
 enum State {
@@ -211,8 +213,13 @@ enum State {
   layout: 'wallet',
 })
 export default class FetchIndex extends Vue {
-  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
+    records: ISCNRecordWithID[]
+    owner: string
+    latestVersion: Long.Long
+  } | null>
 
+  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
@@ -242,6 +249,11 @@ export default class FetchIndex extends Vue {
   isReady: boolean = false
   isAllowed: boolean = false
   hasError: boolean = false
+
+  get isUpdateMode(): boolean {
+    const update = this.$route.query.update as string
+    return !!this.iscnId && !!update && update !== '0'
+  }
 
   get encodedURL(): string {
     const { url } = this;
@@ -378,13 +390,23 @@ export default class FetchIndex extends Vue {
 
   async mounted() {
     if (this.iscnId) {
-      this.$router.push(
-        this.localeLocation({
-          name: 'nft-iscn-iscnId',
-          params: this.iscnParams,
-          query: this.queryParams,
-        })!,
-      )
+      if (!this.isUpdateMode) {
+        this.$router.push(
+          this.localeLocation({
+            name: 'nft-iscn-iscnId',
+            params: this.iscnParams,
+            query: this.queryParams,
+          })!,
+        )
+      } else {
+        const res = await this.fetchISCNById(this.iscnId)
+        if (res) {
+          const iscnOwner = res.owner
+          if (iscnOwner !== this.address) {
+            this.toggleSnackbar('USER_NOT_ISCN_OWNER')
+          }
+        }
+      }
     }
 
     const { liker_id: likerId, wallet } = this.$route.query;
@@ -751,7 +773,10 @@ export default class FetchIndex extends Vue {
         formatISCNTxPayload(this.iscnPayload),
         this.signer,
         this.address,
-        this.iscnPayload.memo,
+        {
+          iscnId: this.isUpdateMode ? this.iscnId : undefined,
+          memo: this.iscnPayload.memo,
+        },
       )
       this.iscnId = res.iscnId
       if (this.url && this.likerId) {

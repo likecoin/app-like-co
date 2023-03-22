@@ -123,10 +123,13 @@ export async function signISCN(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
-  memo?: string,
+  { iscnId, memo }: { iscnId?: string, memo?: string } = {},
 ) {
+  const isUpdate = !!iscnId;
   const signingClient = await getSigningClient();
   await signingClient.connectWithSigner(network.rpcURL, signer);
-  const res = await signingClient.createISCNRecord(address, tx, { memo: memo || 'app.like.co' });
+  const signingPromise = isUpdate ? signingClient.updateISCNRecord(address, iscnId as string, tx, { memo: memo || 'app.like.co' })
+    : signingClient.createISCNRecord(address, tx, { memo: memo || 'app.like.co' });
+  const res = await signingPromise;
   return res as DeliverTxResponse;
 }
