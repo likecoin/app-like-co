@@ -5,11 +5,11 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineAminoSigner } from '@cosmjs/amino';
 
-async function signNewSubscriberMint(inputWallet: string, signer: any) {
+async function signSubscriptionMessage(inputWallet: string, signer: any, action: string) {
   if (!inputWallet) return null;
   const ts = Date.now();
   const payload = JSON.stringify({
-    action: 'new_mint',
+    action,
     likeWallet: inputWallet,
     ts,
   });
@@ -46,13 +46,14 @@ async function payloadSigner(
   return { message, ...payload };
 }
 
-
-export default function signNewSubscriberMintWithCosmosWallet(
+export default function signSubscriptionAction(
   signer: OfflineSigner,
   address: string,
+  action: string,
 ) {
-  return signNewSubscriberMint(
+  return signSubscriptionMessage(
       address,
       (s: any) => payloadSigner(s, signer, address),
+      action,
   );
 }

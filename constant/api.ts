@@ -37,6 +37,7 @@ export const getUserInfoMinByAddress = (addr: string) =>
   `${LIKE_CO_API_ROOT}/users/addr/${addr}/min`;
 export const getUserIsSubscribedMinterApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/status?wallet=${wallet}`;
 export const getNewSubscriptionApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/stripe/new?wallet=${wallet}`;
+export const getSubscriptionPortalApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/stripe/portal?wallet=${wallet}`;
 export const getNewSubscriberMintInstanceApi = (wallet: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/new?wallet=${wallet}`;
 export const getSubscriberMintArweaveApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/arweave?wallet=${wallet}`;
 export const getSubscriberMintIscnApi = (wallet: string, statusId: string) => `${LIKE_CO_API_ROOT}/likernft/subscription/mint/${encodeURIComponent(statusId)}/iscn?wallet=${wallet}`;

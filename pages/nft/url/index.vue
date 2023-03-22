@@ -185,7 +185,6 @@ import {
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
   getWhitelistApi,
-getNewSubscriptionApi,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
 import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, IS_TESTNET, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
@@ -680,9 +679,8 @@ export default class FetchIndex extends Vue {
     return data.isWhitelisted;
   }
 
-  async onSubscribe() {
-    const { data } = await this.$axios.post(getNewSubscriptionApi(this.address));
-    window.location.href = data.url
+  onSubscribe() {
+    this.$router.push(this.localeLocation({ name: 'nft-subscription' })!)
   }
 
   onToggleSubscription() {
