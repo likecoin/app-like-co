@@ -937,7 +937,8 @@ export default class NFTTestMintPage extends Vue {
       const mintMessages = nfts.map((i) =>
         formatMsgMintNFT(this.address, this.classId, i),
       )
-      const sendMessages = nfts.map((i) =>
+      const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
+      const sendMessages = nftsToSend.map((i) =>
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
       )
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
@@ -948,15 +949,18 @@ export default class NFTTestMintPage extends Vue {
         if (this.isWritingNFT && !this.sendNFTResult) {
           this.sendNFTResult = await signingClient.sendMessages(this.address, sendMessages)
         }
+      } else if (this.isWritingNFT) {
+        this.mintNFTResult = await signingClient.sendMessages(
+          this.address,
+          mintMessages,
+        )
+        this.sendNFTResult = await signingClient.sendMessages(
+          this.address,
+          sendMessages,
+        )
       } else {
-        let messages = mintMessages;
-
-        if (this.isWritingNFT) messages = messages.concat(sendMessages);
-
-        const res = await signingClient.sendMessages(this.address, messages)
+        const res = await signingClient.sendMessages(this.address, mintMessages)
         this.mintNFTResult = res
-        // mint and send are in a same tx result
-        if (this.isWritingNFT) this.sendNFTResult = res;
       }
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
