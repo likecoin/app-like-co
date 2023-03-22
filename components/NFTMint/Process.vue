@@ -167,10 +167,14 @@ export default class UploadForm extends Vue {
       case 'sign':
         switch (this.walletType) {
           case 'keplr':
+          case 'keplr-mobile':
             return this.$t('NFTPortal.loadingMessage.keplr')
 
-          case 'likerland_app':
+          case 'liker-id':
             return this.$t('NFTPortal.loadingMessage.likerId')
+
+          case 'cosmostation':
+            return this.$t('NFTPortal.loadingMessage.cosmostation')
 
           default:
             return undefined

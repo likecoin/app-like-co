@@ -1,4 +1,6 @@
 import imageType from 'image-type';
+import { AxiosPromise }  from 'axios'
+
 
 export function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -23,4 +25,14 @@ export async function digestFileSHA256(buffer: ArrayBuffer) {
 export function readImageType(buffer: ArrayBuffer) {
   if (buffer) return imageType(Buffer.from(buffer));
   return null;
+}
+
+export function catchAxiosError(promise: AxiosPromise<any>) {
+  return promise.catch((e) => {
+    if (e.response?.status !== 404) {
+      // eslint-disable-next-line no-console
+      console.error(JSON.stringify(e));
+      throw e;
+    }
+  });
 }

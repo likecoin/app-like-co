@@ -92,7 +92,7 @@ import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger';
 
-const signerModule = namespace('signer')
+const walletModule = namespace('wallet')
 const iscnModule = namespace('iscn')
 
 export enum State {
@@ -105,7 +105,7 @@ export enum State {
   layout: 'wallet',
 })
 export default class NewIndexPage extends Vue {
-  @signerModule.Getter('getAddress') currentAddress!: string
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>

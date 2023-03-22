@@ -33,3 +33,5 @@ export const getNFTMetadata = (iscnId: string) => {
   )}`;
 };
 export const getChainNFTIdList = (classId: string): string => `${LIKECOIN_CHAIN_API}/likechain/likenft/v1/owner?class_id=${classId}`
+export const getUserInfoMinByAddress = (addr: string) =>
+  `${LIKE_CO_API_ROOT}/users/addr/${addr}/min`;

@@ -159,7 +159,6 @@ const base64toBlob = (base64Data:string, contentType: string, sliceSize = 512) =
   return blob;
 }
 
-const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 export enum ErrorType {
@@ -180,14 +179,15 @@ enum State {
   layout: 'wallet',
 })
 export default class FetchIndex extends Vue {
-  @signerModule.Getter('getAddress') address!: string
-  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
   @walletModule.Action toggleSnackbar!: (
     error: string,
   ) => void
 
   @walletModule.Getter('getType') walletType!: string | null
+  @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
   state = State.INIT
   url = this.$route.query.url as string || ''
@@ -305,7 +305,7 @@ export default class FetchIndex extends Vue {
   }
 
   get isUsingLikerLandApp() {
-    return this.walletType === 'likerland_app'
+    return this.walletType === 'liker-id'
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -498,6 +498,7 @@ export default class FetchIndex extends Vue {
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
     logTrackerEvent(this, 'NFTUrlMint', 'SendArweaveFeeTx', to, 1);
+    await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED')
     if (!to) throw new Error('TARGET_ADDRESS_NOT_SET')
     try {
@@ -537,6 +538,7 @@ export default class FetchIndex extends Vue {
   }
 
   async registerISCN(): Promise<void> {
+    await this.initIfNecessary()
     if (!this.signer) {
       this.errorMessage = 'MISSING_SIGNER'
       return

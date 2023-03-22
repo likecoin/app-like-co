@@ -16,31 +16,17 @@
     />
 
     <DialogContainer>
-      <ConnectWalletDialog
-        :is-opened="isShowConnectWalletDialog"
-        @quit="handleConnectWalletDialogQuit"
-        @close="handleConnectWalletDialogClose"
-      />
-      <ConnectLikerIdDialog @quit="toggleConnectWalletDialog(true)" />
+      <Dialog />
     </DialogContainer>
-    
-    <AlertsKeplrNotFound
-      v-model="isShowKeplrWarning"
-      @close="handleKeplrWarningClose"
-    />
-
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { IS_CHAIN_UPGRADING } from '~/constant'
 
 const walletModule = namespace('wallet')
-const signerModule = namespace('signer')
 const uiModule = namespace('ui')
 
 @Component({
@@ -60,24 +46,7 @@ const uiModule = namespace('ui')
   },
 })
 export default class RootLayout extends Vue {
-  @walletModule.State('isShowConnectDialog') isShowConnectWalletDialog!: boolean
-  @walletModule.State isShowKeplrWarning!: boolean
-  @walletModule.Getter('getWalletAddress') walletAddress!: string
-  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
-  @walletModule.Action initIfNecessary!: () => Promise<boolean>
-  @walletModule.Action('reset') resetWallet!: () => void
-  @walletModule.Action('toggleConnectDialog') toggleConnectWalletDialog!: (
-    isShow: boolean
-  ) => void
-
-  @walletModule.Action('toggleKeplrWarning') toggleKeplrWarningSnackbar!: (
-    isShow: boolean
-  ) => void
-
-  @signerModule.Action updateSignerInfo!: (arg0: {
-    signer: OfflineSigner | null
-    address: string
-  }) => void
+  @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
 
   @uiModule.Action('init') initUIStore!: () => void
 
@@ -86,32 +55,16 @@ export default class RootLayout extends Vue {
   isOpenChainUpgradeBlockingDialog = false
 
   async mounted() {
-    this.initUIStore();
-    const isInited = await this.initIfNecessary();
-    if (isInited) {
-      this.updateSignerInfo({
-        address: this.walletAddress,
-        signer: this.signer,
-      })
-    }
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
+    this.initUIStore()
+    await this.restoreSessionIfNecessary()
   }
 
   handleChainUpgradeBlockingDialogClose() {
     this.isOpenChainUpgradeBlockingDialog = false
   }
 
-  handleConnectWalletDialogClose() {
-    this.toggleConnectWalletDialog(false)
-  }
-
-  handleConnectWalletDialogQuit() {
-    this.handleConnectWalletDialogClose()
-    this.$emit('connect-wallet-dialog-quit')
-  }
-
   handleKeplrWarningClose() {
-    this.toggleKeplrWarningSnackbar(false)
     this.$router.go(-1)
   }
 }

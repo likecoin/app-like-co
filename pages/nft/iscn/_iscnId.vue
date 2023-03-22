@@ -128,7 +128,6 @@ import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 
 const iscnModule = namespace('iscn')
-const signerModule = namespace('signer')
 const walletModule = namespace('wallet')
 
 export enum ErrorType {
@@ -194,8 +193,6 @@ export enum MintState {
   layout: 'wallet',
 })
 export default class NFTTestMintPage extends Vue {
-  @signerModule.Getter('getAddress') address!: string
-  @signerModule.Getter('getSigner') signer!: OfflineSigner | null
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
     records: ISCNRecordWithID[]
@@ -204,8 +201,11 @@ export default class NFTTestMintPage extends Vue {
   } | null>
 
   @walletModule.Action toggleSnackbar!: (error: string) => void
+  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
   @walletModule.Getter('getType') walletType!: string | null
+  @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
   platform = this.$route.query.platform as string || ''
 
@@ -389,7 +389,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get isUsingLikerLandApp() {
-    return this.walletType === 'likerland_app'
+    return this.walletType === 'liker-id'
   }
 
   get createNftClassPayload() {
@@ -688,6 +688,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async sendArweaveFeeTx({ to, amount, memo }: { to: string, amount: BigNumber, memo: string }): Promise<void> {
+    await this.initIfNecessary()
     if (!this.signer) {
       logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxError', 'SIGNER_NOT_INITED', 1);
       throw new Error('SIGNER_NOT_INITED')
@@ -789,6 +790,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async createNftClass() {
+    await this.initIfNecessary()
     if (!this.signer) return
     let classId
     try {
@@ -826,6 +828,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async createRoyltyConfig(classId: string) {
+    await this.initIfNecessary()
     try {
       if (!this.signer) return
       const rateBasisPoints = 1000; // 10% as in current chain config
@@ -871,6 +874,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async mintNFT() {
+    await this.initIfNecessary()
     try {
       if (!this.signer) return
       const signingClient = await getSigningClient()

@@ -43,7 +43,7 @@
       v-if="!shouldShowInput && isTagsLimitNotExceeded"
       type="button"
       :class="[
-        'bg-like-cyan-light',
+        '!bg-like-cyan-light',
         'min-h-[30px]',
         'py-[6px]',
         'px-[20px]',
