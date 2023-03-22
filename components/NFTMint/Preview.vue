@@ -151,7 +151,7 @@
         </div>
       </div>
     </div>
-    <div v-if="shouldShowNoUrlWaring" class=" bg-[#FCF1DC] px-[20px] py-[4px] rounded-[3px]">
+    <div v-if="shouldShowNoUrlWarning" class=" bg-[#FCF1DC] px-[20px] py-[4px] rounded-[3px]">
       <i18n path="NFTPortal.errorMessage.metadata.noURL" class="text-[12px] text-[#fd8b4d]">
          <template #more>
             <a class="font-semibold underline" href="https://github.com/likecoin/iscn-specs/blob/master/schema/contentMetadata/README.md?plain=1#L54" target="_blank">{{ $t('NFTPortal.errorMessage.metadata.noURL.learnMore') }}</a>
@@ -176,7 +176,7 @@ export default class NFTMintPreview extends Vue {
 
   @Prop({ default: false }) readonly isLoading!: boolean | undefined
 
-  @Prop({ default: false }) readonly shouldShowNoUrlWaring!: boolean | undefined
+  @Prop({ default: false }) readonly shouldShowNoUrlWarning!: boolean | undefined
 
   isEditingName = false
   isEditingDescription = false

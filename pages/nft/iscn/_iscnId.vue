@@ -32,7 +32,7 @@
         :description="NftDescription"
         :img-src="imgSrc"
         :is-loading="isLoadingPreviewOG"
-        :should-show-no-url-waring="shouldShowNoUrlWaring"
+        :should-show-no-url-warning="shouldShowNoUrlWarning"
         @edit-name="onEditNftName"
         @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
@@ -256,7 +256,7 @@ export default class NFTTestMintPage extends Vue {
   errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
-  shouldShowNoUrlWaring: boolean = false
+  shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
@@ -592,7 +592,7 @@ export default class NFTTestMintPage extends Vue {
         this.NftDescription =`${this.iscnData?.contentMetadata?.description || ''}`;
         if (!this.iscnData.contentMetadata?.url) {
           logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoWarning', 'No URL in ISCN\'s metadata', 1);
-          this.shouldShowNoUrlWaring = true
+          this.shouldShowNoUrlWarning = true
         }
       }
     } catch (error) {
