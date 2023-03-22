@@ -91,7 +91,7 @@
               </Label>
               <a
                 class="flex items-center underline"
-                href="https://discord.com/channels/763001015712350231/814761730349596712"
+                href="https://discord.gg/likecoin"
                 target="_blank"
                 @click.native.prevent="onReport"
               >
