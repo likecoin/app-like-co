@@ -74,7 +74,7 @@ export default class SubscriptionStore extends VuexModule {
 
   @Action
   async fetchCurrentWalletIsSubscriber() {
-    const { address: wallet } = this.context.rootState.signer
+    const { address: wallet } = this.context.rootState.wallet
     try {
       const { data } = await axios.get(getUserIsSubscribedMinterApi(wallet))
       this.context.commit('setIsSubscriber', data.isActive || false)
@@ -85,14 +85,15 @@ export default class SubscriptionStore extends VuexModule {
 
   @Action
   async newMintInstance() {
-    const { address: wallet, signer } = this.context.rootState.signer
+    await this.context.dispatch('wallet/initIfNecessary', null, { root: true })
+    const { address: wallet, signer } = this.context.rootState.wallet
     try {
-      this.context.commit('signer/setMessageSigningMode', true, { root: true })
+      this.context.commit('wallet/setMessageSigningMode', true, { root: true })
       const payload = await signNewSubscriberMintWithCosmosWallet(
         signer,
         wallet,
       );
-      this.context.commit('signer/setMessageSigningMode', false, { root: true })
+      this.context.commit('wallet/setMessageSigningMode', false, { root: true })
       const { data } = await axios.post(
         getNewSubscriberMintInstanceApi(wallet),
         payload,
@@ -127,7 +128,7 @@ export default class SubscriptionStore extends VuexModule {
     payload: any
     options?: any
   }) {
-    const { address: wallet } = this.context.rootState.signer
+    const { address: wallet } = this.context.rootState.wallet
     const { currentMintStatusId: statusId, mintStatusSecret } = this
     let url;
     switch (status) {
