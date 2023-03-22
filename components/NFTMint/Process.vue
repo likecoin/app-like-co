@@ -14,7 +14,7 @@
         </template>
       </Label>
       <Label
-        v-else
+        v-else-if="txStatus === 'processing'"
         :class="[
           'text-medium-gray',
           { 'text-like-green': formattedStatusTitle === 'Completed!' },
@@ -114,6 +114,7 @@ import { ellipsis } from '~/utils/ui'
 const walletModule = namespace('wallet')
 
 export enum MintState {
+  RESERVING = 'reserving',
   UPLOADING = 'uploading',
   CREATING = 'creating',
   MINTING = 'minting',

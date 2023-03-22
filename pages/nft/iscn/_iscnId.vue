@@ -177,6 +177,7 @@ export enum TxStatus {
 }
 
 export enum MintState {
+  RESERVING = 'reserving',
   UPLOADING = 'uploading',
   CREATING = 'creating',
   MINTING = 'minting',
@@ -248,7 +249,7 @@ export default class NFTTestMintPage extends Vue {
 
   isLoading = false
   isLoadingPreviewOG = true
-  mintState = MintState.UPLOADING
+  mintState = MintState.RESERVING
   isPreviewChecked = false
   isMessageChecked = false
 
@@ -474,7 +475,6 @@ export default class NFTTestMintPage extends Vue {
         break
       case 'message':
         this.isMessageChecked = true
-        this.doAction()
         break
       default:
         this.doAction()
@@ -715,6 +715,7 @@ export default class NFTTestMintPage extends Vue {
       throw new Error('TARGET_ADDRESS_NOT_SET')
     }
     try {
+      this.txStatus = TxStatus.PROCESSING
       const { transactionHash } = await sendLIKE(this.address, to, amount.toFixed(), this.signer, memo)
       this.ogImageArweaveFeeTxHash = transactionHash
       logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxSuccess', transactionHash, 1);
