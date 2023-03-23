@@ -43,26 +43,11 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
+        :placeholder="reservePlaceholder"
+        :premint-amount="premintAmount"
         @message-change="(value) => (message = value)"
+        @update-input="handleInputReserveNft"
       />
-
-      <!-- Reserve NFTs Input -->
-      <div
-        v-if="currentPage === 'MintProcess' && mintState === 'reserving'"
-        class="flex justify-start gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] px-[6px] py-[4px]"
-      >
-        <IconGift />
-        <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
-        <input
-          ref="nameInput"
-          :placeholder="reservePlaceholder"
-          type="number"
-          :max="premintAmount"
-          min="0"
-          class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-          @change="handleInputReserveNft"
-        />
-      </div>
 
       <NFTMintProcess
         v-if="currentPage === 'MintProcess'"
@@ -352,14 +337,14 @@ export default class NFTTestMintPage extends Vue {
   get pageTitle() {
     switch (this.currentPage) {
       case CurrentPage.NFT_PREVIEW:
+        return this.$t('NFTPortal.process.title.preview')
       case CurrentPage.MESSAGE_PREVIEW:
-        return 'Preview'
-
+        return this.$t('NFTPortal.process.title.message')
       case CurrentPage.MINT_PROCESS:
-        return 'Sign'
+        return this.$t('NFTPortal.process.title.mint')
 
       default:
-        return 'Writing NFT Preview'
+        return this.$t('NFTPortal.process.title.preview')
     }
   }
 
