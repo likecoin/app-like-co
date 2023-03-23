@@ -489,7 +489,7 @@ export default class FetchIndex extends Vue {
         } else {
           this.state = State.TO_REGISTER_ISCN
         }
-        this.doAction();
+        this.onSubmit();
       }
     }
   }
