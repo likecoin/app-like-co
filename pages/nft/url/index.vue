@@ -80,6 +80,7 @@
           <TextField
             v-model="url"
             class="flex flex-col"
+            :is-disabled="isLoading"
             :placeholder="$t('NFTPortal.placeholder.register')"
             :error-message="errorMessage"
             @input="onInputURL"
