@@ -469,7 +469,7 @@ export default class FetchIndex extends Vue {
     this.state = State.INIT
   }
 
-  async onWindowMessage(event: WindowEventHandlersEventMap['message']) {
+  onWindowMessage(event: WindowEventHandlersEventMap['message']) {
     if (event && event.data && typeof event.data === 'string') {
       if (this.redirectOrigin && event.origin !== this.redirectOrigin) {
         return;
