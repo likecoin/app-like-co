@@ -855,7 +855,7 @@ export default class NFTTestMintPage extends Vue {
 
   async createNftClass() {
     await this.initIfNecessary()
-    if (!this.signer) return
+    if (!this.signer) return '';
     let classId
     if (this.isSubscriptionMint) {
       ({ classId } = await this.updateMintInstance({
