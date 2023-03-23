@@ -35,10 +35,25 @@ export default class NFTSubscriptionPage extends Vue {
   @subscriptionModule.Action signSubscriptionPortal!: () => Promise<any>
 
   @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
 
   async onSubscribe() {
-    const { data } = await this.$axios.post(getNewSubscriptionApi(this.address));
-    window.location.href = data.url
+    await this.restoreSessionIfNecessary()
+    if (!this.address) {
+      const connection = await this.openConnectWalletModal({
+        language: this.$i18n.locale.split('-')[0],
+      })
+      // Re-login
+      if (connection) {
+        await this.initWallet(connection)
+      }
+    }
+    if (this.address) {
+      const { data } = await this.$axios.post(getNewSubscriptionApi(this.address));
+      window.location.href = data.url
+    }
   }
 
   async onSettings() {
