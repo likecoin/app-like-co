@@ -741,14 +741,18 @@ export default class FetchIndex extends Vue {
           timeout: 90000,
         },
       )
-      const { arweaveId } = arweaveResult;
+      const { arweaveId, txHash } = arweaveResult;
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
       if (this.opener) {
         try {
           const message = JSON.stringify({
             action: 'ARWEAVE_SUBMITTED',
-            data: arweaveResult,
+            data: {
+              arweaveId,
+              txHash,
+              tx_hash: txHash,
+            },
           });
           window.opener.postMessage(message, this.redirectOrigin);
         } catch (err) {
@@ -794,8 +798,11 @@ export default class FetchIndex extends Vue {
             const message = JSON.stringify({
               action: 'ISCN_SUBMITTED',
               data: {
+                tx_hash: txHash,
                 txHash,
                 iscnId,
+                iscnVersion: iscnId.split('/')[iscnId.split('/').length - 1],
+                timestamp: Math.floor(Date.now() / 1000),
               },
             });
             window.opener.postMessage(message, this.redirectOrigin);
