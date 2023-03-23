@@ -469,7 +469,7 @@ export default class FetchIndex extends Vue {
     this.state = State.INIT
   }
 
-  onWindowMessage(event: WindowEventHandlersEventMap['message']) {
+  async onWindowMessage(event: WindowEventHandlersEventMap['message']) {
     if (event && event.data && typeof event.data === 'string') {
       if (this.redirectOrigin && event.origin !== this.redirectOrigin) {
         return;
@@ -599,6 +599,12 @@ export default class FetchIndex extends Vue {
     this.hasError = false
     /* eslint-disable no-fallthrough */
     try {
+      if (!this.balance) {
+        this.balance = (await getAccountBalance(this.address)) as string
+      }
+      if (this.balance === '0') {
+        throw new Error('INSUFFICIENT_BALANCE')
+      }
       switch (this.state) {
         case State.INIT: {
           if (this.ownerWallet && this.address !== this.ownerWallet) {
@@ -614,11 +620,6 @@ export default class FetchIndex extends Vue {
               })!,
             )
             break
-          }
-
-          this.balance = (await getAccountBalance(this.address)) as string
-          if (this.balance === '0') {
-            throw new Error('INSUFFICIENT_BALANCE')
           }
 
           this.$router.replace({
