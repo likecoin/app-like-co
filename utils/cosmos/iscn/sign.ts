@@ -48,6 +48,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     ...data
   } = payload;
 
+  let rewardProportion = 1
   if (publisher) {
     const {
       stakeholders: publisherStakeholders = [],
@@ -55,6 +56,12 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     } = getPublisherISCNPayload(publisher)
     stakeholders.push(...publisherStakeholders);
     contentFingerprints.push(...publisherContentFingerprints);
+    if (publisherStakeholders && publisherStakeholders.length) {
+      rewardProportion = publisherStakeholders.reduce((acc, cur) => {
+        if (cur.rewardProportion) return acc + cur.rewardProportion
+        return acc
+      }, 0)
+    }
   }
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
@@ -96,7 +103,11 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
             sameAs: sameAsArray,
             identifier: identifiers,
           },
-          rewardProportion: 1,
+          rewardProportion:
+            rewardProportion === 1
+              ? rewardProportion
+              : Math.floor((rewardProportion / authorNames.length) * 10000) /
+                10000,
           contributionType: 'http://schema.org/author',
         })
       }
