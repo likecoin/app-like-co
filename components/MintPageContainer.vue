@@ -38,7 +38,7 @@
               <a
                 v-t="$t('NFTPortal.label.input.link')"
                 :class="['underline', 'text-like-green']"
-                href="https://forms.gle/dwhq6Dny3DnDUEzg9"
+                :href="googleFormUrl"
                 target="_blank"
               />
             </template>
@@ -67,9 +67,14 @@ const walletModule = namespace('wallet')
 export default class Min5PageContainer extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getHasEmail') hasProvidedEmail!: string | null
+  @walletModule.Getter('getWalletAddress') address!: string | null
 
   get isUsingLikerLandApp() {
     return this.walletType === 'likerland_app'
+  }
+
+  get googleFormUrl() {
+    return `https://docs.google.com/forms/d/e/1FAIpQLSdcrzxO1LZLkh6hhwmCDK-Vs6dWYF6Qx437_7kTNZwNZUGMVg/viewform?usp=pp_url&entry.1753998273=${this.address}`
   }
 }
 </script>
