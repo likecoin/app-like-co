@@ -930,28 +930,30 @@ export default class NFTTestMintPage extends Vue {
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
       )
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-      if (this.isUsingLikerLandApp) {
-        if (!this.mintNFTResult) {
-          this.mintNFTResult = await signingClient.sendMessages(this.address, mintMessages)
-        }
-        if (this.isWritingNFT && !this.sendNFTResult) {
-          this.sendNFTResult = await signingClient.sendMessages(this.address, sendMessages)
-        }
-      } else if (this.isWritingNFT) {
+
+      const shouldMintNFT = !this.mintNFTResult
+      const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
+
+      if (shouldMintNFT) {
         this.mintNFTResult = await signingClient.sendMessages(
           this.address,
           mintMessages,
         )
+      }
+      if (shouldSendNFT) {
         this.sendNFTResult = await signingClient.sendMessages(
           this.address,
           sendMessages,
         )
-      } else {
-        const res = await signingClient.sendMessages(this.address, mintMessages)
-        this.mintNFTResult = res
       }
     } catch (error) {
-      logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
+      logTrackerEvent(
+        this,
+        'IscnMintNFT',
+        'MintNFTError',
+        (error as Error).toString(),
+        1,
+      )
       // eslint-disable-next-line no-console
       console.error(error)
       if ((error as Error).message?.includes('code 11')) {
