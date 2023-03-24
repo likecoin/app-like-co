@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center gap-[8px] mb-[32px]">
+  <div class="flex flex-col items-center justify-center gap-[12px] mb-[32px]">
     <div
       class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
     >
@@ -41,9 +41,24 @@
       </div>
     </div>
 
-    <IconAdd class="text-[#E6F4F2]" />
+    <div class="flex justify-center">
+      <Button
+        preset="tertiary"
+        text-preset="h6"
+        size="mini"
+        align="center"
+        :text="$t('NFTPortal.button.settings')"
+        @click="handleClickSettings"
+      >
+        <template #append>
+          <IconAddMini v-if="!shouldShowSettings" />
+          <div v-else class="bg-dark-gray w-[8px] h-[1px]" />
+        </template>
+      </Button>
+    </div>
 
     <div
+      v-if="shouldShowSettings"
       class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
     >
       <Label
@@ -97,6 +112,7 @@ export default class UploadForm extends Vue {
   userInfo: any = undefined
   avatar: string = ''
   displayName: string = this.address
+  shouldShowSettings = false
 
   async mounted() {
     try {
@@ -111,6 +127,10 @@ export default class UploadForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  handleClickSettings() {
+    this.shouldShowSettings = !this.shouldShowSettings
   }
 }
 </script>
