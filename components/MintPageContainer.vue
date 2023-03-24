@@ -13,7 +13,7 @@
   >
     <!-- Email block -->
     <div
-      v-if="!hasProvidedEmail"
+      v-if="!hasSubmittedEmail"
       :class="[
         'flex',
         'items-start',
@@ -66,7 +66,7 @@ const walletModule = namespace('wallet')
 @Component
 export default class Min5PageContainer extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
-  @walletModule.Getter('getHasEmail') hasProvidedEmail!: string | null
+  @walletModule.Getter('getHasSubmittedEmail') hasSubmittedEmail!: string | null
   @walletModule.Getter('getWalletAddress') address!: string | null
 
   get isUsingLikerLandApp() {
