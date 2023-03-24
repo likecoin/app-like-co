@@ -49,7 +49,7 @@
     <slot />
     <div class="flex flex-col max-w-[600px]">
       <div class="mt-[-20px]">
-        <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp" />
+        <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
         <AttentionsLedger v-if="!isUsingLikerLandApp" />
         <AlertsSignFailed />
       </div>
@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const walletModule = namespace('wallet')
@@ -68,6 +68,9 @@ export default class Min5PageContainer extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getHasSubmittedEmail') hasSubmittedEmail!: string | null
   @walletModule.Getter('getWalletAddress') address!: string | null
+
+  @Prop({ default: false }) readonly isStateTransaction: boolean | undefined
+
 
   get isUsingLikerLandApp() {
     return this.walletType === 'likerland_app'

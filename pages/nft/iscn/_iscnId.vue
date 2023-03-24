@@ -1,5 +1,5 @@
 <template>
-  <MintPageContainer>
+  <MintPageContainer :is-state-transaction="isStateTransaction">
     <ContentCard
       class="max-w-[600px]"
       :title="pageTitle"

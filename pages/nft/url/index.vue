@@ -1,5 +1,5 @@
 <template>
-  <MintPageContainer>
+  <MintPageContainer :is-state-transaction="isStateTransaction">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -219,6 +219,13 @@ export default class FetchIndex extends Vue {
       default:
         return '';
     }
+  }
+
+  get isStateTransaction() {
+    return ([
+      State.TO_UPLOAD_TO_ARWEAVE,
+      State.TO_REGISTER_ISCN,
+    ].includes(this.state as State));
   }
 
   get formData(): FormData | null {
