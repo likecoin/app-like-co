@@ -64,7 +64,7 @@
 
       <!-- Reserve NFTs Result -->
       <div
-        v-if="currentPage === 'MintProcess' && mintState !== 'reserving'"
+        v-if="currentPage === 'MintProcess' && mintState !== 'reserving' && !!reserveNft"
         class="flex justify-start mt-[-28px]"
       >
         <div class="flex text-[#BBBBBB] text-[12px] items-center border-2 border-[#E6F4F2] rounded-[4px] px-[6px] py-[2px]">
