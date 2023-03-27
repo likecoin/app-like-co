@@ -43,7 +43,10 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
+        :placeholder="reservePlaceholder"
+        :premint-amount="premintAmount"
         @message-change="(value) => (message = value)"
+        @update-input="handleInputReserveNft"
       />
 
       <NFTMintProcess
@@ -58,6 +61,16 @@
         :tx-status="txStatus"
         :state="mintState"
       />
+
+      <!-- Reserve NFTs Result -->
+      <div
+        v-if="currentPage === 'MintProcess' && mintState !== 'reserving' && !!reserveNft"
+        class="flex justify-start mt-[-28px]"
+      >
+        <div class="flex text-[#BBBBBB] text-[12px] items-center border-2 border-[#E6F4F2] rounded-[4px] px-[6px] py-[2px]">
+          <span>{{ $t('NFTPortal.label.reserve.result', { num: reserveNft })}}</span>
+        </div>
+      </div>
 
       <!-- footer -->
 
@@ -256,6 +269,8 @@ export default class NFTTestMintPage extends Vue {
   errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
+
+  reserveNft: number = 0
   shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
@@ -318,14 +333,14 @@ export default class NFTTestMintPage extends Vue {
   get pageTitle() {
     switch (this.currentPage) {
       case CurrentPage.NFT_PREVIEW:
+        return this.$t('NFTPortal.process.title.preview')
       case CurrentPage.MESSAGE_PREVIEW:
-        return 'Preview'
-
+        return this.$t('NFTPortal.process.title.message')
       case CurrentPage.MINT_PROCESS:
-        return 'Sign'
+        return this.$t('NFTPortal.process.title.mint')
 
       default:
-        return 'Writing NFT Preview'
+        return this.$t('NFTPortal.process.title.preview')
     }
   }
 
@@ -448,6 +463,10 @@ export default class NFTTestMintPage extends Vue {
       return URL.createObjectURL(this.ogImageBlob)
     }
     return undefined
+  }
+
+  get reservePlaceholder() {
+    return `0 - ${this.premintAmount - 1}`
   }
 
   async mounted() {
@@ -902,29 +921,35 @@ export default class NFTTestMintPage extends Vue {
       const mintMessages = nfts.map((i) =>
         formatMsgMintNFT(this.address, this.classId, i),
       )
-      const sendMessages = nfts.map((i) =>
+      const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
+      const sendMessages = nftsToSend.map((i) =>
         formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
       )
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-      if (this.isUsingLikerLandApp) {
-        if (!this.mintNFTResult) {
-          this.mintNFTResult = await signingClient.sendMessages(this.address, mintMessages)
-        }
-        if (this.isWritingNFT && !this.sendNFTResult) {
-          this.sendNFTResult = await signingClient.sendMessages(this.address, sendMessages)
-        }
-      } else {
-        let messages = mintMessages;
 
-        if (this.isWritingNFT) messages = messages.concat(sendMessages);
+      const shouldMintNFT = !this.mintNFTResult
+      const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
 
-        const res = await signingClient.sendMessages(this.address, messages)
-        this.mintNFTResult = res
-        // mint and send are in a same tx result
-        if (this.isWritingNFT) this.sendNFTResult = res;
+      if (shouldMintNFT) {
+        this.mintNFTResult = await signingClient.sendMessages(
+          this.address,
+          mintMessages,
+        )
+      }
+      if (shouldSendNFT) {
+        this.sendNFTResult = await signingClient.sendMessages(
+          this.address,
+          sendMessages,
+        )
       }
     } catch (error) {
-      logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
+      logTrackerEvent(
+        this,
+        'IscnMintNFT',
+        'MintNFTError',
+        (error as Error).toString(),
+        1,
+      )
       // eslint-disable-next-line no-console
       console.error(error)
       if ((error as Error).message?.includes('code 11')) {
@@ -948,6 +973,15 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  handleInputReserveNft(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = Number(inputElement.value);
+    /* HACK: limit to 1 less than premint amount to ensure at least 1 can be sent to
+      create the WNFT API data */
+    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
+    logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
   onReport() {
