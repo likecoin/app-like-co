@@ -466,7 +466,7 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get reservePlaceholder() {
-    return `0 - ${this.premintAmount}`
+    return `0 - ${this.premintAmount - 1}`
   }
 
   async mounted() {
@@ -978,7 +978,9 @@ export default class NFTTestMintPage extends Vue {
   handleInputReserveNft(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     const value = Number(inputElement.value);
-    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount));
+    /* HACK: limit to 1 less than premint amount to ensure at least 1 can be sent to
+      create the WNFT API data */
+    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
