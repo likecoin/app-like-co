@@ -148,7 +148,7 @@ export default class Wallet extends VuexModule {
         console.error(error)
       })
     try {
-      const url = `https://script.google.com/macros/s/AKfycbzZlwu9-Ct1r28LYD-ONrp7i41EEGKwH_wULwgOIOIF6u2oOSRzYLEzNR5cIOSz1-HHaA/exec?walletAddress=${this.address}`
+      const url = `https://script.google.com/a/macros/like.co/s/AKfycbzNiLsX4ZD9o3tY2zPFXmSnh5cFlAFS-NV4X5XwViYObuNwtZjBlR4DBjN0b58OvVQqSQ/exec?walletAddress=${this.address}`
       const { data } = await axios.get(url)
       if (data) {
         this.context.commit('setHasSubmittedEmail', data.hasEmail)

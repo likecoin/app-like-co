@@ -77,7 +77,7 @@ export default class Min5PageContainer extends Vue {
   }
 
   get googleFormUrl() {
-    return `https://docs.google.com/forms/d/e/1FAIpQLSdcrzxO1LZLkh6hhwmCDK-Vs6dWYF6Qx437_7kTNZwNZUGMVg/viewform?usp=pp_url&entry.1753998273=${this.address}`
+    return `https://docs.google.com/forms/d/e/1FAIpQLSeS_mRGIh_aQxyeBizA092DN9TJSavNbXr7XTZayMluwU4PAA/viewform?usp=pp_url&entry.1671031518=${this.address}`
   }
 }
 </script>
