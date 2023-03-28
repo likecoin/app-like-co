@@ -158,11 +158,17 @@ export async function estimateARPrices(files: ArweaveFile[]): Promise<ArweavePri
 }
 
 async function getPriceRatioBigNumber () {
-  const { data } = await axios.get(COINGECKO_PRICE_API);
-  const { likecoin, arweave: arweavePrice } = data;
-  const priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
-  const priceRatioBigNumber = BigNumber.max(priceRatio, 1);
-  return priceRatioBigNumber;
+  try {
+    const { data } = await axios.get(COINGECKO_PRICE_API, { timeout: 10000 });
+    const { likecoin, arweave: arweavePrice } = data;
+    const priceRatio = new BigNumber(arweavePrice.usd).dividedBy(likecoin.usd).toFixed();
+    const priceRatioBigNumber = BigNumber.max(priceRatio, 1);
+    return priceRatioBigNumber;
+  } catch (err) {
+    console.error(JSON.stringify(err));
+    // TODO: make a less hardcoded fallback price
+    return new BigNumber(5000);
+  }
 }
 
 export function convertARPriceToLIKE(ar: ArweavePrice, {
