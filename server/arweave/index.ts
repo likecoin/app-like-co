@@ -17,16 +17,23 @@ const IPFS_CONSTRAINT = 'v0.1'
 
 const jwk = require('../config/arweave-key.json')
 
+const arweaveGraphQL = Arweave.init({
+  host: 'arweave.net',
+  port: 443,
+  protocol: 'https',
+  timeout: 5000,
+});
+
 const arweave = Arweave.init({
   host: 'arweave.net',
   port: 443,
   protocol: 'https',
-  timeout: 600000,
+  timeout: 60000,
 })
 
 export async function getArweaveIdFromHashes(ipfsHash: string) {
   try {
-    const res = await arweave.api.post('/graphql', {
+    const res = await arweaveGraphQL.api.post('/graphql', {
       query: `
     {
       transactions(
