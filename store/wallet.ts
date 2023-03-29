@@ -86,6 +86,17 @@ export default class Wallet extends VuexModule {
     this.hasSubmittedEmail = hasSubmittedEmail
   }
 
+  setMessageSigningMode(enabled: boolean) {
+    if ((this.signer as any)?.keplr) {
+      (this.signer as any).keplr.defaultOptions = {
+        sign: {
+            preferNoSetFee: enabled,
+            preferNoSetMemo: enabled,
+        },
+      }
+    };
+  }
+
   @Action
   toggleKeplrWarning(isShow: boolean) {
     this.setKeplrWarning(isShow)
@@ -136,6 +147,7 @@ export default class Wallet extends VuexModule {
     const walletAddress = bech32Address || address
     this.context.commit('setAddress', walletAddress)
     this.context.commit('setSigner', offlineSigner)
+    await this.context.dispatch('subscription/fetchCurrentWalletIsSubscriber', null, { root: true });
 
     catchAxiosError(axios.get(getUserInfoMinByAddress(walletAddress)))
       .then((userInfo) => {
@@ -199,6 +211,7 @@ export default class Wallet extends VuexModule {
     this.context.commit('setLikerInfo', null)
     this.context.commit('setType', '')
     this.context.commit('setSigner', null)
+    this.context.dispatch('subscription/resetAllStatus', null, { root: true });
   }
 
   get getType() {
