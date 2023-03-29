@@ -142,7 +142,7 @@ export default class Wallet extends VuexModule {
     const walletAddress = bech32Address || address
     this.context.commit('setAddress', walletAddress)
     this.context.commit('setSigner', offlineSigner)
-    this.context.dispatch('subscription/fetchCurrentWalletIsSubscriber', null, { root: true });
+    await this.context.dispatch('subscription/fetchCurrentWalletIsSubscriber', null, { root: true });
 
     catchAxiosError(axios.get(getUserInfoMinByAddress(walletAddress)))
       .then((userInfo) => {
