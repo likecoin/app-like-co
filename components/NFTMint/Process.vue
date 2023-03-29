@@ -39,19 +39,6 @@
         camera-orbit="315deg 60deg 100m"
         @click.once="onClickModelViewer"
       />
-      <FormField v-if="nftLink" :label="$t('NFTPortal.label.nft')">
-        <div
-          class="
-            w-full
-            bg-shade-gray
-            px-[16px]
-            py-[8px]
-            rounded-[12px]
-          "
-        >
-          {{ nftLink }}
-        </div>
-      </FormField>
     </div>
 
     <!-- Results -->
@@ -94,7 +81,7 @@
 
     <div :class="wrapperClasses">
       <Label :text="$t('NFTPortal.label.mint')" :class="labelClasses" />
-      <Label :class="['text-medium-gray', { 'text-like-green': nftLink }]">
+      <Label :class="['text-medium-gray', { 'text-like-green': !!nftLink }]">
         {{ nftIdStatusText | ellipsis }}
         <template #prepend>
           <IconCheck v-if="nftLink" />
@@ -102,6 +89,20 @@
         </template>
       </Label>
     </div>
+
+    <FormField v-if="nftLink" :label="$t('NFTPortal.label.iframe')">
+        <div
+          class="
+            w-full
+            bg-shade-gray
+            px-[16px]
+            py-[8px]
+            rounded-[12px]
+          "
+        >
+          {{ nftIframeCode }}
+        </div>
+      </FormField>
   </div>
 </template>
 
@@ -110,6 +111,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import logTrackerEvent from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
+import { IS_TESTNET } from '~/constant'
 
 const walletModule = namespace('wallet')
 
@@ -153,6 +155,10 @@ export default class UploadForm extends Vue {
     if (this.classId) return this.classId
     if (!this.classId && this.state === MintState.CREATING) return this.$t('NFTPortal.loadingMessage.preparing')
     return this.$t('NFTPortal.loadingMessage.wait')
+  }
+
+  get nftIframeCode() {
+    return `<iframe width="360" height="440" src=https://button.${IS_TESTNET ? 'rinkeby.' : ''}like.co/in/embed/nft?class_id=${this.classId}></iframe>`;
   }
 
   get nftIdStatusText() {
