@@ -9,12 +9,13 @@ export async function signISCNTx(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
+  { iscnId, memo }: { iscnId?: string, memo?: string } = {},
 ) {
   const client = await getQueryClient();
-  const res = await sign(tx, signer, address);
-  const [iscnId] = await client.queryISCNIdsByTx(res.transactionHash);
+  const res = await sign(tx, signer, address, { memo, iscnId });
+  const [newIscnId] = await client.queryISCNIdsByTx(res.transactionHash);
   return {
-    iscnId,
+    iscnId: newIscnId,
     txHash: res.transactionHash,
   };
 }
@@ -25,4 +26,34 @@ export function getIPFSUrlFromISCN(record: ISCNRecord): string{
   if (!ipfsUrl) return '';
   const ipfsHash = ipfsUrl.replace('ipfs://','');
   return getIPFSURLFromHash(ipfsHash);
+}
+
+export function getPublisherISCNPayload(publisher: string | any) {
+  const stakeholders = [];
+  let contentFingerprints = [];
+  if (!publisher) return {};
+  if (typeof publisher === 'object') {
+    const {
+      contentFingerprints: publisherContentFingerprints,
+      ...actualPublisher
+    } = publisher;
+    contentFingerprints = publisherContentFingerprints;
+    stakeholders.push({
+      rewardProportion: 0.025,
+      contributionType: 'http://schema.org/publisher',
+      ...actualPublisher,
+    });
+  } else {
+    stakeholders.push({
+      entity: {
+        '@id': publisher,
+      },
+      rewardProportion: 0,
+      contributionType: 'http://schema.org/publisher',
+    });
+  }
+  return {
+    stakeholders,
+    contentFingerprints: contentFingerprints || [],
+  };
 }
