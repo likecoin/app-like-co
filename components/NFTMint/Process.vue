@@ -91,18 +91,18 @@
     </div>
 
     <FormField v-if="nftLink" :label="$t('NFTPortal.label.iframe')">
-        <div
-          class="
-            w-full
-            bg-shade-gray
-            px-[16px]
-            py-[8px]
-            rounded-[12px]
-          "
-        >
-          {{ nftIframeCode }}
-        </div>
-      </FormField>
+      <div
+        class="
+          w-full
+          bg-shade-gray
+          px-[16px]
+          py-[8px]
+          rounded-[12px]
+        "
+      >
+        {{ nftIframeCode }}
+      </div>
+    </FormField>
   </div>
 </template>
 
@@ -158,7 +158,7 @@ export default class UploadForm extends Vue {
   }
 
   get nftIframeCode() {
-    return `<iframe width="360" height="440" src=https://button.${IS_TESTNET ? 'rinkeby.' : ''}like.co/in/embed/nft?class_id=${this.classId}></iframe>`;
+    return `<iframe width="360" height="480" src=https://button.${IS_TESTNET ? 'rinkeby.' : ''}like.co/in/embed/nft?class_id=${this.classId}></iframe>`;
   }
 
   get nftIdStatusText() {
