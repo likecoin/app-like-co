@@ -540,13 +540,13 @@ export default class FetchIndex extends Vue {
       tags = tags.split(',');
     }
     this.iscnData = {
-      tagsString: tags.join(','),
+      keywords: tags.join(','),
       type,
       contentFingerprints,
       stakeholders,
       publisher,
       license,
-      name,
+      title: name,
       description,
       author,
       authorDescription,
