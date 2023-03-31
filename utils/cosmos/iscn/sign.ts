@@ -73,7 +73,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       const description = authorDescriptions[i]
       const url: string = (likerIds[i] && likerIdsAddresses[i])
         ? `https://like.co/${likerIds[i]}`
-        : authorUrls[i][0] || authorName
+        : authorUrls[i][0]
 
       const identifiers = authorWallets[i].map((a: any) => ({
           '@type': 'PropertyValue',
