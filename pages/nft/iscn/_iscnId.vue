@@ -1,16 +1,5 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <MintPageContainer :is-state-transaction="isStateTransaction">
     <ContentCard
       class="max-w-[600px]"
       :title="pageTitle"
@@ -115,12 +104,7 @@
         </div>
       </template>
     </ContentCard>
-
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-
-    <AttentionsLedger v-if="!isUsingLikerLandApp" />
-    <AlertsSignFailed />
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">
@@ -145,7 +129,6 @@ import {
   API_LIKER_NFT_MINT_IMAGE,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
-  getWhitelistApi,
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
@@ -154,7 +137,7 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET, WHITELISTED_PLATFORM } from '~/constant'
+import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -513,12 +496,6 @@ export default class NFTTestMintPage extends Vue {
       switch (this.state) {
         case 'create': {
           this.isLoading = true
-          const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
-          if (!isAllowed) {
-            logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
-            this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
-            break
-          }
 
           if (!this.isUserISCNOwner) {
             logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_ISCN_OWNER, 1);
@@ -581,12 +558,6 @@ export default class NFTTestMintPage extends Vue {
     } catch (error) {
       // no need to handle
     }
-  }
-
-  async checkIsWhitelisted() {
-    if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
-    const { data } = await this.$axios.get(getWhitelistApi(this.address))
-    return data.isWhitelisted;
   }
 
   getMintNftPayload(id: string) {

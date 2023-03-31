@@ -43,6 +43,7 @@ export default class Wallet extends VuexModule {
   isOpenSnackbar = false
   likerInfo = null
   errorType = ''
+  hasSubmittedEmail = false
 
   @Mutation
   setType(type: string) {
@@ -78,6 +79,11 @@ export default class Wallet extends VuexModule {
   @Mutation
   setCloseSnackbar() {
     this.isOpenSnackbar = false
+  }
+
+  @Mutation
+  setHasSubmittedEmail(hasSubmittedEmail: boolean) {
+    this.hasSubmittedEmail = hasSubmittedEmail
   }
 
   @Action
@@ -141,6 +147,16 @@ export default class Wallet extends VuexModule {
         // eslint-disable-next-line no-console
         console.error(error)
       })
+    try {
+      const url = `https://script.google.com/a/macros/like.co/s/AKfycbzNiLsX4ZD9o3tY2zPFXmSnh5cFlAFS-NV4X5XwViYObuNwtZjBlR4DBjN0b58OvVQqSQ/exec?walletAddress=${this.address}`
+      const { data } = await axios.get(url)
+      if (data) {
+        this.context.commit('setHasSubmittedEmail', data.hasEmail)
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
     return true
   }
 
@@ -151,7 +167,6 @@ export default class Wallet extends VuexModule {
     if (session) {
       const { accounts, method } = session
       await this.context.dispatch('initWallet', { method, accounts })
-      await this.initWallet({ accounts, method })
     }
   }
 
@@ -196,5 +211,9 @@ export default class Wallet extends VuexModule {
 
   get getWalletAddress() {
     return this.address
+  }
+
+  get getHasSubmittedEmail() {
+    return this.hasSubmittedEmail
   }
 }
