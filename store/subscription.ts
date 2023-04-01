@@ -112,22 +112,28 @@ export default class SubscriptionStore extends VuexModule {
   async newMintInstance() {
     await this.context.dispatch('wallet/initIfNecessary', null, { root: true })
     const { address: wallet, signer } = this.context.rootState.wallet
+    let payload;
     try {
       this.context.commit('wallet/setMessageSigningMode', true, { root: true })
-      const payload = await signSubscriptionAction(
+      payload = await signSubscriptionAction(
         signer,
         wallet,
         'new_mint',
       );
       this.context.commit('wallet/setMessageSigningMode', false, { root: true })
-      const { data } = await axios.post(
-        getNewSubscriberMintInstanceApi(wallet),
-        payload,
-      )
-      const { statusId, statusSecret } = data;
-      this.context.commit('setCurrentMintStatusId', statusId)
-      this.context.commit('setMintStatusSecret', statusSecret)
-      this.context.commit('setMintStatus', 'new')
+    } catch (_) {
+      // no op
+      return null;
+    }
+    const { data } = await axios.post(
+      getNewSubscriberMintInstanceApi(wallet),
+      payload,
+    )
+    const { statusId, statusSecret } = data;
+    this.context.commit('setCurrentMintStatusId', statusId)
+    this.context.commit('setMintStatusSecret', statusSecret)
+    this.context.commit('setMintStatus', 'new')
+    try {
       if (window.sessionStorage) {
         window.sessionStorage.setItem(
           'mintStatus',
@@ -137,11 +143,11 @@ export default class SubscriptionStore extends VuexModule {
           }),
         );
       }
-      return data;
     } catch (_) {
       // no op
+      return null;
     }
-    return null;
+    return data;
   }
 
   @Action
