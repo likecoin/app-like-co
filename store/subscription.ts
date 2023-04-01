@@ -162,6 +162,7 @@ export default class SubscriptionStore extends VuexModule {
   }) {
     const { address: wallet } = this.context.rootState.wallet
     const { currentMintStatusId: statusId, mintStatusSecret } = this
+    if (!statusId || !mintStatusSecret) throw new Error('NO_ACTIVE_MINT_INSTANCE')
     let url;
     switch (status) {
       case 'arweave': {
