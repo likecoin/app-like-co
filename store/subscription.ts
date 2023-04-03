@@ -80,7 +80,7 @@ export default class SubscriptionStore extends VuexModule {
       const { data } = await axios.get(getUserIsSubscribedMinterApi(wallet))
       this.context.commit('setIsSubscriber', data.isActive || false)
     } catch (_) {
-      // no op
+      this.context.commit('setIsSubscriber', false)
     }
   }
 

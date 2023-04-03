@@ -157,6 +157,7 @@
         </div>
       </div>
     </Card>
+    <span v-if="isSubscriptionMint">Subscription mode is on</span>
 
     <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
 
@@ -494,6 +495,7 @@ export default class FetchIndex extends Vue {
           await this.crawlUrlData()
           this.state = State.TO_ESTIMATE_ARWEAVE_FEE
         case State.TO_ESTIMATE_ARWEAVE_FEE:
+          await this.initIfNecessary() // refresh wallet for subscription detection
           if (!this.isSubscriptionMint) {
             await this.checkArweaveIdExistsAndEstimateFee()
           } else if (!this.mintStatusId) {
