@@ -1,14 +1,5 @@
 <template>
-  <Page :class="[
-    'flex',
-    'flex-col',
-    'relative',
-    'items-center',
-    'justify-center',
-    'px-[20px]',
-    'pt-[38px]',
-    'lg:p-[16px]',
-  ]">
+  <MintPageContainer :is-state-transaction="isStateTransaction">
     <Card :class="['p-[32px]', 'w-full', 'max-w-[600px]']" :has-padding="false">
       <!-- header -->
       <div :class="['flex', 'justify-between', 'items-center']">
@@ -33,37 +24,6 @@
       <div v-if="!isReady" class="flex justify-center items-center py-[64px]">
         <ProgressIndicator />
       </div>
-      <!-- Not Whitelisted -->
-      <div
-        v-else-if="!isAllowed"
-        class="flex flex-col"
-      >
-        <div
-          :class="[
-            'flex',
-            'items-start',
-            'justify-start',
-            'gap-[8px]',
-            'px-[12px]',
-            'py-[8px]',
-            'bg-[#FCF1DC]',
-            'border-[1px]',
-            'border-[#F3C267]',
-            'rounded-[12px]',
-            'my-[64px]'
-          ]"
-        >
-          <IconAttention class="flex-shrink-0 text-[#F3C267]" />
-          <div class="flex flex-col items-start">
-            <Label preset="h5" class="text-dark-gray mb-[6px]" :text="$t('IscnRegisterForm.error.notWhitelisted.title')" />
-            <Label preset="p6" class="whitespace-pre-line" :text="$t('IscnRegisterForm.error.notWhitelisted')" />
-          </div>
-        </div>
-        <div class="flex self-end justify-end gap-[12px]">
-          <Button preset="plain" class="hover:bg-light-gray" :to="localeLocation({ name: 'index' })" :text="$t('IscnRegisterForm.button.back')" />
-          <Button preset="outline" href="https://forms.gle/GFbp9SNwSWdmmnQQ6" :text="$t('IscnRegisterForm.button.whitelist')" />
-        </div>
-      </div>
       <!-- URL Input -->
       <div
         v-else
@@ -80,6 +40,7 @@
           <TextField
             v-model="url"
             class="flex flex-col"
+            :is-disabled="isLoading"
             :placeholder="$t('NFTPortal.placeholder.register')"
             :error-message="errorMessage"
             @input="onInputURL"
@@ -141,12 +102,7 @@
         </div>
       </div>
     </Card>
-
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-
-    <AttentionsLedger v-if="!isUsingLikerLandApp" />
-    <AlertsSignFailed />
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">
@@ -169,10 +125,9 @@ import {
   getAddressLikerIdMinApi,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
-  getWhitelistApi,
 } from '~/constant/api'
 import { logTrackerEvent } from '~/utils/logger'
-import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, IS_TESTNET, LIKER_LAND_URL, WHITELISTED_PLATFORM } from '~/constant'
+import { CRAWL_URL_REGEX, ISCN_PREFIX_REGEX, LIKER_LAND_URL } from '~/constant'
 import { ISCN_LICENSES, ISCN_PUBLISHERS } from '~/constant/iscn'
 
 const base64toBlob = (base64Data: string, contentType: string, sliceSize = 512) => {
@@ -197,7 +152,6 @@ const walletModule = namespace('wallet')
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   MISSING_SIGNER = 'MISSING_SIGNER',
-  USER_NOT_WHITELISTED = 'USER_NOT_WHITELISTED',
   USER_NOT_ISCN_OWNER = 'USER_NOT_ISCN_OWNER'
 }
 
@@ -247,7 +201,6 @@ export default class FetchIndex extends Vue {
   balance: string = ''
   isInputValueValid: boolean = false
   isReady: boolean = false
-  isAllowed: boolean = false
   hasError: boolean = false
 
   get isUpdateMode(): boolean {
@@ -374,10 +327,6 @@ export default class FetchIndex extends Vue {
     return url.origin;
   }
 
-  get isUsingLikerLandApp() {
-    return this.walletType === 'liker-id'
-  }
-
   // eslint-disable-next-line class-methods-use-this
   get crawlURLRegex() {
     return new RegExp(CRAWL_URL_REGEX);
@@ -426,18 +375,10 @@ export default class FetchIndex extends Vue {
         // eslint-disable-next-line no-console
         console.error(error);
       }
-    }
-    try {
-      this.isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
-      if (!this.isAllowed) {
-        logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
     } finally {
       this.isReady = true
     }
+
     if (this.url) {
       this.onInputURL(this.url);
     }
@@ -825,12 +766,6 @@ export default class FetchIndex extends Vue {
       console.error(err)
       throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0, 200)}`)
     }
-  }
-
-  async checkIsWhitelisted() {
-    if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
-    const { data } = await this.$axios.get(getWhitelistApi(this.address))
-    return data.isWhitelisted;
   }
 
   setError(err: any) {
