@@ -430,7 +430,7 @@ export default class FetchIndex extends Vue {
 
   @Watch('isSubscriber', { immediate: true })
   onIsSubscriberChange() {
-    this.isSubscriptionMint = this.isSubscriber;
+    this.isSubscriptionMint = this.isSubscriber && !this.isUpdateMode;
   }
 
   @Watch('url')
