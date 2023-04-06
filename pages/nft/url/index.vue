@@ -56,22 +56,6 @@
         </div>
         <div v-else-if="state === 'INIT' && !hasError" class="ml-auto w-min">
           <Button
-            v-if="!isSubscriber"
-            :text="$t('NFTPortal.button.subscribe')"
-            preset="tertiary"
-            @click="onSubscribe"
-          />
-          <div v-else>
-            <Button
-              :is-disabled="state !== 'INIT'"
-              preset="tertiary"
-              @click="onToggleSubscription"
-            >
-              <span v-if="isSubscriptionMint">Subscription mode is on</span>
-              <span v-else>Subscription mode is off</span>
-            </Button>
-          </div>
-          <Button
             :text="$t('NFTPortal.button.register')"
             :preset="isInputValueValid ? 'secondary' : 'tertiary'"
             :is-disabled="!isInputValueValid"
@@ -835,14 +819,6 @@ export default class FetchIndex extends Vue {
         })!,
       )
     }
-  }
-
-  onSubscribe() {
-    this.$router.push(this.localeLocation({ name: 'nft-subscription' })!)
-  }
-
-  onToggleSubscription() {
-    this.isSubscriptionMint = !this.isSubscriptionMint
   }
 
   setError(err: any) {
