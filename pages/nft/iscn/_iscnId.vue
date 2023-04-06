@@ -1,16 +1,5 @@
 <template>
-  <Page
-    :class="[
-      'flex',
-      'flex-col',
-      'relative',
-      'items-center',
-      'justify-center',
-      'px-[20px]',
-      'pt-[38px]',
-      'lg:p-[16px]',
-    ]"
-  >
+  <MintPageContainer :is-state-transaction="isStateTransaction">
     <ContentCard
       class="max-w-[600px]"
       :title="pageTitle"
@@ -43,7 +32,10 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
+        :placeholder="reservePlaceholder"
+        :premint-amount="premintAmount"
         @message-change="(value) => (message = value)"
+        @update-input="handleInputReserveNft"
       />
 
       <NFTMintProcess
@@ -58,6 +50,16 @@
         :tx-status="txStatus"
         :state="mintState"
       />
+
+      <!-- Reserve NFTs Result -->
+      <div
+        v-if="currentPage === 'MintProcess' && mintState !== 'reserving' && !!reserveNft"
+        class="flex justify-start mt-[-28px]"
+      >
+        <div class="flex text-[#BBBBBB] text-[12px] items-center border-2 border-[#E6F4F2] rounded-[4px] px-[6px] py-[2px]">
+          <span>{{ $t('NFTPortal.label.reserve.result', { num: reserveNft })}}</span>
+        </div>
+      </div>
 
       <!-- footer -->
 
@@ -102,12 +104,7 @@
         </div>
       </template>
     </ContentCard>
-
-    <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-
-    <AttentionsLedger v-if="!isUsingLikerLandApp" />
-    <AlertsSignFailed />
-  </Page>
+  </MintPageContainer>
 </template>
 
 <script lang="ts">
@@ -132,7 +129,6 @@ import {
   API_LIKER_NFT_MINT_IMAGE,
   API_POST_ARWEAVE_ESTIMATE,
   API_POST_ARWEAVE_UPLOAD,
-  getWhitelistApi,
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
@@ -141,7 +137,7 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { IS_TESTNET, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET, WHITELISTED_PLATFORM } from '~/constant'
+import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -269,6 +265,8 @@ export default class NFTTestMintPage extends Vue {
   errorMessage: string = ''
   balance: string = ''
   txStatus: string = ''
+
+  reserveNft: number = 0
   shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
@@ -331,14 +329,14 @@ export default class NFTTestMintPage extends Vue {
   get pageTitle() {
     switch (this.currentPage) {
       case CurrentPage.NFT_PREVIEW:
+        return this.$t('NFTPortal.process.title.preview')
       case CurrentPage.MESSAGE_PREVIEW:
-        return 'Preview'
-
+        return this.$t('NFTPortal.process.title.message')
       case CurrentPage.MINT_PROCESS:
-        return 'Sign'
+        return this.$t('NFTPortal.process.title.mint')
 
       default:
-        return 'Writing NFT Preview'
+        return this.$t('NFTPortal.process.title.preview')
     }
   }
 
@@ -463,6 +461,10 @@ export default class NFTTestMintPage extends Vue {
     return undefined
   }
 
+  get reservePlaceholder() {
+    return `0 - ${this.premintAmount - 1}`
+  }
+
   async mounted() {
     try {
       await Promise.all([
@@ -513,12 +515,6 @@ export default class NFTTestMintPage extends Vue {
       switch (this.state) {
         case 'create': {
           this.isLoading = true
-          const isAllowed = IS_TESTNET || await this.checkIsWhitelisted();
-          if (!isAllowed) {
-            logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_WHITELISTED, 1);
-            this.toggleSnackbar(ErrorType.USER_NOT_WHITELISTED)
-            break
-          }
 
           if (!this.isSubscriptionMint && !this.isUserISCNOwner) {
             logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_ISCN_OWNER, 1);
@@ -583,12 +579,6 @@ export default class NFTTestMintPage extends Vue {
     } catch (error) {
       // no need to handle
     }
-  }
-
-  async checkIsWhitelisted() {
-    if (this.platform && WHITELISTED_PLATFORM.includes(this.platform)) return true;
-    const { data } = await this.$axios.get(getWhitelistApi(this.address))
-    return data.isWhitelisted;
   }
 
   getMintNftPayload(id: string) {
@@ -978,29 +968,35 @@ export default class NFTTestMintPage extends Vue {
         const mintMessages = nfts.map((i) =>
           formatMsgMintNFT(this.address, this.classId, i),
         )
-        const sendMessages = nfts.map((i) =>
+        const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
+        const sendMessages = nftsToSend.map((i) =>
           formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
         )
         logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-        if (this.isUsingLikerLandApp) {
-          if (!this.mintNFTResult) {
-            this.mintNFTResult = await signingClient.sendMessages(this.address, mintMessages)
-          }
-          if (this.isWritingNFT && !this.sendNFTResult) {
-            this.sendNFTResult = await signingClient.sendMessages(this.address, sendMessages)
-          }
-        } else {
-          let messages = mintMessages;
 
-          if (this.isWritingNFT) messages = messages.concat(sendMessages);
+        const shouldMintNFT = !this.mintNFTResult
+        const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
 
-          const res = await signingClient.sendMessages(this.address, messages)
-          this.mintNFTResult = res
-          // mint and send are in a same tx result
-          if (this.isWritingNFT) this.sendNFTResult = res;
+        if (shouldMintNFT) {
+          this.mintNFTResult = await signingClient.sendMessages(
+            this.address,
+            mintMessages,
+          )
+        }
+        if (shouldSendNFT) {
+          this.sendNFTResult = await signingClient.sendMessages(
+            this.address,
+            sendMessages,
+          )
         }
       } catch (error) {
-        logTrackerEvent(this, 'IscnMintNFT', 'MintNFTError', (error as Error).toString(), 1);
+        logTrackerEvent(
+          this,
+          'IscnMintNFT',
+          'MintNFTError',
+          (error as Error).toString(),
+          1,
+        )
         // eslint-disable-next-line no-console
         console.error(error)
         if ((error as Error).message?.includes('code 11')) {
@@ -1025,6 +1021,15 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  handleInputReserveNft(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = Number(inputElement.value);
+    /* HACK: limit to 1 less than premint amount to ensure at least 1 can be sent to
+      create the WNFT API data */
+    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
+    logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
   onReport() {

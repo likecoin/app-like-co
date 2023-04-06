@@ -621,7 +621,7 @@ export default class IscnRegisterForm extends Vue {
     return this.authors.map((a) => a.likerId)
   }
 
-  get descriptions() {
+  get authorDescriptions() {
     return this.authors.map((a) => a.authorDescription)
   }
 
@@ -716,7 +716,7 @@ export default class IscnRegisterForm extends Vue {
       authorWallets: this.authorWalletAddresses,
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
-      descriptions: this.descriptions,
+      authorDescriptions: this.authorDescriptions,
     }
   }
 

@@ -5,6 +5,7 @@ import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER } from '~/constant'
+import { getPublisherISCNPayload } from '.';
 
 let client: ISCNSigningClient | null = null;
 let iscnLib: any = null;
@@ -38,24 +39,41 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     authorWallets,
     likerIds,
     likerIdsAddresses,
-    descriptions,
+    authorDescriptions,
     numbersProtocolAssetId,
+    contentFingerprints = [],
+    stakeholders = [],
+    recordNotes,
+    publisher,
     ...data
   } = payload;
 
-  const contentFingerprints = []
+  let rewardProportion = 1
+  if (publisher) {
+    const {
+      stakeholders: publisherStakeholders = [],
+      contentFingerprints: publisherContentFingerprints = [],
+    } = getPublisherISCNPayload(publisher)
+    stakeholders.push(...publisherStakeholders);
+    contentFingerprints.push(...publisherContentFingerprints);
+    if (publisherStakeholders && publisherStakeholders.length) {
+      rewardProportion = publisherStakeholders.reduce((acc, cur) => {
+        if (cur.rewardProportion) return acc + cur.rewardProportion
+        return acc
+      }, 0)
+    }
+  }
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
   if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
   if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
   if (numbersProtocolAssetId) contentFingerprints.push(`num://${numbersProtocolAssetId}`);
-  const stakeholders: any = []
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
-      const description = descriptions[i]
+      const description = authorDescriptions[i]
       const url: string = (likerIds[i] && likerIdsAddresses[i])
         ? `https://like.co/${likerIds[i]}`
-        : authorUrls[i][0] || authorName
+        : authorUrls[i][0]
 
       const identifiers = authorWallets[i].map((a: any) => ({
           '@type': 'PropertyValue',
@@ -85,7 +103,11 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
             sameAs: sameAsArray,
             identifier: identifiers,
           },
-          rewardProportion: 1,
+          rewardProportion:
+            rewardProportion === 1
+              ? rewardProportion
+              : Math.floor((rewardProportion / authorNames.length) * 10000) /
+                10000,
           contributionType: 'http://schema.org/author',
         })
       }
@@ -98,6 +120,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     usageInfo: license,
     contentFingerprints,
     stakeholders,
+    recordNotes,
   }
 }
 
@@ -111,9 +134,13 @@ export async function signISCN(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
+  { iscnId, memo }: { iscnId?: string, memo?: string } = {},
 ) {
+  const isUpdate = !!iscnId;
   const signingClient = await getSigningClient();
   await signingClient.connectWithSigner(network.rpcURL, signer);
-  const res = await signingClient.createISCNRecord(address, tx, { memo: 'app.like.co' });
+  const signingPromise = isUpdate ? signingClient.updateISCNRecord(address, iscnId as string, tx, { memo: memo || 'app.like.co' })
+    : signingClient.createISCNRecord(address, tx, { memo: memo || 'app.like.co' });
+  const res = await signingPromise;
   return res as DeliverTxResponse;
 }

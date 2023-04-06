@@ -12,12 +12,17 @@ export interface ISCNRegisterPayload {
   numbersProtocolAssetId: string;
   fileSHA256: string;
   type: string;
+  publisher?: string,
   authorNames: string[];
   authorUrls: string[][];
   authorWallets: any[][];
+  authorDescriptions: string[];
   likerIds: string[];
   likerIdsAddresses: (string | void)[];
-  descriptions: string[];
+  contentFingerprints?: string[];
+  stakeholders?: any[];
+  recordNotes?: string;
+  memo?: string;
 }
 export interface ISCNRecordWithID extends ISCNRecord {
   id: string;
