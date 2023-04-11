@@ -138,7 +138,7 @@ import {
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
-import sendLIKE from '~/utils/cosmos/sign'
+import { sendLIKE } from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 

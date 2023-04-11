@@ -12,7 +12,6 @@ import {
   getSubscriptionPortalApi,
   getUserIsSubscribedMinterApi,
 } from '@/constant/api'
-import signSubscriptionAction from '~/utils/cosmos/subscription'
 
 @Module({
   name: 'subscription',
@@ -86,16 +85,9 @@ export default class SubscriptionStore extends VuexModule {
 
   @Action
   async signSubscriptionPortal() {
-    await this.context.dispatch('wallet/initIfNecessary', null, { root: true })
-    const { address: wallet, signer } = this.context.rootState.wallet
     try {
-      this.context.commit('wallet/setMessageSigningMode', true, { root: true })
-      const payload = await signSubscriptionAction(
-        signer,
-        wallet,
-        'subscription_portal',
-      );
-      this.context.commit('wallet/setMessageSigningMode', false, { root: true })
+      const payload = await this.context.dispatch('wallet/signTextMessage', { action: 'subscription_portal' }, { root: true })
+      const { address: wallet } = this.context.rootState.wallet
       const { data } = await axios.post(
         getSubscriptionPortalApi(wallet),
         payload,
@@ -110,21 +102,15 @@ export default class SubscriptionStore extends VuexModule {
 
   @Action
   async newMintInstance() {
-    await this.context.dispatch('wallet/initIfNecessary', null, { root: true })
-    const { address: wallet, signer } = this.context.rootState.wallet
     let payload;
     try {
-      this.context.commit('wallet/setMessageSigningMode', true, { root: true })
-      payload = await signSubscriptionAction(
-        signer,
-        wallet,
-        'new_mint',
-      );
-      this.context.commit('wallet/setMessageSigningMode', false, { root: true })
+      payload = await this.context.dispatch('wallet/signTextMessage', { action: 'new_mint' }, { root: true })
     } catch (_) {
       // no op
       return null;
     }
+
+    const { address: wallet } = this.context.rootState.wallet
     const { data } = await axios.post(
       getNewSubscriberMintInstanceApi(wallet),
       payload,

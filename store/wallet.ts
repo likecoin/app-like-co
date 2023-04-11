@@ -5,6 +5,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { catchAxiosError } from '~/utils/misc'
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
 import { getUserInfoMinByAddress } from '~/constant/api'
+import { signTextAction } from '~/utils/cosmos/sign'
 
 let likecoinWalletLib: any = null
 let connectorInstance: any = null
@@ -213,6 +214,20 @@ export default class Wallet extends VuexModule {
     this.context.commit('setType', '')
     this.context.commit('setSigner', null)
     this.context.dispatch('subscription/resetAllStatus', null, { root: true });
+  }
+
+  @Action
+  async signTextMessage({ action }: { action: string }) {
+    await this.context.dispatch('initIfNecessary');
+    if (!this.signer) throw new Error('WALLET_NOT_INITED')
+    this.context.commit('setMessageSigningMode', true)
+    const payload = await signTextAction(
+      this.signer,
+      this.address,
+      action,
+    );
+    this.context.commit('setMessageSigningMode', false)
+    return payload;
   }
 
   get getType() {
