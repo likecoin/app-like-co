@@ -40,6 +40,67 @@
         </div>
       </div>
     </div>
+    <div
+      class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+    >
+      <Label
+        class="w-min text-like-green"
+        :text="$t('NFTPortal.label.message.collections')"
+        tag="div"
+        preset="p6"
+        valign="middle"
+        align="left"
+        content-class="whitespace-nowrap"
+      >
+        <template #prepend>
+          <IconEye />
+        </template>
+      </Label>
+      <Button
+        v-if="selectedNftCollection"
+        preset="tertiary"
+        text-preset="h6"
+        size="mini"
+        align="center"
+        :text="selectedNftCollection.displayName"
+        @click="handleSelectCollections(null)"
+      >
+        <template #append>
+          <IconDelete/>
+        </template>
+      </Button>
+      <template v-else>
+        <Button
+          v-for="n in nftCollections"
+          :key="n.id"
+          preset="tertiary"
+          text-preset="h6"
+          size="mini"
+          align="center"
+          :text="n.displayName"
+          @click="handleSelectCollections(n)"
+        />
+        <Button
+          preset="tertiary"
+          text-preset="h6"
+          size="mini"
+          align="center"
+          @click="handleNewCollections"
+        >
+          <template #prepend>
+            <TextField
+              :value="newCollectionName"
+              :placeholder="$t('NFTPortal.placeholder.newCollectionName')"
+              @click.native.stop="() => {}"
+              @input="(value) => (newCollectionName = value)"
+            />
+          </template>
+          <template #append>
+            <IconAddMini/>
+          </template>
+        </Button>
+      </template>
+    </div>
 
     <div class="flex justify-center">
       <Button
@@ -109,9 +170,14 @@ export default class UploadForm extends Vue {
 
   @Prop(Number) readonly premintAmount!: undefined
 
+  @Prop(Array) readonly nftCollections!: any[]
+
+  @Prop(Object) readonly selectedNftCollection!: any
+
   userInfo: any = undefined
   avatar: string = ''
   displayName: string = this.address
+  newCollectionName: string = '';
   shouldShowSettings = false
 
   async mounted() {
@@ -127,6 +193,14 @@ export default class UploadForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  handleSelectCollections(collection: any) {
+    this.$emit('select-collection', collection)
+  }
+
+  handleNewCollections() {
+    this.$emit('select-collection', { displayName: this.newCollectionName })
   }
 
   handleClickSettings() {

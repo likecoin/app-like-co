@@ -34,7 +34,10 @@
         :address="address"
         :placeholder="reservePlaceholder"
         :premint-amount="premintAmount"
+        :nft-collections="nftCollections"
+        :selected-nft-collection="pendingCollection"
         @message-change="(value) => (message = value)"
+        @select-collection="onSelectCollection"
         @update-input="handleInputReserveNft"
       />
 
@@ -134,6 +137,7 @@ import {
   getNftUriViaNftId,
   getChainNFTIdList,
   getNftModelApi,
+  getNFTCollectionsApi,
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -214,6 +218,7 @@ export default class NFTTestMintPage extends Vue {
 
   @walletModule.Action toggleSnackbar!: (error: string) => void
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @walletModule.Action('signTextMessage') signTextMessage!: (arg0: { action: string; }) => any
 
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
@@ -242,6 +247,8 @@ export default class NFTTestMintPage extends Vue {
   NftName: string = '';
   NftDescription: string  = '';
 
+  nftCollections: any[] = [];
+  pendingCollection: any = null;
   message: string = ''
 
   isCustomOgimage = false
@@ -465,6 +472,10 @@ export default class NFTTestMintPage extends Vue {
     return `0 - ${this.premintAmount - 1}`
   }
 
+  get shouldCreateNewNFTCollection() {
+    return this.pendingCollection && !(this.pendingCollection.id && this.nftCollections.find(nft => nft.id === this.pendingCollection.id));
+  }
+
   async mounted() {
     try {
       await Promise.all([
@@ -472,6 +483,7 @@ export default class NFTTestMintPage extends Vue {
         this.getMintInfo(),
       ])
       await this.getOgImage()
+      await this.getNFTCollections();
       if (this.$route.query.mint_status_id && !this.mintStatusId) {
         this.tryRecoverMintStatus(this.$route.query.mint_status_id as string)
       }
@@ -689,6 +701,17 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
+  async getNFTCollections() {
+    try {
+      const { data } = await this.$axios.get(getNFTCollectionsApi(this.address))
+      const collections = Object.keys(data).map(id => ({ id, ...data[id] }));
+      this.nftCollections = collections;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+  }
+
   async checkArweaveIdExistsAndEstimateFee() {
     try {
       logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFee', this.iscnId, 1);
@@ -827,6 +850,9 @@ export default class NFTTestMintPage extends Vue {
         )
         this.postInfo = data
       }
+      if (this.pendingCollection) {
+        await this.handleNFTCollection();
+      }
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', this.classId, 1);
     } catch (error: any) {
       // If the API returns a status of 409, it indicates that the request may have already successful
@@ -939,6 +965,41 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
+  async handleNFTCollection() {
+    if (this.shouldCreateNewNFTCollection) {
+      const signature = await this.signTextMessage({ action: 'new_collection' });
+      const payload = {
+        ...signature,
+        payload: { displayName: this.pendingCollection.displayName, nfts: [this.classId] },
+      }
+      const { data } = await axios.post(
+        getNFTCollectionsApi(this.address),
+        payload,
+      )
+      this.pendingCollection.id = data.id;
+      logTrackerEvent(this, 'IscnMintNFT', 'PostNewCollectionSuccess', this.classId, 1);
+    } else {
+      const signature = await this.signTextMessage({ action: 'patch_collection' });
+      const {
+        id: collectionId,
+        displayName: collectionDisplayName,
+        nfts: collectionNfts,
+      } = this.pendingCollection
+      const payload = {
+        ...signature,
+        payload: {
+          displayName: collectionDisplayName,
+          nfts: collectionNfts.concat(this.classId),
+        },
+      }
+      await axios.patch(
+        getNFTCollectionsApi(this.address, collectionId),
+        payload,
+      )
+      logTrackerEvent(this, 'IscnMintNFT', 'PatchCollectionSuccess', this.classId, 1);
+    }
+  }
+
   async mintNFT() {
     if (this.isSubscriptionMint) {
       if (!this.mintNFTResult) {
@@ -1030,6 +1091,10 @@ export default class NFTTestMintPage extends Vue {
       create the WNFT API data */
     this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
+  }
+
+  onSelectCollection(collection: any | null) {
+    this.pendingCollection = collection;
   }
 
   onReport() {
