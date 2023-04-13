@@ -93,6 +93,7 @@ export default class Wallet extends VuexModule {
     };
   }
 
+  @Mutation
   setHasSubmittedEmail(hasSubmittedEmail: boolean) {
     this.hasSubmittedEmail = hasSubmittedEmail
   }

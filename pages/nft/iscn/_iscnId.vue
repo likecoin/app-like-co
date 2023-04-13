@@ -95,7 +95,7 @@
                 class="flex items-center underline"
                 href="https://discord.gg/likecoin"
                 target="_blank"
-                @click.native.prevent="onReport"
+                @click.prevent="onReport"
               >
                 <span>{{ $t('NFTPortal.label.report') }}</span>
               </a>
