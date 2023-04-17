@@ -844,8 +844,6 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async createNftClass() {
-    await this.initIfNecessary()
-    if (!this.signer) return '';
     let classId
     if (this.isSubscriptionMint) {
       ({ classId } = await this.updateMintInstance({
@@ -862,6 +860,8 @@ export default class NFTTestMintPage extends Vue {
       }));
     } else {
       try {
+        await this.initIfNecessary()
+        if (!this.signer) return '';
         const signingClient = await getSigningClient()
         await signingClient.setSigner(this.signer)
         logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
