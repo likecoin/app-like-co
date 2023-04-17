@@ -102,6 +102,7 @@
         </div>
       </div>
     </Card>
+    <span v-if="isSubscriptionMint">Subscription mode is on</span>
   </MintPageContainer>
 </template>
 
@@ -112,8 +113,8 @@ import { namespace } from 'vuex-class'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
-import postMappingWithCosmosWallet from '@/utils/mapping';
 import axios, { AxiosError } from 'axios'
+import postMappingWithCosmosWallet from '~/utils/cosmos/mapping';
 
 import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
@@ -148,6 +149,7 @@ const base64toBlob = (base64Data: string, contentType: string, sliceSize = 512) 
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
+const subscriptionModule = namespace('subscription')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -182,6 +184,16 @@ export default class FetchIndex extends Vue {
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
+  @subscriptionModule.Action newMintInstance!: () => Promise<any>
+  @subscriptionModule.Action updateMintInstance!: (arg0: {
+    status: string
+    payload: any
+    options?: any
+  }) => Promise<any>
+
+  @subscriptionModule.Getter('getAddressIsSubscriber') isSubscriber!: boolean
+  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: string
+
   state = State.INIT
   url = this.$route.query.url as string || ''
   platform = this.$route.query.platform as string || ''
@@ -202,6 +214,7 @@ export default class FetchIndex extends Vue {
   isInputValueValid: boolean = false
   isReady: boolean = false
   hasError: boolean = false
+  isSubscriptionMint: boolean = false
 
   get isUpdateMode(): boolean {
     const update = this.$route.query.update as string
@@ -399,6 +412,11 @@ export default class FetchIndex extends Vue {
     }
   }
 
+  @Watch('isSubscriber', { immediate: true })
+  onIsSubscriberChange() {
+    this.isSubscriptionMint = this.isSubscriber && !this.isUpdateMode;
+  }
+
   @Watch('url')
   reset() {
     this.iscnData = null
@@ -543,7 +561,7 @@ export default class FetchIndex extends Vue {
       if (!this.balance) {
         this.balance = (await getAccountBalance(this.address)) as string
       }
-      if (this.balance === '0') {
+      if (!this.isSubscriptionMint && this.balance === '0') {
         throw new Error('INSUFFICIENT_BALANCE')
       }
       switch (this.state) {
@@ -575,12 +593,21 @@ export default class FetchIndex extends Vue {
           await this.crawlUrlData()
           this.state = State.TO_ESTIMATE_ARWEAVE_FEE
         case State.TO_ESTIMATE_ARWEAVE_FEE:
-          await this.checkArweaveIdExistsAndEstimateFee()
+          await this.initIfNecessary() // refresh wallet for subscription detection
+          if (!this.isSubscriptionMint) {
+            await this.checkArweaveIdExistsAndEstimateFee()
+          } else if (!this.mintStatusId) {
+            await this.newMintInstance()
+            this.$router.replace({ query: {
+                ...this.$route.query,
+                mint_status_id: this.mintStatusId,
+            } })
+          }
           this.state = this.arweaveId
             ? State.TO_REGISTER_ISCN
             : State.TO_UPLOAD_TO_ARWEAVE
         case State.TO_UPLOAD_TO_ARWEAVE:
-          if (!this.arweaveFeeTxHash) {
+          if (!this.isSubscriptionMint && !this.arweaveFeeTxHash) {
             await this.sendArweaveFeeTx(this.arweaveFeeInfo)
           }
           await this.submitToArweave()
@@ -671,17 +698,33 @@ export default class FetchIndex extends Vue {
   async submitToArweave(): Promise<void> {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweave', this.arweaveFeeTxHash, 1);
-      if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
-      const arweaveResult = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
-        this.formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+      let arweaveResult;
+      if (this.isSubscriptionMint) {
+        arweaveResult = await this.updateMintInstance(
+          {
+            status: 'arweave',
+            payload: this.formData,
+            options: {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+              timeout: 90000,
+            },
           },
-          timeout: 90000,
-        },
-      )
+        );
+      } else {
+        if (!this.arweaveFeeTxHash) throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
+        arweaveResult = await this.$axios.$post(
+          `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.arweaveFeeTxHash}`,
+          this.formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            timeout: 90000,
+          },
+        )
+      }
       const { arweaveId, txHash } = arweaveResult;
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
@@ -713,58 +756,68 @@ export default class FetchIndex extends Vue {
     if (!this.signer) {
       throw new Error('MISSING_SIGNER')
     }
-    try {
-      logTrackerEvent(this, 'NFTUrlMint', 'SignISCNTx', this.url, 1);
-      const res = await signISCNTx(
-        formatISCNTxPayload(this.iscnPayload),
-        this.signer,
-        this.address,
-        {
-          iscnId: this.isUpdateMode ? this.iscnId : undefined,
-          memo: this.iscnPayload.memo,
-        },
-      )
-      this.iscnId = res.iscnId
-      if (this.url && this.likerId) {
-        logTrackerEvent(this, 'NFTUrlMint', 'PostMappingWithCosmosWallet', this.iscnId, 1);
-        await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+    let res
+    if (this.isSubscriptionMint) {
+      res = await this.updateMintInstance({
+        status: 'iscn',
+        payload: { metadata: formatISCNTxPayload(this.iscnPayload) },
+      });
+      const { iscnId } = res
+      this.iscnId = iscnId
+    } else {
+      try {
+        logTrackerEvent(this, 'NFTUrlMint', 'SignISCNTx', this.url, 1);
+        res = await signISCNTx(
+          formatISCNTxPayload(this.iscnPayload),
+          this.signer,
+          this.address,
+          {
+            iscnId: this.isUpdateMode ? this.iscnId : undefined,
+            memo: this.iscnPayload.memo,
+          },
+        )
+        this.iscnId = res.iscnId
+        if (this.url && this.likerId) {
+          logTrackerEvent(this, 'NFTUrlMint', 'PostMappingWithCosmosWallet', this.iscnId, 1);
+          await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
+        }
+      } catch (err) {
+        logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
+        // eslint-disable-next-line no-console
+        console.error(err)
+        throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0,200)}`)
       }
-      if (res) {
-        if (this.opener) {
-          try {
-            const {
+    }
+    if (this.iscnId) {
+      if (this.opener) {
+        try {
+          const {
+            txHash,
+            iscnId,
+          } = res;
+          const message = JSON.stringify({
+            action: 'ISCN_SUBMITTED',
+            data: {
+              tx_hash: txHash,
               txHash,
               iscnId,
-            } = res;
-            const message = JSON.stringify({
-              action: 'ISCN_SUBMITTED',
-              data: {
-                tx_hash: txHash,
-                txHash,
-                iscnId,
-                iscnVersion: iscnId.split('/')[iscnId.split('/').length - 1],
-                timestamp: Math.floor(Date.now() / 1000),
-              },
-            });
-            window.opener.postMessage(message, this.redirectOrigin);
-          } catch (err) {
-            console.error(err);
-          }
+              iscnVersion: iscnId.split('/')[iscnId.split('/').length - 1],
+              timestamp: Math.floor(Date.now() / 1000),
+            },
+          });
+          window.opener.postMessage(message, this.redirectOrigin);
+        } catch (err) {
+          console.error(err);
         }
-        logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNSuccess', this.iscnId, 1);
-        this.$router.push(
-          this.localeLocation({
-            name: 'nft-iscn-iscnId',
-            params: this.iscnParams,
-            query: this.queryParams,
-          })!,
-        )
       }
-    } catch (err) {
-      logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
-      // eslint-disable-next-line no-console
-      console.error(err)
-      throw new Error(`CANNOT_REGISTER_ISCN, Error: ${((err as Error).message).substring(0, 200)}`)
+      logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNSuccess', this.iscnId, 1);
+      this.$router.push(
+        this.localeLocation({
+          name: 'nft-iscn-iscnId',
+          params: this.iscnParams,
+          query: this.queryParams,
+        })!,
+      )
     }
   }
 
