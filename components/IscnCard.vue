@@ -183,7 +183,7 @@ export default class IscnCard extends Vue {
   }
 
   get iscnIDParts() {
-    const parts = this.recordID.match(/(iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+))\/\d+/)
+    const parts = this.recordID.match(/(iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+))(?:\/\d+)?/)
     const [
       ,
       fullIDWithoutVersion = '',
