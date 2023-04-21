@@ -182,10 +182,21 @@ export default class IscnCard extends Vue {
     return `${type} ${timestamp} ${version ? 'Version ' : ''}${version}`
   }
 
+  get iscnIDParts() {
+    const parts = this.recordID.match(/(iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+))(?:\/\d+)?/)
+    const [
+      ,
+      fullIDWithoutVersion = '',
+      id = '',
+    ] = parts || []
+    return {
+      fullIDWithoutVersion,
+      id,
+    }
+  }
+
   get encodedIDInHex() {
-    const matches = this.recordID.match(/iscn:\/\/[a-zA-Z0-9-_]+\/([a-zA-Z0-9-_]+)\/\d+/)
-    if (!matches || !matches[1]) return ''
-    return Buffer.from(matches[1]).toString('hex')
+    return Buffer.from(this.iscnIDParts.id).toString('hex')
   }
 
   get cardGraphData() {
@@ -253,7 +264,7 @@ export default class IscnCard extends Vue {
   }
 
   get qrCodeContent() {
-    return SITE_URL.concat(`/view/${encodeURIComponent(this.recordID)}`)
+    return SITE_URL.concat(`/view/${encodeURIComponent(this.iscnIDParts.fullIDWithoutVersion)}`)
   }
 
   get borderProps() {
