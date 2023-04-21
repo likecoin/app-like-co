@@ -303,7 +303,19 @@
             :label="$t('iscn.meta.usage.info')"
             class="mb-[12px]"
           >
-            {{ metadata.usageInfo }}
+            <Link
+              v-if="urlPattern.test(metadata.usageInfo)"
+              :class="[
+                'text-[14px]',
+                'break-all',
+              ]"
+              :href="metadata.usageInfo"
+            >
+              {{ metadata.usageInfo }}
+            </Link>
+            <div v-else>
+              {{ metadata.usageInfo }}
+            </div>
           </FormField>
           <Button
             class="w-min"
@@ -462,6 +474,7 @@ import {
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
+  URL_REGEX,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
@@ -567,6 +580,8 @@ export default class ViewIscnIdPage extends Vue {
     authorUrls: [],
     contributionType: '',
   }
+
+  urlPattern = URL_REGEX
 
   isPreminted = !this.isPopupLayout // assume popup is not preminted
 
