@@ -303,15 +303,7 @@
             :label="$t('iscn.meta.usage.info')"
             class="mb-[12px]"
           >
-            <Link
-              :class="[
-                'text-[14px]',
-                'break-all',
-              ]"
-              :href="metadata.usageInfo"
-            >
-              {{ metadata.usageInfo }}
-            </Link>
+            {{ metadata.usageInfo }}
           </FormField>
           <Button
             class="w-min"
