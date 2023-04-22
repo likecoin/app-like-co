@@ -304,7 +304,7 @@
             class="mb-[12px]"
           >
             <Link
-              v-if="urlPattern.test(metadata.usageInfo)"
+              v-if="isValidUrl"
               :class="[
                 'text-[14px]',
                 'break-all',
@@ -474,7 +474,6 @@ import {
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
-  URL_REGEX,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
@@ -581,8 +580,6 @@ export default class ViewIscnIdPage extends Vue {
     contributionType: '',
   }
 
-  urlPattern = URL_REGEX
-
   isPreminted = !this.isPopupLayout // assume popup is not preminted
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
@@ -662,6 +659,14 @@ export default class ViewIscnIdPage extends Vue {
     const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
     if (httpsURL) return httpsURL;
     return '';
+  }
+
+  get isValidUrl() {
+    return (
+      this.metadata.usageInfo.startsWith('http://') ||
+      this.metadata.usageInfo.startsWith('https://') ||
+      this.metadata.usageInfo.startsWith('ftp://')
+    )
   }
 
   async mounted() {

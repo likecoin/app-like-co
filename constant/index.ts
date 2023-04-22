@@ -79,8 +79,6 @@ export const OSMOSIS_ADDRESS_REGEX = /^osmo1[ac-hj-np-z02-9]{38}$/
 
 export const CRAWL_URL_REGEX = /^https?:\/\//i
 
-export const URL_REGEX = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i
-
 export const ISCN_PREFIX_REGEX = /^iscn:\/\/likecoin-chain/i
 
 export const IS_CHAIN_UPGRADING = false;
