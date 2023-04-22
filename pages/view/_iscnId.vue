@@ -304,6 +304,7 @@
             class="mb-[12px]"
           >
             <Link
+              v-if="isUsageInfoUrl"
               :class="[
                 'text-[14px]',
                 'break-all',
@@ -312,6 +313,9 @@
             >
               {{ metadata.usageInfo }}
             </Link>
+            <div v-else>
+              {{ metadata.usageInfo }}
+            </div>
           </FormField>
           <Button
             class="w-min"
@@ -655,6 +659,15 @@ export default class ViewIscnIdPage extends Vue {
     const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
     if (httpsURL) return httpsURL;
     return '';
+  }
+
+  get isUsageInfoUrl() {
+    return (
+      this.metadata?.usageInfo && (
+      this.metadata.usageInfo.startsWith('http://') ||
+      this.metadata.usageInfo.startsWith('https://') ||
+      this.metadata.usageInfo.startsWith('ftp://'))
+    )
   }
 
   async mounted() {
