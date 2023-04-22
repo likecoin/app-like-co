@@ -304,7 +304,7 @@
             class="mb-[12px]"
           >
             <Link
-              v-if="isValidUrl"
+              v-if="isUsageInfoUrl"
               :class="[
                 'text-[14px]',
                 'break-all',
@@ -661,11 +661,12 @@ export default class ViewIscnIdPage extends Vue {
     return '';
   }
 
-  get isValidUrl() {
+  get isUsageInfoUrl() {
     return (
+      this.metadata?.usageInfo && (
       this.metadata.usageInfo.startsWith('http://') ||
       this.metadata.usageInfo.startsWith('https://') ||
-      this.metadata.usageInfo.startsWith('ftp://')
+      this.metadata.usageInfo.startsWith('ftp://'))
     )
   }
 
