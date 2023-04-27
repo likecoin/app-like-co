@@ -1024,7 +1024,7 @@ export default class IscnRegisterForm extends Vue {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
     } catch (err) {
-      this.signDialogError = 'TX_NO_SUCCESS';
+      this.signDialogError = (err as Error).toString()
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err);
@@ -1076,7 +1076,7 @@ export default class IscnRegisterForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
       this.shouldShowAlert = true
-      this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+      this.errorMessage = (err as Error).toString()
     } finally {
       this.isUploadingArweave = false;
       this.uploadStatus = '';
@@ -1105,7 +1105,9 @@ export default class IscnRegisterForm extends Vue {
       this.isOpenSignDialog = false;
     } catch (error) {
       this.shouldShowAlert = true;
-      this.errorMessage = this.$t('IscnRegisterForm.error.numbersProtocol') as string
+      this.errorMessage = (error as Error).toString()
+      // eslint-disable-next-line no-console
+      console.error(error)
     } finally {
       this.uploadStatus = '';
     }
