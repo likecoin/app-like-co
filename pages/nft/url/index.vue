@@ -581,12 +581,14 @@ export default class FetchIndex extends Vue {
             break
           }
 
-          this.$router.replace({
-            query: {
-              ...this.$route.query,
-              url: this.url,
-            },
-          })
+          if (this.$route.query.url !== this.url) {
+            this.$router.replace({
+              query: {
+                ...this.$route.query,
+                url: this.url,
+              },
+            })
+          }
           this.state = State.TO_CRAWL_URL
         }
         case State.TO_CRAWL_URL:
