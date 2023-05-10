@@ -35,7 +35,8 @@
         :placeholder="reservePlaceholder"
         :premint-amount="premintAmount"
         @message-change="(value) => (message = value)"
-        @update-input="handleInputReserveNft"
+        @update-reserve="handleInputReserveNft"
+        @update-initial-batch="handleInputInitialBatch"
       />
 
       <NFTMintProcess
@@ -267,6 +268,7 @@ export default class NFTTestMintPage extends Vue {
   txStatus: string = ''
 
   reserveNft: number = 0
+  initialBatch: number = 0
   shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
@@ -815,7 +817,10 @@ export default class NFTTestMintPage extends Vue {
       } else {
         const { data } = await this.$axios.post(
           API_LIKER_NFT_MINT,
-          { contentUrl: this.iscnData.contentMetadata?.url },
+          {
+            contentUrl: this.iscnData.contentMetadata?.url,
+            initialBatch: this.initialBatch,
+          },
           {
             params: {
               iscn_id: this.iscnId,
@@ -1030,6 +1035,13 @@ export default class NFTTestMintPage extends Vue {
       create the WNFT API data */
     this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
+  }
+
+  handleInputInitialBatch(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = Number(inputElement.value);
+    this.initialBatch = value;
+    logTrackerEvent(this, 'IscnMintNFT', 'SetInitialBatch', this.initialBatch.toString(), 1);
   }
 
   onReport() {

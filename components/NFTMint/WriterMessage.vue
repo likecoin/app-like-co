@@ -85,8 +85,19 @@
           :max="premintAmount"
           min="0"
           class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-          @change="(value) => $emit('update-input', value)"
+          @change="(value) => $emit('update-reserve', value)"
         />
+      </div>
+      <div
+        v-if="shouldShowInitialBatchSettings"
+        class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] py-[4px]"
+      >
+        <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
+        <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
+          <option v-for="_, i in Array(maxInitialBatch)" :key="i" :value="i">
+            {{ basePrice * Math.pow(2, i)}}
+          </option>
+        </select>
       </div>
     </div>
   </div>
@@ -113,6 +124,12 @@ export default class UploadForm extends Vue {
   avatar: string = ''
   displayName: string = this.address
   shouldShowSettings = false
+  maxInitialBatch = 13
+  basePrice = 8
+
+  get shouldShowInitialBatchSettings() {
+    return !!this.$route.query.set_initial_batch
+  }
 
   async mounted() {
     try {
