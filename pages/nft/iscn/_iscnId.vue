@@ -248,6 +248,7 @@ export default class NFTTestMintPage extends Vue {
   isCustomOgimage = false
   defaultOgImageBlob: Blob | null = null
   ogImageBlob: Blob | null = null
+  arweaveFeeInfo: any =  null
   ogImageArweaveId: string = ''
   ogImageArweaveFeeTxHash: string = ''
   chainNFTIdList: any = null
@@ -377,8 +378,16 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get loadingText(): string {
-    if (!this.ogImageArweaveId)
-      return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+    if (this.mintState === MintState.UPLOADING) {
+      if (!this.arweaveFeeInfo) {
+        return this.$t('NFTPortal.loadingMessage.estimateImgFee') as string
+      }
+      if (!this.ogImageArweaveFeeTxHash) {
+        return this.$t('NFTPortal.loadingMessage.waitingImgFee') as string
+      }
+      if (!this.ogImageArweaveId)
+        return this.$t('NFTPortal.loadingMessage.uploadImg') as string
+    }
 
     if (this.state === State.MINT)
       return this.$t('NFTPortal.loadingMessage.mint') as string
@@ -526,9 +535,9 @@ export default class NFTTestMintPage extends Vue {
           if (this.ogImageBlob) {
             this.mintState = MintState.UPLOADING
             if (!this.isSubscriptionMint) {
-              const arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
+              this.arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
               if (!this.ogImageArweaveId && !this.ogImageArweaveFeeTxHash) {
-                await this.sendArweaveFeeTx(arweaveFeeInfo)
+                await this.sendArweaveFeeTx(this.arweaveFeeInfo)
               }
             }
             if (!this.ogImageArweaveId) await this.submitToArweave()
