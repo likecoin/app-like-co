@@ -501,7 +501,7 @@ export default class FetchIndex extends Vue {
     this.iscnData = {
       keywords: tags.join(','),
       type,
-      contentFingerprints,
+      contentFingerprints: [...new Set(contentFingerprints)],
       stakeholders,
       publisher,
       license,
