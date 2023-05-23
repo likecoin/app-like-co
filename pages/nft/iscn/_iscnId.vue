@@ -675,6 +675,7 @@ export default class NFTTestMintPage extends Vue {
 
   onEditOgImage(imageData: File | Blob) {
     this.ogImageBlob = imageData;
+    this.ogImageArweaveId = '';
     this.isCustomOgimage = true;
     logTrackerEvent(this, 'IscnMintNFT', 'MintEditNftImage', this.iscnId, 1);
   }
@@ -682,15 +683,32 @@ export default class NFTTestMintPage extends Vue {
   async getOgImage() {
     try {
       this.isLoadingPreviewOG = true
-      const url = this.iscnData.contentMetadata?.url
-      if (!url) {
-        logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', this.iscnId, 1);
-        throw new Error(this.$t('NFTPortal.errorMessage.urlNotExists') as string);
+      if (this.iscnData.contentMetadata?.['@type'] === 'Photo') {
+        const arweaveURI = this.iscnData.contentFingerprints?.find((f: string) => f.startsWith('ar://'));
+        if (arweaveURI) {
+          try {
+            const { data } = await this.$axios.get(arweaveURI.replace('ar://', 'https://arweave.net/'), { responseType: 'blob' })
+            this.ogImageBlob = data
+            this.defaultOgImageBlob = data
+            this.ogImageArweaveId = arweaveURI.replace('ar://', '')
+            this.isCustomOgimage = true;
+            logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', arweaveURI, 1);
+          } catch (err) {
+            console.error(err)
+          }
+        }
       }
-      logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
-      const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
-      this.ogImageBlob = data
-      this.defaultOgImageBlob = data
+      if (!this.ogImageBlob && !this.ogImageArweaveId) {
+        const url = this.iscnData.contentMetadata?.url
+        if (!url) {
+          logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageNotExists', this.iscnId, 1);
+          throw new Error(this.$t('NFTPortal.errorMessage.urlNotExists') as string);
+        }
+        logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', url, 1);
+        const { data } = await this.$axios.get(`/crawler/ogimage?url=${encodeURIComponent(url)}`, { responseType: 'blob' })
+        this.ogImageBlob = data
+        this.defaultOgImageBlob = data
+      }
       this.isLoadingPreviewOG = false
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageError', (error as Error).toString(), 1);
