@@ -118,7 +118,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     ...data,
     keywords: tagsString.split(','),
     usageInfo: license,
-    contentFingerprints,
+    contentFingerprints: [...new Set(contentFingerprints)],
     stakeholders,
     recordNotes,
   }
