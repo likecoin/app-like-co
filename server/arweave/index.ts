@@ -1,4 +1,5 @@
 import Arweave from 'arweave/node';
+import Bundlr from "@bundlr-network/client";
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import stringify from 'fast-json-stable-stringify';
@@ -10,12 +11,18 @@ import {
 import { COINGECKO_PRICE_API, IS_TESTNET } from '../constant';
 import { ArweaveFile, Manifest, ArweavePrice, ArweavePriceWithLIKE } from './types';
 
+const jwk = require('../config/arweave-key.json')
+
 const IPFS_KEY = 'IPFS-Add'
 
 const IPFS_CONSTRAINT_KEY = 'standard'
 const IPFS_CONSTRAINT = 'v0.1'
 
-const jwk = require('../config/arweave-key.json')
+const bundlr = new Bundlr(
+  IS_TESTNET ? 'http://node2.bundlr.network' : 'http://node1.bundlr.network',
+  'arweave',
+  jwk,
+);
 
 const arweaveGraphQL = Arweave.init({
   host: 'arweave.net',
@@ -23,13 +30,6 @@ const arweaveGraphQL = Arweave.init({
   protocol: 'https',
   timeout: 5000,
 });
-
-const arweave = Arweave.init({
-  host: 'arweave.net',
-  port: 443,
-  protocol: 'https',
-  timeout: 60000,
-})
 
 export async function getArweaveIdFromHashes(ipfsHash: string) {
   try {
@@ -131,11 +131,11 @@ export async function estimateARPrice(data: ArweaveFile) {
     arweaveId: id,
     AR: '0',
   }
-  const transaction = await arweave.createTransaction({ data: buffer }, jwk)
-  const { reward } = transaction;
+  const priceAtomic = await bundlr.getPrice(buffer.byteLength);
+  const priceConverted = bundlr.utils.fromAtomic(priceAtomic);
   return {
     key,
-    AR: arweave.ar.winstonToAr(reward),
+    AR: priceConverted.toFixed(),
   };
 }
 
@@ -204,23 +204,21 @@ export async function convertARPricesToLIKE(ar: ArweavePrice,
 }
 
 export async function submitToArweave(data: ArweaveFile, ipfsHash: string) {
-  const anchorId = (await arweave.api.get('/tx_anchor')).data
   const { mimetype, buffer } = data;
-  const transaction = await arweave.createTransaction({ data: buffer, last_tx: anchorId }, jwk)
-  transaction.addTag('User-Agent', 'app.like.co');
-  transaction.addTag(IPFS_KEY, ipfsHash)
-  transaction.addTag(IPFS_CONSTRAINT_KEY, IPFS_CONSTRAINT)
-  transaction.addTag('Content-Type', mimetype)
-  const { reward } = transaction;
+  const tags = [
+    { name: 'User-Agent', value: 'app.like.co' },
+    { name: IPFS_KEY, value: ipfsHash },
+    { name: IPFS_CONSTRAINT_KEY, value: IPFS_CONSTRAINT },
+    { name: 'Content-Type', value: mimetype },
+  ];
 
   if (!IS_TESTNET) {
-    const balance = await arweave.wallets.getBalance(await arweave.wallets.jwkToAddress(jwk));
-    if (arweave.ar.isLessThan(balance, reward)) throw new Error('INSUFFICIENT_AR_IN_PROXY');
+    const priceAtomic = await bundlr.getPrice(buffer.byteLength);
+    const atomicBalance = await bundlr.getLoadedBalance();
+    if (atomicBalance.isLessThan(priceAtomic)) throw new Error('INSUFFICIENT_AR_IN_PROXY');
   }
-
-  await arweave.transactions.sign(transaction, jwk)
-  await arweave.transactions.post(transaction)
-  return transaction.id;
+  const response = await bundlr.upload(buffer, { tags });
+  return response.id;
 }
 
 export async function uploadFileToArweave(data: ArweaveFile) {
