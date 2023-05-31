@@ -68,6 +68,7 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
     'liker-id',
   ],
   keplrInstallCTAPreset: 'fancy-banner',
+  likerLandAppWCBridge: 'https://wc-bridge-1.like.co',
   cosmostationDirectSignEnabled: true,
 };
 
