@@ -2647,10 +2647,10 @@
     methods "^1.1.2"
     path-to-regexp "^6.1.0"
 
-"@likecoin/iscn-js@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.5.3.tgz#eff19d705a2dc8cb3ad4764515b0d1f0972b216d"
-  integrity sha512-4EWrV0OkRBCrZUrgrs0syCDvF+cNQg8fDzsN8N+sKhpsaAez37LTKrEyoNw6h5dtCC38JhssMBNoVtO+ygtEWw==
+"@likecoin/iscn-js@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.5.4.tgz#3d1c7fff8a183bf884587aebb038e61e11a60147"
+  integrity sha512-LPpfnh0A0G2N49NLtJxSedS+PxKoyTGkql25Mo+Ld+njBngVHZpzSELQ2U0SKV3EJkwRFUMw6fCqCnf150lT3A==
   dependencies:
     "@likecoin/iscn-message-types" "^0.0.5"
     axios "^0.27.2"
