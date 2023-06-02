@@ -149,7 +149,6 @@ import { logTrackerEvent } from '~/utils/logger'
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
-const subscriptionModule = namespace('subscription')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -224,19 +223,7 @@ export default class NFTTestMintPage extends Vue {
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
-  @subscriptionModule.Action updateMintInstance!: (arg0: {
-    status: string
-    payload: any
-    options?: any
-  }) => Promise<any>
-
-  @subscriptionModule.Action tryRecoverMintStatus!: (arg0: string) => void
-
-  @subscriptionModule.Getter('getAddressIsSubscriber') isSubscriber!: boolean
-  @subscriptionModule.Getter('getCurrentMintStatusId') mintStatusId!: string
-
   platform = this.$route.query.platform as string || ''
-  isSubscriptionMint: boolean = false
 
   classId: string = ''
   nftsIds: string[] = []
@@ -487,13 +474,7 @@ export default class NFTTestMintPage extends Vue {
         this.getMintInfo(),
       ])
       await this.getOgImage()
-      if (this.$route.query.mint_status_id && !this.mintStatusId) {
-        this.tryRecoverMintStatus(this.$route.query.mint_status_id as string)
-      }
-      if (this.isSubscriber && this.mintStatusId) {
-        this.isSubscriptionMint = true;
-      }
-      if (!this.isSubscriptionMint && !this.isUserISCNOwner) {
+      if (!this.isUserISCNOwner) {
         throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
       }
     } catch (error) {
@@ -522,7 +503,7 @@ export default class NFTTestMintPage extends Vue {
       this.hasError = false
       this.errorMessage = ''
       this.balance = await getAccountBalance(this.address) as string
-      if (!this.isSubscriptionMint && this.balance === '0') {
+      if (this.balance === '0') {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
@@ -531,18 +512,16 @@ export default class NFTTestMintPage extends Vue {
         case 'create': {
           this.isLoading = true
 
-          if (!this.isSubscriptionMint && !this.isUserISCNOwner) {
+          if (!this.isUserISCNOwner) {
             logTrackerEvent(this, 'IscnMintNFT', 'CreateNFTError', ErrorType.USER_NOT_ISCN_OWNER, 1);
             throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
           }
 
           if (this.ogImageBlob) {
             this.mintState = MintState.UPLOADING
-            if (!this.isSubscriptionMint) {
-              this.arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
-              if (!this.ogImageArweaveId && !this.ogImageArweaveFeeTxHash) {
-                await this.sendArweaveFeeTx(this.arweaveFeeInfo)
-              }
+            this.arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
+            if (!this.ogImageArweaveId && !this.ogImageArweaveFeeTxHash) {
+              await this.sendArweaveFeeTx(this.arweaveFeeInfo)
             }
             if (!this.ogImageArweaveId) await this.submitToArweave()
           }
@@ -773,35 +752,19 @@ export default class NFTTestMintPage extends Vue {
   async submitToArweave(): Promise<void> {
     try {
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweave', this.ogImageArweaveFeeTxHash, 1);
-      let arweaveId: string | undefined;
-      if (this.isSubscriptionMint) {
-        ({ arweaveId } = await this.updateMintInstance(
-          {
-            status: 'nftCover',
-            payload: this.ogImageFormData,
-            options: {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-              timeout: 90000,
-            },
-          },
-        ));
-      } else {
-        if (!this.ogImageArweaveFeeTxHash) {
-          throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
-        }
-        ({ arweaveId } = await this.$axios.$post(
-          `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageArweaveFeeTxHash}`,
-          this.ogImageFormData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          },
-        ))
-        logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveSuccess', arweaveId as string, 1);
+      if (!this.ogImageArweaveFeeTxHash) {
+        throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       }
+      const { arweaveId } = await this.$axios.$post(
+        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageArweaveFeeTxHash}`,
+        this.ogImageFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveSuccess', arweaveId as string, 1);
       this.ogImageArweaveId = arweaveId as string
     } catch (err) {
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveError', (err as Error).toString(), 1);
@@ -839,30 +802,22 @@ export default class NFTTestMintPage extends Vue {
   async postMintInfo() {
     try {
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfo', this.classId, 1);
-      if (this.isSubscriptionMint) {
-        const data = await this.updateMintInstance({
-          status: 'done',
-          payload: {},
-        });
-        this.postInfo = data
-      } else {
-        const { data } = await this.$axios.post(
-          API_LIKER_NFT_MINT,
-          {
-            contentUrl: this.iscnData.contentMetadata?.url,
-            initialBatch: this.initialBatch,
+      const { data } = await this.$axios.post(
+        API_LIKER_NFT_MINT,
+        {
+          contentUrl: this.iscnData.contentMetadata?.url,
+          initialBatch: this.initialBatch,
+        },
+        {
+          params: {
+            iscn_id: this.iscnId,
+            class_id: this.classId,
+            platform: this.platform,
           },
-          {
-            params: {
-              iscn_id: this.iscnId,
-              class_id: this.classId,
-              platform: this.platform,
-            },
-            paramsSerializer: (params) => qs.stringify(params),
-          },
-        )
-        this.postInfo = data
-      }
+          paramsSerializer: (params) => qs.stringify(params),
+        },
+      )
+      this.postInfo = data
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoSuccess', this.classId, 1);
     } catch (error: any) {
       // If the API returns a status of 409, it indicates that the request may have already successful
@@ -881,56 +836,42 @@ export default class NFTTestMintPage extends Vue {
 
   async createNftClass() {
     let classId
-    if (this.isSubscriptionMint) {
-      ({ classId } = await this.updateMintInstance({
-        status: 'nftClass',
-        payload: {
-          iscnId: this.iscnId,
-          name: this.NftName,
-          description: this.NftDescription,
-          image: this.ogImageUri,
-          externalURL: this.iscnData.contentMetadata?.url,
-          message: this.message || '',
-          isCustomImage: this.isCustomOgimage,
-        },
-      }));
-    } else {
-      try {
-        await this.initIfNecessary()
-        if (!this.signer) return '';
-        const signingClient = await getSigningClient()
-        await signingClient.setSigner(this.signer)
-        logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
-        this.txStatus = TxStatus.PROCESSING
+    try {
+      await this.initIfNecessary()
+      if (!this.signer) return '';
+      const signingClient = await getSigningClient()
+      await signingClient.setSigner(this.signer)
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
+      this.txStatus = TxStatus.PROCESSING
 
-        const queryClient = signingClient.getISCNQueryClient()
-        const q = await queryClient.getQueryClient()
-        // expect no pagination (i.e. <= 100 items) for existing class under ISCN
-        const { classes = [] } = await q.likenft.classesByISCN(this.iscnId).catch(() => ({} as any))
-        const existingClassesLength = classes?.length || 0;
-        const expectedClassId = calculateNFTClassIdByISCNId(this.iscnId, existingClassesLength)
+      const queryClient = signingClient.getISCNQueryClient()
+      const q = await queryClient.getQueryClient()
+      // expect no pagination (i.e. <= 100 items) for existing class under ISCN
+      const { classes = [] } = await q.likenft.classesByISCN(this.iscnId).catch(() => ({} as any))
+      const existingClassesLength = classes?.length || 0;
+      const expectedClassId = calculateNFTClassIdByISCNId(this.iscnId, existingClassesLength)
 
-        const messages = [formatMsgNewClass(
-          this.address,
-          this.iscnId,
-          this.createNftClassPayload,
-        )]
-        const config = await this.getRoyaltyConfig();
-        if (config) {
-          messages.push(formatMsgCreateRoyaltyConfig(this.address, expectedClassId, config))
-        }
-        await signingClient.sendMessages(this.address, messages);
-        classId = expectedClassId
-      } catch (error) {
-        logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
-        // eslint-disable-next-line no-console
-        console.error(error)
-        if ((error as Error).message?.includes('code 11')) {
-          throw new Error('CREATE_NFT_CLASS_TX_RUNS_OUT_OF_GAS')
-        }
+      const messages = [formatMsgNewClass(
+        this.address,
+        this.iscnId,
+        this.createNftClassPayload,
+      )]
+      const config = await this.getRoyaltyConfig();
+      if (config) {
+        messages.push(formatMsgCreateRoyaltyConfig(this.address, expectedClassId, config))
       }
-      if (classId) logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1)
+      await signingClient.sendMessages(this.address, messages);
+      classId = expectedClassId
+    } catch (error) {
+      logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
+      // eslint-disable-next-line no-console
+      console.error(error)
+      if ((error as Error).message?.includes('code 11')) {
+        throw new Error('CREATE_NFT_CLASS_TX_RUNS_OUT_OF_GAS')
+      }
+      throw error;
     }
+    logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1)
     return classId
   }
 
@@ -972,70 +913,53 @@ export default class NFTTestMintPage extends Vue {
   }
 
   async mintNFT() {
-    if (this.isSubscriptionMint) {
-      if (!this.mintNFTResult) {
-        const res = await this.updateMintInstance({
-          status: 'nftMint',
-          payload: {
-            iscnId: this.iscnId,
-            classId: this.classId,
-            name: this.NftName,
-            image: this.ogImageUri,
-            message: this.message || '',
-          },
-        });
-        this.mintNFTResult = res;
-        this.sendNFTResult = res;
+    await this.initIfNecessary()
+    try {
+      if (!this.signer) return
+      const signingClient = await getSigningClient()
+      await signingClient.setSigner(this.signer)
+
+      if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
+        .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
+      const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
+      const mintMessages = nfts.map((i) =>
+        formatMsgMintNFT(this.address, this.classId, i),
+      )
+      const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
+      const sendMessages = nftsToSend.map((i) =>
+        formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
+      )
+      logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
+
+      const shouldMintNFT = !this.mintNFTResult
+      const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
+
+      if (shouldMintNFT) {
+        this.mintNFTResult = await signingClient.sendMessages(
+          this.address,
+          mintMessages,
+        )
       }
-    } else {
-      await this.initIfNecessary()
-      try {
-        if (!this.signer) return
-        const signingClient = await getSigningClient()
-        await signingClient.setSigner(this.signer)
-
-        if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
-          .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
-        const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
-        const mintMessages = nfts.map((i) =>
-          formatMsgMintNFT(this.address, this.classId, i),
+      if (shouldSendNFT) {
+        this.sendNFTResult = await signingClient.sendMessages(
+          this.address,
+          sendMessages,
         )
-        const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
-        const sendMessages = nftsToSend.map((i) =>
-          formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
-        )
-        logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
-
-        const shouldMintNFT = !this.mintNFTResult
-        const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
-
-        if (shouldMintNFT) {
-          this.mintNFTResult = await signingClient.sendMessages(
-            this.address,
-            mintMessages,
-          )
-        }
-        if (shouldSendNFT) {
-          this.sendNFTResult = await signingClient.sendMessages(
-            this.address,
-            sendMessages,
-          )
-        }
-      } catch (error) {
-        logTrackerEvent(
-          this,
-          'IscnMintNFT',
-          'MintNFTError',
-          (error as Error).toString(),
-          1,
-        )
-        // eslint-disable-next-line no-console
-        console.error(error)
-        if ((error as Error).message?.includes('code 11')) {
-          throw new Error('MINT_NFT_TX_RUNS_OUT_OF_GAS')
-        }
-        throw new Error(`CANNOT_MINT_NFT, Error: ${((error as Error).message).substring(0,200)}`)
       }
+    } catch (error) {
+      logTrackerEvent(
+        this,
+        'IscnMintNFT',
+        'MintNFTError',
+        (error as Error).toString(),
+        1,
+      )
+      // eslint-disable-next-line no-console
+      console.error(error)
+      if ((error as Error).message?.includes('code 11')) {
+        throw new Error('MINT_NFT_TX_RUNS_OUT_OF_GAS')
+      }
+      throw new Error(`CANNOT_MINT_NFT, Error: ${((error as Error).message).substring(0,200)}`)
     }
   }
 
