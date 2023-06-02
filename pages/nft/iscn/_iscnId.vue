@@ -111,16 +111,20 @@
 <script lang="ts">
 import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
+import Long from 'long';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing';
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { v4 as uuidv4 } from 'uuid'
-import { DeliverTxResponse } from '@cosmjs/stargate'
 import {
+  formatMsgCreateRoyaltyConfig,
   formatMsgMintNFT,
+  formatMsgNewClass,
   formatMsgSend,
 } from '@likecoin/iscn-js/dist/messages/likenft'
+import { calculateNFTClassIdByISCNId } from '@likecoin/iscn-js/dist/nft/nftId'
 import BigNumber from 'bignumber.js'
 import axios, { AxiosError } from 'axios'
 
@@ -839,20 +843,25 @@ export default class NFTTestMintPage extends Vue {
       await signingClient.setSigner(this.signer)
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
       this.txStatus = TxStatus.PROCESSING
-      const res = await signingClient.createNFTClass(
+
+      const queryClient = signingClient.getISCNQueryClient()
+      const q = await queryClient.getQueryClient()
+      // expect no pagination (i.e. <= 100 items) for existing class under ISCN
+      const { classes = [] } = await q.likenft.classesByISCN(this.iscnId).catch(() => ({} as any))
+      const existingClassesLength = classes?.length || 0;
+      const expectedClassId = calculateNFTClassIdByISCNId(this.iscnId, existingClassesLength)
+
+      const messages = [formatMsgNewClass(
         this.address,
         this.iscnId,
         this.createNftClassPayload,
-      )
-      const rawLogs = JSON.parse((res as DeliverTxResponse).rawLog as string)
-      const event = rawLogs[0].events.find(
-        (e: { type: string }) => e.type === 'likechain.likenft.v1.EventNewClass',
-      )
-      const attribute = event.attributes.find(
-        (a: { key: string }) => a.key === 'class_id',
-      )
-      classId = (attribute?.value || '').replace(/^"(.*)"$/, '$1')
-      await this.createRoyaltyConfig(classId);
+      )]
+      const config = await this.getRoyaltyConfig();
+      if (config) {
+        messages.push(formatMsgCreateRoyaltyConfig(this.address, expectedClassId, config))
+      }
+      await signingClient.sendMessages(this.address, messages);
+      classId = expectedClassId
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
@@ -860,15 +869,15 @@ export default class NFTTestMintPage extends Vue {
       if ((error as Error).message?.includes('code 11')) {
         throw new Error('CREATE_NFT_CLASS_TX_RUNS_OUT_OF_GAS')
       }
+      throw error;
     }
     logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassSuccess', classId, 1)
     return classId
   }
 
-  async createRoyaltyConfig(classId: string) {
+  async getRoyaltyConfig() {
     try {
-      if (!this.signer) return
-      const rateBasisPoints = 1000; // 10% as in current chain config
+      const rateBasisPoints = Long.fromNumber(1000); // 10% as in current chain config
       const feeAmount = 25000; // 2.5%
       const userAmount = 1000000 - feeAmount; // 1000000 - fee
       const rewardMap = await parseAndCalculateStakeholderRewards(this.iscnData.stakeholders, this.iscnOwner, {
@@ -883,31 +892,24 @@ export default class NFTTestMintPage extends Vue {
         ] = r;
         return {
           account: address,
-          weight: parseInt(amount, 10),
+          weight: Long.fromString(amount, 10),
         };
       });
       stakeholders.push({
           account: LIKER_NFT_FEE_WALLET,
-          weight: feeAmount,
+          weight: Long.fromNumber(feeAmount),
       })
-
-      const signingClient = await getSigningClient()
-      await signingClient.setSigner(this.signer)
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClass', this.iscnId, 1);
-      this.txStatus = TxStatus.PROCESSING
-      await signingClient.createRoyaltyConfig(
-        this.address,
-        classId,
-        {
-          rateBasisPoints,
-          stakeholders,
-        },
-      )
+      return {
+        rateBasisPoints,
+        stakeholders,
+      };
     } catch (err) {
       // Don't throw on royalty create, not critical for now
       // eslint-disable-next-line no-console
       console.error(err);
     }
+    return null;
   }
 
   async mintNFT() {
