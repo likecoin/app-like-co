@@ -191,6 +191,7 @@ export default class FetchIndex extends Vue {
   iscnData: any
   ipfsHash = ''
   arweaveId = ''
+  ogImageArweaveId = ''
   arweaveFeeInfo: any
   arweaveFeeTxHash = ''
   iscnId = this.$route.query.iscn_id as string || ''
@@ -316,6 +317,7 @@ export default class FetchIndex extends Vue {
       liker_id: _likerId,
       ...querys
     } = this.$route.query;
+    if (this.ogImageArweaveId) { querys.og_image_arweave_id = this.ogImageArweaveId }
     return querys;
     /* eslint-enable @typescript-eslint/no-unused-vars */
   }
@@ -582,11 +584,13 @@ export default class FetchIndex extends Vue {
             ? State.TO_REGISTER_ISCN
             : State.TO_UPLOAD_TO_ARWEAVE
         case State.TO_UPLOAD_TO_ARWEAVE:
-          if (!this.arweaveFeeTxHash) {
-            await this.sendArweaveFeeTx(this.arweaveFeeInfo)
+          if (!this.arweaveId) {
+            if (!this.arweaveFeeTxHash) {
+              await this.sendArweaveFeeTx(this.arweaveFeeInfo)
+            }
+            await this.submitToArweave()
+            this.state = State.TO_REGISTER_ISCN
           }
-          await this.submitToArweave()
-          this.state = State.TO_REGISTER_ISCN
         case State.TO_REGISTER_ISCN:
           await this.registerISCN()
         default:
@@ -629,7 +633,7 @@ export default class FetchIndex extends Vue {
   async checkArweaveIdExistsAndEstimateFee() {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CheckArweaveIdExistsAndEstimateFee', this.url, 1);
-      const { address, arweaveId, LIKE, ipfsHash, memo } = await this.$axios.$post(
+      const { address, arweaveId, LIKE, ipfsHash, memo, list } = await this.$axios.$post(
         API_POST_ARWEAVE_ESTIMATE,
         this.formData,
         {
@@ -638,8 +642,14 @@ export default class FetchIndex extends Vue {
           },
         },
       )
-      if (arweaveId) { this.arweaveId = arweaveId }
-      this.ipfsHash = ipfsHash
+      if (arweaveId) {
+        this.arweaveId = arweaveId
+        if (list) {
+          const ogImageArweaveEntry = list.find((a: any) => a.key === 'image_og')
+          if (ogImageArweaveEntry) this.ogImageArweaveId = ogImageArweaveEntry.arweaveId;
+        }
+      }
+      if (ipfsHash) this.ipfsHash = ipfsHash
       this.arweaveFeeInfo = {
         to: address,
         amount: new BigNumber(LIKE),
@@ -684,9 +694,13 @@ export default class FetchIndex extends Vue {
           timeout: 90000,
         },
       )
-      const { arweaveId, txHash } = arweaveResult;
+      const { arweaveId, list, txHash } = arweaveResult;
       logTrackerEvent(this, 'NFTUrlMint', 'SubmitToArweaveSuccess', arweaveId, 1);
       this.arweaveId = arweaveId
+      if (list) {
+        const ogImageArweaveEntry = list.find((a: any) => a.key === 'image_og')
+        if (ogImageArweaveEntry) this.ogImageArweaveId = ogImageArweaveEntry.arweaveId;
+      }
       if (this.opener) {
         try {
           const message = JSON.stringify({
