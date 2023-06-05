@@ -19,7 +19,7 @@
           <a
             v-t="`announcement`"
             :class="['underline', 'text-like-green', 'font-medium']"
-            href="https://blog.like.co/likecoin-chain-upgrade-laichikok-overview/"
+            href="https://blog.like.co/likecoin-chain-upgrade-chungking/"
             target="_blank"
           />
         </template>
