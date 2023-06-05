@@ -421,6 +421,10 @@ export default class NFTTestMintPage extends Vue {
     return this.walletType === 'liker-id'
   }
 
+  get isTransactionSizeLimited() {
+    return this.isUsingLikerLandApp
+  }
+
   get createNftClassPayload() {
     let metadata: {[key: string]: any} = {
       image: this.ogImageUri,
@@ -450,10 +454,10 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get premintAmount() {
-    if (this.isUsingLikerLandApp) {
-      return 35;
+    if (this.isTransactionSizeLimited) {
+      return 32;
     }
-    return this.isWritingNFT ? 500 : 100;
+    return 256;
   }
 
   get imgSrc() {
@@ -851,7 +855,7 @@ export default class NFTTestMintPage extends Vue {
       const existingClassesLength = classes?.length || 0;
       const expectedClassId = calculateNFTClassIdByISCNId(this.iscnId, existingClassesLength)
 
-      const messages = [formatMsgNewClass(
+      let messages = [formatMsgNewClass(
         this.address,
         this.iscnId,
         this.createNftClassPayload,
@@ -860,7 +864,16 @@ export default class NFTTestMintPage extends Vue {
       if (config) {
         messages.push(formatMsgCreateRoyaltyConfig(this.address, expectedClassId, config))
       }
-      await signingClient.sendMessages(this.address, messages);
+      const { mintMessages, sendMessages } = this.getNFTMessages(expectedClassId);
+      if (!this.isTransactionSizeLimited) {
+        messages.push(...mintMessages, ...sendMessages);
+        const res = await signingClient.sendMessages(this.address, messages);
+        this.mintNFTResult = res;
+        this.sendNFTResult = res;
+      } else {
+        messages = messages.concat(mintMessages);
+        this.mintNFTResult = await signingClient.sendMessages(this.address, messages);
+      }
       classId = expectedClassId
     } catch (error) {
       logTrackerEvent(this, 'IscnMintNFT', 'CreateNftClassError', (error as Error).toString(), 1);
@@ -912,6 +925,23 @@ export default class NFTTestMintPage extends Vue {
     return null;
   }
 
+  getNFTMessages(classId = this.classId) {
+    if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
+        .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
+      const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
+      const mintMessages = nfts.map((i) =>
+        formatMsgMintNFT(this.address, classId, i),
+      )
+      const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
+      const sendMessages = nftsToSend.map((i) =>
+        formatMsgSend(this.address, LIKER_NFT_API_WALLET, classId, i.id),
+      )
+    return {
+      mintMessages,
+      sendMessages,
+    }
+  }
+
   async mintNFT() {
     await this.initIfNecessary()
     try {
@@ -919,32 +949,34 @@ export default class NFTTestMintPage extends Vue {
       const signingClient = await getSigningClient()
       await signingClient.setSigner(this.signer)
 
-      if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
-        .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
-      const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
-      const mintMessages = nfts.map((i) =>
-        formatMsgMintNFT(this.address, this.classId, i),
-      )
-      const nftsToSend = nfts.filter((_, index) => index >= this.reserveNft)
-      const sendMessages = nftsToSend.map((i) =>
-        formatMsgSend(this.address, LIKER_NFT_API_WALLET, this.classId, i.id),
-      )
       logTrackerEvent(this, 'IscnMintNFT', 'MintNFT', this.classId, 1);
 
       const shouldMintNFT = !this.mintNFTResult
       const shouldSendNFT = this.isWritingNFT && !this.sendNFTResult
 
+      const { mintMessages, sendMessages } = this.getNFTMessages();
+
+      let messages: any[] = []
       if (shouldMintNFT) {
-        this.mintNFTResult = await signingClient.sendMessages(
-          this.address,
-          mintMessages,
-        )
+        if (this.isTransactionSizeLimited) {
+          this.mintNFTResult = await signingClient.sendMessages(
+            this.address,
+            mintMessages,
+          )
+        } else {
+          messages.push(...mintMessages)
+        }
       }
       if (shouldSendNFT) {
+        messages = messages.concat(sendMessages)
         this.sendNFTResult = await signingClient.sendMessages(
           this.address,
-          sendMessages,
+          messages,
         )
+        // mintNFTResult not set means mint is sent together with send
+        if (shouldMintNFT && !this.mintNFTResult) {
+          this.mintNFTResult = this.sendNFTResult;
+        }
       }
     } catch (error) {
       logTrackerEvent(
