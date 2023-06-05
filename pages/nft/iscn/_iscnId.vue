@@ -866,8 +866,7 @@ export default class NFTTestMintPage extends Vue {
       }
       const { mintMessages, sendMessages } = this.getNFTMessages(expectedClassId);
       if (!this.isTransactionSizeLimited) {
-        messages = messages.concat(mintMessages);
-        messages = messages.concat(sendMessages);
+        messages.push(...mintMessages, ...sendMessages);
         const res = await signingClient.sendMessages(this.address, messages);
         this.mintNFTResult = res;
         this.sendNFTResult = res;
@@ -959,20 +958,20 @@ export default class NFTTestMintPage extends Vue {
 
       let messages: any[] = []
       if (shouldMintNFT) {
-        messages = messages.concat(mintMessages)
         if (this.isTransactionSizeLimited) {
           this.mintNFTResult = await signingClient.sendMessages(
             this.address,
-            messages,
+            mintMessages,
           )
-          messages = [];
+        } else {
+          messages.push(...mintMessages)
         }
       }
       if (shouldSendNFT) {
         messages = messages.concat(sendMessages)
         this.sendNFTResult = await signingClient.sendMessages(
           this.address,
-          sendMessages,
+          messages,
         )
         // mintNFTResult not set means mint is sent together with send
         if (shouldMintNFT && !this.mintNFTResult) {
