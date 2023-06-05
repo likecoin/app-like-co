@@ -670,19 +670,23 @@ export default class NFTTestMintPage extends Vue {
   async getOgImage() {
     try {
       this.isLoadingPreviewOG = true
-      if (this.iscnData.contentMetadata?.['@type'] === 'Photo') {
+      let arweaveID = this.$route.query.og_image_arweave_id as string;
+      if (!arweaveID && this.iscnData.contentMetadata?.['@type'] === 'Photo') {
         const arweaveURI = this.iscnData.contentFingerprints?.find((f: string) => f.startsWith('ar://'));
         if (arweaveURI) {
-          try {
-            const { data } = await this.$axios.get(arweaveURI.replace('ar://', 'https://arweave.net/'), { responseType: 'blob' })
-            this.ogImageBlob = data
-            this.defaultOgImageBlob = data
-            this.ogImageArweaveId = arweaveURI.replace('ar://', '')
-            this.isCustomOgimage = true;
-            logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', arweaveURI, 1);
-          } catch (err) {
-            console.error(err)
-          }
+          arweaveID = arweaveURI.replace('ar://', '');
+        }
+      }
+      if (arweaveID) {
+        try {
+          const { data } = await this.$axios.get(`https://arweave.net/${arweaveID}`, { responseType: 'blob' })
+          this.ogImageBlob = data
+          this.defaultOgImageBlob = data
+          this.ogImageArweaveId = arweaveID
+          this.isCustomOgimage = true;
+          logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', arweaveID, 1);
+        } catch (err) {
+          console.error(err)
         }
       }
       if (!this.ogImageBlob && !this.ogImageArweaveId) {

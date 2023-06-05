@@ -312,6 +312,33 @@ export async function getCralwerData(url: string, wallet?: string) {
     const metas = $('meta')
     const promiseImg: any = []
 
+    Object.keys(metas).forEach((key: any) => {
+      const { name, property, content: value } = metas[key].attribs || {}
+      if (name === 'description' || property === 'og:description') {
+        description = description || value
+      } else if (name === 'keywords') {
+        keywords = keywords || value
+      } else if (name === 'author') {
+        author = author || value
+      } else if (property === 'og:image') {
+        ogImage = ogImage || value
+      } else if (name === 'msapplication-TileImage') {
+        tileImage = tileImage || value
+      }
+    })
+    ogImage = ogImage || tileImage
+    if (ogImage) {
+      promiseImg.push(
+        axios
+          .get(`${encodedURL(ogImage)}`, { responseType: 'arraybuffer' })
+          .then((element) => {
+            const newFileName = 'image_og'
+            return { element, key: newFileName }
+          })
+          .catch(() => {}),
+      )
+    }
+
     const img = $('img')
     img.each((i, e) => {
       const src = $(e).attr('src')
@@ -344,21 +371,6 @@ export async function getCralwerData(url: string, wallet?: string) {
         type: e.element.headers['content-type'],
       }))
 
-    Object.keys(metas).forEach((key: any) => {
-      const { name, property, content: value } = metas[key].attribs || {}
-      if (name === 'description' || property === 'og:description') {
-        description = description || value
-      } else if (name === 'keywords') {
-        keywords = keywords || value
-      } else if (name === 'author') {
-        author = author || value
-      } else if (property === 'og:image') {
-        ogImage = ogImage || value
-      } else if (name === 'msapplication-TileImage') {
-        tileImage = tileImage || value
-      }
-    })
-    ogImage = ogImage || tileImage
     body = $('body').html() || ''
     body = formatBody({ content: body, title, author, description, wallet })
   } catch (error) {
