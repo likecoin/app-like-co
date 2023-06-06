@@ -94,6 +94,30 @@
       >
         <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
         <ContentFingerprintLink v-if="uploadArweaveId" :item="formattedArweave" />
+        <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
+        <div
+          v-if="!fileData"
+          :class="[
+            'flex',
+            'mt-[12px]',
+            'gap-[8px]'
+          ]"
+        >
+          <TextField
+            v-model="contentFingerprintInput"
+            class="w-full"
+          />
+          <Button
+            type="button"
+            class="mb-[4px]"
+            size="mini"
+            preset="secondary"
+            content-class="py-[4px]"
+            @click="addContentFingerprint"
+          >
+            <IconAddMini />
+          </Button>
+        </div>
       </FormField>
       <!-- Numbers Protocol -->
       <FormField
@@ -590,6 +614,8 @@ export default class IscnRegisterForm extends Vue {
   likerId: string = ''
   likerIdsAddresses: (string | void)[] = []
   authorDescription: string = ''
+  contentFingerprintInput: string = ''
+  customContentFingerprints: string[] = []
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
@@ -740,6 +766,7 @@ export default class IscnRegisterForm extends Vue {
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
       authorDescriptions: this.authorDescriptions,
+      contentFingerprints: this.customContentFingerprints,
     }
   }
 
@@ -821,6 +848,10 @@ export default class IscnRegisterForm extends Vue {
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
     this.uploadStatus = ''
+  }
+
+  addContentFingerprint() {
+    this.customContentFingerprints.push(this.contentFingerprintInput)
   }
 
   handleOpenAuthorDialog() {
