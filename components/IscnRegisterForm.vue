@@ -226,6 +226,17 @@
             />
           </FormField>
           <FormField
+            :label="$t('IscnRegisterForm.label.sameAs')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <EditableTagList
+              v-model="sameAs"
+              :characters-limit="charactersLimit.url"
+              :tags-limit="charactersLimit.tagNumber"
+            />
+          </FormField>
+          <Divider class="my-[12px]" />
+          <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
           >
@@ -539,7 +550,8 @@ export enum CharactersLimit {
   authorDescription = 200,
   likerIdLeast = 7,
   likerId = 20,
-  license = 200
+  license = 200,
+  url = 2048,
 }
 
 @Component
@@ -565,6 +577,7 @@ export default class IscnRegisterForm extends Vue {
   name: string = ''
   description: string = ''
   tags: string[] = []
+  sameAs: string[] = []
   url: string = ''
   license: string = ''
   authorName: string = ''
@@ -684,8 +697,8 @@ export default class IscnRegisterForm extends Vue {
 
   get exif() {
     const extension = this.fileType?.split('/')
-    return this.exifInfo
-      ? {
+    if (this.exifInfo) {
+      return {
           ...this.exifInfo,
           Format: this.fileType,
           Size:
@@ -697,10 +710,14 @@ export default class IscnRegisterForm extends Vue {
                 })`
               : this.fileSize,
         }
-      : {
+    }
+    if (this.isImage || this.isPhoto) {
+      return {
           Format: this.fileType,
           Size: this.fileSize,
         }
+  }
+    return undefined
   }
 
   get payload() {
@@ -709,6 +726,7 @@ export default class IscnRegisterForm extends Vue {
       name: this.name,
       description: this.description,
       tagsString: this.tagsString,
+      sameAs: this.sameAs,
       url: this.url,
       exifInfo: this.exif,
       license: this.license,

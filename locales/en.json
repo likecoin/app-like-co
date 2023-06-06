@@ -203,6 +203,7 @@
   "IscnRegisterForm.label.iscn": "ISCN Title",
   "IscnRegisterForm.label.license": "License",
   "IscnRegisterForm.label.likerID": "LikerID",
+  "IscnRegisterForm.label.sameAs" : "Same As URLs",
   "IscnRegisterForm.label.name": "Name",
   "IscnRegisterForm.label.numbersProtocol": "Numbers Protocol",
   "IscnRegisterForm.label.numbersProtocol.details": "Register your asset in {link}",
