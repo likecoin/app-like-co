@@ -30,6 +30,7 @@
           'text-medium-gray',
         ]"
       >
+        <template v-if="fileData">
         <Previewer :is-image="isImage" :file-data="fileData" />
         <div
           :class="[
@@ -80,6 +81,10 @@
               <IconInfo />
             </template>
           </Button>
+        </div>
+        </template>
+        <div v-else>
+          {{ $t('IscnRegisterForm.label.emptyFile') }}
         </div>
       </div>
       <!-- fingerPrint -->
@@ -678,7 +683,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get exif() {
-    const extension = this.fileType!.split('/')
+    const extension = this.fileType?.split('/')
     return this.exifInfo
       ? {
           ...this.exifInfo,
@@ -687,7 +692,7 @@ export default class IscnRegisterForm extends Vue {
             this.exifInfo.ExifImageHeight && this.exifInfo.ExifImageWidth
               ? `${this.exifInfo.ExifImageHeight} x ${
                   this.exifInfo.ExifImageWidth
-                } ${extension[extension.length - 1].toUpperCase()} (${
+                } ${extension?.[extension.length - 1].toUpperCase()} (${
                   this.fileSize
                 })`
               : this.fileSize,
@@ -983,11 +988,13 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
+    if (this.fileBlob) {
     await this.submitToArweave();
     if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetId) {
       await this.submitToNumbers();
     }
-    if (this.uploadArweaveId) await this.submitToISCN()
+    }
+    if (!this.fileBlob || this.uploadArweaveId) await this.submitToISCN()
   }
 
   async estimateArweaveFee(): Promise<void> {
