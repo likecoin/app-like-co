@@ -74,18 +74,46 @@
             <IconGift />
           </template>
         </Label>
+        <div class="flex justify-center gap-[12px] items-center">
+          <Button
+            preset="outline"
+            @click="onClickReserveDefault"
+          >
+            {{ $t('NFTPortal.button.reserve.default') }}
+          </Button>
+          <Button
+            preset="outline"
+            @click="onClickReserveAll"
+          >
+            {{ $t('NFTPortal.button.reserve.all') }}
+          </Button>
+        </div>
         <div
           class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
           <input
-            ref="nameInput"
+            ref="reserveInput"
             :placeholder="placeholder"
             type="number"
-            :max="premintAmount"
+            :max="mintAmount"
             min="0"
             class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-            @change="(value) => $emit('update-reserve', value)"
+            @change="(e) => $emit('update-reserve', e.target.value)"
+          />
+        </div>
+        <div
+          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center rounded-[4px] py-[4px]"
+        >
+          <span>{{ $t('NFTPortal.label.mintAmount.input') }}</span>
+          <input
+            ref="mintAmount"
+            type="number"
+            :max="maxMintAmount"
+            min="1"
+            :value="mintAmount"
+            class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
+            @change="(e) => $emit('update-mint-amount', e.target.value)"
           />
         </div>
       </div>
@@ -110,7 +138,7 @@
           class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
-          <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
+          <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
             <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch">
               {{ price }}
             </option>
@@ -131,12 +159,13 @@ import { ellipsis } from '~/utils/ui'
 @Component({
   filters: { ellipsis },
 })
-export default class UploadForm extends Vue {
+export default class WriterMessage extends Vue {
   @Prop(String) readonly address!: string
 
   @Prop(String) readonly placeholder!: string
 
-  @Prop(Number) readonly premintAmount!: undefined
+  @Prop(Number) readonly mintAmount!: number
+  @Prop(Number) readonly maxMintAmount!: number
 
   userInfo: any = undefined
   avatar: string = ''
@@ -167,6 +196,28 @@ export default class UploadForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  onClickReserveDefault() {
+    if (this.$refs.reserveInput) {
+      (this.$refs.reserveInput as HTMLInputElement).value = '0'
+    }
+    if (this.$refs.mintAmount) {
+      (this.$refs.mintAmount as HTMLInputElement).value = this.maxMintAmount.toString()
+    }
+    this.$emit('update-mint-amount', this.maxMintAmount)
+    this.$emit('update-reserve', 0)
+  }
+
+  onClickReserveAll() {
+    if (this.$refs.reserveInput) {
+      (this.$refs.reserveInput as HTMLInputElement).value = this.maxMintAmount.toString()
+    }
+    if (this.$refs.mintAmount) {
+      (this.$refs.mintAmount as HTMLInputElement).value = this.maxMintAmount.toString()
+    }
+    this.$emit('update-mint-amount', this.maxMintAmount)
+    this.$emit('update-reserve', this.maxMintAmount)
   }
 
   handleClickSettings() {
