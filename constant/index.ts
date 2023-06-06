@@ -81,6 +81,7 @@ export const CRAWL_URL_REGEX = /^https?:\/\//i
 
 export const ISCN_PREFIX_REGEX = /^iscn:\/\/likecoin-chain/i
 
+// NOTE: Remember to update blog post URL with i18n key `ChainUpgrade` when changing this
 export const IS_CHAIN_UPGRADING = false;
 
 export const LIKER_NFT_API_WALLET = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
