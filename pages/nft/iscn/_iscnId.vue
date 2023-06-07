@@ -453,6 +453,14 @@ export default class NFTTestMintPage extends Vue {
     return payload;
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get createNftClassConfig() {
+    return {
+      maxSupply: Long.fromNumber(0),
+      burnable: true,
+    };
+  }
+
   get premintAmount() {
     if (this.isTransactionSizeLimited) {
       return 32;
@@ -863,6 +871,7 @@ export default class NFTTestMintPage extends Vue {
         this.address,
         this.iscnId,
         this.createNftClassPayload,
+        this.createNftClassConfig,
       )]
       const config = await this.getRoyaltyConfig();
       if (config) {
