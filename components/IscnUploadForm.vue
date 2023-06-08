@@ -96,7 +96,12 @@
             </div>
           </div>
           <!-- Publish btn -->
-          <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
+          <div class="flex gap-[8px] justify-end pt-[24px] text-medium-gray">
+            <Button
+              :preset="submitBtnClasses"
+              @click="onSkipUpload"
+              >{{ $t('UploadForm.button.skip') }}
+            </Button>
             <Button
               type="submit"
               :preset="submitBtnClasses"
@@ -266,6 +271,10 @@ export default class UploadForm extends Vue {
     } else {
       throw new Error('not ipfs url')
     }
+  }
+
+  onSkipUpload() {
+    this.$emit('submit', {})
   }
 
   onSubmit() {

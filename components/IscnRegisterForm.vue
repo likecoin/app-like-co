@@ -30,56 +30,61 @@
           'text-medium-gray',
         ]"
       >
-        <Previewer :is-image="isImage" :file-data="fileData" />
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-          ]"
-        >
+        <template v-if="fileData">
+          <Previewer :is-image="isImage" :file-data="fileData" />
           <div
-            v-if="uploadStatus === 'Loading'"
             :class="[
               'flex',
-              'items-center',
-              'mb-[24px]',
+              'flex-col',
             ]"
           >
-            <ProgressIndicator />
             <div
-              class="ml-[12px]"
-              v-text="$t('IscnRegisterForm.label.uploading')"
-            />
+              v-if="uploadStatus === 'Loading'"
+              :class="[
+                'flex',
+                'items-center',
+                'mb-[24px]',
+              ]"
+            >
+              <ProgressIndicator />
+              <div
+                class="ml-[12px]"
+                v-text="$t('IscnRegisterForm.label.uploading')"
+              />
+            </div>
+            <Label
+              v-else
+              :class="[
+                'w-min',
+                'mb-[16px]',
+              ]"
+              :text="$t('IscnRegisterForm.title.ready')"
+              tag="div"
+              preset="p5"
+              valign="middle"
+              content-class="font-semibold whitespace-nowrap text-like-green"
+              prepend-class="text-like-green"
+            >
+              <template #prepend>
+                <IconDone />
+              </template>
+            </Label>
+            <Button
+              v-if="exifInfo"
+              class="w-min"
+              type="button"
+              :text="$t('UploadForm.view.file.button')"
+              preset="outline"
+              @click="isOpenFileInfoDialog = true"
+            >
+              <template #prepend>
+                <IconInfo />
+              </template>
+            </Button>
           </div>
-          <Label
-            v-else
-            :class="[
-              'w-min',
-              'mb-[16px]',
-            ]"
-            :text="$t('IscnRegisterForm.title.ready')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconDone />
-            </template>
-          </Label>
-          <Button
-            v-if="exifInfo"
-            class="w-min"
-            type="button"
-            :text="$t('UploadForm.view.file.button')"
-            preset="outline"
-            @click="isOpenFileInfoDialog = true"
-          >
-            <template #prepend>
-              <IconInfo />
-            </template>
-          </Button>
+        </template>
+        <div v-else>
+          {{ $t('IscnRegisterForm.label.emptyFile') }}
         </div>
       </div>
       <!-- fingerPrint -->
@@ -89,6 +94,27 @@
       >
         <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
         <ContentFingerprintLink v-if="uploadArweaveId" :item="formattedArweave" />
+        <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
+        <div
+          v-if="!fileData"
+          :class="[
+            'flex',
+            { 'mt-[12px]': customContentFingerprints.length },
+            'gap-[8px]'
+          ]"
+        >
+          <TextField
+            v-model="contentFingerprintInput"
+            class="w-full"
+          />
+          <Button
+            preset="secondary"
+            type="button"
+            @click="addContentFingerprint"
+          >
+            <IconAddMini />
+          </Button>
+        </div>
       </FormField>
       <!-- Numbers Protocol -->
       <FormField
@@ -220,6 +246,17 @@
               :placeholder="$t('IscnRegisterForm.placeholder.url')"
             />
           </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.sameAs')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <EditableTagList
+              v-model="sameAs"
+              :characters-limit="charactersLimit.url"
+              :tags-limit="charactersLimit.tagNumber"
+            />
+          </FormField>
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
@@ -534,7 +571,8 @@ export enum CharactersLimit {
   authorDescription = 200,
   likerIdLeast = 7,
   likerId = 20,
-  license = 200
+  license = 200,
+  url = 2048,
 }
 
 @Component
@@ -560,6 +598,7 @@ export default class IscnRegisterForm extends Vue {
   name: string = ''
   description: string = ''
   tags: string[] = []
+  sameAs: string[] = []
   url: string = ''
   license: string = ''
   authorName: string = ''
@@ -572,6 +611,8 @@ export default class IscnRegisterForm extends Vue {
   likerId: string = ''
   likerIdsAddresses: (string | void)[] = []
   authorDescription: string = ''
+  contentFingerprintInput: string = ''
+  customContentFingerprints: string[] = []
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
@@ -678,24 +719,28 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get exif() {
-    const extension = this.fileType!.split('/')
-    return this.exifInfo
-      ? {
+    const extension = this.fileType?.split('/')
+    if (this.exifInfo) {
+      return {
           ...this.exifInfo,
           Format: this.fileType,
           Size:
             this.exifInfo.ExifImageHeight && this.exifInfo.ExifImageWidth
               ? `${this.exifInfo.ExifImageHeight} x ${
                   this.exifInfo.ExifImageWidth
-                } ${extension[extension.length - 1].toUpperCase()} (${
+                } ${extension?.[extension.length - 1].toUpperCase()} (${
                   this.fileSize
                 })`
               : this.fileSize,
         }
-      : {
+    }
+    if (this.isImage || this.isPhoto) {
+      return {
           Format: this.fileType,
           Size: this.fileSize,
         }
+  }
+    return undefined
   }
 
   get payload() {
@@ -704,6 +749,7 @@ export default class IscnRegisterForm extends Vue {
       name: this.name,
       description: this.description,
       tagsString: this.tagsString,
+      sameAs: this.sameAs,
       url: this.url,
       exifInfo: this.exif,
       license: this.license,
@@ -717,6 +763,7 @@ export default class IscnRegisterForm extends Vue {
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
       authorDescriptions: this.authorDescriptions,
+      contentFingerprints: this.customContentFingerprints,
     }
   }
 
@@ -798,6 +845,10 @@ export default class IscnRegisterForm extends Vue {
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
     this.uploadStatus = ''
+  }
+
+  addContentFingerprint() {
+    this.customContentFingerprints.push(this.contentFingerprintInput)
   }
 
   handleOpenAuthorDialog() {
@@ -983,11 +1034,13 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
+    if (this.fileBlob) {
     await this.submitToArweave();
     if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetId) {
       await this.submitToNumbers();
     }
-    if (this.uploadArweaveId) await this.submitToISCN()
+    }
+    if (!this.fileBlob || this.uploadArweaveId) await this.submitToISCN()
   }
 
   async estimateArweaveFee(): Promise<void> {
