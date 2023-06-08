@@ -75,7 +75,7 @@
           </template>
         </Label>
         <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] py-[4px]"
+          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
           <input
@@ -107,7 +107,7 @@
           </template>
         </Label>
         <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] py-[4px]"
+          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
           <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
