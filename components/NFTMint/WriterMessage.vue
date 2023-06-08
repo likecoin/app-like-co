@@ -57,49 +57,67 @@
       </Button>
     </div>
 
-    <div
-      v-if="shouldShowSettings"
-      class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
-    >
-      <Label
-        class="w-min text-like-green"
-        :text="$t('NFTPortal.label.message.reserve')"
-        tag="div"
-        preset="p6"
-        valign="middle"
-        align="left"
-        content-class="whitespace-nowrap"
-      >
-        <template #prepend>
-          <IconGift />
-        </template>
-      </Label>
+    <template v-if="shouldShowSettings">
       <div
-        class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] py-[4px]"
+        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
-        <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
-        <input
-          ref="nameInput"
-          :placeholder="placeholder"
-          type="number"
-          :max="premintAmount"
-          min="0"
-          class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-          @change="(value) => $emit('update-reserve', value)"
-        />
+        <Label
+          class="w-min text-like-green"
+          :text="$t('NFTPortal.label.message.reserve')"
+          tag="div"
+          preset="p6"
+          valign="middle"
+          align="left"
+          content-class="whitespace-nowrap"
+        >
+          <template #prepend>
+            <IconGift />
+          </template>
+        </Label>
+        <div
+          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
+        >
+          <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
+          <input
+            ref="nameInput"
+            :placeholder="placeholder"
+            type="number"
+            :max="premintAmount"
+            min="0"
+            class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
+            @change="(value) => $emit('update-reserve', value)"
+          />
+        </div>
       </div>
+
       <div
-        v-if="shouldShowInitialBatchSettings"
-        class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center bg-[#E6F4F2] rounded-[4px] py-[4px]"
+        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
-        <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
-        <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
-          <option v-for="_, i in Array(maxInitialBatch)" :key="i" :value="i">
-            {{ basePrice * Math.pow(2, i)}}
-          </option>
-        </select>
+        <Label
+          class="w-min text-like-green"
+          :text="$t('NFTPortal.label.message.mintSettings')"
+          tag="div"
+          preset="p6"
+          valign="middle"
+          align="left"
+          content-class="whitespace-nowrap"
+        >
+          <template #prepend>
+            <IconMint />
+          </template>
+        </Label>
+        <div
+          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
+        >
+          <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
+          <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
+            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch">
+              {{ price }}
+            </option>
+          </select>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -124,8 +142,13 @@ export default class UploadForm extends Vue {
   avatar: string = ''
   displayName: string = this.address
   shouldShowSettings = false
-  maxInitialBatch = 13
-  basePrice = 8
+  shouldShowAdvancedSettings = false
+  initialBatchOptions = [
+    { batch: 0, price: 8 },
+    { batch: 4, price: 128 },
+    { batch: 7, price: 1024 },
+    { batch: 9, price: 4096 },
+  ]
 
   get shouldShowInitialBatchSettings() {
     return !!this.$route.query.set_initial_batch
@@ -148,6 +171,10 @@ export default class UploadForm extends Vue {
 
   handleClickSettings() {
     this.shouldShowSettings = !this.shouldShowSettings
+  }
+
+  handleAdvancedClickSettings() {
+    this.shouldShowAdvancedSettings = !this.shouldShowAdvancedSettings
   }
 }
 </script>
