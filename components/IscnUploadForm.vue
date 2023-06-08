@@ -98,8 +98,8 @@
           <!-- Publish btn -->
           <div class="flex gap-[8px] justify-end pt-[24px] text-medium-gray">
             <Button
-              @click="onSkipUpload"
               :preset="submitBtnClasses"
+              @click="onSkipUpload"
               >{{ $t('UploadForm.button.skip') }}
             </Button>
             <Button

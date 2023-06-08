@@ -31,57 +31,57 @@
         ]"
       >
         <template v-if="fileData">
-        <Previewer :is-image="isImage" :file-data="fileData" />
-        <div
-          :class="[
-            'flex',
-            'flex-col',
-          ]"
-        >
+          <Previewer :is-image="isImage" :file-data="fileData" />
           <div
-            v-if="uploadStatus === 'Loading'"
             :class="[
               'flex',
-              'items-center',
-              'mb-[24px]',
+              'flex-col',
             ]"
           >
-            <ProgressIndicator />
             <div
-              class="ml-[12px]"
-              v-text="$t('IscnRegisterForm.label.uploading')"
-            />
+              v-if="uploadStatus === 'Loading'"
+              :class="[
+                'flex',
+                'items-center',
+                'mb-[24px]',
+              ]"
+            >
+              <ProgressIndicator />
+              <div
+                class="ml-[12px]"
+                v-text="$t('IscnRegisterForm.label.uploading')"
+              />
+            </div>
+            <Label
+              v-else
+              :class="[
+                'w-min',
+                'mb-[16px]',
+              ]"
+              :text="$t('IscnRegisterForm.title.ready')"
+              tag="div"
+              preset="p5"
+              valign="middle"
+              content-class="font-semibold whitespace-nowrap text-like-green"
+              prepend-class="text-like-green"
+            >
+              <template #prepend>
+                <IconDone />
+              </template>
+            </Label>
+            <Button
+              v-if="exifInfo"
+              class="w-min"
+              type="button"
+              :text="$t('UploadForm.view.file.button')"
+              preset="outline"
+              @click="isOpenFileInfoDialog = true"
+            >
+              <template #prepend>
+                <IconInfo />
+              </template>
+            </Button>
           </div>
-          <Label
-            v-else
-            :class="[
-              'w-min',
-              'mb-[16px]',
-            ]"
-            :text="$t('IscnRegisterForm.title.ready')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconDone />
-            </template>
-          </Label>
-          <Button
-            v-if="exifInfo"
-            class="w-min"
-            type="button"
-            :text="$t('UploadForm.view.file.button')"
-            preset="outline"
-            @click="isOpenFileInfoDialog = true"
-          >
-            <template #prepend>
-              <IconInfo />
-            </template>
-          </Button>
-        </div>
         </template>
         <div v-else>
           {{ $t('IscnRegisterForm.label.emptyFile') }}
@@ -99,7 +99,7 @@
           v-if="!fileData"
           :class="[
             'flex',
-            'mt-[12px]',
+            { 'mt-[12px]': customContentFingerprints.length },
             'gap-[8px]'
           ]"
         >
@@ -108,11 +108,8 @@
             class="w-full"
           />
           <Button
-            type="button"
-            class="mb-[4px]"
-            size="mini"
             preset="secondary"
-            content-class="py-[4px]"
+            type="button"
             @click="addContentFingerprint"
           >
             <IconAddMini />
