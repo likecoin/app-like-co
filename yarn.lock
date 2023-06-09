@@ -2671,10 +2671,10 @@
   dependencies:
     buffer "^6.0.3"
 
-"@likecoin/wallet-connector@^0.17.3":
-  version "0.17.3"
-  resolved "https://registry.yarnpkg.com/@likecoin/wallet-connector/-/wallet-connector-0.17.3.tgz#6702b5f0565efc29d076b90d4573d853baf92ef5"
-  integrity sha512-BUVhIemHhsLWDZwjUhw9D5gYJYymCSdJoXZUJbEtHqap7SPTNouzCZAIzJrkkiIwwpjNA7VaEhoMy08Mpf+EOQ==
+"@likecoin/wallet-connector@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@likecoin/wallet-connector/-/wallet-connector-0.20.1.tgz#e788c3aa2c98605b864c94caa8e1e54d897113d7"
+  integrity sha512-w7HLyOO9ZqpTLRKiGImJhW3PC2lb6sMBlZQUrrFJr4G+Cx+OF4lIA99KFqUV1pWLL7Q4EQPUHueK7XTpOtOisQ==
   dependencies:
     "@cosmjs/proto-signing" "^0.28.13"
     "@headlessui/react" "^1.6.6"
