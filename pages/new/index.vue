@@ -126,6 +126,10 @@ export default class NewIndexPage extends Vue {
   isSubmit = false
   record: ISCNRecordWithID | null = null
 
+  get shouldSkipToMintNFT(): boolean {
+    return this.$route.query.mint === '1'
+  }
+
   get step(): any {
     switch (this.state) {
       case State.init:
@@ -197,6 +201,14 @@ export default class NewIndexPage extends Vue {
     const records = await this.queryISCNByAddress(this.currentAddress)
     this.record = records ? records[records.length - 1] : null
     logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1);
+    if (this.shouldSkipToMintNFT) {
+      this.$router.push(
+        this.localeLocation({
+          name: 'nft-iscn-iscnId',
+          params: { iscnId },
+        })!,
+      )
+    }
   }
 
   handleCreateAnotherButtonClick() {
