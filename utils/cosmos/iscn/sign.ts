@@ -41,13 +41,15 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     likerIdsAddresses,
     authorDescriptions,
     numbersProtocolAssetId,
-    contentFingerprints = [],
-    stakeholders = [],
+    contentFingerprints: contentFingerprintsInput = [],
+    stakeholders: stakeholdersInput = [],
     recordNotes,
     publisher,
     ...data
   } = payload;
 
+  const contentFingerprints = [...contentFingerprintsInput]
+  const stakeholders = [...stakeholdersInput]
   let rewardProportion = 1
   if (publisher) {
     const {
