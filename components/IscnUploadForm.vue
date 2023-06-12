@@ -95,6 +95,17 @@
               <IconDelete />
             </div>
           </div>
+          <div class="flex gap-[8px] justify-end text-medium-gray">
+            <NuxtLink
+              :class="[
+                'text-[12px]',
+                'underline',
+              ]"
+              :to="localeLocation({ name: 'nft-url' })"
+            >
+              {{ $t('UploadForm.button.mintUrl') }}
+            </NuxtLink>
+          </div>
           <!-- Publish btn -->
           <div class="flex gap-[8px] justify-end pt-[24px] text-medium-gray">
             <Button
