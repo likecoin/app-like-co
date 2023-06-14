@@ -6,6 +6,7 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER } from '~/constant'
 import { getPublisherISCNPayload } from '.';
+import { ISCN_PUBLISHERS } from '~/constant/iscn';
 
 let client: ISCNSigningClient | null = null;
 let iscnLib: any = null;
@@ -44,12 +45,16 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     contentFingerprints: contentFingerprintsInput = [],
     stakeholders: stakeholdersInput = [],
     recordNotes,
-    publisher,
+    publisher: publisherInput,
     ...data
   } = payload;
 
   const contentFingerprints = [...contentFingerprintsInput]
   const stakeholders = [...stakeholdersInput]
+  let publisher = publisherInput
+  if (!stakeholders.length && !publisher) {
+    publisher = ISCN_PUBLISHERS.likerland
+  }
   let rewardProportion = 1
   if (publisher) {
     const {
@@ -59,10 +64,11 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     stakeholders.push(...publisherStakeholders);
     contentFingerprints.push(...publisherContentFingerprints);
     if (publisherStakeholders && publisherStakeholders.length) {
-      rewardProportion = publisherStakeholders.reduce((acc, cur) => {
+      rewardProportion -= publisherStakeholders.reduce((acc, cur) => {
         if (cur.rewardProportion) return acc + cur.rewardProportion
         return acc
       }, 0)
+      rewardProportion = Math.max(0, rewardProportion);
     }
   }
   if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
@@ -91,7 +97,9 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
           value: `https://like.co/${likerIds[i]}`,
         }
 
-      if(likerIds[i] && likerIdsAddresses[i]) identifiers.push(likerIdentifiers)
+      if (likerIds[i] && likerIdsAddresses[i]) {
+        identifiers.push(likerIdentifiers)
+      }
 
       const sameAsArray = authorUrls[i].filter(a => !!a)
       const isNonEmpty = url || authorName || identifiers.length
