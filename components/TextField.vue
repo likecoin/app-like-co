@@ -15,7 +15,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
 export default class TextField extends Vue {
-  @Prop(String) readonly value!: string | undefined
+  @Prop([String, Number]) readonly value!: string | number | undefined
   @Prop(String) readonly placeholder!: string | undefined
   @Prop({ default: 44 }) readonly size!: number
   @Prop(String) readonly errorMessage!: string | undefined
@@ -26,7 +26,6 @@ export default class TextField extends Vue {
     'py-[12px]',
     'px-[16px]',
     'w-full',
-    'min-w-[200px]',
     'bg-shade-gray',
     'rounded-[12px]',
     'border-2',
@@ -69,20 +68,20 @@ export default class TextField extends Vue {
 
   get sizeClasses(): any {
     switch (this.size) {
-      case 44:
-        return [
-          'h-44px',
-          'font-semibold',
-        ]
-
       case 40:
         return [
           'h-40px',
+          'min-w-[80px]',
           'font-normal',
         ]
 
+      case 44:
       default:
-        return []
+        return [
+          'h-44px',
+          'min-w-[200px]',
+          'font-semibold',
+        ]
     }
   }
 

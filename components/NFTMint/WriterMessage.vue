@@ -59,7 +59,7 @@
 
     <template v-if="shouldShowSettings">
       <div
-        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
           class="w-min text-like-green"
@@ -77,49 +77,45 @@
         <div class="flex justify-center gap-[12px] items-center">
           <Button
             preset="outline"
+            size="mini"
             @click="onClickReserveDefault"
           >
             {{ $t('NFTPortal.button.reserve.default') }}
           </Button>
           <Button
             preset="outline"
+            size="mini"
             @click="onClickReserveAll"
           >
             {{ $t('NFTPortal.button.reserve.all') }}
           </Button>
         </div>
-        <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
-        >
-          <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
-          <input
-            ref="reserveInput"
-            :placeholder="placeholder"
-            type="number"
-            :max="mintAmount"
-            min="0"
-            class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-            @change="(e) => $emit('update-reserve', e.target.value)"
-          />
-        </div>
-        <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center rounded-[4px] py-[4px]"
-        >
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
           <span>{{ $t('NFTPortal.label.mintAmount.input') }}</span>
-          <input
-            ref="mintAmount"
+          <TextField
+            :key="mintAmount.toString()"
+            v-model="mintAmountInput"
             type="number"
             :max="maxMintAmount"
-            min="1"
-            :value="mintAmount"
-            class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-            @change="(e) => $emit('update-mint-amount', e.target.value)"
+            :min="0"
+            :size="40"
+          />
+        </div>
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
+          <span>{{ $t('NFTPortal.label.reserve.input') }}<br><span class="text-medium-gray">({{ placeholder }})</span></span>
+          <TextField
+            :key="mintAmountInput.toString()"
+            v-model="reserveAmountInput"
+            type="number"
+            :max="mintAmount"
+            :min="0"
+            :size="40"
           />
         </div>
       </div>
 
       <div
-        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
           class="w-min text-like-green"
@@ -135,7 +131,7 @@
           </template>
         </Label>
         <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
+          class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
           <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
@@ -150,7 +146,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 import { getAddressLikerIdMinApi } from '~/constant/api'
 
@@ -164,6 +160,7 @@ export default class WriterMessage extends Vue {
 
   @Prop(String) readonly placeholder!: string
 
+  @Prop(Number) readonly reserveAmount!: number
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
 
@@ -179,8 +176,35 @@ export default class WriterMessage extends Vue {
     { batch: 9, price: 4096 },
   ]
 
+  reserveAmountInput = this.reserveAmount
+  mintAmountInput = this.mintAmount
+
   get shouldShowInitialBatchSettings() {
     return !!this.$route.query.set_initial_batch
+  }
+
+  @Watch('reserveAmount')
+  handleReserveAmountChange() {
+    this.reserveAmountInput = this.reserveAmount
+  }
+
+  @Watch('mintAmount')
+  handleMintAmountChange() {
+    this.mintAmountInput = this.mintAmount
+  }
+
+  @Watch('reserveAmountInput')
+  handleReserveAmountInputChange() {
+    if (this.reserveAmountInput === undefined) return
+    this.reserveAmountInput = Math.max(0, Math.min(this.reserveAmountInput, this.mintAmountInput))
+    this.$emit('update-reserve', this.reserveAmountInput)
+  }
+
+  @Watch('mintAmountInput')
+  handleMintAmountInputChange() {
+    this.mintAmountInput = Math.max(1, Math.min(this.mintAmountInput, this.maxMintAmount));
+    this.$emit('update-mint-amount', this.mintAmountInput)
+    this.handleReserveAmountInputChange()
   }
 
   async mounted() {
@@ -199,25 +223,12 @@ export default class WriterMessage extends Vue {
   }
 
   onClickReserveDefault() {
-    if (this.$refs.reserveInput) {
-      (this.$refs.reserveInput as HTMLInputElement).value = '0'
-    }
-    if (this.$refs.mintAmount) {
-      (this.$refs.mintAmount as HTMLInputElement).value = this.maxMintAmount.toString()
-    }
-    this.$emit('update-mint-amount', this.maxMintAmount)
-    this.$emit('update-reserve', 0)
+    this.mintAmountInput = this.maxMintAmount
+    this.reserveAmountInput = 0
   }
 
   onClickReserveAll() {
-    if (this.$refs.reserveInput) {
-      (this.$refs.reserveInput as HTMLInputElement).value = this.maxMintAmount.toString()
-    }
-    if (this.$refs.mintAmount) {
-      (this.$refs.mintAmount as HTMLInputElement).value = this.maxMintAmount.toString()
-    }
-    this.$emit('update-mint-amount', this.maxMintAmount)
-    this.$emit('update-reserve', this.maxMintAmount)
+    this.reserveAmountInput = this.mintAmountInput
   }
 
   handleClickSettings() {

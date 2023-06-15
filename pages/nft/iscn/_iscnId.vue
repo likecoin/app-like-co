@@ -35,6 +35,7 @@
         :placeholder="reservePlaceholder"
         :mint-amount="mintAmount"
         :max-mint-amount="maxMintAmount"
+        :reserve-amount="reserveNft"
         @message-change="(value) => (message = value)"
         @update-mint-amount="handleInputMintAmount"
         @update-reserve="handleInputReserveNft"
@@ -117,7 +118,7 @@ import Long from 'long';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing';
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -1040,15 +1041,13 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  handleInputMintAmount(inputValue: string | number) {
-    const value = Number(inputValue);
-    this.mintAmount = Math.max(1, Math.min(value, this.maxMintAmount));
+  handleInputMintAmount(inputValue: number) {
+    this.mintAmount = inputValue;
     logTrackerEvent(this, 'IscnMintNFT', 'MintAmount', this.mintAmount.toString(), 1);
   }
 
-  handleInputReserveNft(inputValue: string | number) {
-    const value = Number(inputValue);
-    this.reserveNft = Math.max(0, Math.min(value, this.mintAmount));
+  handleInputReserveNft(inputValue: number) {
+    this.reserveNft = inputValue;
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
