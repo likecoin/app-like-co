@@ -13,7 +13,7 @@
         :size="40"
         :class="['my-[4px]', 'flex-grow']"
         :placeholder="placeholder"
-        @delete-empty-field="deleteEmptyField"
+        @blur="deleteEmptyField"
       />
       <span
         v-if="value.length > 1"

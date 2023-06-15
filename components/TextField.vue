@@ -2,16 +2,18 @@
   <div class="flex flex-col">
     <component
       :is="tag"
+      :key="`${keyIndex}`"
+      ref="input"
       v-bind="inputProps"
       @input="$emit('input', $event.target.value)"
-      @blur="$emit('delete-empty-field')"
+      @blur="handleBlur"
     ><template v-if="isTextarea && value">{{ value }}</template></component>
     <span :class="errorMsgClasses">{{ errorMessage }}</span>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 @Component
 export default class TextField extends Vue {
@@ -21,6 +23,8 @@ export default class TextField extends Vue {
   @Prop(String) readonly errorMessage!: string | undefined
   @Prop({ default: false }) readonly isDisabled!: boolean
   @Prop({ default: false }) readonly isTextarea!: boolean
+
+  keyIndex = 0
 
   static presetClasses: Array<string> = [
     'py-[12px]',
@@ -93,6 +97,23 @@ export default class TextField extends Vue {
 
   get errorMsgClasses(): any {
     return { 'pl-[8px] text-[red] text-[10px]': this.errorMessage }
+  }
+
+  @Watch('value')
+  onValueChange(value: string) {
+    if (this.isTextarea) return
+
+    // NOTE: Workaround for the issue that the input value is not updated when the value prop is changed.
+    const inputValue = (this.$refs.input as any).value
+    if (inputValue.toString() !== value.toString()) {
+      (this.$refs.input as any).value = value
+    }
+  }
+
+  handleBlur() {
+    // NOTE: Update the key to re-render the input element to sync with value prop
+    this.keyIndex = (this.keyIndex + 1) % 2
+    this.$emit('blur')
   }
 }
 </script>

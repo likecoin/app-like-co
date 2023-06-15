@@ -96,13 +96,13 @@
             <span class="text-medium-gray">{{ `(${1} - ${maxMintAmount})` }}</span>
           </span>
           <TextField
-            :key="mintAmount.toString()"
             :value="mintAmount"
             type="number"
             :max="maxMintAmount"
             :min="1"
             :size="40"
             @input="updateMintAmount($event)"
+            @blur="handleMintAmountInputBlur"
           />
         </div>
         <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
@@ -111,13 +111,13 @@
             <span class="text-medium-gray">{{ `(${0} - ${mintAmount})` }}</span>
           </span>
           <TextField
-            :key="reserveAmount.toString()"
             :value="reserveAmount"
             type="number"
             :max="mintAmount"
             :min="0"
             :size="40"
             @input="updateReserveAmount($event)"
+            @blur="handleReserveAmountInputBlur"
           />
         </div>
       </div>
@@ -214,6 +214,14 @@ export default class WriterMessage extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  handleMintAmountInputBlur() {
+    this.updateMintAmount(this.mintAmount)
+  }
+
+  handleReserveAmountInputBlur() {
+    this.updateReserveAmount(this.reserveAmount)
   }
 
   onClickReserveDefault() {
