@@ -32,10 +32,12 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
-        :placeholder="reservePlaceholder"
-        :premint-amount="premintAmount"
+        :mint-amount.sync="mintAmount"
+        :max-mint-amount="maxMintAmount"
+        :reserve-amount.sync="reserveNft"
         @message-change="(value) => (message = value)"
-        @update-reserve="handleInputReserveNft"
+        @update-mint-amount.once="handleInputMintAmount"
+        @update-reserve.once="handleInputReserveNft"
         @update-initial-batch="handleInputInitialBatch"
       />
 
@@ -44,8 +46,8 @@
         :iscn-id="iscnId"
         :ar-id="ogImageArweaveId"
         :class-id="classId"
-        :nft-link="apiData && detailsPageURL"
-        :nft-model-url="apiData && modelURL"
+        :nft-link="(doneOverride || apiData) && detailsPageURL"
+        :nft-model-url="(doneOverride || apiData) && modelURL"
         :has-error="hasError"
         :error-message="errorMessage"
         :tx-status="txStatus"
@@ -260,6 +262,7 @@ export default class NFTTestMintPage extends Vue {
   txStatus: string = ''
 
   reserveNft: number = 0
+  mintAmount: number = this.maxMintAmount
   initialBatch: number = 0
   shouldShowNoUrlWarning: boolean = false
 
@@ -269,12 +272,11 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get isWritingNFT(): boolean {
-    const { raw_nft: nft = 0 } = this.$route.query
-    return !(nft && nft !== '0');
+    return this.mintAmount > this.reserveNft;
   }
 
   get NFTPrefix(): string {
-    return (this.$route.query.nft_prefix as string) || `${this.isWritingNFT ? 'Writing NFT' : ''}`;
+    return (this.$route.query.nft_prefix as string) || 'Writing NFT';
   }
 
   get hasOpener(): boolean {
@@ -294,8 +296,13 @@ export default class NFTTestMintPage extends Vue {
     return iscnId
   }
 
+  get doneOverride(): boolean {
+    const { done } = this.$route.query
+    return done === '1'
+  }
+
   get state(): string {
-    if (this.apiData) return State.DONE
+    if (this.apiData || this.doneOverride) return State.DONE
     if (this.classId) return State.MINT
     if (this.isMessageChecked) return State.CREATE
     if (this.isPreviewChecked) return State.MESSAGE
@@ -431,14 +438,13 @@ export default class NFTTestMintPage extends Vue {
       external_url: this.iscnData.contentMetadata?.url,
       message: this.message || '',
     }
-    if (this.isWritingNFT) {
-      metadata = Object.assign(metadata, {
-        nft_meta_collection_id: 'likerland_writing_nft',
-        nft_meta_collection_name: 'Writing NFT',
-        nft_meta_collection_descrption: 'Writing NFT by Liker Land',
-      })
-    }
+    metadata = Object.assign(metadata, {
+      nft_meta_collection_id: 'likerland_writing_nft',
+      nft_meta_collection_name: 'Writing NFT',
+      nft_meta_collection_descrption: 'Writing NFT by Liker Land',
+    })
     let payload = {
+      symbol: 'WRITING',
       name: this.NftName,
       description: this.NftDescription,
       metadata,
@@ -446,11 +452,10 @@ export default class NFTTestMintPage extends Vue {
     if (this.isCustomOgimage) payload.metadata.is_custom_image = 'true';
     if (this.isWritingNFT) {
       payload = Object.assign(payload, {
-        symbol: 'WRITING',
         uri: getNftClassUriViaIscnId(this.iscnId),
       });
     }
-    return payload;
+    return payload
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -461,7 +466,7 @@ export default class NFTTestMintPage extends Vue {
     };
   }
 
-  get premintAmount() {
+  get maxMintAmount() {
     if (this.isTransactionSizeLimited) {
       return 32;
     }
@@ -475,16 +480,18 @@ export default class NFTTestMintPage extends Vue {
     return undefined
   }
 
-  get reservePlaceholder() {
-    return `0 - ${this.premintAmount - 1}`
-  }
-
   async mounted() {
     try {
       await Promise.all([
         this.getISCNInfo(),
         this.getMintInfo(),
       ])
+      if (this.$route.query.done === '1') {
+        // for handling refresh after all reserve nft
+        // state is set in computed
+        this.txStatus = TxStatus.COMPLETED
+        return;
+      }
       await this.getOgImage()
       if (!this.isUserISCNOwner) {
         throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
@@ -560,6 +567,11 @@ export default class NFTTestMintPage extends Vue {
             await this.postMintInfo()
             if (!this.postInfo) break
             await this.getMintInfo()
+          } else {
+            this.$router.replace({ query: {
+              ...this.$route.query,
+              done: '1',
+            } })
           }
           this.txStatus = TxStatus.COMPLETED
           this.isLoading = false
@@ -939,8 +951,8 @@ export default class NFTTestMintPage extends Vue {
   }
 
   getNFTMessages(classId = this.classId) {
-    if (!this.nftsIds.length) this.nftsIds = [...Array(this.premintAmount).keys()]
-        .map((_) => `${this.isWritingNFT ? 'writing-' : ''}${uuidv4()}`);
+    if (!this.nftsIds.length) this.nftsIds = [...Array(this.mintAmount).keys()]
+        .map((_) => `writing-${uuidv4()}`);
       const nfts = this.nftsIds.map(id => this.getMintNftPayload(id))
       const mintMessages = nfts.map((i) =>
         formatMsgMintNFT(this.address, classId, i),
@@ -1024,18 +1036,16 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  handleInputReserveNft(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    const value = Number(inputElement.value);
-    /* HACK: limit to 1 less than premint amount to ensure at least 1 can be sent to
-      create the WNFT API data */
-    this.reserveNft = Math.max(0, Math.min(value, this.premintAmount - 1));
+  handleInputMintAmount() {
+    logTrackerEvent(this, 'IscnMintNFT', 'MintAmount', this.mintAmount.toString(), 1);
+  }
+
+  handleInputReserveNft() {
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 
-  handleInputInitialBatch(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    const value = Number(inputElement.value);
+  handleInputInitialBatch(inputValue: string | number) {
+    const value = Number(inputValue);
     this.initialBatch = value;
     logTrackerEvent(this, 'IscnMintNFT', 'SetInitialBatch', this.initialBatch.toString(), 1);
   }

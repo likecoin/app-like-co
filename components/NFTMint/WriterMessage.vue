@@ -59,7 +59,7 @@
 
     <template v-if="shouldShowSettings">
       <div
-        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
           class="w-min text-like-green"
@@ -74,24 +74,56 @@
             <IconGift />
           </template>
         </Label>
-        <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
-        >
-          <span>{{ $t('NFTPortal.label.reserve.input') }}</span>
-          <input
-            ref="nameInput"
-            :placeholder="placeholder"
+        <div class="flex justify-center gap-[12px] items-center">
+          <Button
+            preset="outline"
+            size="mini"
+            @click="onClickReserveDefault"
+          >
+            {{ $t('NFTPortal.button.reserve.default') }}
+          </Button>
+          <Button
+            preset="outline"
+            size="mini"
+            @click="onClickReserveAll"
+          >
+            {{ $t('NFTPortal.button.reserve.all') }}
+          </Button>
+        </div>
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
+          <span>
+            {{ $t('NFTPortal.label.mintAmount.input') }}<br>
+            <span class="text-medium-gray">{{ `(${1} - ${maxMintAmount})` }}</span>
+          </span>
+          <TextField
+            :key="mintAmount.toString()"
+            :value="mintAmount"
             type="number"
-            :max="premintAmount"
-            min="0"
-            class="w-[65px] bg-transparent border-0 border-b-2 border-black outline-none text-center placeholder-medium-gray focus:outline-none"
-            @change="(value) => $emit('update-reserve', value)"
+            :max="maxMintAmount"
+            :min="1"
+            :size="40"
+            @input="updateMintAmount($event)"
+          />
+        </div>
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
+          <span>
+            {{ $t('NFTPortal.label.reserve.input') }}<br>
+            <span class="text-medium-gray">{{ `(${0} - ${mintAmount})` }}</span>
+          </span>
+          <TextField
+            :key="reserveAmount.toString()"
+            :value="reserveAmount"
+            type="number"
+            :max="mintAmount"
+            :min="0"
+            :size="40"
+            @input="updateReserveAmount($event)"
           />
         </div>
       </div>
 
       <div
-        class="flex flex-col justify-start gap-[32px] pt-[20px] pb-[24px] px-[40px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
           class="w-min text-like-green"
@@ -107,10 +139,10 @@
           </template>
         </Label>
         <div
-          class="flex justify-center gap-[12px] text-dark-gray text-[14px] items-center"
+          class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
-          <select ref="batchInput" @change="(value) => $emit('update-initial-batch', value)">
+          <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
             <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch">
               {{ price }}
             </option>
@@ -131,12 +163,12 @@ import { ellipsis } from '~/utils/ui'
 @Component({
   filters: { ellipsis },
 })
-export default class UploadForm extends Vue {
+export default class WriterMessage extends Vue {
   @Prop(String) readonly address!: string
 
-  @Prop(String) readonly placeholder!: string
-
-  @Prop(Number) readonly premintAmount!: undefined
+  @Prop(Number) readonly reserveAmount!: number
+  @Prop(Number) readonly mintAmount!: number
+  @Prop(Number) readonly maxMintAmount!: number
 
   userInfo: any = undefined
   avatar: string = ''
@@ -154,6 +186,21 @@ export default class UploadForm extends Vue {
     return !!this.$route.query.set_initial_batch
   }
 
+  updateReserveAmount(value: number) {
+    const reserveAmount = Math.max(0, Math.min(value, this.mintAmount))
+    this.$emit('update:reserveAmount', reserveAmount)
+    this.$emit('update-reserve', reserveAmount)
+  }
+
+  updateMintAmount(value: number) {
+    const mintAmount = Math.max(1, Math.min(value, this.maxMintAmount))
+    if (mintAmount < this.reserveAmount) {
+      this.updateReserveAmount(mintAmount)
+    }
+    this.$emit('update:mintAmount', mintAmount)
+    this.$emit('update-mint-amount', mintAmount)
+  }
+
   async mounted() {
     try {
       const { data } = await this.$axios.get(
@@ -167,6 +214,15 @@ export default class UploadForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  onClickReserveDefault() {
+    this.updateReserveAmount(0)
+    this.updateMintAmount(this.maxMintAmount)
+  }
+
+  onClickReserveAll() {
+    this.updateReserveAmount(this.mintAmount)
   }
 
   handleClickSettings() {
