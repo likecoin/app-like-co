@@ -45,6 +45,17 @@
             :error-message="errorMessage"
             @input="onInputURL"
           />
+          <div class="flex gap-[8px] justify-end mt-[8px] text-medium-gray">
+            <NuxtLink
+              :class="[
+                'text-[12px]',
+                'underline',
+              ]"
+              :to="localeLocation({ name: 'new', query: { mint: '1' } })"
+            >
+              {{ $t('NFTPortal.label.fileUpload') }}
+            </NuxtLink>
+          </div>
           {{ iscnId }}
         </div>
         <div v-if="isLoading" class="flex flex-col items-end w-full">
