@@ -32,13 +32,12 @@
       <NFTMintWriterMessage
         v-if="currentPage === 'MessagePreview'"
         :address="address"
-        :placeholder="reservePlaceholder"
-        :mint-amount="mintAmount"
+        :mint-amount.sync="mintAmount"
         :max-mint-amount="maxMintAmount"
-        :reserve-amount="reserveNft"
+        :reserve-amount.sync="reserveNft"
         @message-change="(value) => (message = value)"
-        @update-mint-amount="handleInputMintAmount"
-        @update-reserve="handleInputReserveNft"
+        @update-mint-amount.once="handleInputMintAmount"
+        @update-reserve.once="handleInputReserveNft"
         @update-initial-batch="handleInputInitialBatch"
       />
 
@@ -479,10 +478,6 @@ export default class NFTTestMintPage extends Vue {
       return URL.createObjectURL(this.ogImageBlob)
     }
     return undefined
-  }
-
-  get reservePlaceholder() {
-    return `0 - ${this.mintAmount}`
   }
 
   async mounted() {
@@ -1041,13 +1036,11 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  handleInputMintAmount(inputValue: number) {
-    this.mintAmount = inputValue;
+  handleInputMintAmount() {
     logTrackerEvent(this, 'IscnMintNFT', 'MintAmount', this.mintAmount.toString(), 1);
   }
 
-  handleInputReserveNft(inputValue: number) {
-    this.reserveNft = inputValue;
+  handleInputReserveNft() {
     logTrackerEvent(this, 'IscnMintNFT', 'ReserveNFT', this.reserveNft.toString(), 1);
   }
 

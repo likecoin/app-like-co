@@ -91,25 +91,33 @@
           </Button>
         </div>
         <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
-          <span>{{ $t('NFTPortal.label.mintAmount.input') }}</span>
+          <span>
+            {{ $t('NFTPortal.label.mintAmount.input') }}<br>
+            <span class="text-medium-gray">{{ `(${1} - ${maxMintAmount})` }}</span>
+          </span>
           <TextField
             :key="mintAmount.toString()"
-            v-model="mintAmountInput"
+            :value="mintAmount"
             type="number"
             :max="maxMintAmount"
-            :min="0"
+            :min="1"
             :size="40"
+            @input="updateMintAmount($event)"
           />
         </div>
         <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
-          <span>{{ $t('NFTPortal.label.reserve.input') }}<br><span class="text-medium-gray">({{ placeholder }})</span></span>
+          <span>
+            {{ $t('NFTPortal.label.reserve.input') }}<br>
+            <span class="text-medium-gray">{{ `(${0} - ${mintAmount})` }}</span>
+          </span>
           <TextField
-            :key="mintAmountInput.toString()"
-            v-model="reserveAmountInput"
+            :key="reserveAmount.toString()"
+            :value="reserveAmount"
             type="number"
             :max="mintAmount"
             :min="0"
             :size="40"
+            @input="updateReserveAmount($event)"
           />
         </div>
       </div>
@@ -146,7 +154,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { getAddressLikerIdMinApi } from '~/constant/api'
 
@@ -157,8 +165,6 @@ import { ellipsis } from '~/utils/ui'
 })
 export default class WriterMessage extends Vue {
   @Prop(String) readonly address!: string
-
-  @Prop(String) readonly placeholder!: string
 
   @Prop(Number) readonly reserveAmount!: number
   @Prop(Number) readonly mintAmount!: number
@@ -176,35 +182,23 @@ export default class WriterMessage extends Vue {
     { batch: 9, price: 4096 },
   ]
 
-  reserveAmountInput = this.reserveAmount
-  mintAmountInput = this.mintAmount
-
   get shouldShowInitialBatchSettings() {
     return !!this.$route.query.set_initial_batch
   }
 
-  @Watch('reserveAmount')
-  handleReserveAmountChange() {
-    this.reserveAmountInput = this.reserveAmount
+  updateReserveAmount(value: number) {
+    const reserveAmount = Math.max(0, Math.min(value, this.mintAmount))
+    this.$emit('update:reserveAmount', reserveAmount)
+    this.$emit('update-reserve', reserveAmount)
   }
 
-  @Watch('mintAmount')
-  handleMintAmountChange() {
-    this.mintAmountInput = this.mintAmount
-  }
-
-  @Watch('reserveAmountInput')
-  handleReserveAmountInputChange() {
-    if (this.reserveAmountInput === undefined) return
-    this.reserveAmountInput = Math.max(0, Math.min(this.reserveAmountInput, this.mintAmountInput))
-    this.$emit('update-reserve', this.reserveAmountInput)
-  }
-
-  @Watch('mintAmountInput')
-  handleMintAmountInputChange() {
-    this.mintAmountInput = Math.max(1, Math.min(this.mintAmountInput, this.maxMintAmount));
-    this.$emit('update-mint-amount', this.mintAmountInput)
-    this.handleReserveAmountInputChange()
+  updateMintAmount(value: number) {
+    const mintAmount = Math.max(1, Math.min(value, this.maxMintAmount))
+    if (mintAmount < this.reserveAmount) {
+      this.updateReserveAmount(mintAmount)
+    }
+    this.$emit('update:mintAmount', mintAmount)
+    this.$emit('update-mint-amount', mintAmount)
   }
 
   async mounted() {
@@ -223,12 +217,12 @@ export default class WriterMessage extends Vue {
   }
 
   onClickReserveDefault() {
-    this.mintAmountInput = this.maxMintAmount
-    this.reserveAmountInput = 0
+    this.updateReserveAmount(0)
+    this.updateMintAmount(this.maxMintAmount)
   }
 
   onClickReserveAll() {
-    this.reserveAmountInput = this.mintAmountInput
+    this.updateReserveAmount(this.mintAmount)
   }
 
   handleClickSettings() {

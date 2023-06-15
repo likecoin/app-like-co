@@ -71,7 +71,7 @@ export default class TextField extends Vue {
       case 40:
         return [
           'h-40px',
-          'min-w-[80px]',
+          'min-w-[100px]',
           'font-normal',
         ]
 
