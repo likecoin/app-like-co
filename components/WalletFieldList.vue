@@ -77,7 +77,7 @@
         :class="['my-[4px]', 'flex-grow']"
         :size="40"
         :placeholder="getWalletAddressPlaceholder(item.type)"
-        @delete-empty-field="deleteEmptyField"
+        @blur="deleteEmptyField"
       />
       <span
         v-if="value.length > 1"
