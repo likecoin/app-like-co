@@ -468,7 +468,7 @@ export default class NFTTestMintPage extends Vue {
 
   get maxMintAmount() {
     if (this.isTransactionSizeLimited) {
-      return 32;
+      return 30;
     }
     return 256;
   }
