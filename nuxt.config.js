@@ -158,6 +158,11 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    transpile: [
+      'cosmjs-type',
+      '@cosmjs',
+      '@likecoin/iscn-js',
+    ],
     extend(config, ctx) {
       /* eslint-disable no-param-reassign */
       if (!ctx.isDev) {
