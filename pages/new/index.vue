@@ -111,8 +111,8 @@ export default class NewIndexPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   state = 'init'
-  ipfsHash = ''
-  arweaveId = ''
+  ipfsHash = this.$route.query.ipfs_hash || ''
+  arweaveId = this.$route.query.arweave_id || ''
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -143,6 +143,23 @@ export default class NewIndexPage extends Vue {
 
       default:
         return undefined
+    }
+  }
+
+  async mounted() {
+    if ((this.ipfsHash || this.arweaveId) && this.shouldSkipToMintNFT) {
+      this.state = 'iscn';
+      let url;
+      if (this.arweaveId) url = `https://arweave.net/${this.arweaveId}`;
+      else if (this.ipfsHash) url = `https://ipfs.io/ipfs/${this.ipfsHash}`;
+      if (url) {
+        const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
+        this.fileBlob = data as Blob
+        this.isImage = headers['content-type'].startsWith('image')
+        this.fileType = headers['content-type']
+        this.fileSize = headers['content-length']
+        this.fileData = `data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`
+      }
     }
   }
 
