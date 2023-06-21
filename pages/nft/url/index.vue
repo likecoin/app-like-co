@@ -576,6 +576,22 @@ export default class FetchIndex extends Vue {
             break
           }
 
+          if (this.url.startsWith('ipfs://') || this.url.startsWith('ar://') ) {
+            const ipfsHash = this.url.startsWith('ipfs://') ? this.url.replace('ipfs://', '') : undefined;
+            const arweaveId = this.url.startsWith('ar://') ? this.url.replace('ar://', '') : undefined;
+            this.$router.push(
+              this.localeLocation({
+                name: 'new',
+                query: {
+                  ipfs_hash: ipfsHash,
+                  arweave_id: arweaveId,
+                  mint: '1',
+                },
+              })!,
+            )
+            break
+          }
+
           if (this.$route.query.url !== this.url) {
             this.$router.replace({
               query: {
@@ -813,6 +829,10 @@ export default class FetchIndex extends Vue {
   onInputURL(url: string) {
     this.errorMessage = ''
     if (this.iscnPrefixRegex.test(url)) {
+      this.isInputValueValid = true
+      return
+    }
+    if (this.url.startsWith('ipfs://') || this.url.startsWith('ar://')) {
       this.isInputValueValid = true
       return
     }
