@@ -3,7 +3,7 @@ import { getSitemapRoutes } from './config/sitemap';
 import { SITE_URL } from './constant';
 
 const siteDefaultDescription =
-  'Register a Writing NFT for your content, publish your work on blockchain.'
+  'Register a Writing NFT for your content, publish your stories as collectibles.'
 
 const {
   IS_TESTNET,
@@ -73,6 +73,9 @@ export default {
           "'self'",
           'data:',
           '*',
+        ],
+        'frame-src': [
+          'verify.walletconnect.com',
         ],
         'style-src': [
           "'self'",
@@ -162,6 +165,8 @@ export default {
       'cosmjs-type',
       '@cosmjs',
       '@likecoin/iscn-js',
+      '@likecoin/wallet-connector',
+      '@walletconnect',
     ],
     extend(config, ctx) {
       /* eslint-disable no-param-reassign */
