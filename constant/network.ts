@@ -66,10 +66,18 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
     'cosmostation',
     'cosmostation-mobile',
     'liker-id',
+    'walletconnect-v2',
   ],
   keplrInstallCTAPreset: 'fancy-banner',
   likerLandAppWCBridge: 'https://wc-bridge-1.like.co',
   cosmostationDirectSignEnabled: true,
+  walletConnectProjectId: 'e110ac49451fee41d5bcda1b0dfdb94e',
+  walletConnectMetadata: {
+    description: 'Register a Writing NFT for your content, publish your stories as collectibles.',
+    url: 'https://app.like.co',
+    icons: ['https://like.co/logo.png'],
+    name: 'app.like.co',
+  },
 };
 
 const combinedConfig = {
