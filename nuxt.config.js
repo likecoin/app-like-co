@@ -3,7 +3,7 @@ import { getSitemapRoutes } from './config/sitemap';
 import { SITE_URL } from './constant';
 
 const siteDefaultDescription =
-  'Register a Writing NFT for your content, publish your stories as collectibles.'
+  'Mint Writing NFT for your content. Turn your stories into collectibles.'
 
 const {
   IS_TESTNET,

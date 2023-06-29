@@ -324,7 +324,7 @@
   "page.airdrop.title": "LikeCoin Airdrop",
   "page.iscnId.popup.title": "LikeCoin Publishing Widget",
   "page.iscnId.default.title": "ISCN Viewer - Decentralized Publishing - LikeCoin",
-  "page.iscnId.default.description": "Register a Writing NFT for your content, publish your work on blockchain.",
+  "page.iscnId.default.description": "Mint Writing NFT for your content. Turn your stories into collectibles.",
   "Registration.step": "Step {step}/{total}",
   "SearchPage.empty.label": "No record",
   "SearchPage.error": "Oops, something went wrong please try again",
