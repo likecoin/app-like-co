@@ -117,7 +117,7 @@ import Long from 'long';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing';
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -498,6 +498,13 @@ export default class NFTTestMintPage extends Vue {
       }
     } catch (error) {
       this.setError(error)
+    }
+  }
+
+  @Watch('maxMintAmount')
+  onMaxMintAmount(max: number) {
+    if (this.mintAmount > max) {
+      this.mintAmount = max
     }
   }
 
