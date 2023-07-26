@@ -842,6 +842,7 @@ export default class NFTTestMintPage extends Vue {
         {
           contentUrl: this.iscnData.contentMetadata?.url,
           initialBatch: this.initialBatch,
+          reservedNftCount: this.reserveNft,
         },
         {
           params: {
