@@ -143,7 +143,7 @@
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
           <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
-            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch">
+            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch" :selected="batch === 0">
               {{ price }}
             </option>
           </select>
@@ -176,6 +176,7 @@ export default class WriterMessage extends Vue {
   shouldShowSettings = false
   shouldShowAdvancedSettings = false
   initialBatchOptions = [
+    { batch: -1, price: this.$t('NFTPortal.label.initialBatch.free') },
     { batch: 0, price: 8 },
     { batch: 4, price: 128 },
     { batch: 7, price: 1024 },
