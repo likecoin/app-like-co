@@ -134,7 +134,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   }
 }
 
-export async function esimateISCNTxGasAndFee(tx: ISCNSignPayload) {
+export async function estimateISCNTxGasAndFee(tx: ISCNSignPayload) {
   const signingClient = await getSigningClient();
   const res = await signingClient.esimateISCNTxGasAndFee(tx);
   return res;

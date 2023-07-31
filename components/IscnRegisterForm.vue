@@ -550,7 +550,7 @@ import { Author } from '~/types/author'
 
 import { signISCNTx } from '~/utils/cosmos/iscn';
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
-import { esimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
+import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import {
   getLikerIdMinApi,
   API_POST_ARWEAVE_ESTIMATE,
@@ -951,7 +951,7 @@ export default class IscnRegisterForm extends Vue {
       estimation,
     ] = await Promise.all([
       getAccountBalance(this.address),
-      esimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
+      estimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
     ])
     this.balance = new BigNumber(balance);
     const { iscnFee, gas: iscnGasEstimation } = estimation;
