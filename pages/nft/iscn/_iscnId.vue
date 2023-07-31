@@ -441,7 +441,7 @@ export default class NFTTestMintPage extends Vue {
     metadata = Object.assign(metadata, {
       nft_meta_collection_id: 'likerland_writing_nft',
       nft_meta_collection_name: 'Writing NFT',
-      nft_meta_collection_descrption: 'Writing NFT by Liker Land',
+      nft_meta_collection_description: 'Writing NFT by Liker Land',
     })
     let payload = {
       symbol: 'WRITING',
