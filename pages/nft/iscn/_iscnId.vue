@@ -480,6 +480,10 @@ export default class NFTTestMintPage extends Vue {
     return undefined
   }
 
+  get isFree() {
+    return this.initialBatch === -1
+  }
+
   async mounted() {
     try {
       await Promise.all([
@@ -843,6 +847,7 @@ export default class NFTTestMintPage extends Vue {
           contentUrl: this.iscnData.contentMetadata?.url,
           initialBatch: this.initialBatch,
           reservedNftCount: this.reserveNft,
+          isFree: this.isFree,
         },
         {
           params: {
