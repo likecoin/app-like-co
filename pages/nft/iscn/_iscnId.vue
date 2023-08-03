@@ -550,7 +550,7 @@ export default class NFTTestMintPage extends Vue {
           if (this.ogImageBlob) {
             this.mintState = MintState.UPLOADING
             this.arweaveFeeInfo = await this.checkArweaveIdExistsAndEstimateFee()
-            if (!this.ogImageArweaveId && !this.ogImageArweaveFeeTxHash) {
+            if (!this.ogImageArweaveId && !this.ogImageArweaveFeeTxHash && this.arweaveFeeInfo) {
               await this.sendArweaveFeeTx(this.arweaveFeeInfo)
             }
             if (!this.ogImageArweaveId) await this.submitToArweave()
@@ -639,7 +639,7 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'GetISCNInfoError', (error as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(error)
-      throw new Error('ISCN not found')
+      this.throwCustomError('ISCN_NOT_FOUND', error as Error)
     }
   }
 
@@ -762,7 +762,8 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFeeError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
-      throw new Error('CANNOT_ESTIMATE_ARWEAVE_FEE')
+      this.throwCustomError('CANNOT_ESTIMATE_ARWEAVE_FEE', err as Error)
+      return false
     }
   }
 
@@ -784,7 +785,7 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'SendArweaveFeeTxError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
-      throw new Error('CANNOT_SEND_ARWEAVE_FEE_TX')
+      this.throwCustomError('CANNOT_SEND_ARWEAVE_FEE_TX', err as Error)
     }
   }
 
@@ -809,7 +810,8 @@ export default class NFTTestMintPage extends Vue {
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
       console.error(err)
-      throw new Error('CANNOT_UPLOAD_TO_ARWEAVE')
+      this.throwCustomError('CANNOT_UPLOAD_TO_ARWEAVE', err as Error)
+
     }
   }
 
@@ -871,7 +873,7 @@ export default class NFTTestMintPage extends Vue {
       // eslint-disable-next-line no-console
       console.error(error)
       logTrackerEvent(this, 'IscnMintNFT', 'PostMintInfoError', (error as Error).toString(), 1);
-      throw new Error('CANNOT_POST_MINT_INFO')
+      this.throwCustomError('CANNOT_POST_MINT_INFO', error as Error)
     }
   }
 
@@ -1047,6 +1049,11 @@ export default class NFTTestMintPage extends Vue {
       this.errorMessage = message;
       this.toggleSnackbar(message)
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  throwCustomError(title: string, error: Error) {
+    throw new Error(`${title}, Error: ${error.message.substring(0, 200)}`)
   }
 
   handleInputMintAmount() {
