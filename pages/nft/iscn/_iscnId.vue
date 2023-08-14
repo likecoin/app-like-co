@@ -263,7 +263,7 @@ export default class NFTTestMintPage extends Vue {
 
   reserveNft: number = 0
   mintAmount: number = this.maxMintAmount
-  initialBatch: number = 0
+  initialBatch: number = 4
   shouldShowNoUrlWarning: boolean = false
 
   get isUserISCNOwner(): boolean {
