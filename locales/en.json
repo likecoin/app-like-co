@@ -263,6 +263,7 @@
   "NFTPortal.errorMessage.metadata.noURL": "Warning: No URL in ISCN's metadata {more}.",
   "NFTPortal.errorMessage.metadata.noURL.learnMore": "learn more",
   "NFTPortal.label.classId": "Class ID",
+  "NFTPortal.label.collectableBefore.input": "Set collectable expiration date",
   "NFTPortal.label.creator": "Creator",
   "NFTPortal.label.defaultDescription": "(no description)",
   "NFTPortal.label.detailsPage": "NFT Details Page :",

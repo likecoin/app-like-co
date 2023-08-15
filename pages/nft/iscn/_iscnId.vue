@@ -35,6 +35,7 @@
         :mint-amount.sync="mintAmount"
         :max-mint-amount="maxMintAmount"
         :reserve-amount.sync="reserveNft"
+        :collectable-before-date.sync="collectableBeforeDate"
         @message-change="(value) => (message = value)"
         @update-mint-amount.once="handleInputMintAmount"
         @update-reserve.once="handleInputReserveNft"
@@ -266,6 +267,8 @@ export default class NFTTestMintPage extends Vue {
   initialBatch: number = 4
   shouldShowNoUrlWarning: boolean = false
 
+  collectableBeforeDate: string = ''
+
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
     return (this.iscnOwner === this.address)
@@ -482,6 +485,10 @@ export default class NFTTestMintPage extends Vue {
 
   get isFree() {
     return this.initialBatch === -1
+  }
+
+  get collectableBefore() {
+    return Date.parse(this.collectableBeforeDate);
   }
 
   async mounted() {
@@ -850,6 +857,7 @@ export default class NFTTestMintPage extends Vue {
           initialBatch: this.initialBatch,
           reservedNftCount: this.reserveNft,
           isFree: this.isFree,
+          collectableBefore: this.collectableBefore,
         },
         {
           params: {
