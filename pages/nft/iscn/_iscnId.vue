@@ -488,7 +488,10 @@ export default class NFTTestMintPage extends Vue {
   }
 
   get collectExpiryAt() {
-    return Date.parse(this.collectExpiryDate);
+    if (this.collectExpiryDate) {
+      return Date.parse(this.collectExpiryDate);
+    }
+    return undefined;
   }
 
   async mounted() {
