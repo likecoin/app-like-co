@@ -153,10 +153,10 @@
         class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <label>
-          <input v-model="shouldShowCollectableBeforeDateInput" type="checkbox"  @change="resetCollectableBeforeDate" />
-          {{ $t('NFTPortal.label.collectableBefore.input') }}
+          <input v-model="shouldShowCollectExpiryDateInput" type="checkbox"  @change="resetCollectExpiryDate" />
+          {{ $t('NFTPortal.label.collectExpiryDate.input') }}
         </label>
-        <input v-if=shouldShowCollectableBeforeDateInput ref="collectableBeforeDateInput" type="date" :min="tomorrow" @change="updateCollectableBeforeDate($event)" />
+        <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
       </div>
     </template>
   </div>
@@ -178,14 +178,14 @@ export default class WriterMessage extends Vue {
   @Prop(Number) readonly reserveAmount!: number
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
-  @Prop(String) readonly collectableBeforeDate!: string
+  @Prop(String) readonly collectExpiryDate!: string
 
   userInfo: any = undefined
   avatar: string = ''
   displayName: string = this.address
   shouldShowSettings = true
   shouldShowAdvancedSettings = false
-  shouldShowCollectableBeforeDateInput = false
+  shouldShowCollectExpiryDateInput = false
   tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0]
@@ -217,18 +217,18 @@ export default class WriterMessage extends Vue {
     this.$emit('update-mint-amount', mintAmount)
   }
 
-  resetCollectableBeforeDate(value: Event) {
+  resetCollectExpiryDate(value: Event) {
     const { checked } = (value.target as HTMLInputElement)
     if (!checked) {
-      this.$emit('update:collectableBeforeDate', '')
-      this.$emit('update-collectable-before-date', '')
+      this.$emit('update:collectExpiryDate', '')
+      this.$emit('update-collect-expiry-date', '')
     }
   }
 
-  updateCollectableBeforeDate(value: Event) {
+  updateCollectExpiryDate(value: Event) {
     const date = (value.target as HTMLInputElement).value
-    this.$emit('update:collectableBeforeDate', date)
-    this.$emit('update-collectable-before-date', date)
+    this.$emit('update:collectExpiryDate', date)
+    this.$emit('update-collect-expiry-date', date)
   }
 
   async mounted() {
