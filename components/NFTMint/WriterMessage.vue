@@ -148,15 +148,15 @@
             </option>
           </select>
         </div>
-      </div>
-      <div
-        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
-      >
-        <label>
-          <input v-model="shouldShowCollectExpiryDateInput" type="checkbox"  @change="resetCollectExpiryDate" />
-          {{ $t('NFTPortal.label.collectExpiryDate.input') }}
-        </label>
-        <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
+        <div
+          class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
+        >
+          <label>
+            <input v-model="shouldShowCollectExpiryDateInput" type="checkbox"  @change="resetCollectExpiryDate" />
+            {{ $t('NFTPortal.label.collectExpiryDate.input') }}
+          </label>
+          <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
+        </div>  
       </div>
     </template>
   </div>
