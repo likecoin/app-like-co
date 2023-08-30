@@ -148,6 +148,15 @@
             </option>
           </select>
         </div>
+        <div
+          class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
+        >
+          <label>
+            <input v-model="shouldShowCollectExpiryDateInput" type="checkbox"  @change="resetCollectExpiryDate" />
+            {{ $t('NFTPortal.label.collectExpiryDate.input') }}
+          </label>
+          <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
+        </div>  
       </div>
     </template>
   </div>
@@ -169,12 +178,18 @@ export default class WriterMessage extends Vue {
   @Prop(Number) readonly reserveAmount!: number
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
+  @Prop(String) readonly collectExpiryDate!: string
 
   userInfo: any = undefined
   avatar: string = ''
   displayName: string = this.address
   shouldShowSettings = true
   shouldShowAdvancedSettings = false
+  shouldShowCollectExpiryDateInput = false
+  tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0]
+
   initialBatchOptions = [
     { batch: -1, price: this.$t('NFTPortal.label.initialBatch.free') },
     { batch: 0, price: 8 },
@@ -200,6 +215,20 @@ export default class WriterMessage extends Vue {
     }
     this.$emit('update:mintAmount', mintAmount)
     this.$emit('update-mint-amount', mintAmount)
+  }
+
+  resetCollectExpiryDate(value: Event) {
+    const { checked } = (value.target as HTMLInputElement)
+    if (!checked) {
+      this.$emit('update:collectExpiryDate', '')
+      this.$emit('update-collect-expiry-date', '')
+    }
+  }
+
+  updateCollectExpiryDate(value: Event) {
+    const date = (value.target as HTMLInputElement).value
+    this.$emit('update:collectExpiryDate', date)
+    this.$emit('update-collect-expiry-date', date)
   }
 
   async mounted() {
