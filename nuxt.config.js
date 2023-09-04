@@ -150,6 +150,7 @@ export default {
     clientIntegrations: {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
+      CaptureConsole: { levels: ['error'] },
     },
   },
   sitemap: {
