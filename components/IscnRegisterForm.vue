@@ -9,7 +9,11 @@
       <!-- header -->
       <IscnFormHeader :step="step" :total-step="4" />
       <!-- guide text -->
-      <Label
+      <Label v-if="showUploadOnly"
+        :text="$t('IscnRegisterForm.guide.uploadOnly')"
+        class="text-medium-gray my-[12px]"
+      />
+      <Label v-else
         :text="$t('IscnRegisterForm.guide.review')"
         class="text-medium-gray my-[12px]"
       />
@@ -39,7 +43,7 @@
             ]"
           >
             <div
-              v-if="uploadStatus === 'Loading'"
+              v-if="uploadStatus === 'loading'"
               :class="[
                 'flex',
                 'items-center',
@@ -118,7 +122,7 @@
       </FormField>
       <!-- Numbers Protocol -->
       <FormField
-        v-if="isPhoto || isImage"
+        v-if="!showUploadOnly && (isPhoto || isImage)"
         :label="$t('IscnRegisterForm.label.numbersProtocol')"
         class="mb-[12px]"
       >
@@ -149,9 +153,31 @@
           :all-exif="exifInfo"
         />
       </Dialog>
+      <div v-if="showUploadOnly" :class="[
+        'flex',
+        'flex-col',
+        'items-end',
+      ]">
+        <template v-if="uploadStatus">
+          <ProgressIndicator />
+          <div :class="[
+            'text-[12px]',
+            'mt-[4px]',
+          ]">
+            {{ formattedUploadStatus }}
+          </div>
+        </template>
+        <Button v-else :text="$t('IscnRegisterForm.button.upload')" preset="secondary"
+          @click.native="onUploadOnly">
+          <template #append>
+            <IconArrowRight />
+          </template>
+        </Button>
+      </div>
     </Card>
     <!-- ////// Input Card /////// -->
     <Card
+      v-if="!showUploadOnly"
       class="flex flex-col mt-[16px] p-[32px]"
       :has-padding="false"
     >
@@ -279,7 +305,7 @@
           </FormField>
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
-            <div v-if="uploadStatus === 'Loading'">
+            <div v-if="uploadStatus === 'loading'">
               <Button
                 :text="$t('IscnRegisterForm.button.loading')"
                 preset="outline"
@@ -308,16 +334,35 @@
                 {{ formattedUploadStatus }}
               </div>
             </div>
-            <Button
-              v-else
-              :text="$t('IscnRegisterForm.button.register')"
-              type="submit"
-              preset="secondary"
+            <div v-else
+              :class="[
+                'flex',
+                'flex-col',
+                'items-end',
+              ]"
             >
-              <template #append>
-                <IconArrowRight />
-              </template>
-            </Button>
+              <Button
+                :text="$t('IscnRegisterForm.button.register')"
+                type="submit"
+                preset="secondary"
+              >
+                <template #append>
+                  <IconArrowRight />
+                </template>
+              </Button>
+              <a
+                :class="[
+                  'text-[8px]',
+                  'underline',
+                  'mt-[4px]',
+                  'mb-[-12px]',
+                ]"
+                href="#"
+                @click.prevent="showUploadOnly = true"
+              >
+                {{ $t('IscnRegisterForm.button.uploadOnly') }}
+              </a>
+            </div>
           </div>
         </form>
       </div>
@@ -585,6 +630,7 @@ export default class IscnRegisterForm extends Vue {
   @Prop({ default: null }) readonly fileSize: string | null | undefined
   @Prop(String) readonly fileSHA256!: string
   @Prop({ default: false }) readonly isIPFSLink!: boolean
+  @Prop({ default: false }) readonly isUploadOnly!: boolean
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
   @Prop(Number) readonly step: number | undefined
@@ -639,6 +685,8 @@ export default class IscnRegisterForm extends Vue {
   checkedAuthorInfo = false
   isChecked = false
   charactersLimit = CharactersLimit
+
+  showUploadOnly = this.isUploadOnly
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -840,7 +888,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
-    this.uploadStatus = 'Loading'
+    this.uploadStatus = 'loading'
     await this.estimateArweaveFee();
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
@@ -1020,6 +1068,33 @@ export default class IscnRegisterForm extends Vue {
     return undefined
   }
 
+  async onUploadOnly(): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
+    await this.getLikerIdsAddresses()
+    this.$emit('handleSubmit')
+    this.error = ''
+    this.signDialogError = ''
+    if (this.balance.lt(this.totalFee)) {
+      this.error = 'INSUFFICIENT_BALANCE'
+      this.isOpenWarningSnackbar = true
+      this.uploadStatus = ''
+      return
+    }
+    if (!this.fileBlob) {
+      this.error = 'NO_FILE_TO_UPLOAD'
+      this.isOpenWarningSnackbar = true
+      this.uploadStatus = ''
+      return
+    }
+    await this.submitToArweave();
+    if (this.uploadArweaveId) {
+      this.$emit('fileUploaded', {
+        ipfsHash: this.ipfsHash,
+        arweaveId: this.uploadArweaveId,
+      })
+    }
+  }
+
   async onSubmit(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
     await this.getLikerIdsAddresses()
@@ -1057,6 +1132,9 @@ export default class IscnRegisterForm extends Vue {
         },
       );
       this.uploadArweaveId = arweaveId;
+      if (arweaveId) {
+        this.$emit('arweaveUploaded', { arweaveId })
+      }
       if (LIKE) this.arweaveFee = new BigNumber(LIKE);
       this.arweaveFeeTargetAddress = address;
     } catch (err) {

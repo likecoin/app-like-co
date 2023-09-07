@@ -43,45 +43,55 @@
       :file-s-h-a256="fileSHA256"
       :file-blob="fileBlob"
       :is-image="isImage"
+      :is-upload-only="isUploadOnly"
       :exif-info="exifInfo"
       :step="step"
       @arweaveUploaded="onArweaveIdUpdate"
       @txBroadcasted="onISCNTxInfo"
+      @fileUploaded="onFileOnlyUpload"
       @handleSubmit="isSubmit = true"
       @handleQuit="isSubmit = false"
     />
-    <IscnUploadedInfo
-      v-else-if="state === 'done'"
-      :owner="currentAddress"
-      :iscn-id="iscnId"
-      :iscn-hash="iscnTxHash"
-      :record="record"
-      :exif-info="exifInfo"
-      :step="step"
-    >
-      <template #card-footer>
-        <div
-          :class="[
-            'flex',
-            'justify-center',
-          ]"
-        >
-          <Button
+    <template v-else-if="state === 'done'">
+      <IscnUploadedInfo
+        v-if="iscnId"
+        :owner="currentAddress"
+        :iscn-id="iscnId"
+        :iscn-hash="iscnTxHash"
+        :record="record"
+        :exif-info="exifInfo"
+        :step="step"
+      >
+        <template #card-footer>
+          <div
             :class="[
-              'mt-[16px]',
-              'mb-[28px]',
+              'flex',
+              'justify-center',
             ]"
-            preset="secondary"
-            :text="$t('IscnUploaded.button.new')"
-            @click="handleCreateAnotherButtonClick"
           >
-            <template #prepend>
-              <IconAddToISCN class="w-[20px]" />
-            </template>
-          </Button>
-        </div>
-      </template>
-    </IscnUploadedInfo>
+            <Button
+              :class="[
+                'mt-[16px]',
+                'mb-[28px]',
+              ]"
+              preset="secondary"
+              :text="$t('IscnUploaded.button.new')"
+              @click="handleCreateAnotherButtonClick"
+            >
+              <template #prepend>
+                <IconAddToISCN class="w-[20px]" />
+              </template>
+            </Button>
+          </div>
+        </template>
+      </IscnUploadedInfo>
+      <FileUploadedInfo
+        v-else
+        :ipfs-hash="ipfsHash"
+        :arweave-id="arweaveId"
+        :step="step"
+      />
+    </template>
   </Page>
 </template>
 
@@ -113,6 +123,7 @@ export default class NewIndexPage extends Vue {
   state = 'init'
   ipfsHash = this.$route.query.ipfs_hash || ''
   arweaveId = this.$route.query.arweave_id || ''
+  isUploadOnly = this.$route.query.upload_only === '1'
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -200,6 +211,10 @@ export default class NewIndexPage extends Vue {
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
     this.arweaveId = arweaveId
     logTrackerEvent(this, 'ISCNCreate', 'ISCNFileUploadToARSuccess', arweaveId, 1);
+  }
+
+  onFileOnlyUpload() {
+    this.state = 'done'
   }
 
   async onISCNTxInfo({
