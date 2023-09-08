@@ -167,8 +167,12 @@
             {{ formattedUploadStatus }}
           </div>
         </template>
-        <Button v-else :text="$t('IscnRegisterForm.button.upload')" preset="secondary"
-          @click.native="onUploadOnly">
+        <Button
+          v-else
+          :text="$t('IscnRegisterForm.button.upload')"
+          preset="secondary"
+          @click.native="onUploadOnly"
+        >
           <template #append>
             <IconArrowRight />
           </template>
@@ -337,10 +341,17 @@
             <div v-else
               :class="[
                 'flex',
-                'flex-col',
+                'flex',
                 'items-end',
+                'gap-[12px]',
               ]"
             >
+              <Button
+                  v-if="!uploadStatus"
+                  preset="outline"
+                  :text="$t('IscnRegisterForm.button.uploadOnly')"
+                  @click="showUploadOnly = true"
+              />
               <Button
                 :text="$t('IscnRegisterForm.button.register')"
                 type="submit"
@@ -350,18 +361,6 @@
                   <IconArrowRight />
                 </template>
               </Button>
-              <a
-                :class="[
-                  'text-[8px]',
-                  'underline',
-                  'mt-[4px]',
-                  'mb-[-12px]',
-                ]"
-                href="#"
-                @click.prevent="showUploadOnly = true"
-              >
-                {{ $t('IscnRegisterForm.button.uploadOnly') }}
-              </a>
             </div>
           </div>
         </form>
@@ -1069,7 +1068,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onUploadOnly(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
     await this.getLikerIdsAddresses()
     this.$emit('handleSubmit')
     this.error = ''

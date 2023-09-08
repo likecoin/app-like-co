@@ -183,7 +183,7 @@
   "IscnRegisterForm.button.success": "Success",
   "IscnRegisterForm.button.upload": "Upload",
   "IscnRegisterForm.button.uploading": "Uploading",
-  "iscnRegisterForm.button.uploadOnly": "Switch to upload only mode",
+  "IscnRegisterForm.button.uploadOnly": "Switch to upload only mode",
   "IscnRegisterForm.button.whitelist": "Apply for Whitelist",
   "IscnRegisterForm.error.arweave": "Oops. Unable to upload to Arweave. Please try again later.",
   "IscnRegisterForm.error.authorNameIsEmpty": "Please enter the author name",
