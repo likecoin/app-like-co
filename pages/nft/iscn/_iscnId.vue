@@ -36,7 +36,8 @@
         :max-mint-amount="maxMintAmount"
         :reserve-amount.sync="reserveNft"
         :collect-expiry-date.sync="collectExpiryDate"
-        @message-change="(value) => (message = value)"
+        :is-free-for-subscribers.sync="isFreeForSubscribers"
+        :send-to-subscribers.sync="sendToSubscribers"
         @update-mint-amount.once="handleInputMintAmount"
         @update-reserve.once="handleInputReserveNft"
         @update-initial-batch="handleInputInitialBatch"
@@ -268,6 +269,8 @@ export default class NFTTestMintPage extends Vue {
   shouldShowNoUrlWarning: boolean = false
 
   collectExpiryDate: string = ''
+  isFreeForSubscribers: boolean = true
+  sendToSubscribers: boolean = true
 
   get isUserISCNOwner(): boolean {
     if (!this.iscnOwner) return false
@@ -861,6 +864,8 @@ export default class NFTTestMintPage extends Vue {
           reservedNftCount: this.reserveNft,
           isFree: this.isFree,
           collectExpiryAt: this.collectExpiryAt,
+          isFreeForSubscribers: this.isFreeForSubscribers,
+          sendToSubscribers: this.sendToSubscribers,
         },
         {
           params: {

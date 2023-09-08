@@ -156,7 +156,35 @@
             {{ $t('NFTPortal.label.collectExpiryDate.input') }}
           </label>
           <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
-        </div>  
+        </div>
+      </div>
+      <div
+        class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
+      >
+        <Label
+          class="w-min text-like-green"
+          :text="$t('NFTPortal.label.message.subscription')"
+          tag="div"
+          preset="p6"
+          valign="middle"
+          align="left"
+          content-class="whitespace-nowrap"
+        >
+        </Label>
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
+          <CheckBox :value="isFreeForSubscribers" @input="(v) => $emit('update:isFreeForSubscribers', v)">
+            <Label>
+              {{ $t('NFTPortal.label.subscription.isFreeForSubscribers') }}
+            </Label>
+          </CheckBox>
+        </div>
+        <div class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center">
+          <CheckBox :value="sendToSubscribers" @input="(v) => $emit('update:sendToSubscribers', v)">
+            <Label>
+              {{ $t('NFTPortal.label.subscription.sendToSubscribers') }}
+            </Label>
+          </CheckBox>
+        </div>
       </div>
     </template>
   </div>
@@ -179,6 +207,8 @@ export default class WriterMessage extends Vue {
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
   @Prop(String) readonly collectExpiryDate!: string
+  @Prop(Boolean) readonly isFreeForSubscribers!: boolean
+  @Prop(Boolean) readonly sendToSubscribers!: boolean
 
   userInfo: any = undefined
   avatar: string = ''
