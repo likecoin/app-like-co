@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 
-import { ArweaveFile } from '../arweave/types';
+export type ArweaveFile = {
+  key: string;
+  mimetype: string;
+  buffer: Buffer;
+  arweaveId?: string;
+  filename?: string;
+}
 
 export function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
