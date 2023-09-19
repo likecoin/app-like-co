@@ -143,8 +143,8 @@
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
           <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
-            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch" :selected="batch === 4">
-              {{ price }}
+            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch" :selected="batch === 0">
+              ${{ price }}
             </option>
           </select>
         </div>
@@ -156,7 +156,7 @@
             {{ $t('NFTPortal.label.collectExpiryDate.input') }}
           </label>
           <input v-if=shouldShowCollectExpiryDateInput ref="collectExpiryDateInput" type="date" :min="tomorrow" @change="updateCollectExpiryDate($event)" />
-        </div>  
+        </div>
       </div>
     </template>
   </div>
@@ -192,10 +192,10 @@ export default class WriterMessage extends Vue {
 
   initialBatchOptions = [
     { batch: -1, price: this.$t('NFTPortal.label.initialBatch.free') },
-    { batch: 0, price: 8 },
-    { batch: 4, price: 128 },
-    { batch: 7, price: 1024 },
-    { batch: 9, price: 4096 },
+    { batch: 0, price: 1 },
+    { batch: 4, price: 8 },
+    { batch: 7, price: 64 },
+    { batch: 9, price: 256 },
   ]
 
   get shouldShowInitialBatchSettings() {
