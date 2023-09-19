@@ -365,7 +365,7 @@ export default class FetchIndex extends Vue {
         if (res) {
           const iscnOwner = res.owner
           if (iscnOwner !== this.address) {
-            this.toggleSnackbar('USER_NOT_ISCN_OWNER')
+            this.toggleSnackbar(ErrorType.USER_NOT_ISCN_OWNER)
           }
         }
       }
@@ -557,7 +557,7 @@ export default class FetchIndex extends Vue {
         this.balance = (await getAccountBalance(this.address)) as string
       }
       if (this.balance === '0') {
-        throw new Error('INSUFFICIENT_BALANCE')
+        throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
       switch (this.state) {
         case State.INIT: {
@@ -754,7 +754,7 @@ export default class FetchIndex extends Vue {
   async registerISCN(): Promise<void> {
     await this.initIfNecessary()
     if (!this.signer) {
-      throw new Error('MISSING_SIGNER')
+      throw new Error(ErrorType.MISSING_SIGNER)
     }
     let res
     try {
