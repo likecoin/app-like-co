@@ -592,13 +592,12 @@ import { namespace } from 'vuex-class'
 import { AxiosResponse } from 'axios'
 import { Author } from '~/types/author'
 
+import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import { signISCNTx } from '~/utils/cosmos/iscn';
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import {
   getLikerIdMinApi,
-  API_POST_ARWEAVE_ESTIMATE,
-  API_POST_ARWEAVE_UPLOAD,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
   } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
@@ -788,6 +787,10 @@ export default class IscnRegisterForm extends Vue {
         }
   }
     return undefined
+  }
+
+  get fileByteSize() {
+    return this.fileBlob?.size || 0
   }
 
   get payload() {
@@ -1119,18 +1122,10 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async estimateArweaveFee(): Promise<void> {
-    const formData = new FormData();
-    if (this.fileBlob) formData.append('file', this.fileBlob);
     try {
-      const { address, arweaveId, LIKE } = await this.$axios.$post(
-        API_POST_ARWEAVE_ESTIMATE,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
+      const { address, arweaveId, LIKE } = await estimateBundlrFilePrice({
+        fileSize: this.fileByteSize, ipfsHash: this.ipfsHash,
+      })
       this.uploadArweaveId = arweaveId;
       if (arweaveId) {
         this.$emit('arweaveUploaded', { arweaveId })
@@ -1150,7 +1145,7 @@ export default class IscnRegisterForm extends Vue {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = 'signing';
-    const memo = JSON.stringify({ ipfs: this.ipfsHash });
+    const memo = JSON.stringify({ ipfs: this.ipfsHash, fileSize: this.fileByteSize });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
@@ -1168,30 +1163,26 @@ export default class IscnRegisterForm extends Vue {
   async submitToArweave(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
     if (this.uploadArweaveId) return;
+    if (!this.fileBlob) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
     const transactionHash = await this.sendArweaveFeeTx();
-    const formData = new FormData();
-    if (this.fileBlob) formData.append('file', this.fileBlob);
+
     // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
       logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
-      formData.append('num', '1')
     }
     this.isUploadingArweave = true;
     this.uploadStatus = 'uploading';
     try {
-      const {
-        arweaveId,
-      } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )
+      const arrayBuffer = await this.fileBlob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const arweaveId = await uploadSingleFileToBundlr(buffer, {
+        fileSize: this.fileByteSize,
+        ipfsHash: this.ipfsHash,
+        fileType: this.fileType as string,
+        txHash: transactionHash,
+      });
       if (arweaveId) {
         this.uploadArweaveId = arweaveId
         this.$emit('arweaveUploaded', { arweaveId })
