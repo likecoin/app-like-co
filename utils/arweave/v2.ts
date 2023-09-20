@@ -24,7 +24,7 @@ class Provider {
     ipfsHash: string
     txHash: string
   }) {
-    this.pubKey = Buffer.from(publicKey, 'hex');
+    this.pubKey = Buffer.from(publicKey, 'base64');
     this.fileSize = fileSize
     this.ipfsHash = ipfsHash
     this.txHash = txHash
@@ -45,7 +45,7 @@ class Provider {
   }
 
   setPublicKey(newPubKey: string) {
-    this.pubKey = Buffer.from(newPubKey, 'hex');
+    this.pubKey = Buffer.from(newPubKey, 'base64');
   }
 
   getPublicKey() {
@@ -60,7 +60,7 @@ class Provider {
       message: { address: string; 'Transaction hash': Uint8Array },
     ) => {
       const convertedMsg = Buffer.from(message['Transaction hash']).toString(
-        'hex',
+        'base64',
       )
       const res = await axios.post(API_POST_ARWEAVE_V2_SIGN, {
         signatureData: convertedMsg,
@@ -69,7 +69,7 @@ class Provider {
         txHash: this.txHash,
       })
       const { signature } = await res.data
-      const bSig = Buffer.from(signature, 'hex')
+      const bSig = Buffer.from(signature, 'base64')
       // pad & convert so it's in the format the signer expects to have to convert from.
       const pad = Buffer.concat([
         Buffer.from([0]),
