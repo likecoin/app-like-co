@@ -1069,6 +1069,7 @@ export default class IscnRegisterForm extends Vue {
 
   async onUploadOnly(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
+    this.uploadStatus = 'loading'
     await this.getLikerIdsAddresses()
     this.$emit('handleSubmit')
     this.error = ''
@@ -1178,10 +1179,10 @@ export default class IscnRegisterForm extends Vue {
       formData.append('num', '1')
     }
     this.isUploadingArweave = true;
+    this.uploadStatus = 'uploading';
     try {
       const {
         arweaveId,
-        numAssetIds: [numbersProtocolAssetId],
       } = await this.$axios.$post(
         `${API_POST_ARWEAVE_UPLOAD}?txHash=${transactionHash}`,
         formData,
@@ -1193,8 +1194,7 @@ export default class IscnRegisterForm extends Vue {
       )
       if (arweaveId) {
         this.uploadArweaveId = arweaveId
-        this.numbersProtocolAssetId = numbersProtocolAssetId
-        this.$emit('arweaveUploaded', { arweaveId, numbersProtocolAssetId })
+        this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
       } else {
         this.shouldShowAlert = true
@@ -1217,6 +1217,7 @@ export default class IscnRegisterForm extends Vue {
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
     this.isOpenSignDialog = true;
     try {
+      this.uploadStatus = 'loading';
       const formData = new FormData();
       if (this.fileBlob) formData.append('file', this.fileBlob);
       const {
@@ -1261,6 +1262,7 @@ export default class IscnRegisterForm extends Vue {
       return
     }
     try {
+      this.uploadStatus = 'signing'
       const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
