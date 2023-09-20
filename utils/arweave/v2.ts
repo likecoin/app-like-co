@@ -150,8 +150,11 @@ export async function uploadSingleFileToBundlr(
   }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string },
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash })
-  const response = await bundler.upload(file, {
-    tags: fileType ? [{ name: 'Content-Type', value: fileType }] : [],
-  })
+  const tags = [
+    { name: 'IPFS-Add', value: ipfsHash },
+    { name: 'standard', value: 'v0.1'},
+  ];
+  if (fileType) tags.push({ name: 'Content-Type', value: fileType })
+  const response = await bundler.upload(file, { tags })
   return response.id
 }
