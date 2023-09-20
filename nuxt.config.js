@@ -168,12 +168,28 @@ export default {
       '@likecoin/iscn-js',
       '@likecoin/wallet-connector',
       '@walletconnect',
+      '@bundlr-network',
+      '@noble/curves',
+      'arbundle',
     ],
     extend(config, ctx) {
       /* eslint-disable no-param-reassign */
       if (!ctx.isDev) {
         config.resolve.alias['bn.js'] = path.join(__dirname, './node_modules/bn.js');
       }
+      if (ctx.isClient) {
+        config.resolve.alias['arbundles/web'] = path.join(__dirname, './node_modules/arbundles/build/web/esm/webIndex');
+      } else {
+        config.externals = {
+          '@bundlr-network/client': '@bundlr-network/client',
+        }
+        // config.resolve.alias['arbundles/node'] = path.join(__dirname, './node_modules/arbundles/build/node/cjs');
+      }
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
+      });
       /* eslint-enable no-param-reassign */
     },
   },

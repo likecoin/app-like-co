@@ -1,4 +1,3 @@
-import WebBundlr from '@bundlr-network/client'
 import axios from 'axios'
 
 import { IS_TESTNET } from '~/constant'
@@ -86,6 +85,8 @@ class Provider {
   _ready() {}
 }
 
+let WebBundlr: any = null;
+
 async function getProvider({
   fileSize,
   ipfsHash,
@@ -110,6 +111,9 @@ async function getBundler({
   ipfsHash: string
   txHash: string
 }) {
+  if (!WebBundlr) {
+    WebBundlr = (await import('@bundlr-network/client')).default;
+  }
   const p = await getProvider({ fileSize, ipfsHash, txHash })
   const bundlr = new WebBundlr(
     IS_TESTNET
