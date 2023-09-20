@@ -192,15 +192,16 @@ export default class WriterMessage extends Vue {
 
   initialBatchOptions = [
     { batch: -1, price: this.$t('NFTPortal.label.initialBatch.free') },
-    { batch: 0, price: 1 },
-    { batch: 1, price: 2 },
-    { batch: 2, price: 4 },
-    { batch: 3, price: 8 },
-    { batch: 4, price: 16 },
-    { batch: 5, price: 32 },
-    { batch: 6, price: 64 },
-    { batch: 7, price: 128 },
-    { batch: 8, price: 256 },
+    // To maintain the compatibility of the DB data, minting starts from batch 7
+    { batch: 7, price: 1 },
+    { batch: 8, price: 2 },
+    { batch: 9, price: 4 },
+    { batch: 10, price: 8 },
+    { batch: 11, price: 16 },
+    { batch: 12, price: 32 },
+    { batch: 13, price: 64 },
+    { batch: 14, price: 128 },
+    { batch: 15, price: 256 },
   ]
 
   get shouldShowInitialBatchSettings() {
