@@ -156,7 +156,7 @@ import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { logTrackerEvent } from '~/utils/logger'
-import { IS_CHAIN_UPGRADING } from '~/constant'
+import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
 
 import {
   fileToArrayBuffer,
@@ -224,7 +224,7 @@ export default class UploadForm extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
-      if (files[0].size < 30000000) {
+      if (files[0].size < UPLOAD_FILESIZE_MAX) {
         this.fileName = files[0].name
         this.fileSize = files[0].size
         this.fileType = `${files[0].type}`
