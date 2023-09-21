@@ -5,6 +5,7 @@ import {
   API_POST_ARWEAVE_V2_SIGN,
   API_GET_ARWEAVE_V2_PUBLIC_KEY,
   API_POST_ARWEAVE_V2_ESTIMATE,
+  API_POST_ARWEAVE_V2_REGISTER,
 } from '~/constant/api'
 
 class Provider {
@@ -156,5 +157,14 @@ export async function uploadSingleFileToBundlr(
   ];
   if (fileType) tags.push({ name: 'Content-Type', value: fileType })
   const response = await bundler.upload(file, { tags })
-  return response.id
+  const arweaveId = response.id;
+  if (arweaveId) {
+    await axios.post(API_POST_ARWEAVE_V2_REGISTER, {
+      fileSize,
+      ipfsHash,
+      txHash,
+      arweaveId,
+    });
+  }
+  return arweaveId;
 }
