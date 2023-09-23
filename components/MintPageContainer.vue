@@ -73,7 +73,7 @@ export default class Min5PageContainer extends Vue {
 
 
   get isUsingLikerLandApp() {
-    return this.walletType === 'likerland_app'
+    return this.walletType === 'liker-id'
   }
 
   get googleFormUrl() {
