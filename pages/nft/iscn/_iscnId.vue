@@ -514,7 +514,7 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
-  @Watch('maxMintAmount')
+  @Watch('maxMintAmount', { immediate: true })
   onMaxMintAmount(max: number) {
     if (this.mintAmount > max) {
       this.mintAmount = max
