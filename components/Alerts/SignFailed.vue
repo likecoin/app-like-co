@@ -67,6 +67,7 @@ export default class SignFailed extends Vue {
 
   async handleReLogin() {
     const { currentRoute } = this.$router
+    const { path, query, hash, params } = currentRoute
     await this.disconnectWallet()
     const connection = await this.openConnectWalletModal({
       language: this.$i18n.locale.split('-')[0],
@@ -84,7 +85,7 @@ export default class SignFailed extends Vue {
         wallet: accounts[0].address,
         method,
       })
-      this.$router.push(currentRoute.path);
+      this.$router.push({ path, query, hash, params })
     }
     this.handleSnackbarClose()
   }
