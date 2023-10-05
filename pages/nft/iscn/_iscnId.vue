@@ -263,7 +263,7 @@ export default class NFTTestMintPage extends Vue {
 
   reserveNft: number = 0
   mintAmount: number = this.maxMintAmount
-  initialBatch: number = 7
+  initialBatch: number = 6
   shouldShowNoUrlWarning: boolean = false
 
   collectExpiryDate: string = ''
