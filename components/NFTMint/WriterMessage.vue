@@ -143,7 +143,7 @@
         >
           <span>{{ $t('NFTPortal.label.initialBatch.input') }}</span>
           <select ref="batchInput" @change="(e) => $emit('update-initial-batch', e.target.value)">
-            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch" :selected="batch === 7">
+            <option v-for="{ batch, price } in initialBatchOptions" :key="batch" :value="batch" :selected="batch === 6">
               {{ price }}
             </option>
           </select>
@@ -193,6 +193,7 @@ export default class WriterMessage extends Vue {
   initialBatchOptions = [
     { batch: -1, price: this.$t('NFTPortal.label.initialBatch.free') },
     // To maintain the compatibility of the DB data, minting starts from batch 7
+    { batch: 6, price: this.$t('NFTPortal.label.price', { price: 0.5 }) },
     { batch: 7, price: this.$t('NFTPortal.label.price', { price: 1 }) },
     { batch: 8, price: this.$t('NFTPortal.label.price', { price: 2 }) },
     { batch: 9, price: this.$t('NFTPortal.label.price', { price: 4 }) },
