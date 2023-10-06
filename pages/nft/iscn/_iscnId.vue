@@ -130,13 +130,12 @@ import {
 import { calculateNFTClassIdByISCNId } from '@likecoin/iscn-js/dist/nft/nftId'
 import BigNumber from 'bignumber.js'
 import axios, { AxiosError } from 'axios'
+import Hash from 'ipfs-only-hash'
 
 import {
   LIKER_NFT_TARGET_ADDRESS,
   API_LIKER_NFT_MINT,
   API_LIKER_NFT_MINT_IMAGE,
-  API_POST_ARWEAVE_ESTIMATE,
-  API_POST_ARWEAVE_UPLOAD,
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
@@ -149,6 +148,7 @@ import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/co
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
+import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2';
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
@@ -411,11 +411,9 @@ export default class NFTTestMintPage extends Vue {
     return ''
   }
 
-  get ogImageFormData(): FormData | null {
-    if (!this.ogImageBlob) return null
-    const formData = new FormData()
-    formData.append('file', this.ogImageBlob)
-    return formData
+  get ogImageByteSize(): number {
+    if (!this.ogImageBlob) return 0
+    return this.ogImageBlob.size
   }
 
   get detailsPageURL(): string {
@@ -631,6 +629,11 @@ export default class NFTTestMintPage extends Vue {
     }
   }
 
+  async getOgImageIpfsHash(): Promise<string> {
+    if (!this.ogImageBlob) return ''
+    return Hash.of(Buffer.from(await this.ogImageBlob.arrayBuffer()))
+  }
+
   async getISCNInfo() {
     try {
       const res = await this.fetchISCNById(this.iscnId)
@@ -752,15 +755,9 @@ export default class NFTTestMintPage extends Vue {
   async checkArweaveIdExistsAndEstimateFee() {
     try {
       logTrackerEvent(this, 'IscnMintNFT', 'CheckArweaveIdExistsAndEstimateFee', this.iscnId, 1);
-      const { address, arweaveId, LIKE, memo } = await this.$axios.$post(
-        API_POST_ARWEAVE_ESTIMATE,
-        this.ogImageFormData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )
+      const { address, arweaveId, LIKE, memo } = await estimateBundlrFilePrice({
+        fileSize: this.ogImageByteSize, ipfsHash: await this.getOgImageIpfsHash(),
+      })
       this.ogImageArweaveId = arweaveId
       return {
         to: address,
@@ -801,18 +798,20 @@ export default class NFTTestMintPage extends Vue {
   async submitToArweave(): Promise<void> {
     try {
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweave', this.ogImageArweaveFeeTxHash, 1);
+      if (!this.ogImageBlob) {
+        throw new Error('OG_IMAGE_NOT_SET')
+      }
       if (!this.ogImageArweaveFeeTxHash) {
         throw new Error('ARWEAVE_FEE_TX_HASH_NOT_SET')
       }
-      const { arweaveId } = await this.$axios.$post(
-        `${API_POST_ARWEAVE_UPLOAD}?txHash=${this.ogImageArweaveFeeTxHash}`,
-        this.ogImageFormData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )
+      const arrayBuffer = await this.ogImageBlob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const arweaveId = await uploadSingleFileToBundlr(buffer, {
+        fileSize: this.ogImageByteSize,
+        ipfsHash: await this.getOgImageIpfsHash(),
+        fileType: this.ogImageBlob.type,
+        txHash: this.ogImageArweaveFeeTxHash,
+      });
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveSuccess', arweaveId as string, 1);
       this.ogImageArweaveId = arweaveId as string
     } catch (err) {
