@@ -63,9 +63,12 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
   bech32PrefixConsPub: 'likevalconspub',
   availableMethods: [
     'keplr',
+    'keplr-mobile',
     'cosmostation',
     'cosmostation-mobile',
     'liker-id',
+    'leap',
+    'metamask-leap',
     'walletconnect-v2',
   ],
   keplrInstallCTAPreset: 'fancy-banner',
