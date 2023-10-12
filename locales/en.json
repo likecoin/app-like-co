@@ -285,7 +285,7 @@
   "NFTPortal.label.AR": "Arweave ID",
   "NFTPortal.label.mint": "Mint NFT",
   "NFTPortal.label.message.mintSettings": "Sales Settings",
-  "NFTPortal.label.mintAmount.input": "Number of NFTs to premint",
+  "NFTPortal.label.mintAmount.input": "Number of NFTs to mint",
   "NFTPortal.label.message.preview": "Creator Message Preview",
   "NFTPortal.label.message.reserve": "Reserve Writing NFTs",
   "NFTPortal.label.message.dialog": "Message To Your Collector",
