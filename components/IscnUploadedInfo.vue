@@ -10,10 +10,19 @@
       <!-- header -->
       <IscnFormHeader :step="step" :total-step="4"/>
       <!-- guide title -->
-      <Label
-        :text="$t('IscnUploaded.guide.title')"
-        class="text-medium-gray mt-[12px] mb-[28px]"
-      />
+      <div class="flex items-center justify-between mt-[12px] mb-[28px]">
+        <Label
+          align="middle"
+          :text="$t('IscnUploaded.guide.title')"
+          class="text-medium-gray"
+        />
+        <Button preset="plain" text="Download iscn.json" @click="handleClickDownload">
+          <template #prepend>
+            <IconDownload />
+          </template>
+        </Button>
+      </div>
+
       <!-- ISCN card -->
       <IscnCard
         v-if="record"
@@ -178,6 +187,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { downloadJSON } from '~/utils/misc'
 import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
 
 @Component({
@@ -225,6 +235,30 @@ export default class IscnUploadedInfo extends Vue {
 
   get recordTimestamp() {
     return this.recordData?.recordTimestamp || ''
+  }
+
+  handleClickDownload() {
+    const { url, name, keywords, usageInfo, author, description, sameAs } =
+      this.metadata
+    const generateData = {
+      contentMetadata: {
+        url,
+        name,
+        '@type': this.type,
+        version: 1,
+        '@context': "http://schema.org/",
+        keywords,
+        usageInfo,
+        author,
+        description,
+        sameAs,
+      },
+      stakeholders: this.recordData?.stakeholders,
+      contentFingerprints: this.contentFingerprints,
+      recordNotes: '',
+    }
+
+    downloadJSON(generateData, 'iscn.json')
   }
 }
 </script>
