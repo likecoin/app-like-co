@@ -188,7 +188,7 @@
       <!-- header -->
       <Label
         class="w-min mb-[16px]"
-        :text="type"
+        :text="$t('IscnRegisterForm.label.content')"
         tag="div"
         preset="p5"
         valign="middle"
@@ -196,7 +196,7 @@
         prepend-class="text-like-green"
       >
         <template #prepend>
-          <ISCNTypeIcon :type="type" />
+          <ISCNTypeIcon />
         </template>
       </Label>
       <!-- form fieldset -->
@@ -221,6 +221,17 @@
               :is-textarea="true"
               :error-message="validateField(description, charactersLimit.description, true)"
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.type')"
+            class="mb-[12px]"
+          >
+            <Selector
+              class="h-[40px] w-[52px] ml-[8px]"
+              :options="typeOptions"
+              :placeholder="defaultType"
+              @input="setType"
             />
           </FormField>
           <FormField
@@ -657,6 +668,7 @@ export default class IscnRegisterForm extends Vue {
   authorDescription: string = ''
   contentFingerprintInput: string = ''
   customContentFingerprints: string[] = []
+  type: string = this.defaultType
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
@@ -685,6 +697,12 @@ export default class IscnRegisterForm extends Vue {
   charactersLimit = CharactersLimit
 
   showUploadOnly = this.isUploadOnly
+  typeOptions = [
+    'Book',
+    'Photo',
+    'Image',
+    'Creative',
+  ]
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -716,7 +734,7 @@ export default class IscnRegisterForm extends Vue {
     return this.exifInfo && this.exifInfo.ExifImageWidth
   }
 
-  get type() {
+  get defaultType() {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
     return 'CreativeWork'
@@ -978,6 +996,10 @@ export default class IscnRegisterForm extends Vue {
 
   setAuthorName(value: string) {
     this.authorName = value
+  }
+
+  setType(value: string) {
+    this.type = value
   }
 
   async getLikerIdsAddresses(): Promise<void> {

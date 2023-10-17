@@ -20,7 +20,7 @@ export enum RecordType {
 
 @Component
 export default class ISCNTypeIcon extends Vue {
-  @Prop(String) readonly type!: String | undefined
+  @Prop({ default: 'CreativeWork' }) readonly type!: String | undefined
 
   get recordType() {
     switch (this.type) {
