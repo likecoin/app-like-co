@@ -223,21 +223,9 @@
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
-          <FormField
-            :label="$t('IscnRegisterForm.label.type')"
-            class="mb-[12px]"
-          >
-            <Selector
-              class="h-[40px] w-[52px] ml-[8px]"
-              :options="typeOptions"
-              :placeholder="defaultType"
-              @input="setType"
-            />
-          </FormField>
           <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.author')"
-            class="mb-[12px]"
           >
             <span
               v-if="author.name"
@@ -329,13 +317,25 @@
           </FormField>
           <Divider class="my-[12px]" />
           <FormField
+            :label="$t('IscnRegisterForm.label.type')"
+            class="mb-[12px]"
+          >
+            <Selector
+              class="h-[40px] w-[160px]"
+              :options="typeOptions"
+              :placeholder="defaultType"
+              @input="setType"
+            />
+          </FormField>
+          <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
           >
-            <TextField
-              v-model="license"
-              :error-message="validateField(license, charactersLimit.license)"
-              :placeholder="$t('IscnRegisterForm.placeholder.license')"
+            <Selector
+              class="h-[40px] w-[320px]"
+              :options="licenseOptions"
+              :placeholder="license"
+              @input="setLicense"
             />
           </FormField>
           <Divider class="my-[12px]" />
@@ -650,7 +650,6 @@ export enum CharactersLimit {
   authorDescription = 200,
   likerIdLeast = 7,
   likerId = 20,
-  license = 200,
   url = 2048,
 }
 
@@ -678,6 +677,18 @@ export default class IscnRegisterForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
+ typeOptions = [
+    'Book',
+    'Photo',
+    'Image',
+    'Creative',
+  ]
+
+  licenseOptions = [
+    'Copyright. All rights reserved.',
+    'CC BY 4.0',
+  ]
+
   author: Author = {
     name: '',
     url: [],
@@ -692,7 +703,7 @@ export default class IscnRegisterForm extends Vue {
   tags: string[] = []
   sameAs: string[] = []
   url: string = ''
-  license: string = ''
+  license: string = this.licenseOptions[0]
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
@@ -734,12 +745,6 @@ export default class IscnRegisterForm extends Vue {
   charactersLimit = CharactersLimit
 
   showUploadOnly = this.isUploadOnly
-  typeOptions = [
-    'Book',
-    'Photo',
-    'Image',
-    'Creative',
-  ]
 
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
 
@@ -932,8 +937,7 @@ export default class IscnRegisterForm extends Vue {
       this.name &&
       this.description &&
       this.name.length <= CharactersLimit.name &&
-      this.description.length <= CharactersLimit.description &&
-      this.license.length <= CharactersLimit.license
+      this.description.length <= CharactersLimit.description
     )
   }
 
@@ -1066,6 +1070,10 @@ export default class IscnRegisterForm extends Vue {
 
   setType(value: string) {
     this.type = value
+  }
+
+  setLicense(value: string) {
+    this.license = value
   }
 
   async getLikerIdsAddresses(): Promise<void> {

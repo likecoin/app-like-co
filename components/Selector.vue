@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-stretch w-[160px] border-[2px] border-medium-gray rounded-[12px] hover:bg-light-gray">
+  <div class="flex items-stretch border-[2px] border-medium-gray rounded-[12px] hover:bg-light-gray">
     <button :class="selectorWrapper" @blur.prevent="isOpenOptions = false">
       <div
         class="flex items-center justify-between whitespace-nowrap px-[12px]"
@@ -18,6 +18,7 @@
           text-dark-gray text-left
           mt-[8px]
           p-[12px]
+          z-50
         "
       >
         <div
