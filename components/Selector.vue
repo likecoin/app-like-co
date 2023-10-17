@@ -1,46 +1,44 @@
 <template>
-  <button :class="selectorWapper" @blur="isOpenOptions = false">
-    <div
-      class="h-[100%] w-[100%] flex flex-row items-center justify-center"
-      @click="isOpenOptions = !isOpenOptions"
-    >
-      {{ placeholder }}
-      <IconArrowDown />
-    </div>
-    <div
-      v-if="isOpenOptions && options.length"
-      class="
-        w-[280px]
-        absolute
-        buttom-0
-        bg-white
-        border-shade-gray border-[1px]
-        rounded-[24px]
-        text-dark-gray text-left
-        mt-[8px]
-        p-[24px]
-      "
-    >
+  <div class="flex items-stretch w-[160px] border-[2px] border-medium-gray rounded-[12px] hover:bg-light-gray">
+    <button :class="selectorWrapper" @blur.prevent="isOpenOptions = false">
       <div
-        v-for="(option, i) of options"
-        :key="i"
-        class="
-          pt-[4px]
-          pl-[4px]
-          pr-[4px]
-          transition
-          duration-100
-          cursor-pointer
-          hover:bg-light-gray
-          active:bg-shade-gray
-        "
-        @click="handleSelectValue(option)"
+        class="flex items-center justify-between whitespace-nowrap px-[12px]"
+        @click.prevent="isOpenOptions = !isOpenOptions"
       >
-        <div class="py-[8px]">{{ option }}</div>
-        <IconDiver v-if="i !== options.length - 1" />
+        {{ currentValue }}
+        <IconArrowDown />
       </div>
-    </div>
-  </button>
+      <div
+        v-if="isOpenOptions && options.length"
+        class="
+          absolute
+          bg-white
+          border-shade-gray border-[1px]
+          rounded-[24px]
+          text-dark-gray text-left
+          mt-[8px]
+          p-[12px]
+        "
+      >
+        <div
+          v-for="(option, i) of options"
+          :key="i"
+          class="
+            pt-[4px]
+            transition
+            duration-100
+            cursor-pointer
+            hover:bg-light-gray
+            active:bg-shade-gray
+          "
+          @click.prevent="handleSelectValue(option)"
+        >
+          <div class="py-[8px]">{{ option }}</div>
+          <IconDiver v-if="i !== options.length - 1" />
+        </div>
+      </div>
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -59,17 +57,17 @@ export default class Selector extends Vue {
 
   isOpenOptions: boolean = false
   selected: string = ''
+  value: string = ''
 
-  get selectorWapper() {
+  get selectorWrapper() {
     return [
+      'w-[100%]',
       'block',
       'relative',
-      'bg-shade-gray',
       'rounded-[12px]',
       {
         'text-left': this.placeholder,
       },
-      this.isOpenOptions ? 'bg-medium-gray' : 'hover:bg-light-gray',
       'outline-none',
       'transition',
       'duration-150',
@@ -77,8 +75,14 @@ export default class Selector extends Vue {
     ]
   }
 
+  get currentValue(){
+    return this.value || this.placeholder
+  }
+
+
   handleSelectValue(value: string) {
     this.isOpenOptions = false
+    this.value = value
     this.$emit('input', value)
   }
 }
