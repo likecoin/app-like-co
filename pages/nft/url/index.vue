@@ -297,6 +297,7 @@ export default class FetchIndex extends Vue {
       ipfsHash: this.ipfsHash,
       arweaveId: this.arweaveId,
       fileSHA256: '',
+      author,
       authorNames: [author],
       authorUrls: [[]],
       authorWallets: [[{
