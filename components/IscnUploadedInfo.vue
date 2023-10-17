@@ -156,7 +156,7 @@
       </FormField>
       <Divider class="mb-[24px]" />
       <FormField
-        v-if="keywords"
+        v-if="keywords.length"
         :label="$t('iscn.meta.tags.title')"
         class="mb-[12px]"
       >
@@ -216,7 +216,7 @@ export default class IscnUploadedInfo extends Vue {
   }
 
   get keywords(): Array<string> {
-    return this.metadata?.keywords.split(',') || []
+    return this.metadata?.keywords && this.metadata?.keywords.split(',') || []
   }
 
   get contentFingerprints() {
