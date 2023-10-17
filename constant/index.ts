@@ -110,6 +110,4 @@ export const LIKECOIN_CHAIN_STAKING_ENDPOINT = IS_TESTNET
   ? 'https://likecoin-public-testnet-5.netlify.app/validators'
   : 'https://dao.like.co/validators';
 
-export const UPLOAD_FILESIZE_MAX = 100000000; // 100MB
-
-
+export const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024; // 200MB
