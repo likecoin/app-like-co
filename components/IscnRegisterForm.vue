@@ -234,8 +234,39 @@
               @input="setType"
             />
           </FormField>
+          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.author')"
+            class="mb-[12px]"
+          >
+            <span
+              v-if="author.name"
+              class="mr-[8px] mb-[4px]"
+            >
+              <Button
+                size="mini"
+                preset="secondary"
+                tag="div"
+                text-preset="h6"
+                type="button"
+                :text="author.name"
+                @click="editAuthor({ type: 'author' })"
+              />
+            </span>
+            <Button
+              v-else
+              type="button"
+              class="mb-[4px]"
+              size="mini"
+              preset="secondary"
+              content-class="py-[4px]"
+              @click="handleOpenAuthorDialog({ type: 'author' })"
+            >
+              <IconAddMini />
+            </Button>
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.stakeholder')"
             content-classes="flex flex-row flex-wrap"
           >
             <!-- add author -->
@@ -251,7 +282,7 @@
                 text-preset="h6"
                 type="button"
                 :text="author.name"
-                @click="editAuthor(index)"
+                @click="editAuthor({ type: 'stakeholder', index })"
               />
             </span>
             <Button
@@ -260,13 +291,13 @@
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
-              @click="handleOpenAuthorDialog"
+              @click="handleOpenAuthorDialog({ type: 'stakeholder' })"
             >
               <IconAddMini />
             </Button>
           </FormField>
-          <!-- add tags -->
           <Divider class="my-[12px]" />
+          <!-- add tags -->
           <FormField
             :label="$t('IscnRegisterForm.label.tags')"
             content-classes="flex flex-row flex-wrap"
@@ -277,7 +308,6 @@
               :tags-limit="charactersLimit.tagNumber"
             />
           </FormField>
-          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.url')"
             class="mb-[12px]"
@@ -434,11 +464,6 @@
               class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
             />
-            <!-- hide for now -->
-            <!-- <Selector
-              class="h-[40px] w-[52px] ml-[8px]"
-              @input="setAuthorName"
-            /> -->
           </FormField>
           <FormField class="mb-[16px]" :label="$t('IscnRegisterForm.label.likerID')">
             <TextField
@@ -629,6 +654,11 @@ export enum CharactersLimit {
   url = 2048,
 }
 
+export enum AuthorDialogType {
+  author = 'author',
+  stakeholder = 'stakeholder'
+}
+
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: false }) readonly isImage!: boolean
@@ -648,6 +678,13 @@ export default class IscnRegisterForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
+  author: Author = {
+    name: '',
+    url: [],
+    wallet: [],
+    likerId: '',
+    authorDescription: '',
+  }
 
   authors: Author[] = []
   name: string = ''
@@ -703,6 +740,8 @@ export default class IscnRegisterForm extends Vue {
     'Image',
     'Creative',
   ]
+
+  currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -825,6 +864,7 @@ export default class IscnRegisterForm extends Vue {
       arweaveId: this.uploadArweaveId || this.arweaveId,
       numbersProtocolAssetId: this.numbersProtocolAssetId,
       fileSHA256: this.fileSHA256,
+      author: this.author.name,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
@@ -919,24 +959,47 @@ export default class IscnRegisterForm extends Vue {
     this.customContentFingerprints.push(this.contentFingerprintInput)
   }
 
-  handleOpenAuthorDialog() {
-    logTrackerEvent(this, 'ISCNCreate', 'OpenAuthorDialog', '', 1);
+  handleOpenAuthorDialog({ type }: { type: AuthorDialogType }) {
     this.checkedAuthorInfo = false
     this.isOpenAuthorDialog = true
     this.initAuthorInfo()
+    switch (type) {
+      case AuthorDialogType.author:
+        logTrackerEvent(this, 'ISCNCreate', 'OpenAuthorDialog', '', 1)
+        this.currentAuthorDialogType = AuthorDialogType.author
+        break
+
+      case AuthorDialogType.stakeholder:
+      default:
+        logTrackerEvent(this, 'ISCNCreate', 'OpenStakeholderDialog', '', 1)
+        this.currentAuthorDialogType = AuthorDialogType.stakeholder
+        break
+    }
   }
 
-  editAuthor(index: number) {
-    logTrackerEvent(this, 'ISCNCreate', 'EditAuthor', index.toString(), 1);
-    const { name, wallet, url, likerId, authorDescription } =
-      this.authors[index]
-    this.authorName = name
-    this.authorWalletAddress = wallet
-    this.authorUrl = url
-    this.likerId = likerId
-    this.authorDescription = authorDescription
-    this.activeEditingAuthorIndex = index
+  editAuthor({ type = AuthorDialogType.stakeholder, index }: { type: AuthorDialogType; index: any }) {
     this.isOpenAuthorDialog = true
+
+    if (type === AuthorDialogType.author) {
+      logTrackerEvent(this, 'ISCNCreate', 'EditAuthor', '', 1)
+      const { name, wallet, url, likerId, authorDescription } = this.author
+      this.authorName = name
+      this.authorWalletAddress = wallet
+      this.authorUrl = url
+      this.likerId = likerId
+      this.authorDescription = authorDescription
+      this.activeEditingAuthorIndex = this.authors.findIndex(author => author.name === name);
+    } else {
+      logTrackerEvent(this, 'ISCNCreate', 'EditStakeholder', index.toString(), 1)
+      const { name, wallet, url, likerId, authorDescription } =
+        this.authors[index]
+      this.authorName = name
+      this.authorWalletAddress = wallet
+      this.authorUrl = url
+      this.likerId = likerId
+      this.authorDescription = authorDescription
+      this.activeEditingAuthorIndex = index
+    }
   }
 
   dismissAuthorDialog() {
@@ -976,6 +1039,9 @@ export default class IscnRegisterForm extends Vue {
       url: this.authorUrl,
       likerId: this.likerId,
       authorDescription: this.authorDescription,
+    }
+    if (this.currentAuthorDialogType === AuthorDialogType.author) {
+      this.author = newAuthor
     }
     if (this.activeEditingAuthorIndex >= 0) {
       this.authors.splice(this.activeEditingAuthorIndex, 1, newAuthor)

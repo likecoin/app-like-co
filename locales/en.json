@@ -205,6 +205,7 @@
   "IscnRegisterForm.guide.review": "Review and edit metadata",
   "IscnRegisterForm.ipfs.link": "ipfs://{hash}",
   "IscnRegisterForm.label.author": "Author",
+  "IscnRegisterForm.label.stakeholder": "Stakeholders",
   "IscnRegisterForm.label.description": "Description",
   "IscnRegisterForm.label.emptyFile": "No Content",
   "IscnRegisterForm.label.fingerprints": "Content Fingerprints",

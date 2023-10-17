@@ -35,6 +35,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     ipfsHash,
     arweaveId,
     fileSHA256,
+    author,
     authorNames,
     authorUrls,
     authorWallets,
@@ -126,6 +127,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
 
   return {
     ...data,
+    author,
     keywords: tagsString.split(','),
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
