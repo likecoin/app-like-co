@@ -643,7 +643,7 @@ const walletModule = namespace('wallet')
 
 export enum CharactersLimit {
   name = 100,
-  description = 200,
+  description = 1600,
   tagContent = 35,
   tagNumber = 10,
   authorName = 40,
@@ -681,7 +681,7 @@ export default class IscnRegisterForm extends Vue {
     'Book',
     'Photo',
     'Image',
-    'Creative',
+    'CreativeWork',
   ]
 
   licenseOptions = [
