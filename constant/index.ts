@@ -58,6 +58,14 @@ export const WALLET_TYPES = [
   'eth',
 ]
 
+export const FILE_TYPES = [
+  'epub',
+  'pdf',
+  'mp3',
+  'jpg',
+  'png',
+]
+
 export const SITE_URL = IS_TESTNET ? 'https://app.rinkeby.like.co' : 'https://app.like.co';
 
 export const CONNECT_WALLET_TYPES = [

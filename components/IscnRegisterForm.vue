@@ -297,22 +297,43 @@
             />
           </FormField>
           <FormField
+            :label="$t('IscnRegisterForm.label.sameAs')"
+            content-classes="flex flex-row flex-wrap"
+          >
+            <span
+              v-if="formattedSameAsList.length"
+              class="mr-[8px] mb-[4px]"
+            >
+              <Button
+                size="mini"
+                preset="secondary"
+                tag="div"
+                text-preset="h6"
+                type="button"
+                :text="`${formattedSameAsList.length} urls`"
+                @click="handleOpenSameAsDialog()"
+              />
+            </span>
+            <Button
+              v-else
+              type="button"
+              class="mb-[4px]"
+              size="mini"
+              preset="secondary"
+              content-class="py-[4px]"
+              @click="handleOpenSameAsDialog()"
+            >
+              <IconAddMini />
+            </Button>
+
+
+          </FormField>
+          <FormField
             :label="$t('IscnRegisterForm.label.url')"
-            class="mb-[12px]"
           >
             <TextField
               v-model="url"
               :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </FormField>
-          <FormField
-            :label="$t('IscnRegisterForm.label.sameAs')"
-            content-classes="flex flex-row flex-wrap"
-          >
-            <EditableTagList
-              v-model="sameAs"
-              :characters-limit="charactersLimit.url"
-              :tags-limit="charactersLimit.tagNumber"
             />
           </FormField>
           <Divider class="my-[12px]" />
@@ -420,7 +441,7 @@
           {{ $t('IscnRegisterForm.error.buy') }}
         </Link>
       </Snackbar>
-      <!-- Dialog -->
+      <!-- Dialogs -->
       <Dialog
         v-model="isOpenAuthorDialog"
         :has-padding="false"
@@ -440,7 +461,7 @@
         >
           <Label
             class="w-min mb-[16px]"
-            :text="$t('IscnRegisterForm.title.editAuthor')"
+            :text="authorDialogTitle"
             tag="div"
             preset="p5"
             valign="middle"
@@ -522,6 +543,45 @@
           </div>
         </Card>
       </Dialog>
+      <Dialog
+        v-model="isOpenSameAsDialog"
+        :has-padding="false"
+        preset="custom"
+        :is-disabled-backdrop-click="true"
+      >
+        <Card
+          :class="[
+            'flex',
+            'flex-col',
+            'w-[616px]',
+            'max-h-[75vh]',
+            'pb-[40px]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
+        >
+          <Label
+            class="w-min mb-[16px]"
+            :text="$t('IscnRegisterForm.sameAsDialog.title')"
+            tag="div"
+            preset="p5"
+            valign="middle"
+            content-class="font-semibold whitespace-nowrap text-like-green"
+            prepend-class="text-like-green"
+          >
+            <template #prepend>
+              <IconAdd />
+            </template>
+          </Label>
+          <SameAsFieldList
+            :name="name"
+            :url-options="contentFingerprintLinks"
+            :current-list="sameAsList"
+            @onConfirm="confirmSameAsChange"
+          />
+        </Card>
+      </Dialog>
+
       <Dialog
         v-model="isOpenSignDialog"
         :header-text="signDialogHeaderText"
@@ -651,6 +711,7 @@ export enum CharactersLimit {
   likerIdLeast = 7,
   likerId = 20,
   url = 2048,
+  filename = 15
 }
 
 export enum AuthorDialogType {
@@ -687,6 +748,14 @@ export default class IscnRegisterForm extends Vue {
   licenseOptions = [
     'Copyright. All rights reserved.',
     'CC BY 4.0',
+  ]
+
+  fileTypeOptions = [
+    'epub',
+    'pdf',
+    'mp3',
+    'jpg',
+    'png',
   ]
 
   author: Author = {
@@ -729,6 +798,7 @@ export default class IscnRegisterForm extends Vue {
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
+  isOpenSameAsDialog = false
   isOpenWarningSnackbar = false
   isOpenKeplr = true
   activeEditingAuthorIndex = -1
@@ -747,6 +817,7 @@ export default class IscnRegisterForm extends Vue {
   showUploadOnly = this.isUploadOnly
 
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
+  sameAsList: any = []
 
   get tagsString(): string {
     return this.tags.join(',')
@@ -784,6 +855,12 @@ export default class IscnRegisterForm extends Vue {
     return 'CreativeWork'
   }
 
+  get authorDialogTitle() {
+    return this.currentAuthorDialogType === AuthorDialogType.author
+      ? this.$t('IscnRegisterForm.title.editAuthor')
+      : this.$t('IscnRegisterForm.title.editStakeholder')
+  }
+
   get formattedIpfs() {
     return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
   }
@@ -791,6 +868,29 @@ export default class IscnRegisterForm extends Vue {
   get formattedArweave() {
     return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.uploadArweaveId })
   }
+
+  get contentFingerprintLinks() {
+    const array=[]
+    if (this.uploadArweaveId) {
+      array.push(this.formattedArweave)
+    }
+    if (this.ipfsHash){
+      array.push(this.formattedIpfs)
+    }
+    if (this.customContentFingerprints.length){
+      array.push(...this.customContentFingerprints)
+    }
+    return array
+  }
+
+  get formattedSameAsList() {
+  return this.sameAsList.map((sameAs: { filename: any; filetype: any; url: any }) => {
+    if (sameAs.filename && sameAs.filetype) {
+      return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`;
+    }
+    return '';
+  });
+}
 
   get errorMsg() {
     switch (this.error) {
@@ -861,7 +961,7 @@ export default class IscnRegisterForm extends Vue {
       name: this.name,
       description: this.description,
       tagsString: this.tagsString,
-      sameAs: this.sameAs,
+      sameAs: this.formattedSameAsList,
       url: this.url,
       exifInfo: this.exif,
       license: this.license,
@@ -951,6 +1051,15 @@ export default class IscnRegisterForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
+  // @Watch('contentFingerprintLinks')
+  // setSameAsList() {
+  //   this.sameAsList = this.contentFingerprintLinks.map((url) => ({
+  //     url,
+  //     filename: '',
+  //     filetype: this.fileTypeOptions[0],
+  //   }))
+  // }
+
   async mounted() {
     this.uploadStatus = 'loading'
     await this.estimateArweaveFee();
@@ -961,6 +1070,7 @@ export default class IscnRegisterForm extends Vue {
 
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
+    this.contentFingerprintInput = ''
   }
 
   handleOpenAuthorDialog({ type }: { type: AuthorDialogType }) {
@@ -1074,6 +1184,17 @@ export default class IscnRegisterForm extends Vue {
 
   setLicense(value: string) {
     this.license = value
+  }
+
+  handleOpenSameAsDialog() {
+    this.isOpenSameAsDialog = true
+  }
+
+  confirmSameAsChange(value: any) {
+    logTrackerEvent(this, 'ISCNCreate', 'ConfirmSameAsChange', '', 1);
+    console.log('value',value)
+    this.sameAsList = value
+    this.isOpenSameAsDialog = false
   }
 
   async getLikerIdsAddresses(): Promise<void> {
