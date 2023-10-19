@@ -852,6 +852,7 @@ export default class IscnRegisterForm extends Vue {
   get defaultType() {
     if (this.isPhoto) return 'Photo'
     if (this.isImage) return 'Image'
+    if (this.fileType === 'application/pdf' || this.fileType === 'application/epub+zip') return 'Book'
     return 'CreativeWork'
   }
 
