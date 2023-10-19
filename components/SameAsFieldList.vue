@@ -25,8 +25,8 @@
           <FormField :label="$t('IscnRegisterForm.label.fileType')">
             <Selector
               class="h-[40px] w-[80px]"
-              :options="filetypeOptions"
-              :placeholder="item.filetype || filetypeOptions[0]"
+              :options="sameAsFiletypeOptions"
+              :placeholder="item.filetype || sameAsFiletypeOptions[0]"
               @input="(value) => handleSelectValue({ value, index: i })"
             />
           </FormField>
@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { FILE_TYPES } from '~/constant'
+import { SAME_AS_FILE_TYPES } from '~/constant'
 
 @Component
 export default class WalletFieldList extends Vue {
@@ -84,12 +84,12 @@ export default class WalletFieldList extends Vue {
       url: '',
       id: 1,
       filename: this.formatName,
-      filetype: FILE_TYPES[0],
+      filetype: SAME_AS_FILE_TYPES[0],
     }]
 
   // eslint-disable-next-line class-methods-use-this
-  get filetypeOptions() {
-    return FILE_TYPES
+  get sameAsFiletypeOptions() {
+    return SAME_AS_FILE_TYPES
   }
 
   get formatName(){
@@ -102,21 +102,21 @@ export default class WalletFieldList extends Vue {
         url: list.url,
         id: `${list.url}-${list.filename}`,
         filename: list.filename,
-        filetype: list.filetype || FILE_TYPES[0],
+        filetype: list.filetype || SAME_AS_FILE_TYPES[0],
       }))
     } else if (this.urlOptions.length) {
       this.sameAsList = this.urlOptions.map((url, index) => ({
         url,
         id: `${url}-${index}`,
         filename: this.formatName,
-        filetype: FILE_TYPES[0],
+        filetype: SAME_AS_FILE_TYPES[0],
       }))
     } else {
       this.sameAsList = [{
           url: '',
           id: 1,
           filename: this.formatName,
-          filetype: FILE_TYPES[0],
+          filetype: SAME_AS_FILE_TYPES[0],
         }]
     }
   }
@@ -130,7 +130,7 @@ export default class WalletFieldList extends Vue {
       url: '',
       id: Date.now(),
       filename: '',
-      filetype: FILE_TYPES[0],
+      filetype: SAME_AS_FILE_TYPES[0],
     })
   }
 

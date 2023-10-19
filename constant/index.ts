@@ -58,7 +58,7 @@ export const WALLET_TYPES = [
   'eth',
 ]
 
-export const FILE_TYPES = [
+export const SAME_AS_FILE_TYPES = [
   'epub',
   'pdf',
   'mp3',
