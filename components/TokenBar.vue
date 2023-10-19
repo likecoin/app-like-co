@@ -29,7 +29,7 @@
       preset="tertiary"
       text-preset="h6"
       size="mini"
-      href="https://app.osmosis.zone/?from=ATOM&to=LIKE"
+      href="https://app.osmosis.zone/?from=USDC&to=LIKE"
       :text="$t('HomePage.button.osmosis')"
     />
     <!-- help button -->
