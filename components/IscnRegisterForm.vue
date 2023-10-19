@@ -353,10 +353,15 @@
             class="mb-[12px]"
           >
             <Selector
-              class="h-[40px] w-[320px]"
+              class="h-[40px] w-[320px] mb-[8px]"
               :options="licenseOptions"
               :placeholder="license"
               @input="setLicense"
+            />
+            <TextField
+              v-if="license === 'Other'"
+              v-model="customLicense"
+              :placeholder="$t('iscn.meta.license.placeholder')"
             />
           </FormField>
           <Divider class="my-[12px]" />
@@ -745,11 +750,6 @@ export default class IscnRegisterForm extends Vue {
     'CreativeWork',
   ]
 
-  licenseOptions = [
-    'Copyright. All rights reserved.',
-    'CC BY 4.0',
-  ]
-
   fileTypeOptions = [
     'epub',
     'pdf',
@@ -757,6 +757,12 @@ export default class IscnRegisterForm extends Vue {
     'jpg',
     'png',
   ]
+
+  licenseMap: { [key: string]: string | null }= {
+    'Copyright. All rights reserved.': 'All Rights Reserved',
+    'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
+    'Other': null,
+  }
 
   author: Author = {
     name: '',
@@ -773,6 +779,7 @@ export default class IscnRegisterForm extends Vue {
   sameAs: string[] = []
   url: string = ''
   license: string = this.licenseOptions[0]
+  customLicense: string = ''
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
@@ -885,13 +892,21 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get formattedSameAsList() {
-  return this.sameAsList.map((sameAs: { filename: any; filetype: any; url: any }) => {
-    if (sameAs.filename && sameAs.filetype) {
-      return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`;
-    }
-    return '';
-  });
-}
+    return this.sameAsList.map((sameAs: { filename: any; filetype: any; url: any }) => {
+      if (sameAs.filename && sameAs.filetype) {
+        return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`;
+      }
+      return '';
+    });
+  }
+
+  get licenseOptions() {
+    return Object.keys(this.licenseMap)
+  }
+
+  get formattedLicense() {
+    return this.licenseMap[this.license] || this.customLicense;
+  }
 
   get errorMsg() {
     switch (this.error) {
@@ -965,7 +980,7 @@ export default class IscnRegisterForm extends Vue {
       sameAs: this.formattedSameAsList,
       url: this.url,
       exifInfo: this.exif,
-      license: this.license,
+      license: this.formattedLicense,
       ipfsHash: this.uploadIpfsHash || this.ipfsHash,
       arweaveId: this.uploadArweaveId || this.arweaveId,
       numbersProtocolAssetId: this.numbersProtocolAssetId,
