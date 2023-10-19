@@ -238,20 +238,11 @@ export default class IscnUploadedInfo extends Vue {
   }
 
   handleClickDownload() {
-    const { url, name, keywords, usageInfo, author, description, sameAs } =
-      this.metadata
     const generateData = {
       contentMetadata: {
-        url,
-        name,
+        ...this.metadata,
         '@type': this.type,
-        version: 1,
         '@context': "http://schema.org/",
-        keywords,
-        usageInfo,
-        author,
-        description,
-        sameAs,
       },
       stakeholders: this.recordData?.stakeholders,
       contentFingerprints: this.contentFingerprints,
