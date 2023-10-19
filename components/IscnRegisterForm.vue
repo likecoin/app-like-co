@@ -1051,15 +1051,6 @@ export default class IscnRegisterForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
-  // @Watch('contentFingerprintLinks')
-  // setSameAsList() {
-  //   this.sameAsList = this.contentFingerprintLinks.map((url) => ({
-  //     url,
-  //     filename: '',
-  //     filetype: this.fileTypeOptions[0],
-  //   }))
-  // }
-
   async mounted() {
     this.uploadStatus = 'loading'
     await this.estimateArweaveFee();
