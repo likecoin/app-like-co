@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-stretch border-[2px] border-medium-gray rounded-[12px] hover:bg-light-gray">
-    <button :class="selectorWrapper" @blur.prevent="isOpenOptions = false">
+    <button :class="selectorWrapper" type="button" @blur.prevent="isOpenOptions = false">
       <div
         class="flex items-center justify-between whitespace-nowrap px-[12px]"
         @click.prevent="isOpenOptions = !isOpenOptions"
@@ -32,7 +32,7 @@
             hover:bg-light-gray
             active:bg-shade-gray
           "
-          @click.prevent="handleSelectValue(option)"
+          @click="handleSelectValue(option)"
         >
           <div class="py-[8px]">{{ option }}</div>
           <IconDiver v-if="i !== options.length - 1" />
@@ -85,6 +85,7 @@ export default class Selector extends Vue {
     this.isOpenOptions = false
     this.value = value
     this.$emit('input', value)
+
   }
 }
 </script>
