@@ -1183,7 +1183,6 @@ export default class IscnRegisterForm extends Vue {
 
   confirmSameAsChange(value: any) {
     logTrackerEvent(this, 'ISCNCreate', 'ConfirmSameAsChange', '', 1);
-    console.log('value',value)
     this.sameAsList = value
     this.isOpenSameAsDialog = false
   }
