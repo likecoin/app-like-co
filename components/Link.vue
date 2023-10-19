@@ -2,10 +2,7 @@
   <component
     :is="tag"
     :class="rootClasses"
-    :to="to || null"
-    :href="href || null"
-    :target="href ? '_blank' : null"
-    :rel="rel"
+    v-bind="attrs"
   >
     <slot />
     <IconNorthEast v-if="href" class="ml-[4px] self-center" />
@@ -22,14 +19,23 @@ export default class Link extends Vue {
   @Prop(String) readonly href: string | undefined
   @Prop({ default: false }) readonly isInline!: boolean
 
+  get attrs() {
+    if (this.to) {
+      return { to: this.to }
+    }
+    if (this.href) {
+      return {
+        href: this.href,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    }
+    return {}
+  }
+
   get tag() {
     if (this.to) return 'NuxtLink'
     return 'a'
-  }
-
-  get rel() {
-    if (this.href) return 'noopener noreferrer'
-    return null
   }
 
   get rootClasses() {
