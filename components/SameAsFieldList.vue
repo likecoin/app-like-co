@@ -92,8 +92,18 @@ export default class WalletFieldList extends Vue {
     return SAME_AS_FILE_TYPES
   }
 
-  get formatName(){
-    return this.name ? this.name.toUpperCase() : ''
+  get formatName() {
+    if (!this.name) {
+      return '';
+    }
+    if (/[\u4E00-\u9FA5]/.test(this.name)) {
+      return this.name;
+    }
+      return this.name.replace(/[.,!?;:'"(){}[\]<>]/g, '').replace(/\s+/g, '_').toUpperCase();
+  }
+
+  get formatUrlOptions() {
+    return this.urlOptions.filter(url => url.startsWith('ar://'))
   }
 
   mounted() {
@@ -104,8 +114,8 @@ export default class WalletFieldList extends Vue {
         filename: list.filename,
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
       }))
-    } else if (this.urlOptions.length) {
-      this.sameAsList = this.urlOptions.map((url, index) => ({
+    } else if (this.formatUrlOptions.length) {
+      this.sameAsList = this.formatUrlOptions.map((url, index) => ({
         url,
         id: `${url}-${index}`,
         filename: this.formatName,
