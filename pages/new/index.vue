@@ -35,20 +35,16 @@
     />
     <IscnRegisterForm
       v-else-if="state === 'iscn'"
-      :ipfs-hash="ipfsHash"
+      :file-records="formattedFileRecords"
+
+      :ipfs-hash="urlIpfsHash"
       :arweave-id="arweaveId"
-      :file-data="fileData"
-      :file-type="fileType"
-      :file-size="fileSize"
-      :file-s-h-a256="fileSHA256"
-      :file-blob="fileBlob"
-      :is-image="isImage"
+
       :is-upload-only="isUploadOnly"
-      :exif-info="exifInfo"
       :step="step"
       @arweaveUploaded="onArweaveIdUpdate"
       @txBroadcasted="onISCNTxInfo"
-      @fileUploaded="onFileOnlyUpload"
+      @fileUploaded="fileUploaded"
       @handleSubmit="isSubmit = true"
       @handleQuit="isSubmit = false"
     />
@@ -121,7 +117,7 @@ export default class NewIndexPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   state = 'init'
-  ipfsHash = this.$route.query.ipfs_hash || ''
+  urlIpfsHash = this.$route.query.ipfs_hash || ''
   arweaveId = this.$route.query.arweave_id || ''
   isUploadOnly = this.$route.query.upload_only === '1'
   fileSHA256 = ''
@@ -131,11 +127,14 @@ export default class NewIndexPage extends Vue {
   iscnId = ''
   iscnTxHash = ''
   iscnTimestamp = ''
-  isImage = false
+  isFileImage = false
   fileBlob: Blob | null = null
   exifInfo: any | null = null
   isSubmit = false
   record: ISCNRecordWithID | null = null
+
+  uploadFileRecords: any[] = []
+  urlFileRecords: any[] = []
 
   get shouldSkipToMintNFT(): boolean {
     return this.$route.query.mint === '1'
@@ -157,55 +156,43 @@ export default class NewIndexPage extends Vue {
     }
   }
 
+  get formattedFileRecords() {
+     if (this.uploadFileRecords.length) {
+      return this.uploadFileRecords
+     }
+     if (this.urlFileRecords.length) {
+      return this.urlFileRecords
+     }
+     return[]
+  }
+
   async mounted() {
-    if ((this.ipfsHash || this.arweaveId) && this.shouldSkipToMintNFT) {
+    if ((this.urlIpfsHash || this.arweaveId) && this.shouldSkipToMintNFT) {
       this.state = 'iscn';
       let url;
       if (this.arweaveId) url = `https://arweave.net/${this.arweaveId}`;
-      else if (this.ipfsHash) url = `https://ipfs.io/ipfs/${this.ipfsHash}`;
+      else if (this.urlIpfsHash) url = `https://ipfs.io/ipfs/${this.urlIpfsHash}`;
       if (url) {
         const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
-        this.fileBlob = data as Blob
-        this.isImage = headers['content-type'].startsWith('image')
-        this.fileType = headers['content-type']
-        this.fileSize = headers['content-length']
-        this.fileData = `data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`
+        this.urlFileRecords.push({
+        fileBlob:data as Blob,
+        ipfsHash:this.urlIpfsHash,
+        arweaveId: this.arweaveId,
+        isFileImage:headers['content-type'].startsWith('image'),
+        fileType:headers['content-type'],
+        fileSize:headers['content-length'],
+        fileData:`data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`,
+        })
       }
     }
   }
 
-  onSubmitUpload({
-    ipfsHash,
-    arweaveId,
-    fileData,
-    fileSHA256,
-    isImage,
-    fileBlob,
-    exifInfo,
-    fileType,
-    fileSize,
-  }: {
-    ipfsHash: string
-    arweaveId: string
-    fileData: string
-    fileSHA256: string
-    isImage: boolean
-    fileBlob: Blob | null
-    exifInfo: any
-    fileType: string
-    fileSize: string
-  }) {
-    this.ipfsHash = ipfsHash
-    this.arweaveId = arweaveId
-    this.fileData = fileData
-    this.fileSHA256 = fileSHA256
-    this.isImage = isImage
-    this.fileBlob = fileBlob
-    this.exifInfo = exifInfo
-    this.fileType = fileType
-    this.fileSize = fileSize
+  onSubmitUpload(fileRecords: any[] | []) {
+    if (fileRecords && fileRecords.length) {
+      this.uploadFileRecords.push(...fileRecords)
+    }
     this.state = 'iscn'
-    logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', this.fileType, 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', '', 1);
   }
 
   onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
@@ -245,7 +232,7 @@ export default class NewIndexPage extends Vue {
 
   handleCreateAnotherButtonClick() {
     this.state = 'init'
-    this.ipfsHash = ''
+    this.urlIpfsHash = ''
     this.arweaveId = ''
     this.fileSHA256 = ''
     this.fileData = ''
@@ -254,7 +241,7 @@ export default class NewIndexPage extends Vue {
     this.iscnId = ''
     this.iscnTxHash = ''
     this.iscnTimestamp = ''
-    this.isImage = false
+    this.isFileImage = false
     this.fileBlob = null
     this.exifInfo = null
     this.isSubmit = false

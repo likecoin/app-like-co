@@ -360,7 +360,7 @@
   "UploadForm.title.registerISCN": "Register ISCN",
   "UploadForm.url.placeholder": "Use existing IPFS content",
   "UploadForm.view.file.button": "View File Info",
-  "UploadForm.warning": "Oops, file is too large. The file size should not exceed 100MB",
+  "UploadForm.warning": "Oops, file is too large. The file size should not exceed {size}MB",
   "WorksPage.empty.label": "No works",
   "WorksPage.label.search.result": "Search result for :",
   "WorksPage.label.portfolio": "View my Writing NFT Portfolio",
