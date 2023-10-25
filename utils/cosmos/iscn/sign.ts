@@ -72,9 +72,18 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       rewardProportion = Math.max(0, rewardProportion);
     }
   }
-  if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
-  if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
-  if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
+
+  const pushContentFingerprint = (value: any, prefix:string) => {
+    if (Array.isArray(value)) {
+      value.forEach(item => contentFingerprints.push(`${prefix}${item}`));
+    } else if (typeof value === 'string' && value.length) {
+      contentFingerprints.push(`${prefix}${value}`);
+    }
+  };
+  pushContentFingerprint(fileSHA256, 'hash://sha256/');
+  pushContentFingerprint(ipfsHash, 'ipfs://');
+  pushContentFingerprint(arweaveId, 'ar://');
+
   if (numbersProtocolAssetId) contentFingerprints.push(`num://${numbersProtocolAssetId}`);
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {

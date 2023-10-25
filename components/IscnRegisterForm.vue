@@ -34,20 +34,60 @@
           'text-medium-gray',
         ]"
       >
-        <template v-if="fileData">
-          <Previewer :is-image="isImage" :file-data="fileData" />
+        <template v-if="fileRecords.length">
           <div
-            :class="[
-              'flex',
-              'flex-col',
-            ]"
+            v-if="fileRecords.length"
+            class="flex flex-col items-center w-full"
           >
+            <table class="w-full">
+              <tbody class="w-full">
+                <tr
+                  v-for="{
+                    isFileImage,
+                    fileData,
+                    fileName,
+                    fileSize,
+                  } of fileRecords"
+                  :key="fileName"
+                  class="border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
+                >
+                  <td class="py-[4px]">
+                    <Previewer
+                      :is-image="isFileImage"
+                      :file-data="fileData"
+                      size="small"
+                    />
+                  </td>
+                  <td class="py-[4px]">
+                    <div
+                      :class="[
+                        'flex',
+                        'flex-col',
+                        'items-stretch',
+                        'justify-start',
+                      ]"
+                    >
+                      <Label
+                        :text="fileName"
+                        preset="h5"
+                        :class="['font-semibold', 'text-dark-gray']"
+                      />
+                      <Label
+                        :text="`${Math.round(fileSize * 0.001)} KB`"
+                        preset="h6"
+                        :class="['font-normal', 'text-medium-gray', 'mt-[8px]']"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             <div
               v-if="uploadStatus === 'loading'"
               :class="[
                 'flex',
                 'items-center',
-                'mb-[24px]',
+                'mt-[32px]',
               ]"
             >
               <ProgressIndicator />
@@ -60,7 +100,7 @@
               v-else
               :class="[
                 'w-min',
-                'mb-[16px]',
+                'mt-[32px]',
               ]"
               :text="$t('IscnRegisterForm.title.ready')"
               tag="div"
@@ -73,18 +113,6 @@
                 <IconDone />
               </template>
             </Label>
-            <Button
-              v-if="exifInfo"
-              class="w-min"
-              type="button"
-              :text="$t('UploadForm.view.file.button')"
-              preset="outline"
-              @click="isOpenFileInfoDialog = true"
-            >
-              <template #prepend>
-                <IconInfo />
-              </template>
-            </Button>
           </div>
         </template>
         <div v-else>
@@ -96,11 +124,11 @@
         :label="$t('IscnRegisterForm.label.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink v-if="ipfsHash"  :item="formattedIpfs" />
-        <ContentFingerprintLink v-if="uploadArweaveId" :item="formattedArweave" />
+        <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formattedIpfs(ipfs)" />
+        <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formattedArweave(ar)" />
         <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
         <div
-          v-if="!fileData"
+          v-if="shouldShowContentFingerprintInput"
           :class="[
             'flex',
             { 'mt-[12px]': customContentFingerprints.length },
@@ -121,7 +149,7 @@
         </div>
       </FormField>
       <!-- Numbers Protocol -->
-      <FormField
+      <!-- <FormField
         v-if="!showUploadOnly && (isPhoto || isImage)"
         :label="$t('IscnRegisterForm.label.numbersProtocol')"
         class="mb-[12px]"
@@ -135,9 +163,9 @@
             >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
           </i18n>
         </CheckBox>
-      </FormField>
+      </FormField> -->
       <!-- Dialog -->
-      <Dialog
+      <!-- <Dialog
         v-model="isOpenFileInfoDialog"
         :has-padding="false"
         preset="custom"
@@ -152,7 +180,7 @@
           :img-src="fileData"
           :all-exif="exifInfo"
         />
-      </Dialog>
+      </Dialog> -->
       <div v-if="showUploadOnly" :class="[
         'flex',
         'flex-col',
@@ -699,7 +727,7 @@ import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import {
   getLikerIdMinApi,
-  API_POST_NUMBERS_PROTOCOL_ASSETS,
+  // API_POST_NUMBERS_PROTOCOL_ASSETS,
   } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -726,17 +754,10 @@ export enum AuthorDialogType {
 
 @Component
 export default class IscnRegisterForm extends Vue {
-  @Prop({ default: false }) readonly isImage!: boolean
-  @Prop({ default: null }) readonly exifInfo: any | null | undefined
-  @Prop({ default: null }) readonly fileBlob: Blob | null | undefined
-  @Prop({ default: null }) readonly fileData: string | null | undefined
-  @Prop({ default: null }) readonly fileType: string | null | undefined
-  @Prop({ default: null }) readonly fileSize: string | null | undefined
-  @Prop(String) readonly fileSHA256!: string
-  @Prop({ default: false }) readonly isIPFSLink!: boolean
-  @Prop({ default: false }) readonly isUploadOnly!: boolean
+  @Prop({ default: [] }) readonly fileRecords!: any[]
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
+  @Prop({ default: false }) readonly isUploadOnly!: boolean
   @Prop(Number) readonly step: number | undefined
 
   @walletModule.Getter('getWalletAddress') address!: string
@@ -784,8 +805,7 @@ export default class IscnRegisterForm extends Vue {
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
   uploadStatus: string = ''
-  uploadIpfsHash: string = this.ipfsHash || ''
-  uploadArweaveId: string = this.arweaveId || ''
+  uploadArweaveIdList: string[] = []
   error: string = ''
   likerId: string = ''
   likerIdsAddresses: (string | void)[] = []
@@ -826,6 +846,19 @@ export default class IscnRegisterForm extends Vue {
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
   sameAsList: any = []
 
+  get ipfsHashList() {
+    const list = []
+    if (this.ipfsHash) {
+      list.push(this.ipfsHash)
+    }
+    list.push(...this.fileRecords.map((file) => file.ipfsHash))
+    return list
+  }
+
+  get shouldShowContentFingerprintInput() {
+    return !this.fileRecords.some((file) => file.fileData)
+  }
+
   get tagsString(): string {
     return this.tags.join(',')
   }
@@ -852,14 +885,10 @@ export default class IscnRegisterForm extends Vue {
     return this.authors.map((a) => a.authorDescription)
   }
 
-  get isPhoto() {
-    return this.exifInfo && this.exifInfo.ExifImageWidth
-  }
-
   get defaultType() {
-    if (this.isPhoto) return 'Photo'
-    if (this.isImage) return 'Image'
-    if (this.fileType === 'application/pdf' || this.fileType === 'application/epub+zip') return 'Book'
+    if (this.fileRecords.some(file => file.fileType === 'application/pdf' || file.fileType === 'application/epub+zip')) return 'Book'
+    if (this.fileRecords.some(file => file.exifInfo && file.exifInfo.ExifImageWidth)) return 'Photo'
+    if (this.fileRecords.some(file => file.isFileImage)) return 'Image'
     return 'CreativeWork'
   }
 
@@ -869,21 +898,13 @@ export default class IscnRegisterForm extends Vue {
       : this.$t('IscnRegisterForm.title.editStakeholder')
   }
 
-  get formattedIpfs() {
-    return this.$t('IscnRegisterForm.ipfs.link', { hash: this.ipfsHash })
-  }
-
-  get formattedArweave() {
-    return this.$t('IscnRegisterForm.arweave.link', { arweaveId: this.uploadArweaveId })
-  }
-
   get contentFingerprintLinks() {
     const array=[]
-    if (this.uploadArweaveId) {
-      array.push(this.formattedArweave)
+    if (this.uploadArweaveIdList) {
+      array.push(...this.uploadArweaveIdList.map(id => this.formattedArweave(id)))
     }
-    if (this.ipfsHash){
-      array.push(this.formattedIpfs)
+    if (this.ipfsHashList.length) {
+      array.push(...this.ipfsHashList.map(ipfs => this.formattedIpfs(ipfs)))
     }
     if (this.customContentFingerprints.length){
       array.push(...this.customContentFingerprints)
@@ -943,32 +964,30 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get exif() {
-    const extension = this.fileType?.split('/')
-    if (this.exifInfo) {
-      return {
-          ...this.exifInfo,
-          Format: this.fileType,
+    return this.fileRecords.map((file) => {
+      const extension = file.fileType?.split('/')
+      if (file.exifInfo) {
+        return {
+          ...file.exifInfo,
+          Format: file.fileType,
           Size:
-            this.exifInfo.ExifImageHeight && this.exifInfo.ExifImageWidth
-              ? `${this.exifInfo.ExifImageHeight} x ${
-                  this.exifInfo.ExifImageWidth
+            file.exifInfo.ExifImageHeight && file.exifInfo.ExifImageWidth
+              ? `${file.exifInfo.ExifImageHeight} x ${
+                  file.exifInfo.ExifImageWidth
                 } ${extension?.[extension.length - 1].toUpperCase()} (${
-                  this.fileSize
+                  file.fileSize
                 })`
-              : this.fileSize,
+              : file.fileSize,
         }
-    }
-    if (this.isImage || this.isPhoto) {
-      return {
-          Format: this.fileType,
-          Size: this.fileSize,
+      }
+      if (file.isFileImage || (file.exifInfo && file.exifInfo.ExifImageWidth)) {
+        return {
+          Format: file.fileType,
+          Size: file.fileSize,
         }
-  }
-    return undefined
-  }
-
-  get fileByteSize() {
-    return this.fileBlob?.size || 0
+      }
+      return undefined
+    })
   }
 
   get payload() {
@@ -979,12 +998,12 @@ export default class IscnRegisterForm extends Vue {
       tagsString: this.tagsString,
       sameAs: this.formattedSameAsList,
       url: this.url,
-      exifInfo: this.exif,
+      exifInfo: this.exif.filter(file => file),
       license: this.formattedLicense,
-      ipfsHash: this.uploadIpfsHash || this.ipfsHash,
-      arweaveId: this.uploadArweaveId || this.arweaveId,
+      ipfsHash: this.ipfsHashList,
+      arweaveId: this.uploadArweaveIdList,
       numbersProtocolAssetId: this.numbersProtocolAssetId,
-      fileSHA256: this.fileSHA256,
+      fileSHA256: this.fileRecords.map(file => file.fileSHA256),
       author: this.author.name,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
@@ -1010,11 +1029,11 @@ export default class IscnRegisterForm extends Vue {
     if (this.arweaveFee.lte(0)) {
       return 1;
     }
-    return this.uploadArweaveId ? 2 : 1;
+    return this.uploadArweaveIdList.length ? 2 : 1;
   }
 
   get totalSignStep() {
-    if (this.uploadArweaveId && this.arweaveFee.lte(0)) return 1
+    if (this.uploadArweaveIdList.length && this.arweaveFee.lte(0)) return 1
     return 2;
   }
 
@@ -1027,14 +1046,14 @@ export default class IscnRegisterForm extends Vue {
     if (this.isUploadingArweave) {
       return this.$t('IscnRegisterForm.signDialog.closeWarning')
     }
-    if (this.uploadArweaveId) {
+    if (this.uploadArweaveIdList.length) {
       return this.$t('IscnRegisterForm.signDialog.sign.iscn.register');
     }
     return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload');
   }
 
   get signDialogFee() {
-    if (this.uploadArweaveId) return this.iscnFee;
+    if (this.uploadArweaveIdList.length) return this.iscnFee;
     return this.arweaveFeePlusGas;
   }
 
@@ -1068,6 +1087,9 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
+    if (this.arweaveId) {
+      this.uploadArweaveIdList.push(this.arweaveId)
+    }
     this.uploadStatus = 'loading'
     await this.estimateArweaveFee();
     // ISCN Fee needs Arweave fee to calculate
@@ -1193,6 +1215,14 @@ export default class IscnRegisterForm extends Vue {
     this.license = value
   }
 
+  formattedIpfs(ipfsHash: string) {
+    return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash })
+  }
+
+  formattedArweave(arweaveId: string) {
+    return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
+  }
+
   handleOpenSameAsDialog() {
     this.isOpenSameAsDialog = true
   }
@@ -1306,17 +1336,33 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    if (!this.fileBlob) {
+    if (!this.fileRecords.some(file => file.fileBlob)) {
       this.error = 'NO_FILE_TO_UPLOAD'
       this.isOpenWarningSnackbar = true
       this.uploadStatus = ''
       return
     }
-    await this.submitToArweave();
-    if (this.uploadArweaveId) {
+    try {
+      this.isUploadingArweave = true;
+      this.uploadStatus = 'uploading';
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const record of this.fileRecords) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.submitToArweave(record);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    } finally {
+      this.isUploadingArweave = false;
+      this.uploadStatus = '';
+    }
+
+    if (this.uploadArweaveIdList.length) {
       this.$emit('fileUploaded', {
-        ipfsHash: this.ipfsHash,
-        arweaveId: this.uploadArweaveId,
+        ipfsHash: this.ipfsHashList,
+        arweaveId: this.uploadArweaveIdList,
       })
     }
   }
@@ -1335,26 +1381,61 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    if (this.fileBlob) {
-    await this.submitToArweave();
-    if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetId) {
-      await this.submitToNumbers();
+    if (this.fileRecords.some(file => file.fileBlob)) {
+      try {
+        this.isUploadingArweave = true;
+        this.uploadStatus = 'uploading';
+        // eslint-disable-next-line no-restricted-syntax
+        for (const record of this.fileRecords) {
+          // eslint-disable-next-line no-await-in-loop
+          await this.submitToArweave(record);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error)
+      } finally {
+        this.isUploadingArweave = false;
+        this.uploadStatus = '';
+      }
     }
-    }
-    if (!this.fileBlob || this.uploadArweaveId) await this.submitToISCN()
+    if (!this.fileRecords.some(file => file.fileBlob) || this.uploadArweaveIdList.length) await this.submitToISCN()
   }
 
   async estimateArweaveFee(): Promise<void> {
     try {
-      const { address, arweaveId, LIKE } = await estimateBundlrFilePrice({
-        fileSize: this.fileByteSize, ipfsHash: this.ipfsHash,
-      })
-      this.uploadArweaveId = arweaveId;
-      if (arweaveId) {
-        this.$emit('arweaveUploaded', { arweaveId })
+      const pricePromises = this.fileRecords.map(record =>
+        estimateBundlrFilePrice({
+          fileSize: record.fileBlob?.size || 0,
+          ipfsHash: record.ipfsHash,
+        }),
+      );
+
+      const results = await Promise.all(pricePromises);
+      let totalFee = new BigNumber(0);
+      const arweaveIds: string[] = [];
+
+      results.forEach(result => {
+        const { address, arweaveId, LIKE } = result;
+        if (LIKE) {
+          totalFee = totalFee.plus(new BigNumber(LIKE));
+        }
+        if (arweaveId) {
+          arweaveIds.push(arweaveId);
+        }
+        if (!this.arweaveFeeTargetAddress) {
+          this.arweaveFeeTargetAddress = address;
+        }
+      });
+
+      this.arweaveFee = totalFee;
+      if (arweaveIds.length) {
+        this.uploadArweaveIdList = [
+          ...this.uploadArweaveIdList,
+          ...arweaveIds,
+          ];
+        this.$emit('arweaveUploaded', { arweaveId: arweaveIds[0] });
       }
-      if (LIKE) this.arweaveFee = new BigNumber(LIKE);
-      this.arweaveFeeTargetAddress = address;
+
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
@@ -1362,13 +1443,13 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  async sendArweaveFeeTx(): Promise<string> {
+  async sendArweaveFeeTx(records: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
     await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = 'signing';
-    const memo = JSON.stringify({ ipfs: this.ipfsHash, fileSize: this.fileByteSize });
+    const memo = JSON.stringify({ ipfs: records.ipfsHash, fileSize: records.fileBlob?.size || 0 });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       return transactionHash;
@@ -1383,31 +1464,29 @@ export default class IscnRegisterForm extends Vue {
     return '';
   }
 
-  async submitToArweave(): Promise<void> {
+  async submitToArweave(records: any): Promise<void> {
+    const tempRecord = {...records}
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
-    if (this.uploadArweaveId) return;
-    if (!this.fileBlob) return;
+    if (!tempRecord.fileBlob) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
-    const transactionHash = await this.sendArweaveFeeTx();
-
+    tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
     // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
       logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
     }
-    this.isUploadingArweave = true;
-    this.uploadStatus = 'uploading';
+
     try {
-      const arrayBuffer = await this.fileBlob.arrayBuffer();
+      const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const arweaveId = await uploadSingleFileToBundlr(buffer, {
-        fileSize: this.fileByteSize,
-        ipfsHash: this.ipfsHash,
-        fileType: this.fileType as string,
-        txHash: transactionHash,
+        fileSize: tempRecord.fileBlob?.size || 0,
+        ipfsHash: tempRecord.ipfsHash,
+        fileType: tempRecord.fileType as string,
+        txHash: tempRecord.transactionHash,
       });
       if (arweaveId) {
-        this.uploadArweaveId = arweaveId
+        this.uploadArweaveIdList.push(arweaveId)
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
       } else {
@@ -1421,42 +1500,39 @@ export default class IscnRegisterForm extends Vue {
       console.error(err)
       this.shouldShowAlert = true
       this.errorMessage = (err as Error).toString()
-    } finally {
-      this.isUploadingArweave = false;
-      this.uploadStatus = '';
     }
   }
 
-  async submitToNumbers(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
-    this.isOpenSignDialog = true;
-    try {
-      this.uploadStatus = 'loading';
-      const formData = new FormData();
-      if (this.fileBlob) formData.append('file', this.fileBlob);
-      const {
-        numAssetIds: [numbersProtocolAssetId],
-      } = await this.$axios.$post(
-        `${API_POST_NUMBERS_PROTOCOL_ASSETS}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )
-      this.numbersProtocolAssetId = numbersProtocolAssetId
-      this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
-      this.isOpenSignDialog = false;
-    } catch (error) {
-      this.shouldShowAlert = true;
-      this.errorMessage = (error as Error).toString()
-      // eslint-disable-next-line no-console
-      console.error(error)
-    } finally {
-      this.uploadStatus = '';
-    }
-  }
+  // async submitToNumbers(): Promise<void> {
+  //   logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
+  //   this.isOpenSignDialog = true;
+  //   try {
+  //     this.uploadStatus = 'loading';
+  //     const formData = new FormData();
+  //     if (this.fileBlob) formData.append('file', this.fileBlob);
+  //     const {
+  //       numAssetIds: [numbersProtocolAssetId],
+  //     } = await this.$axios.$post(
+  //       `${API_POST_NUMBERS_PROTOCOL_ASSETS}`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       },
+  //     )
+  //     this.numbersProtocolAssetId = numbersProtocolAssetId
+  //     this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
+  //     this.isOpenSignDialog = false;
+  //   } catch (error) {
+  //     this.shouldShowAlert = true;
+  //     this.errorMessage = (error as Error).toString()
+  //     // eslint-disable-next-line no-console
+  //     console.error(error)
+  //   } finally {
+  //     this.uploadStatus = '';
+  //   }
+  // }
 
   async submitToISCN(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToISCN', '', 1);
