@@ -783,6 +783,7 @@ export default class IscnRegisterForm extends Vue {
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
+  arweavePaymentTransactionHash: string = ''
   uploadStatus: string = ''
   uploadIpfsHash: string = this.ipfsHash || ''
   uploadArweaveId: string = this.arweaveId || ''
@@ -1364,6 +1365,7 @@ export default class IscnRegisterForm extends Vue {
 
   async sendArweaveFeeTx(): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
+    if (this.arweavePaymentTransactionHash) return this.arweavePaymentTransactionHash;
     await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
@@ -1371,6 +1373,7 @@ export default class IscnRegisterForm extends Vue {
     const memo = JSON.stringify({ ipfs: this.ipfsHash, fileSize: this.fileByteSize });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
+      if (transactionHash) this.arweavePaymentTransactionHash = transactionHash;
       return transactionHash;
     } catch (err) {
       this.signDialogError = (err as Error).toString()
@@ -1389,7 +1392,10 @@ export default class IscnRegisterForm extends Vue {
     if (!this.fileBlob) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
-    const transactionHash = await this.sendArweaveFeeTx();
+    let transactionHash = this.arweavePaymentTransactionHash
+    if (!transactionHash) {
+       transactionHash = await this.sendArweaveFeeTx();
+    }
 
     // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
