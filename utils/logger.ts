@@ -46,7 +46,7 @@ export function logTrackerEvent(
   vue: Vue,
   category: string,
   action: string,
-  label: string,
+  label: string = '',
   value: number,
 ) {
   try {
