@@ -804,7 +804,7 @@ export default class IscnRegisterForm extends Vue {
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
-  arweavePaymentTransactionHash: string = ''
+  sentArweaveTransactionHashes = new Map<string, string>()
   uploadStatus: string = ''
   uploadArweaveIdList: string[] = []
   error: string = ''
@@ -1446,7 +1446,12 @@ export default class IscnRegisterForm extends Vue {
 
   async sendArweaveFeeTx(records: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
-    if (this.arweavePaymentTransactionHash) return this.arweavePaymentTransactionHash;
+    if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
+      const transactionHash = this.sentArweaveTransactionHashes.get(records.ipfsHash);
+      if (transactionHash) {
+        return transactionHash;
+      }
+    }
     await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
@@ -1454,8 +1459,10 @@ export default class IscnRegisterForm extends Vue {
     const memo = JSON.stringify({ ipfs: records.ipfsHash, fileSize: records.fileBlob?.size || 0 });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
-      if (transactionHash) this.arweavePaymentTransactionHash = transactionHash;
-      return transactionHash;
+      if (transactionHash) {
+        this.sentArweaveTransactionHashes.set(records.ipfsHash, transactionHash);
+        return transactionHash;
+      }
     } catch (err) {
       this.signDialogError = (err as Error).toString()
       // TODO: Handle error
@@ -1473,11 +1480,10 @@ export default class IscnRegisterForm extends Vue {
     if (!tempRecord.fileBlob) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
-    let transactionHash = this.arweavePaymentTransactionHash
-    if (!transactionHash) {
-       transactionHash = await this.sendArweaveFeeTx();
+    tempRecord.transactionHash = this.sentArweaveTransactionHashes.get(tempRecord.ipfsHash)
+    if (!tempRecord.transactionHash) {
+     tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
     }
-
     // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
       logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
