@@ -217,7 +217,7 @@
   "IscnRegisterForm.label.fileName": "File name",
   "IscnRegisterForm.label.fileType": "File type",
   "IscnRegisterForm.label.numbersProtocol": "Numbers Protocol",
-  "IscnRegisterForm.label.numbersProtocol.details": "Register your asset in {link}",
+  "IscnRegisterForm.label.numbersProtocol.details": "Register your image asset in {link}",
   "IscnRegisterForm.label.numbersProtocol.details.link": "Numbers Protocol",
   "IscnRegisterForm.label.registrant": "Registrant",
   "IscnRegisterForm.label.tags": "Tags",

@@ -83,7 +83,7 @@
                     </div>
                   </td>
                   <td class="py-[4px]">
-                    <div class="flex gap-[4px] items-end ml-[4px]">
+                    <div class="flex gap-[4px] items-center justify-end ml-[4px]">
                       <div
                         v-if="exifInfo"
                         :class="['cursor-pointer']"
@@ -92,7 +92,7 @@
                         <IconInfo />
                       </div>
                       <div
-                        :class="['ml-auto', 'cursor-pointer']"
+                        :class="['cursor-pointer']"
                         @click="handleDeleteFile(index)"
                       >
                         <IconDelete />

@@ -83,8 +83,8 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
   pushContentFingerprint(fileSHA256, 'hash://sha256/');
   pushContentFingerprint(ipfsHash, 'ipfs://');
   pushContentFingerprint(arweaveId, 'ar://');
+  pushContentFingerprint(numbersProtocolAssetId, 'num://');
 
-  if (numbersProtocolAssetId) contentFingerprints.push(`num://${numbersProtocolAssetId}`);
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]

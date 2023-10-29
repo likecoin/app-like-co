@@ -81,13 +81,23 @@
                     </div>
                   </td>
                   <td class="py-[4px]">
-                    <div class="flex gap-[4px] items-end ml-[4px]">
+                    <div class="flex gap-[8px] items-center justify-end ml-[4px]">
                       <div
                         v-if="exifInfo"
                         :class="['cursor-pointer']"
                         @click="handleClickExifInfo(index)"
                       >
                         <IconInfo />
+                      </div>
+                      <div
+                        v-if="exifInfo || isFileImage"
+                      >
+                        <input
+                          v-model="isRegisterNumbersProtocolAsset"
+                          type="checkbox"
+                          name="numbers"
+                          disabled
+                        >
                       </div>
                     </div>
                   </td>
@@ -161,8 +171,8 @@
         </div>
       </FormField>
       <!-- Numbers Protocol -->
-      <!-- <FormField
-        v-if="!showUploadOnly && (isPhoto || isImage)"
+      <FormField
+        v-if="shouldShowUploadToNumbers"
         :label="$t('IscnRegisterForm.label.numbersProtocol')"
         class="mb-[12px]"
       >
@@ -175,7 +185,7 @@
             >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
           </i18n>
         </CheckBox>
-      </FormField> -->
+      </FormField>
       <!-- Dialog -->
       <Dialog
         v-model="isOpenFileInfoDialog"
@@ -739,7 +749,7 @@ import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import {
   getLikerIdMinApi,
-  // API_POST_NUMBERS_PROTOCOL_ASSETS,
+  API_POST_NUMBERS_PROTOCOL_ASSETS,
   } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -837,7 +847,7 @@ export default class IscnRegisterForm extends Vue {
   debouncedCalculateISCNFee = debounce(this.calculateISCNFee, 400)
 
   isRegisterNumbersProtocolAsset = false
-  numbersProtocolAssetId = ''
+  numbersProtocolAssetIds = new Map<string, string>()
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
@@ -1018,7 +1028,7 @@ export default class IscnRegisterForm extends Vue {
       license: this.formattedLicense,
       ipfsHash: this.ipfsHashList,
       arweaveId: this.uploadArweaveIdList,
-      numbersProtocolAssetId: this.numbersProtocolAssetId,
+      numbersProtocolAssetId: [...this.numbersProtocolAssetIds.values()],
       fileSHA256: this.fileRecords.map(file => file.fileSHA256),
       author: this.author.name,
       authorNames: this.authorNames,
@@ -1090,6 +1100,10 @@ export default class IscnRegisterForm extends Vue {
       this.name.length <= CharactersLimit.name &&
       this.description.length <= CharactersLimit.description
     )
+  }
+
+  get shouldShowUploadToNumbers() {
+    return this.fileRecords.some(file => file.isFileImage || file.exifInfo)
   }
 
   @Watch('payload', { immediate: true, deep: true })
@@ -1405,6 +1419,10 @@ export default class IscnRegisterForm extends Vue {
         for (const record of this.fileRecords) {
           // eslint-disable-next-line no-await-in-loop
           await this.submitToArweave(record);
+          if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetIds.has(record.ipfsHash)) {
+          // eslint-disable-next-line no-await-in-loop
+            await this.submitToNumbers(record);
+          }
         }
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -1531,36 +1549,36 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  // async submitToNumbers(): Promise<void> {
-  //   logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
-  //   this.isOpenSignDialog = true;
-  //   try {
-  //     this.uploadStatus = 'loading';
-  //     const formData = new FormData();
-  //     if (this.fileBlob) formData.append('file', this.fileBlob);
-  //     const {
-  //       numAssetIds: [numbersProtocolAssetId],
-  //     } = await this.$axios.$post(
-  //       `${API_POST_NUMBERS_PROTOCOL_ASSETS}`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       },
-  //     )
-  //     this.numbersProtocolAssetId = numbersProtocolAssetId
-  //     this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
-  //     this.isOpenSignDialog = false;
-  //   } catch (error) {
-  //     this.shouldShowAlert = true;
-  //     this.errorMessage = (error as Error).toString()
-  //     // eslint-disable-next-line no-console
-  //     console.error(error)
-  //   } finally {
-  //     this.uploadStatus = '';
-  //   }
-  // }
+  async submitToNumbers(record: any): Promise<void> {
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
+    this.isOpenSignDialog = true;
+    try {
+      this.uploadStatus = 'loading';
+      const formData = new FormData();
+      if (record.fileBlob) formData.append('file', record.fileBlob);
+      const {
+        numAssetIds: [numbersProtocolAssetId],
+      } = await this.$axios.$post(
+        `${API_POST_NUMBERS_PROTOCOL_ASSETS}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      this.numbersProtocolAssetIds.set(record.ipfsHash, numbersProtocolAssetId)
+      this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
+      this.isOpenSignDialog = false;
+    } catch (error) {
+      this.shouldShowAlert = true;
+      this.errorMessage = (error as Error).toString()
+      // eslint-disable-next-line no-console
+      console.error(error)
+    } finally {
+      this.uploadStatus = '';
+    }
+  }
 
   async submitToISCN(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToISCN', '', 1);
