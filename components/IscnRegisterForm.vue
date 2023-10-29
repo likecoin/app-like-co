@@ -826,7 +826,7 @@ export default class IscnRegisterForm extends Vue {
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
-  sentArweaveTransactionHashes = new Map<string, string>()
+  sentArweaveTransactionHashes = new Map<string, any>()
   uploadStatus: string = ''
   uploadArweaveIdList: string[] = []
   error: string = ''
@@ -1480,7 +1480,7 @@ export default class IscnRegisterForm extends Vue {
   async sendArweaveFeeTx(records: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
     if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
-      const transactionHash = this.sentArweaveTransactionHashes.get(records.ipfsHash);
+      const { transactionHash } = this.sentArweaveTransactionHashes.get(records.ipfsHash);
       if (transactionHash) {
         return transactionHash;
       }
@@ -1493,7 +1493,8 @@ export default class IscnRegisterForm extends Vue {
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       if (transactionHash) {
-        this.sentArweaveTransactionHashes.set(records.ipfsHash, transactionHash);
+        const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
+        this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...existingData, transactionHash });
         return transactionHash;
       }
     } catch (err) {
@@ -1508,44 +1509,51 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async submitToArweave(records: any): Promise<void> {
+    const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
+    const { transactionHash, arweaveId: uploadArweaveId } = existingData;
+    if (transactionHash && uploadArweaveId) return
     const tempRecord = {...records}
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
     if (!tempRecord.fileBlob) return;
     this.isOpenSignDialog = true;
     this.onOpenKeplr();
-    tempRecord.transactionHash = this.sentArweaveTransactionHashes.get(tempRecord.ipfsHash)
+    tempRecord.transactionHash = transactionHash
     if (!tempRecord.transactionHash) {
-     tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
+      tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
     }
     // Register Numbers Protocol assets along with Arweave
     if (this.isRegisterNumbersProtocolAsset) {
       logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
     }
 
-    try {
-      const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const arweaveId = await uploadSingleFileToBundlr(buffer, {
-        fileSize: tempRecord.fileBlob?.size || 0,
-        ipfsHash: tempRecord.ipfsHash,
-        fileType: tempRecord.fileType as string,
-        txHash: tempRecord.transactionHash,
-      });
-      if (arweaveId) {
-        this.uploadArweaveIdList.push(arweaveId)
-        this.$emit('arweaveUploaded', { arweaveId })
-        this.isOpenSignDialog = false
-      } else {
+    if (tempRecord.transactionHash && !uploadArweaveId) {
+      try {
+        const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const arweaveId = await uploadSingleFileToBundlr(buffer, {
+          fileSize: tempRecord.fileBlob?.size || 0,
+          ipfsHash: tempRecord.ipfsHash,
+          fileType: tempRecord.fileType as string,
+          txHash: tempRecord.transactionHash,
+        });
+        if (arweaveId) {
+          const uploadedData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
+          this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...uploadedData, arweaveId });
+          this.uploadArweaveIdList.push(arweaveId)
+          this.$emit('arweaveUploaded', { arweaveId })
+          this.isOpenSignDialog = false
+        } else {
+          this.shouldShowAlert = true
+          this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+          this.$emit('handleContinue')
+        }
+      } catch (err) {
+        // TODO: Handle error
+        // eslint-disable-next-line no-console
+        console.error(err)
         this.shouldShowAlert = true
-        this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
-        this.$emit('handleContinue')
+        this.errorMessage = (err as Error).toString()
       }
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.error(err)
-      this.shouldShowAlert = true
-      this.errorMessage = (err as Error).toString()
     }
   }
 
