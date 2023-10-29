@@ -146,8 +146,8 @@
         :label="$t('IscnRegisterForm.label.fingerprints')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formattedIpfs(ipfs)" />
-        <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formattedArweave(ar)" />
+        <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formatIpfs(ipfs)" />
+        <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formatArweave(ar)" />
         <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
         <div
           v-if="shouldShowContentFingerprintInput"
@@ -927,10 +927,10 @@ export default class IscnRegisterForm extends Vue {
   get contentFingerprintLinks() {
     const array=[]
     if (this.uploadArweaveIdList) {
-      array.push(...this.uploadArweaveIdList.map(id => this.formattedArweave(id)))
+      array.push(...this.uploadArweaveIdList.map(id => this.formatArweave(id)))
     }
     if (this.ipfsHashList.length) {
-      array.push(...this.ipfsHashList.map(ipfs => this.formattedIpfs(ipfs)))
+      array.push(...this.ipfsHashList.map(ipfs => this.formatIpfs(ipfs)))
     }
     if (this.customContentFingerprints.length){
       array.push(...this.customContentFingerprints)
@@ -1245,11 +1245,11 @@ export default class IscnRegisterForm extends Vue {
     this.license = value
   }
 
-  formattedIpfs(ipfsHash: string) {
+  formatIpfs(ipfsHash: string) {
     return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash })
   }
 
-  formattedArweave(arweaveId: string) {
+  formatArweave(arweaveId: string) {
     return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
   }
 

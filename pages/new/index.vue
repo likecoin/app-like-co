@@ -175,13 +175,13 @@ export default class NewIndexPage extends Vue {
       if (url) {
         const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
         this.urlFileRecords.push({
-        fileBlob:data as Blob,
-        ipfsHash:this.urlIpfsHash,
-        arweaveId: this.arweaveId,
-        isFileImage:headers['content-type'].startsWith('image'),
-        fileType:headers['content-type'],
-        fileSize:headers['content-length'],
-        fileData:`data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`,
+          fileBlob: data as Blob,
+          ipfsHash: this.urlIpfsHash,
+          arweaveId: this.arweaveId,
+          isFileImage:  headers['content-type'].startsWith('image'),
+          fileType: headers['content-type'],
+          fileSize: headers['content-length'],
+          fileData: `data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`,
         })
       }
     }

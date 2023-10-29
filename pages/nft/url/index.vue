@@ -307,7 +307,7 @@ export default class FetchIndex extends Vue {
       likerIds: [],
       likerIdsAddresses: [],
       authorDescriptions: [authorDescription],
-      numbersProtocolAssetId: [],
+      numbersProtocolAssetId: '',
       contentFingerprints,
       stakeholders,
       recordNotes,
