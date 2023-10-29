@@ -291,7 +291,7 @@ export default class FetchIndex extends Vue {
       description,
       tagsString: keywords,
       url: this.iscnData.url || this.url,
-      exifInfo: [],
+      exifInfo: {},
       license,
       publisher,
       ipfsHash: this.ipfsHash,
