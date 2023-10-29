@@ -42,12 +42,13 @@
             <table class="w-full">
               <tbody class="w-full">
                 <tr
-                  v-for="{
+                  v-for="({
                     isFileImage,
                     fileData,
                     fileName,
                     fileSize,
-                  } of fileRecords"
+                    exifInfo,
+                  }, index) of fileRecords"
                   :key="fileName"
                   class="border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
                 >
@@ -77,6 +78,17 @@
                         preset="h6"
                         :class="['font-normal', 'text-medium-gray', 'mt-[8px]']"
                       />
+                    </div>
+                  </td>
+                  <td class="py-[4px]">
+                    <div class="flex gap-[4px] items-end ml-[4px]">
+                      <div
+                        v-if="exifInfo"
+                        :class="['cursor-pointer']"
+                        @click="handleClickExifInfo(index)"
+                      >
+                        <IconInfo />
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -165,7 +177,7 @@
         </CheckBox>
       </FormField> -->
       <!-- Dialog -->
-      <!-- <Dialog
+      <Dialog
         v-model="isOpenFileInfoDialog"
         :has-padding="false"
         preset="custom"
@@ -177,10 +189,10 @@
             'overflow-y-scroll',
             'scrollbar-hidden',
           ]"
-          :img-src="fileData"
-          :all-exif="exifInfo"
+          :img-src="displayImageSrc"
+          :all-exif="displayExifInfo"
         />
-      </Dialog> -->
+      </Dialog>
       <div v-if="showUploadOnly" :class="[
         'flex',
         'flex-col',
@@ -814,6 +826,9 @@ export default class IscnRegisterForm extends Vue {
   contentFingerprintInput: string = ''
   customContentFingerprints: string[] = []
   type: string = this.defaultType
+
+  displayImageSrc: string = ''
+  displayExifInfo: any = null
 
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
@@ -1579,6 +1594,12 @@ export default class IscnRegisterForm extends Vue {
     } finally {
       this.isOpenQuitAlertDialog = false;
     }
+  }
+
+  handleClickExifInfo(index: number) {
+    this.isOpenFileInfoDialog = true
+    this.displayImageSrc = this.fileRecords[index].fileData
+    this.displayExifInfo = this.fileRecords[index].exifInfo
   }
 }
 </script>

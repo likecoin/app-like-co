@@ -48,7 +48,7 @@
               <tbody class="w-full">
                 <tr
                   v-for="(
-                    { isFileImage, fileData, fileName, fileSize },
+                    { isFileImage, fileData, fileName, fileSize, exifInfo},
                     index
                   ) of fileRecords"
                   :key="fileName"
@@ -72,7 +72,7 @@
                     >
                       <Label
                         :text="fileName"
-                        preset="h5"
+                        preset="h6"
                         :class="['font-semibold', 'text-dark-gray']"
                       />
                       <Label
@@ -83,11 +83,20 @@
                     </div>
                   </td>
                   <td class="py-[4px]">
-                    <div
-                      :class="['mr-[8px]', 'cursor-pointer']"
-                      @click="handleDeleteFile(index)"
-                    >
-                      <IconDelete />
+                    <div class="flex gap-[4px] items-end ml-[4px]">
+                      <div
+                        v-if="exifInfo"
+                        :class="['cursor-pointer']"
+                        @click="handleClickExifInfo(index)"
+                      >
+                        <IconInfo />
+                      </div>
+                      <div
+                        :class="['ml-auto', 'cursor-pointer']"
+                        @click="handleDeleteFile(index)"
+                      >
+                        <IconDelete />
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -133,8 +142,8 @@
             'overflow-y-scroll',
             'scrollbar-hidden',
           ]"
-          :img-src="fileData"
-          :all-exif="exifInfo"
+          :img-src="displayImageSrc"
+          :all-exif="displayExifInfo"
         />
       </Dialog>
     </Card>
@@ -174,6 +183,9 @@ export default class UploadForm extends Vue {
   fileName: string = ''
   fileSize: number = 0
   fileType: string = ''
+
+  displayImageSrc: string = ''
+  displayExifInfo: any = null
 
   fileRecords: any[] = []
 
@@ -270,7 +282,10 @@ export default class UploadForm extends Vue {
             if (imageType) {
               try {
                 // eslint-disable-next-line no-await-in-loop
-                fileRecord.exifInfo = await exifr.parse(file)
+                const exif = await exifr.parse(file)
+                if (exif) {
+                  fileRecord.exifInfo = exif
+                }
               } catch (err) {
                 // eslint-disable-next-line no-console
                 console.error(err)
@@ -312,6 +327,12 @@ export default class UploadForm extends Vue {
 
   handleDeleteFile(index: number) {
     this.fileRecords.splice(index, 1)
+  }
+
+  handleClickExifInfo(index: number) {
+    this.isOpenFileInfoDialog = true
+    this.displayImageSrc = this.fileRecords[index].fileData
+    this.displayExifInfo = this.fileRecords[index].exifInfo
   }
 }
 </script>
