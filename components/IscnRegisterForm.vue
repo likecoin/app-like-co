@@ -747,6 +747,7 @@ import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arwea
 import { signISCNTx } from '~/utils/cosmos/iscn';
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
+import { ISCN_GAS_MULTIPLIER } from '~/constant';
 import {
   getLikerIdMinApi,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
@@ -843,6 +844,7 @@ export default class IscnRegisterForm extends Vue {
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
   iscnFee = new BigNumber(0)
+  iscnGasFee = ''
   balance = new BigNumber(0)
   debouncedCalculateISCNFee = debounce(this.calculateISCNFee, 400)
 
@@ -1288,11 +1290,12 @@ export default class IscnRegisterForm extends Vue {
     ])
     this.balance = new BigNumber(balance);
     const { iscnFee, gas: iscnGasEstimation } = estimation;
-    const iscnGasNanolike = iscnGasEstimation.fee.amount[0].amount
+    const iscnGasNanolike = new BigNumber(iscnGasEstimation.fee.amount[0].amount).times(ISCN_GAS_MULTIPLIER)
     const iscnFeeNanolike = iscnFee.amount
     this.iscnFee =  new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9);
+    this.iscnGasFee = iscnGasNanolike.integerValue().toString();
   }
 
   handleSignDialogClose() {
@@ -1607,7 +1610,12 @@ export default class IscnRegisterForm extends Vue {
     }
     try {
       this.uploadStatus = 'signing'
-      const res = await signISCNTx(formatISCNTxPayload(this.payload), this.signer, this.address)
+      const res = await signISCNTx(
+        formatISCNTxPayload(this.payload),
+        this.signer,
+        this.address,
+        { gas: this.iscnGasFee },
+      )
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
       this.isOpenSignDialog = false;
