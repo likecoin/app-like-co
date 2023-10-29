@@ -174,7 +174,7 @@ export default class NewIndexPage extends Vue {
       else if (this.urlIpfsHash) url = `https://ipfs.io/ipfs/${this.urlIpfsHash}`;
       if (url) {
         const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
-        this.urlFileRecords.push({
+        this.urlFileRecords = [{
           fileBlob: data as Blob,
           ipfsHash: this.urlIpfsHash,
           arweaveId: this.arweaveId,
@@ -182,14 +182,14 @@ export default class NewIndexPage extends Vue {
           fileType: headers['content-type'],
           fileSize: headers['content-length'],
           fileData: `data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`,
-        })
+        }]
       }
     }
   }
 
   onSubmitUpload(fileRecords: any[] | []) {
     if (fileRecords && fileRecords.length) {
-      this.uploadFileRecords.push(...fileRecords)
+      this.uploadFileRecords = [...fileRecords]
     }
     this.state = 'iscn'
     logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', '', 1);

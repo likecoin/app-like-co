@@ -1118,7 +1118,7 @@ export default class IscnRegisterForm extends Vue {
 
   async mounted() {
     if (this.arweaveId) {
-      this.uploadArweaveIdList.push(this.arweaveId)
+      this.uploadArweaveIdList = [this.arweaveId];
     }
     this.uploadStatus = 'loading'
     await this.estimateArweaveFee();
