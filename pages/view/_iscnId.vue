@@ -260,13 +260,13 @@
           </template>
           <FormField
             :label="$t('iscn.meta.stakeholders')"
-            class="mb-[12px]"
-            content-classes="flex flex-row items-center"
+            class="mb-[6px]"
+            content-classes="flex flex-row flex-wrap items-center"
           >
             <Button
               v-for="(stakeholder, index) in stakeholders"
               :key="stakeholder.key"
-              class="mr-[8px]"
+              class="mr-[8px] mb-[8px]"
               size="mini"
               preset="secondary"
               tag="div"
