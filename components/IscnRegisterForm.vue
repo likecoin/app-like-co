@@ -827,7 +827,10 @@ export default class IscnRegisterForm extends Vue {
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
-  sentArweaveTransactionHashes = new Map<string, any>()
+  sentArweaveTransactionHashes = new Map<
+    string, { transactionHash?: string, arweaveId?: string }
+  >()
+
   uploadStatus: string = ''
   uploadArweaveIdList: string[] = []
   error: string = ''
@@ -1483,9 +1486,9 @@ export default class IscnRegisterForm extends Vue {
   async sendArweaveFeeTx(records: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
     if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
-      const { transactionHash } = this.sentArweaveTransactionHashes.get(records.ipfsHash);
-      if (transactionHash) {
-        return transactionHash;
+      const transactionInfo = this.sentArweaveTransactionHashes.get(records.ipfsHash);
+      if (transactionInfo && transactionInfo.transactionHash) {
+        return transactionInfo.transactionHash;
       }
     }
     await this.initIfNecessary()
