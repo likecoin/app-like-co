@@ -7,8 +7,8 @@ export interface ISCNRegisterPayload {
   url: string;
   exifInfo: any;
   license: string;
-  ipfsHash: any;
-  arweaveId: any;
+  ipfsHash: string | string[];
+  arweaveId: string | string[];
   numbersProtocolAssetId: string | string[];
   fileSHA256: string | string[];
   type: string;
