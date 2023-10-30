@@ -114,7 +114,26 @@
           </NuxtLink>
         </div>
         <!-- Publish btn -->
-        <div class="flex gap-[8px] justify-end mt-[12px] text-medium-gray">
+        <div
+          v-if="uploadStatus"
+          :class="[
+            'flex',
+            'flex-col',
+            'items-end',
+            'mt-[12px]'
+          ]"
+        >
+          <ProgressIndicator />
+          <div
+            :class="[
+              'text-[12px]',
+              'mt-[4px]',
+            ]"
+          >
+            {{ formattedUploadStatus }}
+          </div>
+        </div>
+        <div v-else class="flex gap-[8px] justify-end mt-[12px] text-medium-gray">
           <Button preset="outline" @click="onSkipUpload"
             >{{ $t('UploadForm.button.skip') }}
           </Button>
@@ -146,6 +165,72 @@
           :all-exif="displayExifInfo"
         />
       </Dialog>
+      <Dialog
+        v-model="isOpenSignDialog"
+        :header-text="$t('IscnRegisterForm.button.uploading')"
+        :is-disabled-backdrop-click="true"
+        :has-close-button="signDialogError"
+        @close="handleSignDialogClose"
+      >
+        <template #header-prepend>
+          <IconStar class="w-[20px]" />
+        </template>
+        <ProgressIndicator
+          class="mx-auto mb-[24px]"
+        />
+        <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
+        <pre
+          v-if="signDialogError"
+          :class="[
+            'mt-[12px]',
+            'p-[8px]',
+            'bg-red',
+            'bg-opacity-20',
+            'rounded-[8px]',
+            'text-red',
+            'text-[12px]',
+            'font-400',
+          ]"
+        >{{ signDialogError }}</pre>
+        <Divider class="mt-[12px] mb-[8px]" />
+        <span
+          v-t="'IscnRegisterForm.signDialog.sign.arweave.uploading'"
+          class="whitespace-pre-line"
+        />
+      </Dialog>
+      <Dialog
+        v-model="isOpenSignDialog"
+        :header-text="$t('IscnRegisterForm.button.uploading')"
+        :is-disabled-backdrop-click="true"
+        :has-close-button="signDialogError"
+        @close="handleSignDialogClose"
+      >
+        <template #header-prepend>
+          <IconStar class="w-[20px]" />
+        </template>
+        <ProgressIndicator
+          class="mx-auto mb-[24px]"
+        />
+        <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
+        <pre
+          v-if="signDialogError"
+          :class="[
+            'mt-[12px]',
+            'p-[8px]',
+            'bg-red',
+            'bg-opacity-20',
+            'rounded-[8px]',
+            'text-red',
+            'text-[12px]',
+            'font-400',
+          ]"
+        >{{ signDialogError }}</pre>
+        <Divider class="mt-[12px] mb-[8px]" />
+        <span
+          v-t="'IscnRegisterForm.signDialog.sign.arweave.uploading'"
+          class="whitespace-pre-line"
+        />
+      </Dialog>
     </Card>
     <AttentionsLedger />
     <Snackbar
@@ -153,25 +238,51 @@
       :text="$t('UploadForm.warning',{ size: Math.round(uploadSizeLimit / (1024*1024)) })"
       preset="warn"
     />
+    <Snackbar
+      v-model="isOpenWarningSnackbar"
+      preset="warn"
+    >
+      {{ errorMsg }}
+      <Link
+        v-if="error === 'INSUFFICIENT_BALANCE'"
+        :class="['text-white','ml-[2px]']"
+        href="https://app.osmosis.zone/?from=USDC&to=LIKE"
+      >
+        {{ $t('IscnRegisterForm.error.buy') }}
+      </Link>
+    </Snackbar>
   </div>
 </template>
 
 <script lang="ts">
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { namespace } from 'vuex-class'
 import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { logTrackerEvent } from '~/utils/logger'
-import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
+import BigNumber from 'bignumber.js'
 
+import { OfflineSigner } from '@cosmjs/proto-signing'
+
+import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
+import { logTrackerEvent } from '~/utils/logger'
+import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import {
   fileToArrayBuffer,
   digestFileSHA256,
   readImageType,
 } from '~/utils/misc'
+import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
+import { getAccountBalance } from '~/utils/cosmos'
+
+const walletModule = namespace('wallet')
 
 @Component
 export default class UploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
+
+  @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @walletModule.Getter('getWalletAddress') address!: string
 
   isImage: boolean = false
   ipfsURL: string = ''
@@ -190,9 +301,26 @@ export default class UploadForm extends Vue {
   fileRecords: any[] = []
 
   isOpenFileInfoDialog = false
+  isOpenSignDialog = false
+  isOpenWarningSnackbar = false
+  isOpenKeplr = true
   isSizeExceeded = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
+  uploadStatus: string = ''
+  uploadArweaveIdList: string[] = []
+  arweaveFeeTargetAddress: string = ''
+  arweaveFee = new BigNumber(0)
+  sentArweaveTransactionHashes = new Map<string, string>()
+
+  likerId: string = ''
+  likerIdsAddresses: (string | void)[] = []
+  error: string = ''
+  shouldShowAlert = false
+  errorMessage = ''
+
+  signDialogError = ''
+  balance = new BigNumber(0)
 
   get formClasses() {
     return [
@@ -223,6 +351,62 @@ export default class UploadForm extends Vue {
 
   get size() {
     return `${Math.round(this.fileSize * 0.001)} KB`
+  }
+
+  get arweaveFeePlusGas() {
+    if (this.arweaveFee.lte(0)) return this.arweaveFee;
+    const gasAmount = new BigNumber(DEFAULT_TRANSFER_FEE.amount[0].amount).shiftedBy(-9);
+    return this.arweaveFee.plus(gasAmount);
+  }
+
+  get signDialogMessage() {
+    return this.$t('IscnRegisterForm.signDialog.closeWarning')
+  }
+
+  get formattedUploadStatus() {
+    switch (this.uploadStatus) {
+      case 'loading':
+        return this.$t('IscnRegisterForm.button.loading')
+
+      case 'signing':
+        return this.$t('IscnRegisterForm.button.signing')
+
+      case 'uploading':
+        return this.$t('IscnRegisterForm.button.uploading')
+
+      case 'success':
+        return this.$t('IscnRegisterForm.button.success')
+
+      default:
+        return this.$t('IscnRegisterForm.button.register')
+    }
+  }
+
+  get errorMsg() {
+    switch (this.error) {
+      case 'INSUFFICIENT_BALANCE':
+        return this.$t('IscnRegisterForm.error.insufficient')
+      case 'MISSING_SIGNER':
+        return this.$t('IscnRegisterForm.error.missingSigner')
+      default:
+        return ''
+    }
+  }
+
+  @Watch('error')
+  showWarning(errormsg: any) {
+    if (errormsg) this.isOpenWarningSnackbar = true
+  }
+
+  @Watch('fileRecords')
+  async estimateArFee(fileRecords: any) {
+    if (fileRecords.length) {
+      this.uploadStatus = 'loading'
+      await this.estimateArweaveFee();
+      this.uploadStatus = ''
+    } else {
+      this.arweaveFee = new BigNumber(0)
+    }
   }
 
   async onFileUpload(event: DragEvent) {
@@ -320,11 +504,6 @@ export default class UploadForm extends Vue {
     this.$emit('submit', {})
   }
 
-  onSubmit() {
-    if (IS_CHAIN_UPGRADING) return
-    this.$emit('submit', this.fileRecords)
-  }
-
   handleDeleteFile(index: number) {
     this.fileRecords.splice(index, 1)
   }
@@ -333,6 +512,166 @@ export default class UploadForm extends Vue {
     this.isOpenFileInfoDialog = true
     this.displayImageSrc = this.fileRecords[index].fileData
     this.displayExifInfo = this.fileRecords[index].exifInfo
+  }
+
+  onOpenKeplr() {
+    logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1);
+    this.isOpenKeplr = true
+    setTimeout(() => {
+      this.isOpenKeplr = false
+    }, 5000)
+  }
+
+  async estimateArweaveFee(): Promise<void> {
+    try {
+      const pricePromises = this.fileRecords.map(record =>
+        estimateBundlrFilePrice({
+          fileSize: record.fileBlob?.size || 0,
+          ipfsHash: record.ipfsHash,
+        }),
+      );
+
+      const results = await Promise.all(pricePromises);
+      let totalFee = new BigNumber(0);
+      const arweaveIds: string[] = [];
+
+      results.forEach(result => {
+        const { address, arweaveId, LIKE } = result;
+        if (LIKE) {
+          totalFee = totalFee.plus(new BigNumber(LIKE));
+        }
+        if (arweaveId) {
+          arweaveIds.push(arweaveId);
+        }
+        if (!this.arweaveFeeTargetAddress) {
+          this.arweaveFeeTargetAddress = address;
+        }
+      });
+
+      this.arweaveFee = totalFee;
+      if (arweaveIds.length) {
+        this.uploadArweaveIdList = [...arweaveIds];
+        this.$emit('arweaveUploaded', { arweaveId: arweaveIds[0] });
+      }
+
+    } catch (err) {
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
+
+  async sendArweaveFeeTx(records: any): Promise<string> {
+    logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
+    if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
+      const transactionHash = this.sentArweaveTransactionHashes.get(records.ipfsHash);
+      if (transactionHash) {
+        return transactionHash;
+      }
+    }
+    await this.initIfNecessary()
+    if (!this.signer) throw new Error('SIGNER_NOT_INITED');
+    if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
+    this.uploadStatus = 'signing';
+    const memo = JSON.stringify({ ipfs: records.ipfsHash, fileSize: records.fileBlob?.size || 0 });
+    try {
+      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
+      if (transactionHash) {
+        this.sentArweaveTransactionHashes.set(records.ipfsHash, transactionHash);
+        return transactionHash;
+      }
+    } catch (err) {
+      this.signDialogError = (err as Error).toString()
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
+      console.error(err);
+    } finally {
+      this.uploadStatus = '';
+    }
+    return '';
+  }
+
+  async submitToArweave(records: any): Promise<void> {
+    const tempRecord = {...records}
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
+    if (!tempRecord.fileBlob) return;
+      this.isOpenSignDialog = true;
+      this.onOpenKeplr();
+      tempRecord.transactionHash = this.sentArweaveTransactionHashes.get(tempRecord.ipfsHash)
+    if (!tempRecord.transactionHash) {
+     tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
+    }
+
+    try {
+      const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const arweaveId = await uploadSingleFileToBundlr(buffer, {
+        fileSize: tempRecord.fileBlob?.size || 0,
+        ipfsHash: tempRecord.ipfsHash,
+        fileType: tempRecord.fileType as string,
+        txHash: tempRecord.transactionHash,
+      });
+      if (arweaveId) {
+        this.uploadArweaveIdList.push(arweaveId)
+        this.$emit('arweaveUploaded', { arweaveId })
+        this.isOpenSignDialog = false
+      } else {
+        this.shouldShowAlert = true
+        this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
+        this.$emit('handleContinue')
+      }
+    } catch (err) {
+      // TODO: Handle error
+      // eslint-disable-next-line no-console
+      console.error(err)
+      this.shouldShowAlert = true
+      this.errorMessage = (err as Error).toString()
+    }
+  }
+
+  async onSubmit() {
+    if (IS_CHAIN_UPGRADING) return
+    logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
+    this.uploadStatus = 'uploading'
+    this.$emit('handleSubmit')
+    this.error = ''
+    this.signDialogError = ''
+
+    const [balance] = await Promise.all([getAccountBalance(this.address)])
+    this.balance = new BigNumber(balance);
+    if (this.balance.lt(this.arweaveFee)) {
+      this.error = 'INSUFFICIENT_BALANCE'
+      this.isOpenWarningSnackbar = true
+      this.uploadStatus = ''
+      return
+    }
+    if (!this.fileRecords.some(file => file.fileBlob)) {
+      this.error = 'NO_FILE_TO_UPLOAD'
+      this.isOpenWarningSnackbar = true
+      this.uploadStatus = ''
+      return
+    }
+
+    try {
+      this.uploadStatus = 'uploading';
+      // eslint-disable-next-line no-restricted-syntax
+      for (const record of this.fileRecords) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.submitToArweave(record);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    } finally {
+      this.uploadStatus = '';
+    }
+
+    this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: this.uploadArweaveIdList })
+  }
+
+  handleSignDialogClose() {
+    logTrackerEvent(this, 'ISCNCreate', 'CloseSignDialog', '', 1);
+    this.isOpenSignDialog = false
   }
 }
 </script>

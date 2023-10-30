@@ -8,12 +8,7 @@
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <IscnFormHeader :step="step" :total-step="4" />
-      <!-- guide text -->
-      <Label v-if="showUploadOnly"
-        :text="$t('IscnRegisterForm.guide.uploadOnly')"
-        class="text-medium-gray my-[12px]"
-      />
-      <Label v-else
+      <Label
         :text="$t('IscnRegisterForm.guide.review')"
         class="text-medium-gray my-[12px]"
       />
@@ -203,35 +198,9 @@
           :all-exif="displayExifInfo"
         />
       </Dialog>
-      <div v-if="showUploadOnly" :class="[
-        'flex',
-        'flex-col',
-        'items-end',
-      ]">
-        <template v-if="uploadStatus">
-          <ProgressIndicator />
-          <div :class="[
-            'text-[12px]',
-            'mt-[4px]',
-          ]">
-            {{ formattedUploadStatus }}
-          </div>
-        </template>
-        <Button
-          v-else
-          :text="$t('IscnRegisterForm.button.upload')"
-          preset="secondary"
-          @click.native="onUploadOnly"
-        >
-          <template #append>
-            <IconArrowRight />
-          </template>
-        </Button>
-      </div>
     </Card>
     <!-- ////// Input Card /////// -->
     <Card
-      v-if="!showUploadOnly"
       class="flex flex-col mt-[16px] p-[32px]"
       :has-padding="false"
     >
@@ -463,12 +432,6 @@
                 'gap-[12px]',
               ]"
             >
-              <Button
-                  v-if="!uploadStatus"
-                  preset="outline"
-                  :text="$t('IscnRegisterForm.button.uploadOnly')"
-                  @click="showUploadOnly = true"
-              />
               <Button
                 :text="$t('IscnRegisterForm.button.register')"
                 type="submit"
@@ -743,9 +706,7 @@ import { namespace } from 'vuex-class'
 import { AxiosResponse } from 'axios'
 import { Author } from '~/types/author'
 
-import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import { signISCNTx } from '~/utils/cosmos/iscn';
-import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
 import { ISCN_GAS_MULTIPLIER } from '~/constant';
 import {
@@ -778,9 +739,10 @@ export enum AuthorDialogType {
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: [] }) readonly fileRecords!: any[]
+  @Prop({ default: [] }) readonly uploadArweaveList!: any[]
+
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
-  @Prop({ default: false }) readonly isUploadOnly!: boolean
   @Prop(Number) readonly step: number | undefined
 
   @walletModule.Getter('getWalletAddress') address!: string
@@ -832,7 +794,7 @@ export default class IscnRegisterForm extends Vue {
   >()
 
   uploadStatus: string = ''
-  uploadArweaveIdList: string[] = []
+  uploadArweaveIdList: any = []
   error: string = ''
   likerId: string = ''
   likerIdsAddresses: (string | void)[] = []
@@ -844,7 +806,6 @@ export default class IscnRegisterForm extends Vue {
   displayImageSrc: string = ''
   displayExifInfo: any = null
 
-  arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
   iscnFee = new BigNumber(0)
   iscnGasFee = ''
@@ -871,8 +832,6 @@ export default class IscnRegisterForm extends Vue {
   checkedAuthorInfo = false
   isChecked = false
   charactersLimit = CharactersLimit
-
-  showUploadOnly = this.isUploadOnly
 
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
   sameAsList: any = []
@@ -932,7 +891,7 @@ export default class IscnRegisterForm extends Vue {
   get contentFingerprintLinks() {
     const array=[]
     if (this.uploadArweaveIdList) {
-      array.push(...this.uploadArweaveIdList.map(id => this.formatArweave(id)))
+      array.push(...this.uploadArweaveIdList.map((id: string) => this.formatArweave(id)))
     }
     if (this.ipfsHashList.length) {
       array.push(...this.ipfsHashList.map(ipfs => this.formatIpfs(ipfs)))
@@ -1046,14 +1005,8 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  get arweaveFeePlusGas() {
-    if (this.arweaveFee.lte(0)) return this.arweaveFee;
-    const gasAmount = new BigNumber(DEFAULT_TRANSFER_FEE.amount[0].amount).shiftedBy(-9);
-    return this.arweaveFee.plus(gasAmount);
-  }
-
   get totalFee() {
-    return this.iscnFee.plus(this.arweaveFeePlusGas)
+    return this.iscnFee
   }
 
   get currentSignStep() {
@@ -1084,8 +1037,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get signDialogFee() {
-    if (this.uploadArweaveIdList.length) return this.iscnFee;
-    return this.arweaveFeePlusGas;
+    return this.iscnFee
   }
 
   get buttonState() {
@@ -1122,11 +1074,13 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
-    if (this.arweaveId) {
-      this.uploadArweaveIdList = [this.arweaveId];
+    if (this.uploadArweaveList && this.uploadArweaveList.length) {
+      this.uploadArweaveIdList = [...this.uploadArweaveList]
+    }
+    if (this.arweaveId){
+      this.uploadArweaveIdList.push(this.arweaveId)
     }
     this.uploadStatus = 'loading'
-    await this.estimateArweaveFee();
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
     this.uploadStatus = ''
@@ -1359,50 +1313,6 @@ export default class IscnRegisterForm extends Vue {
     return undefined
   }
 
-  async onUploadOnly(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
-    this.uploadStatus = 'loading'
-    await this.getLikerIdsAddresses()
-    this.$emit('handleSubmit')
-    this.error = ''
-    this.signDialogError = ''
-    if (this.balance.lt(this.totalFee)) {
-      this.error = 'INSUFFICIENT_BALANCE'
-      this.isOpenWarningSnackbar = true
-      this.uploadStatus = ''
-      return
-    }
-    if (!this.fileRecords.some(file => file.fileBlob)) {
-      this.error = 'NO_FILE_TO_UPLOAD'
-      this.isOpenWarningSnackbar = true
-      this.uploadStatus = ''
-      return
-    }
-    try {
-      this.isUploadingArweave = true;
-      this.uploadStatus = 'uploading';
-
-      // eslint-disable-next-line no-restricted-syntax
-      for (const record of this.fileRecords) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.submitToArweave(record);
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    } finally {
-      this.isUploadingArweave = false;
-      this.uploadStatus = '';
-    }
-
-    if (this.uploadArweaveIdList.length) {
-      this.$emit('fileUploaded', {
-        ipfsHash: this.ipfsHashList,
-        arweaveId: this.uploadArweaveIdList,
-      })
-    }
-  }
-
   async onSubmit(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
     await this.getLikerIdsAddresses()
@@ -1424,7 +1334,6 @@ export default class IscnRegisterForm extends Vue {
         // eslint-disable-next-line no-restricted-syntax
         for (const record of this.fileRecords) {
           // eslint-disable-next-line no-await-in-loop
-          await this.submitToArweave(record);
           if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetIds.has(record.ipfsHash)) {
           // eslint-disable-next-line no-await-in-loop
             await this.submitToNumbers(record);
@@ -1439,128 +1348,6 @@ export default class IscnRegisterForm extends Vue {
       }
     }
     if (!this.fileRecords.some(file => file.fileBlob) || this.uploadArweaveIdList.length) await this.submitToISCN()
-  }
-
-  async estimateArweaveFee(): Promise<void> {
-    try {
-      const pricePromises = this.fileRecords.map(record =>
-        estimateBundlrFilePrice({
-          fileSize: record.fileBlob?.size || 0,
-          ipfsHash: record.ipfsHash,
-        }),
-      );
-
-      const results = await Promise.all(pricePromises);
-      let totalFee = new BigNumber(0);
-      const arweaveIds: string[] = [];
-
-      results.forEach(result => {
-        const { address, arweaveId, LIKE } = result;
-        if (LIKE) {
-          totalFee = totalFee.plus(new BigNumber(LIKE));
-        }
-        if (arweaveId) {
-          arweaveIds.push(arweaveId);
-        }
-        if (!this.arweaveFeeTargetAddress) {
-          this.arweaveFeeTargetAddress = address;
-        }
-      });
-
-      this.arweaveFee = totalFee;
-      if (arweaveIds.length) {
-        this.uploadArweaveIdList = [
-          ...this.uploadArweaveIdList,
-          ...arweaveIds,
-          ];
-        this.$emit('arweaveUploaded', { arweaveId: arweaveIds[0] });
-      }
-
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
-
-  async sendArweaveFeeTx(records: any): Promise<string> {
-    logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
-    if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
-      const transactionInfo = this.sentArweaveTransactionHashes.get(records.ipfsHash);
-      if (transactionInfo && transactionInfo.transactionHash) {
-        return transactionInfo.transactionHash;
-      }
-    }
-    await this.initIfNecessary()
-    if (!this.signer) throw new Error('SIGNER_NOT_INITED');
-    if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
-    this.uploadStatus = 'signing';
-    const memo = JSON.stringify({ ipfs: records.ipfsHash, fileSize: records.fileBlob?.size || 0 });
-    try {
-      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
-      if (transactionHash) {
-        const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
-        this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...existingData, transactionHash });
-        return transactionHash;
-      }
-    } catch (err) {
-      this.signDialogError = (err as Error).toString()
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.error(err);
-    } finally {
-      this.uploadStatus = '';
-    }
-    return '';
-  }
-
-  async submitToArweave(records: any): Promise<void> {
-    const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
-    const { transactionHash, arweaveId: uploadArweaveId } = existingData;
-    if (transactionHash && uploadArweaveId) return
-    const tempRecord = {...records}
-    logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
-    if (!tempRecord.fileBlob) return;
-    this.isOpenSignDialog = true;
-    this.onOpenKeplr();
-    tempRecord.transactionHash = transactionHash
-    if (!tempRecord.transactionHash) {
-      tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
-    }
-    // Register Numbers Protocol assets along with Arweave
-    if (this.isRegisterNumbersProtocolAsset) {
-      logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
-    }
-
-    if (tempRecord.transactionHash && !uploadArweaveId) {
-      try {
-        const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const arweaveId = await uploadSingleFileToBundlr(buffer, {
-          fileSize: tempRecord.fileBlob?.size || 0,
-          ipfsHash: tempRecord.ipfsHash,
-          fileType: tempRecord.fileType as string,
-          txHash: tempRecord.transactionHash,
-        });
-        if (arweaveId) {
-          const uploadedData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
-          this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...uploadedData, arweaveId });
-          this.uploadArweaveIdList.push(arweaveId)
-          this.$emit('arweaveUploaded', { arweaveId })
-          this.isOpenSignDialog = false
-        } else {
-          this.shouldShowAlert = true
-          this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
-          this.$emit('handleContinue')
-        }
-      } catch (err) {
-        // TODO: Handle error
-        // eslint-disable-next-line no-console
-        console.error(err)
-        this.shouldShowAlert = true
-        this.errorMessage = (err as Error).toString()
-      }
-    }
   }
 
   async submitToNumbers(record: any): Promise<void> {
