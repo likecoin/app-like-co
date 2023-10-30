@@ -89,9 +89,15 @@
         'justify-end',
         'w-full',
         'pt-[24px]',
+        'gap-[8px]',
         'lg:pt-0',
       ]"
     >
+      <Button preset="tertiary" :text="$t('NFTPortal.button.download.iscn')" @click="handleClickDownload">
+        <template #prepend>
+          <IconDownload />
+        </template>
+      </Button>
       <Button
         preset="secondary"
         class="w-full lg:w-auto"
@@ -467,6 +473,8 @@ import { API_LIKER_NFT_MINT } from '~/constant/api'
 import { isCosmosTransactionHash } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { downloadJSON } from '~/utils/misc'
+
 import {
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
@@ -860,6 +868,21 @@ export default class ViewIscnIdPage extends Vue {
         console.error(err);
       }
     }
+  }
+
+  handleClickDownload() {
+    const generateData = {
+      contentMetadata: {
+        ...this.metadata,
+        '@type': this.type,
+        '@context': "http://schema.org/",
+      },
+      stakeholders: this.recordData?.stakeholders,
+      contentFingerprints: this.recordData.contentFingerprints,
+      recordNotes: '',
+    }
+
+    downloadJSON(generateData, 'iscn.json')
   }
 }
 </script>
