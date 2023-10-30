@@ -4,7 +4,7 @@ import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
-import { WALLET_TYPE_REPLACER } from '~/constant'
+import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE } from '~/constant'
 import { getPublisherISCNPayload } from '.';
 import { ISCN_PUBLISHERS } from '~/constant/iscn';
 
@@ -72,10 +72,19 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
       rewardProportion = Math.max(0, rewardProportion);
     }
   }
-  if (fileSHA256) contentFingerprints.push(`hash://sha256/${fileSHA256}`)
-  if (ipfsHash) contentFingerprints.push(`ipfs://${ipfsHash}`)
-  if (arweaveId) contentFingerprints.push(`ar://${arweaveId}`);
-  if (numbersProtocolAssetId) contentFingerprints.push(`num://${numbersProtocolAssetId}`);
+
+  const pushContentFingerprint = (value: any, prefix:string) => {
+    if (Array.isArray(value)) {
+      value.forEach(item => contentFingerprints.push(`${prefix}${item}`));
+    } else if (typeof value === 'string' && value.length) {
+      contentFingerprints.push(`${prefix}${value}`);
+    }
+  };
+  pushContentFingerprint(fileSHA256, 'hash://sha256/');
+  pushContentFingerprint(ipfsHash, 'ipfs://');
+  pushContentFingerprint(arweaveId, 'ar://');
+  pushContentFingerprint(numbersProtocolAssetId, 'num://');
+
   if (authorNames.length) {
     for (let i = 0; i < authorNames.length; i += 1) {
       const authorName: string = authorNames[i]
@@ -146,13 +155,36 @@ export async function signISCN(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
-  { iscnId, memo }: { iscnId?: string, memo?: string } = {},
+  {
+    iscnId,
+    memo,
+    gas = ISCN_GAS_FEE.toString(),
+  }: { iscnId?: string, memo?: string, gas?: string } = {},
 ) {
-  const isUpdate = !!iscnId;
-  const signingClient = await getSigningClient();
-  await signingClient.connectWithSigner(network.rpcURL, signer);
-  const signingPromise = isUpdate ? signingClient.updateISCNRecord(address, iscnId as string, tx, { memo: memo || 'app.like.co' })
-    : signingClient.createISCNRecord(address, tx, { memo: memo || 'app.like.co' });
-  const res = await signingPromise;
-  return res as DeliverTxResponse;
+  const isUpdate = !!iscnId
+  const signingClient = await getSigningClient()
+  await signingClient.connectWithSigner(network.rpcURL, signer)
+  const signingPromise = isUpdate
+    ? signingClient.updateISCNRecord(address, iscnId as string, tx, {
+        memo: memo || 'app.like.co',
+        fee: {
+          gas,
+          amount: [{
+              denom: DEFAULT_GAS_PRICE[0].denom,
+              amount: DEFAULT_GAS_PRICE[0].amount.toString(),
+            }],
+        },
+      })
+    : signingClient.createISCNRecord(address, tx, {
+        memo: memo || 'app.like.co',
+        fee: {
+          gas,
+          amount: [{
+              denom: DEFAULT_GAS_PRICE[0].denom,
+              amount: DEFAULT_GAS_PRICE[0].amount.toString(),
+            }],
+        },
+      })
+  const res = await signingPromise
+  return res as DeliverTxResponse
 }

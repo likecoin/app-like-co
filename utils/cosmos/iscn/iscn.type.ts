@@ -7,10 +7,10 @@ export interface ISCNRegisterPayload {
   url: string;
   exifInfo: any;
   license: string;
-  ipfsHash: string;
-  arweaveId: string;
-  numbersProtocolAssetId: string;
-  fileSHA256: string;
+  ipfsHash: string | string[];
+  arweaveId: string | string[];
+  numbersProtocolAssetId: string | string[];
+  fileSHA256: string | string[];
   type: string;
   publisher?: string,
   author: string;

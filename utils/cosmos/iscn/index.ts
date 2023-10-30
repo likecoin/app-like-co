@@ -9,10 +9,10 @@ export async function signISCNTx(
   tx: ISCNSignPayload,
   signer: OfflineSigner,
   address: string,
-  { iscnId, memo }: { iscnId?: string, memo?: string } = {},
+  { iscnId, memo, gas}: { iscnId?: string, memo?: string, gas?: string } = {},
 ) {
   const client = await getQueryClient();
-  const res = await sign(tx, signer, address, { memo, iscnId });
+  const res = await sign(tx, signer, address, { memo, iscnId, gas });
   const [newIscnId] = await client.queryISCNIdsByTx(res.transactionHash);
   return {
     iscnId: newIscnId,
