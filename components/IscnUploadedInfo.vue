@@ -16,7 +16,7 @@
           :text="$t('IscnUploaded.guide.title')"
           class="text-medium-gray"
         />
-        <Button preset="plain" text="Download iscn.json" @click="handleClickDownload">
+        <Button preset="plain" :text="$t('NFTPortal.button.download.iscn')" @click="handleClickDownload">
           <template #prepend>
             <IconDownload />
           </template>
