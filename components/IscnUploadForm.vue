@@ -227,6 +227,7 @@ import { namespace } from 'vuex-class'
 import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import BigNumber from 'bignumber.js'
+import ePub from 'epubjs';
 
 import { OfflineSigner } from '@cosmjs/proto-signing'
 
@@ -282,8 +283,6 @@ export default class UploadForm extends Vue {
     string, { transactionHash?: string, arweaveId?: string }
   >()
 
-
-
   likerId: string = ''
   error: string = ''
   shouldShowAlert = false
@@ -291,6 +290,8 @@ export default class UploadForm extends Vue {
 
   signDialogError = ''
   balance = new BigNumber(0)
+
+  epubMetadataList: any[] = []
 
   get formClasses() {
     return [
@@ -376,6 +377,10 @@ export default class UploadForm extends Vue {
     }
   }
 
+  mounted() {
+    this.epubMetadataList = []
+  }
+
   async onFileUpload(event: DragEvent) {
     logTrackerEvent(this, 'ISCNCreate', 'SelectFile', '', 1)
     this.isSizeExceeded = false
@@ -442,6 +447,10 @@ export default class UploadForm extends Vue {
                 console.error(err)
               }
             }
+            if (file.type === 'application/epub+zip') {
+             // eslint-disable-next-line no-await-in-loop
+             await this.processEPub({ buffer:fileBytes })
+            }
           }
         } else {
           this.isSizeExceeded = true
@@ -450,6 +459,84 @@ export default class UploadForm extends Vue {
       }
     }
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  async processEPub({ buffer }: { buffer: ArrayBuffer }) {
+  try {
+    const Book = ePub(buffer);
+    await Book.ready;
+    const epubMetadata: any = {};
+
+    // Get metadata
+    const { metadata } = Book.packaging;
+    if (metadata) {
+      epubMetadata.title = metadata.title;
+      epubMetadata.author = metadata.creator;
+      epubMetadata.language = metadata.language;
+      epubMetadata.description = metadata.description;
+    }
+
+    // Get tags
+    const opfFilePath = await (Book.path as any).path;
+    const opfContent = await Book.archive.getText(opfFilePath);
+    const parser = new DOMParser();
+    const opfDocument = parser.parseFromString(opfContent, 'application/xml');
+    const dcSubjectElements = opfDocument.querySelectorAll('dc\\:subject, subject');
+    const subjects: string[] = [];
+    dcSubjectElements.forEach((element) => {
+      const subject = element.textContent;
+      subject && subjects.push(subject);
+    });
+    epubMetadata.tags = subjects;
+
+    // Get cover file
+    const coverUrl = (Book as any).cover;
+    if (!coverUrl) {
+      this.epubMetadataList.push(epubMetadata);
+      return;
+    }
+
+    const blobData = await Book.archive.getBlob(coverUrl);
+    if (blobData) {
+      const coverFile = new File([blobData], `${metadata.title}_cover.jpeg`, {
+        type: 'image/jpeg',
+      });
+
+      const fileBytes = (await fileToArrayBuffer(coverFile)) as unknown as ArrayBuffer;
+      if (fileBytes) {
+        const [
+          fileSHA256,
+          imageType,
+          ipfsHash,
+          // eslint-disable-next-line no-await-in-loop
+        ] = await Promise.all([
+          digestFileSHA256(fileBytes),
+          readImageType(fileBytes),
+          Hash.of(Buffer.from(fileBytes)),
+        ]);
+
+        const fileRecord: any = {
+          fileName: coverFile.name,
+          fileSize: coverFile.size,
+          fileType: coverFile.type,
+          fileBlob: coverFile,
+          fileData: coverFile,
+          ipfsHash,
+          fileSHA256,
+          isFileImage: !!imageType,
+        };
+
+        epubMetadata.fileSHA256 = fileSHA256;
+        this.epubMetadataList.push(epubMetadata);
+        this.fileRecords.push(fileRecord);
+      }
+    } else {
+      this.epubMetadataList.push(epubMetadata);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
   onEnterURL() {
     if (
@@ -589,6 +676,10 @@ export default class UploadForm extends Vue {
       if (arweaveId) {
         const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
+        if (tempRecord.fileName === 'cover.jpeg') {
+          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
+          metadata.arweaveId = arweaveId
+        }
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
       } else {
@@ -642,7 +733,7 @@ export default class UploadForm extends Vue {
     }
 
     const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
-    this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: uploadArweaveIdList })
+    this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: uploadArweaveIdList, epubMetadata: this.epubMetadataList[0] })
   }
 
   handleSignDialogClose() {

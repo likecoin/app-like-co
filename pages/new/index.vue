@@ -41,6 +41,7 @@
       :ipfs-hash="urlIpfsHash"
       :arweave-id="urlArweaveId"
       :upload-arweave-list=uploadArweaveList
+      :epub-metadata="epubMetadata"
 
       :step="step"
       @txBroadcasted="onISCNTxInfo"
@@ -134,6 +135,7 @@ export default class NewIndexPage extends Vue {
 
   uploadFileRecords: any[] = []
   urlFileRecords: any[] = []
+  epubMetadata: any | null = null
 
   get shouldSkipToMintNFT(): boolean {
     return this.$route.query.mint === '1'
@@ -189,15 +191,20 @@ export default class NewIndexPage extends Vue {
   onSubmitUpload({
     fileRecords,
     arweaveIds,
+    epubMetadata,
   }: {
     fileRecords: any[]
     arweaveIds: string[]
+    epubMetadata: any
   }) {
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
     }
     if (arweaveIds && arweaveIds.length) {
       this.uploadArweaveList = [...arweaveIds]
+    }
+    if (epubMetadata) {
+      this.epubMetadata = {...epubMetadata}
     }
     this.state = 'iscn'
     logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', '', 1)
