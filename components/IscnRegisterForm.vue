@@ -1003,6 +1003,8 @@ export default class IscnRegisterForm extends Vue {
       likerIdsAddresses: this.likerIdsAddresses,
       authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.customContentFingerprints,
+      inLanguage: this.language,
+      thumbnail: this.epubMetadata.thumbnail,
     }
   }
 
@@ -1091,6 +1093,7 @@ export default class IscnRegisterForm extends Vue {
       this.description = this.extractText(this.epubMetadata.description);
       this.author.name = this.epubMetadata.author;
       this.language = this.epubMetadata.language
+      this.tags = this.epubMetadata.tags
       if (this.author.name) { this.authors.push(this.author) }
     }
 

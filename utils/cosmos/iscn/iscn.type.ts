@@ -24,6 +24,8 @@ export interface ISCNRegisterPayload {
   stakeholders?: any[];
   recordNotes?: string;
   memo?: string;
+  inLanguage?: string;
+  thumbnail?: any;
 }
 export interface ISCNRecordWithID extends ISCNRecord {
   id: string;

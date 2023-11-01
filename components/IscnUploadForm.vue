@@ -231,7 +231,7 @@ import ePub from 'epubjs';
 
 import { OfflineSigner } from '@cosmjs/proto-signing'
 
-import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
+import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX, IPFS_VIEW_GATEWAY_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import {
@@ -449,7 +449,7 @@ export default class UploadForm extends Vue {
             }
             if (file.type === 'application/epub+zip') {
              // eslint-disable-next-line no-await-in-loop
-             await this.processEPub({ buffer:fileBytes })
+             await this.processEPub({ buffer: fileBytes, file })
             }
           }
         } else {
@@ -460,83 +460,112 @@ export default class UploadForm extends Vue {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async processEPub({ buffer }: { buffer: ArrayBuffer }) {
-  try {
-    const Book = ePub(buffer);
-    await Book.ready;
-    const epubMetadata: any = {};
+  async processEPub({ buffer, file }: { buffer: ArrayBuffer; file: File }) {
+    try {
+      const Book = ePub(buffer)
+      await Book.ready
+      const epubMetadata: any = {}
 
-    // Get metadata
-    const { metadata } = Book.packaging;
-    if (metadata) {
-      epubMetadata.title = metadata.title;
-      epubMetadata.author = metadata.creator;
-      epubMetadata.language = metadata.language;
-      epubMetadata.description = metadata.description;
-    }
-
-    // Get tags
-    const opfFilePath = await (Book.path as any).path;
-    const opfContent = await Book.archive.getText(opfFilePath);
-    const parser = new DOMParser();
-    const opfDocument = parser.parseFromString(opfContent, 'application/xml');
-    const dcSubjectElements = opfDocument.querySelectorAll('dc\\:subject, subject');
-    const subjects: string[] = [];
-    dcSubjectElements.forEach((element) => {
-      const subject = element.textContent;
-      subject && subjects.push(subject);
-    });
-    epubMetadata.tags = subjects;
-
-    // Get cover file
-    const coverUrl = (Book as any).cover;
-    if (!coverUrl) {
-      this.epubMetadataList.push(epubMetadata);
-      return;
-    }
-
-    const blobData = await Book.archive.getBlob(coverUrl);
-    if (blobData) {
-      const coverFile = new File([blobData], `${metadata.title}_cover.jpeg`, {
-        type: 'image/jpeg',
-      });
-
-      const fileBytes = (await fileToArrayBuffer(coverFile)) as unknown as ArrayBuffer;
-      if (fileBytes) {
-        const [
-          fileSHA256,
-          imageType,
-          ipfsHash,
-          // eslint-disable-next-line no-await-in-loop
-        ] = await Promise.all([
-          digestFileSHA256(fileBytes),
-          readImageType(fileBytes),
-          Hash.of(Buffer.from(fileBytes)),
-        ]);
-
-        const fileRecord: any = {
-          fileName: coverFile.name,
-          fileSize: coverFile.size,
-          fileType: coverFile.type,
-          fileBlob: coverFile,
-          fileData: coverFile,
-          ipfsHash,
-          fileSHA256,
-          isFileImage: !!imageType,
-        };
-
-        epubMetadata.fileSHA256 = fileSHA256;
-        this.epubMetadataList.push(epubMetadata);
-        this.fileRecords.push(fileRecord);
+      // Get metadata
+      const { metadata } = Book.packaging
+      if (metadata) {
+        epubMetadata.epubFileName = file.name
+        epubMetadata.title = metadata.title
+        epubMetadata.author = metadata.creator
+        epubMetadata.language = this.formatLanguage(metadata.language)
+        epubMetadata.description = metadata.description
       }
-    } else {
-      this.epubMetadataList.push(epubMetadata);
+
+      // Get tags
+      const opfFilePath = await (Book.path as any).path
+      const opfContent = await Book.archive.getText(opfFilePath)
+      const parser = new DOMParser()
+      const opfDocument = parser.parseFromString(opfContent, 'application/xml')
+      const dcSubjectElements = opfDocument.querySelectorAll(
+        'dc\\:subject, subject',
+      )
+      const subjects: string[] = []
+      dcSubjectElements.forEach((element) => {
+        const subject = element.textContent
+        subject && subjects.push(subject)
+      })
+      epubMetadata.tags = subjects
+
+      // Get cover file
+      const coverUrl = (Book as any).cover
+      if (!coverUrl) {
+        this.epubMetadataList.push(epubMetadata)
+        return
+      }
+
+      const blobData = await Book.archive.getBlob(coverUrl)
+      if (blobData) {
+        const coverFile = new File([blobData], `${metadata.title}_cover.jpeg`, {
+          type: 'image/jpeg',
+        })
+
+        const fileBytes = (await fileToArrayBuffer(
+          coverFile,
+        )) as unknown as ArrayBuffer
+        if (fileBytes) {
+          const [
+            fileSHA256,
+            imageType,
+            ipfsHash,
+            // eslint-disable-next-line no-await-in-loop
+          ] = await Promise.all([
+            digestFileSHA256(fileBytes),
+            readImageType(fileBytes),
+            Hash.of(Buffer.from(fileBytes)),
+          ])
+
+          const fileRecord: any = {
+            fileName: coverFile.name,
+            fileSize: coverFile.size,
+            fileType: coverFile.type,
+            fileBlob: coverFile,
+            ipfsHash,
+            fileSHA256,
+            isFileImage: !!imageType,
+          }
+
+          epubMetadata.ipfsHash = ipfsHash
+          epubMetadata.thumbnail = {
+            "@type": "ImageObject",
+            url: `${IPFS_VIEW_GATEWAY_URL}${ipfsHash}`,
+            name: `${file.name}_cover`,
+            description: `${file.name}_cover`,
+            encodingFormat: "image/jpeg",
+          };
+
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            if (!e.target) return
+            fileRecord.fileData = e.target.result as string
+          }
+          reader.readAsDataURL(coverFile)
+          this.epubMetadataList = [
+            ...this.epubMetadataList,
+            epubMetadata,
+          ]
+          this.fileRecords.push(fileRecord)
+        }
+      }
+    } catch (err) {
+      console.error(err)
     }
-  } catch (err) {
-    console.error(err);
   }
-}
+
+  // eslint-disable-next-line class-methods-use-this
+  formatLanguage(language: string) {
+    if (language && language.toLowerCase().startsWith('en')) {
+      return 'en'
+    }
+    if (language && language.toLowerCase().startsWith('zh')) {
+      return 'zh'
+    }
+    return language
+  }
 
   onEnterURL() {
     if (
@@ -559,7 +588,13 @@ export default class UploadForm extends Vue {
   }
 
   handleDeleteFile(index: number) {
-    this.fileRecords.splice(index, 1)
+    const deletedFile = this.fileRecords[index];
+    this.fileRecords.splice(index, 1);
+
+    const indexToDelete = this.epubMetadataList.findIndex(item => item.epubFileName === deletedFile.fileName);
+    if (indexToDelete !== -1) {
+      this.epubMetadataList.splice(indexToDelete, 1);
+    }
   }
 
   handleClickExifInfo(index: number) {
@@ -601,6 +636,10 @@ export default class UploadForm extends Vue {
         }
         if (arweaveId) {
           this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
+          const metadata = this.epubMetadataList.find((data: any) => data.ipfsHash === ipfsHash)
+          if (metadata) {
+            metadata.thumbnail.contentUrl = `https://arweave.net/${arweaveId}`;
+          }
         }
         if (!this.arweaveFeeTargetAddress) {
           this.arweaveFeeTargetAddress = address;
@@ -677,8 +716,8 @@ export default class UploadForm extends Vue {
         const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName === 'cover.jpeg') {
-          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
-          metadata.arweaveId = arweaveId
+          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.thumbnail.url)
+          metadata.thumbnail.contentUrl = `https://arweave.net/${arweaveId}`
         }
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
