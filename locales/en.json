@@ -220,6 +220,7 @@
   "IscnRegisterForm.label.name": "Name",
   "IscnRegisterForm.label.fileName": "File name",
   "IscnRegisterForm.label.fileType": "File type",
+  "IscnRegisterForm.label.originFile": "origin file: {name}",
   "IscnRegisterForm.label.numbersProtocol": "Numbers Protocol",
   "IscnRegisterForm.label.numbersProtocol.details": "Register your image asset in {link}",
   "IscnRegisterForm.label.numbersProtocol.details.link": "Numbers Protocol",

@@ -231,7 +231,7 @@ import ePub from 'epubjs';
 
 import { OfflineSigner } from '@cosmjs/proto-signing'
 
-import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX, IPFS_VIEW_GATEWAY_URL } from '~/constant'
+import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import {
@@ -530,13 +530,6 @@ export default class UploadForm extends Vue {
           }
 
           epubMetadata.ipfsHash = ipfsHash
-          epubMetadata.thumbnail = {
-            "@type": "ImageObject",
-            url: `${IPFS_VIEW_GATEWAY_URL}${ipfsHash}`,
-            name: `${file.name}_cover`,
-            description: `${file.name}_cover`,
-            encodingFormat: "image/jpeg",
-          };
 
           const reader = new FileReader()
           reader.onload = (e) => {
@@ -638,7 +631,7 @@ export default class UploadForm extends Vue {
           this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
           const metadata = this.epubMetadataList.find((data: any) => data.ipfsHash === ipfsHash)
           if (metadata) {
-            metadata.thumbnail.contentUrl = `https://arweave.net/${arweaveId}`;
+            metadata.thumbnailUrl = `ar://${arweaveId}`;
           }
         }
         if (!this.arweaveFeeTargetAddress) {
@@ -716,8 +709,8 @@ export default class UploadForm extends Vue {
         const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName === 'cover.jpeg') {
-          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.thumbnail.url)
-          metadata.thumbnail.contentUrl = `https://arweave.net/${arweaveId}`
+          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
+          metadata.thumbnailUrl = `ar://${arweaveId}`
         }
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
@@ -772,6 +765,16 @@ export default class UploadForm extends Vue {
     }
 
     const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
+    this.fileRecords.forEach((record: any, index:number) => {
+      if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
+        const arweaveId = this.sentArweaveTransactionInfo.get(
+          record.ipfsHash,
+        )?.arweaveId
+        if (arweaveId) {
+          this.fileRecords[index].arweaveId = `ar://${arweaveId}`
+        }
+      }
+    })
     this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: uploadArweaveIdList, epubMetadata: this.epubMetadataList[0] })
   }
 

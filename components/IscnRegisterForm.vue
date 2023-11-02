@@ -594,6 +594,7 @@
           <SameAsFieldList
             :name="name"
             :url-options="contentFingerprintLinks"
+            :file-records="fileRecords"
             :current-list="sameAsList"
             @onConfirm="confirmSameAsChange"
           />
@@ -1004,7 +1005,7 @@ export default class IscnRegisterForm extends Vue {
       authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.customContentFingerprints,
       inLanguage: this.language,
-      thumbnail: this.epubMetadata.thumbnail,
+      thumbnailUrl: this.epubMetadata?.thumbnailUrl,
     }
   }
 
