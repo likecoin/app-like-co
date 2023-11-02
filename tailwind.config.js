@@ -22,9 +22,6 @@ module.exports = {
       'airdrop-gold':'#D1AB79',
       'twitter-blue':'#4696F1',
     },
-    boxShadow: {
-      popup: '2px 4px 8px rgba(0, 0, 0, 0.25)',
-    },
     fontFamily: {
       'mono': [
         'PT Mono',
@@ -37,6 +34,13 @@ module.exports = {
         '44px': '44px',
         '48px': '48px',
         '64px': '64px',
+      },
+      screens: {
+        // Should remove this once we upgrade TailwindCSS to v3
+        print: { raw: 'print' },
+      },
+      boxShadow: {
+        popup: '2px 4px 8px rgba(0, 0, 0, 0.25)',
       },
     },
     screens: {
@@ -59,7 +63,7 @@ module.exports = {
         '.scrollbar-hidden': {
           '-ms-overflow-style': 'none', /* IE and Edge */
           'scrollbar-width': 'none', /* Firefox */
-          '&::-webkit-scrollbar': { 
+          '&::-webkit-scrollbar': {
             display: 'none', /* Chrome */
           },
         },

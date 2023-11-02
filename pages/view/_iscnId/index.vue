@@ -128,30 +128,37 @@
           'lg:max-w-[280px]',
         ]"
       >
-        <IscnCard
-          :key="`${record.id}-portrait`"
-          :class="[
-            'hidden',
-            'lg:block',
-            'flex-shrink-0',
-            'w-[280px]',
-          ]"
-          :record="record"
-          orientation="portrait"
-          :is-animated="true"
-        />
-        <IscnCard
-          :key="`${record.id}-landscape`"
-          :class="[
-            'w-full',
-            'lg:absolute',
-            'lg:opacity-0',
-            'lg:pointer-events-none',
-          ]"
-          :record="record"
-          :is-animated="true"
-          orientation="landscape"
-        />
+        <NuxtLink
+          :to="localeLocation({
+            name: 'view-iscnId-card',
+            params: { iscnId: record.id },
+          })"
+        >
+          <IscnCard
+            :key="`${record.id}-portrait`"
+            :class="[
+              'hidden',
+              'lg:block',
+              'flex-shrink-0',
+              'w-[280px]',
+            ]"
+            :record="record"
+            orientation="portrait"
+            :is-animated="true"
+          />
+          <IscnCard
+            :key="`${record.id}-landscape`"
+            :class="[
+              'w-full',
+              'lg:absolute',
+              'lg:opacity-0',
+              'lg:pointer-events-none',
+            ]"
+            :record="record"
+            :is-animated="true"
+            orientation="landscape"
+          />
+        </NuxtLink>
         <Button
           v-if="viewContentURL"
           class="mx-auto mt-[16px]"

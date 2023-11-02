@@ -64,6 +64,18 @@
               />
             </foreignObject>
           </g>
+          <rect
+            key="border_radius_hack_for_printing"
+            class="hidden print:block"
+            x="-9"
+            y="-9"
+            :width="svgSizeProps.width + 18"
+            :height="svgSizeProps.height + 18"
+            rx="30"
+            fill="none"
+            stroke="#fff"
+            stroke-width="18"
+          />
         </svg>
       </div>
     </div>
