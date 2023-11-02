@@ -26,6 +26,7 @@ export interface ISCNRegisterPayload {
   memo?: string;
   inLanguage?: string;
   thumbnailUrl?: string;
+  isbn?: string | number;
 }
 export interface ISCNRecordWithID extends ISCNRecord {
   id: string;

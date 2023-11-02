@@ -355,6 +355,15 @@
               :placeholder="$t('IscnRegisterForm.placeholder.url')"
             />
           </FormField>
+          <FormField
+            v-if="type === 'Book'"
+            :label="$t('IscnRegisterForm.label.isbn')"
+          >
+            <TextField
+              v-model="isbn"
+              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+            />
+          </FormField>
           <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.type')"
@@ -786,8 +795,10 @@ export default class IscnRegisterForm extends Vue {
   tags: string[] = []
   sameAs: string[] = []
   url: string = ''
+  isbn: string = ''
   license: string = this.licenseOptions[0]
   customLicense: string = ''
+  thumbnailUrl: string = ''
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
@@ -990,6 +1001,7 @@ export default class IscnRegisterForm extends Vue {
       tagsString: this.tagsString,
       sameAs: this.formattedSameAsList,
       url: this.url,
+      isbn: this.isbn,
       exifInfo: this.exif.filter(file => file),
       license: this.formattedLicense,
       ipfsHash: this.ipfsHashList,
@@ -1005,7 +1017,7 @@ export default class IscnRegisterForm extends Vue {
       authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.customContentFingerprints,
       inLanguage: this.language,
-      thumbnailUrl: this.epubMetadata?.thumbnailUrl,
+      thumbnailUrl: this.thumbnailUrl,
     }
   }
 
@@ -1095,6 +1107,7 @@ export default class IscnRegisterForm extends Vue {
       this.author.name = this.epubMetadata.author;
       this.language = this.epubMetadata.language
       this.tags = this.epubMetadata.tags
+      this.thumbnailUrl = this.epubMetadata.thumbnailUrl
       if (this.author.name) { this.authors.push(this.author) }
     }
 
