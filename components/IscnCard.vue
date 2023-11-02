@@ -8,7 +8,6 @@
         <div
           ref="canvas"
           :class="canvasWrapperClasses"
-          :style="rootStyle"
           @resize="handleResize"
         />
         <svg
@@ -107,7 +106,6 @@ export default class IscnCard extends Vue {
   static baseWidth = 560
   static baseHeight = 280
   static baseBorderWidth = 18
-  static baseBorderRadius = 24
   static baseAnimationDuration = 500
   static baseShapeMorphingMagnitude = 4
   static baseColorMultiplier = 10
@@ -210,10 +208,6 @@ export default class IscnCard extends Vue {
     return this.orientation === IscnCardOrientation.portrait
   }
 
-  get borderRadius() {
-    return IscnCard.baseBorderRadius * this.width / this.svgSizeProps.width
-  }
-
   get viewBox() {
     return this.isPortrait
       ? `0 0 ${IscnCard.baseHeight} ${IscnCard.baseWidth}`
@@ -222,12 +216,6 @@ export default class IscnCard extends Vue {
 
   get isShowLoadingIndicator() {
     return !this.isAnimated && this.isQRCodeRendering
-  }
-
-  get rootStyle() {
-    return {
-      borderRadius: `${this.borderRadius}px`,
-    }
   }
 
   get rootProps() {
@@ -239,7 +227,10 @@ export default class IscnCard extends Vue {
           'animate-pulse': this.isShowLoadingIndicator,
         },
       ],
-      style: this.rootStyle,
+      style: {
+        maskSize: 'contain',
+        maskImage: `url(/images/iscn-card/mask-${this.isPortrait ? 'portrait' : 'landscape'}.png)`,
+      },
     }
   }
 
@@ -505,8 +496,7 @@ export default class IscnCard extends Vue {
 
       // eslint-disable-next-line no-param-reassign
       s.setup = () => {
-        const canvas = s.createCanvas(this.width, this.height)
-        canvas.style('border-radius', `${this.borderRadius}px`)
+        s.createCanvas(this.width, this.height)
         if (!this.isAnimated) {
           s.noLoop()
         }
