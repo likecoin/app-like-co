@@ -32,19 +32,18 @@
       v-if="state === 'init'"
       :step="step"
       @submit="onSubmitUpload"
+      @arweaveUploaded="onArweaveIdUpload"
     />
     <IscnRegisterForm
       v-else-if="state === 'iscn'"
       :file-records="formattedFileRecords"
 
       :ipfs-hash="urlIpfsHash"
-      :arweave-id="arweaveId"
+      :arweave-id="urlArweaveId"
+      :upload-arweave-list=uploadArweaveList
 
-      :is-upload-only="isUploadOnly"
       :step="step"
-      @arweaveUploaded="onArweaveIdUpdate"
       @txBroadcasted="onISCNTxInfo"
-      @fileUploaded="fileUploaded"
       @handleSubmit="isSubmit = true"
       @handleQuit="isSubmit = false"
     />
@@ -118,8 +117,8 @@ export default class NewIndexPage extends Vue {
 
   state = 'init'
   urlIpfsHash = this.$route.query.ipfs_hash || ''
-  arweaveId = this.$route.query.arweave_id || ''
-  isUploadOnly = this.$route.query.upload_only === '1'
+  urlArweaveId = this.$route.query.arweave_id || ''
+  uploadArweaveList: string[] = []
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -167,17 +166,17 @@ export default class NewIndexPage extends Vue {
   }
 
   async mounted() {
-    if ((this.urlIpfsHash || this.arweaveId) && this.shouldSkipToMintNFT) {
+    if ((this.urlIpfsHash || this.urlArweaveId) && this.shouldSkipToMintNFT) {
       this.state = 'iscn';
       let url;
-      if (this.arweaveId) url = `https://arweave.net/${this.arweaveId}`;
+      if (this.urlArweaveId) url = `https://arweave.net/${this.urlArweaveId}`;
       else if (this.urlIpfsHash) url = `https://ipfs.io/ipfs/${this.urlIpfsHash}`;
       if (url) {
         const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
         this.urlFileRecords = [{
           fileBlob: data as Blob,
           ipfsHash: this.urlIpfsHash,
-          arweaveId: this.arweaveId,
+          arweaveId: this.urlArweaveId,
           isFileImage:  headers['content-type'].startsWith('image'),
           fileType: headers['content-type'],
           fileSize: headers['content-length'],
@@ -187,16 +186,24 @@ export default class NewIndexPage extends Vue {
     }
   }
 
-  onSubmitUpload(fileRecords: any[] | []) {
+  onSubmitUpload({
+    fileRecords,
+    arweaveIds,
+  }: {
+    fileRecords: any[]
+    arweaveIds: string[]
+  }) {
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
     }
+    if (arweaveIds && arweaveIds.length) {
+      this.uploadArweaveList = [...arweaveIds]
+    }
     this.state = 'iscn'
-    logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNConfirmFile', '', 1)
   }
 
-  onArweaveIdUpdate({ arweaveId }: { arweaveId: string }) {
-    this.arweaveId = arweaveId
+  onArweaveIdUpload({ arweaveId }: { arweaveId: string }) {
     logTrackerEvent(this, 'ISCNCreate', 'ISCNFileUploadToARSuccess', arweaveId, 1);
   }
 
@@ -233,7 +240,7 @@ export default class NewIndexPage extends Vue {
   handleCreateAnotherButtonClick() {
     this.state = 'init'
     this.urlIpfsHash = ''
-    this.arweaveId = ''
+    this.urlArweaveId = ''
     this.fileSHA256 = ''
     this.fileData = ''
     this.fileType = ''

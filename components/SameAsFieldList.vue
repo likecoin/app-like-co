@@ -33,7 +33,6 @@
         </div>
       </div>
       <div
-        v-if="sameAsList.length > 1"
         class="self-end flex-shrink ml-auto cursor-pointer"
         @click="deleteField(i)"
       >
