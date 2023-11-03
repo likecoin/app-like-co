@@ -125,13 +125,13 @@ export default class WalletFieldList extends Vue {
     } else if (this.formatUrlOptions.length) {
       this.sameAsList = this.formatUrlOptions.map((url, index) =>{
         const originFile = this.fileRecords.find((file) => (file.arweaveId === url))
-        const formattedFileType = this.formatFileType(originFile.fileType);
+        const formattedFileType = this.formatFileType(originFile?.fileType);
         return{
           url,
           id: `${url}-${index}`,
           filename: this.formatName,
           filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
-          originFileName: originFile.fileName,
+          originFileName: originFile?.fileName || '',
         }
       })
     } else {

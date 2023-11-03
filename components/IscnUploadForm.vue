@@ -377,10 +377,6 @@ export default class UploadForm extends Vue {
     }
   }
 
-  mounted() {
-    this.epubMetadataList = []
-  }
-
   async onFileUpload(event: DragEvent) {
     logTrackerEvent(this, 'ISCNCreate', 'SelectFile', '', 1)
     this.isSizeExceeded = false
