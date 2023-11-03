@@ -33,7 +33,6 @@
       :step="step"
       @submit="onSubmitUpload"
       @arweaveUploaded="onArweaveIdUpload"
-      @handleSubmit="isSubmit = true"
     />
     <IscnRegisterForm
       v-else-if="state === 'iscn'"

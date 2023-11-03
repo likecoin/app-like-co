@@ -198,39 +198,6 @@
           class="whitespace-pre-line"
         />
       </Dialog>
-      <Dialog
-        v-model="isOpenSignDialog"
-        :header-text="$t('IscnRegisterForm.button.uploading')"
-        :is-disabled-backdrop-click="true"
-        :has-close-button="signDialogError"
-        @close="handleSignDialogClose"
-      >
-        <template #header-prepend>
-          <IconStar class="w-[20px]" />
-        </template>
-        <ProgressIndicator
-          class="mx-auto mb-[24px]"
-        />
-        <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
-        <pre
-          v-if="signDialogError"
-          :class="[
-            'mt-[12px]',
-            'p-[8px]',
-            'bg-red',
-            'bg-opacity-20',
-            'rounded-[8px]',
-            'text-red',
-            'text-[12px]',
-            'font-400',
-          ]"
-        >{{ signDialogError }}</pre>
-        <Divider class="mt-[12px] mb-[8px]" />
-        <span
-          v-t="'IscnRegisterForm.signDialog.sign.arweave.uploading'"
-          class="whitespace-pre-line"
-        />
-      </Dialog>
     </Card>
     <AttentionsLedger />
     <Snackbar
@@ -524,17 +491,19 @@ export default class UploadForm extends Vue {
 
   async estimateArweaveFee(): Promise<void> {
     try {
-      const pricePromises = this.fileRecords.map(record =>
-        estimateBundlrFilePrice({
-          fileSize: record.fileBlob?.size || 0,
-          ipfsHash: record.ipfsHash,
-        }).then(priceResult => ({
-          ...priceResult,
-          ipfsHash: record.ipfsHash,
-        })),
-      );
+      const results = await Promise.all(
+        this.fileRecords.map(async (record) => {
+          const priceResult = await estimateBundlrFilePrice({
+            fileSize: record.fileBlob?.size || 0,
+            ipfsHash: record.ipfsHash,
+          })
+          return {
+            ...priceResult,
+            ipfsHash: record.ipfsHash,
+          }
+        }),
+      )
 
-      const results = await Promise.all(pricePromises);
       let totalFee = new BigNumber(0);
       results.forEach(result => {
         const { address, arweaveId, LIKE, ipfsHash } = result;
@@ -638,11 +607,10 @@ export default class UploadForm extends Vue {
     if (IS_CHAIN_UPGRADING) return
     logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
     this.uploadStatus = 'uploading'
-    this.$emit('handleSubmit')
     this.error = ''
     this.signDialogError = ''
 
-    const [balance] = await Promise.all([getAccountBalance(this.address)])
+    const balance = await getAccountBalance(this.address);
     this.balance = new BigNumber(balance);
     if (this.balance.lt(this.arweaveFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
