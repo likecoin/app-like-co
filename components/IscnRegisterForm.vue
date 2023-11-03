@@ -739,7 +739,7 @@ export enum AuthorDialogType {
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: [] }) readonly fileRecords!: any[]
-  @Prop({ default: [] }) readonly uploadArweaveList!: any[]
+  @Prop({ default: [] }) readonly uploadArweaveList!: string[]
 
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
@@ -794,10 +794,9 @@ export default class IscnRegisterForm extends Vue {
   >()
 
   uploadStatus: string = ''
-  uploadArweaveIdList: any = []
   error: string = ''
   likerId: string = ''
-  likerIdsAddresses: (string | void)[] = []
+  likerIdsAddresses: string[] = []
   authorDescription: string = ''
   contentFingerprintInput: string = ''
   customContentFingerprints: string[] = []
@@ -1063,6 +1062,17 @@ export default class IscnRegisterForm extends Vue {
     return this.fileRecords.some(file => file.isFileImage || file.exifInfo)
   }
 
+  get uploadArweaveIdList() {
+    let arweaveIdList: string[] = [];
+    if (this.uploadArweaveList && this.uploadArweaveList.length) {
+      arweaveIdList = [...this.uploadArweaveList];
+    }
+    if (this.arweaveId) {
+      arweaveIdList.push(this.arweaveId);
+    }
+    return arweaveIdList;
+  }
+
   @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateISCNFee()
@@ -1074,12 +1084,6 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
-    if (this.uploadArweaveList && this.uploadArweaveList.length) {
-      this.uploadArweaveIdList = [...this.uploadArweaveList]
-    }
-    if (this.arweaveId){
-      this.uploadArweaveIdList.push(this.arweaveId)
-    }
     this.uploadStatus = 'loading'
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
@@ -1222,9 +1226,10 @@ export default class IscnRegisterForm extends Vue {
     this.isOpenSameAsDialog = false
   }
 
-  async getLikerIdsAddresses(): Promise<void> {
+  async getLikerIdsAddresses() {
+    let likerIdsAddresses: any[] = [];
     try {
-      this.likerIdsAddresses = await Promise.all(
+      likerIdsAddresses = await Promise.all(
         this.likerIds.map((e) =>
           this.$axios.get(getLikerIdMinApi(e as string))
           .then((element: AxiosResponse): string | undefined => element?.data?.likeWallet)
@@ -1235,6 +1240,7 @@ export default class IscnRegisterForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(error)
     }
+    return likerIdsAddresses
   }
 
   async calculateISCNFee(): Promise<void> {
@@ -1315,7 +1321,7 @@ export default class IscnRegisterForm extends Vue {
 
   async onSubmit(): Promise<void> {
     logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
-    await this.getLikerIdsAddresses()
+    this.likerIdsAddresses = await this.getLikerIdsAddresses()
     this.$emit('handleSubmit')
     this.isChecked = true
     if (!this.isMetadataReady) return

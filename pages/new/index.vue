@@ -119,7 +119,7 @@ export default class NewIndexPage extends Vue {
   state = 'init'
   urlIpfsHash = this.$route.query.ipfs_hash || ''
   urlArweaveId = this.$route.query.arweave_id || ''
-  uploadArweaveList: any[] = []
+  uploadArweaveList: string[] = []
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -191,8 +191,8 @@ export default class NewIndexPage extends Vue {
     fileRecords,
     arweaveIds,
   }: {
-    fileRecords: any[] | []
-    arweaveIds: any[] | []
+    fileRecords: any[]
+    arweaveIds: string[]
   }) {
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]

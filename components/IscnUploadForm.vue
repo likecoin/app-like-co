@@ -275,6 +275,7 @@ import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { getAccountBalance } from '~/utils/cosmos'
 
 const walletModule = namespace('wallet')
+type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
 
 @Component
 export default class UploadForm extends Vue {
@@ -307,7 +308,7 @@ export default class UploadForm extends Vue {
   isSizeExceeded = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
-  uploadStatus: string = ''
+  uploadStatus: UploadStatus = '';
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
   sentArweaveTransactionHashes = new Map<
@@ -317,7 +318,6 @@ export default class UploadForm extends Vue {
 
 
   likerId: string = ''
-  likerIdsAddresses: (string | void)[] = []
   error: string = ''
   shouldShowAlert = false
   errorMessage = ''
@@ -376,9 +376,6 @@ export default class UploadForm extends Vue {
 
       case 'uploading':
         return this.$t('IscnRegisterForm.button.uploading')
-
-      case 'success':
-        return this.$t('IscnRegisterForm.button.success')
 
       default:
         return this.$t('IscnRegisterForm.button.register')
