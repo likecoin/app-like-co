@@ -278,7 +278,7 @@ export default class UploadForm extends Vue {
   uploadStatus: UploadStatus = '';
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
-  sentArweaveTransactionHashes = new Map<
+  sentArweaveTransactionInfo = new Map<
     string, { transactionHash?: string, arweaveId?: string }
   >()
 
@@ -511,7 +511,7 @@ export default class UploadForm extends Vue {
           totalFee = totalFee.plus(new BigNumber(LIKE));
         }
         if (arweaveId) {
-          this.sentArweaveTransactionHashes.set(ipfsHash, { transactionHash: '', arweaveId });
+          this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
         }
         if (!this.arweaveFeeTargetAddress) {
           this.arweaveFeeTargetAddress = address;
@@ -529,8 +529,8 @@ export default class UploadForm extends Vue {
 
   async sendArweaveFeeTx(records: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
-    if (this.sentArweaveTransactionHashes.has(records.ipfsHash)) {
-      const transactionInfo = this.sentArweaveTransactionHashes.get(records.ipfsHash);
+    if (this.sentArweaveTransactionInfo.has(records.ipfsHash)) {
+      const transactionInfo = this.sentArweaveTransactionInfo.get(records.ipfsHash);
       if (transactionInfo && transactionInfo.transactionHash) {
         return transactionInfo.transactionHash;
       }
@@ -544,8 +544,8 @@ export default class UploadForm extends Vue {
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       if (transactionHash) {
-        const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
-        this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...existingData, transactionHash });
+        const existingData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
+        this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...existingData, transactionHash });
         return transactionHash;
       }
 
@@ -561,7 +561,7 @@ export default class UploadForm extends Vue {
   }
 
   async submitToArweave(records: any): Promise<void> {
-    const existingData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
+    const existingData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
     const { transactionHash, arweaveId: uploadArweaveId } = existingData;
     if (uploadArweaveId) return
     const tempRecord = {...records}
@@ -585,8 +585,8 @@ export default class UploadForm extends Vue {
         txHash: tempRecord.transactionHash,
       });
       if (arweaveId) {
-        const uploadedData = this.sentArweaveTransactionHashes.get(records.ipfsHash) || {};
-        this.sentArweaveTransactionHashes.set(records.ipfsHash, { ...uploadedData, arweaveId });
+        const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
+        this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
       } else {
@@ -639,7 +639,7 @@ export default class UploadForm extends Vue {
       this.uploadStatus = '';
     }
 
-    const uploadArweaveIdList = Array.from(this.sentArweaveTransactionHashes.values()).map(entry => entry.arweaveId);
+    const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
     this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: uploadArweaveIdList })
   }
 
