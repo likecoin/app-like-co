@@ -484,6 +484,8 @@ export default class UploadForm extends Vue {
   onOpenKeplr() {
     logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1);
     this.isOpenKeplr = true
+    // Hack: In some cases, there might be no response from Keplr,
+    // so we set a timeout to automatically close it after 5 seconds.
     setTimeout(() => {
       this.isOpenKeplr = false
     }, 5000)
