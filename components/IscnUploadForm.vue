@@ -357,7 +357,7 @@ export default class UploadForm extends Vue {
       case 'MISSING_SIGNER':
         return this.$t('IscnRegisterForm.error.missingSigner')
       default:
-        return ''
+        return this.error
     }
   }
 
@@ -711,16 +711,14 @@ export default class UploadForm extends Vue {
         this.$emit('arweaveUploaded', { arweaveId })
         this.isOpenSignDialog = false
       } else {
-        this.shouldShowAlert = true
-        this.errorMessage = this.$t('IscnRegisterForm.error.arweave') as string
-        this.$emit('handleContinue')
+        this.isOpenWarningSnackbar = true
+        this.error = this.$t('IscnRegisterForm.error.arweave') as string
+        throw new Error(this.error)
       }
     } catch (err) {
       // TODO: Handle error
       // eslint-disable-next-line no-console
-      console.error(err)
-      this.shouldShowAlert = true
-      this.errorMessage = (err as Error).toString()
+      throw new Error(err as string)
     }
   }
 
@@ -756,6 +754,10 @@ export default class UploadForm extends Vue {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
+      this.isOpenWarningSnackbar = true
+      this.error = (error as Error).toString()
+      this.uploadStatus = '';
+      return
     } finally {
       this.uploadStatus = '';
     }
