@@ -118,8 +118,8 @@ async function getBundler({
   const p = await getProvider({ fileSize, ipfsHash, txHash })
   const bundlr = new WebBundlr(
     IS_TESTNET
-      ? 'https://devnet.bundlr.network'
-      : 'https://node1.bundlr.network',
+      ? 'https://devnet.irys.xyz'
+      : 'https://node1.irys.xyz',
     'matic',
     p,
   )
@@ -152,6 +152,9 @@ export async function uploadSingleFileToBundlr(
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash })
   const tags = [
+    { name: 'App-Name', value: 'app.like.co' },
+    { name: 'App-Version', value: '2.0' },
+    { name: 'User-Agent', value: 'app.like.co' },
     { name: 'IPFS-Add', value: ipfsHash },
     { name: 'standard', value: 'v0.1'},
   ];
