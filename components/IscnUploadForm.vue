@@ -518,10 +518,6 @@ export default class UploadForm extends Vue {
             ])
 
             epubMetadata.ipfsHash = ipfsHash
-            this.epubMetadataList = [
-              ...this.epubMetadataList,
-              epubMetadata,
-            ]
 
             const fileRecord: any = {
               fileName: coverFile.name,
@@ -541,9 +537,8 @@ export default class UploadForm extends Vue {
             reader.readAsDataURL(coverFile)
           }
         }
-      } else {
-        this.epubMetadataList.push(epubMetadata)
       }
+      this.epubMetadataList.push(epubMetadata)
     } catch (err) {
       console.error(err)
     }
