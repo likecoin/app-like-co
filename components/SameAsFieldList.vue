@@ -114,7 +114,7 @@ export default class WalletFieldList extends Vue {
       return this.name.replace(/[.,!?;:'"(){}[\]<>]/g, '').replace(/\s+/g, '_').toUpperCase();
   }
 
-  get formatUrlOptions() {
+  get filteredUrlOptions() {
     return this.urlOptions.filter(url => url.startsWith('ar://'))
   }
 
@@ -127,11 +127,11 @@ export default class WalletFieldList extends Vue {
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
         originFileName: list.originFileName,
       }))
-    } else if (this.formatUrlOptions.length) {
+    } else if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
         .filter((file) => this.fileTypeToFind.includes(this.formatFileType(file.fileType)))
         .map((file, index) => {
-          const url = this.formatUrlOptions.find((ar) => ar.includes(file.arweaveId));
+          const url = this.filteredUrlOptions.find((ar) => ar.includes(file.arweaveId));
           const formattedFileType = this.formatFileType(file.fileType);
 
           return {
