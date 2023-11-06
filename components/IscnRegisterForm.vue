@@ -1107,7 +1107,7 @@ export default class IscnRegisterForm extends Vue {
       this.author.name = this.epubMetadata.author;
       this.language = this.epubMetadata.language
       this.tags = this.epubMetadata.tags
-      this.thumbnailUrl = this.epubMetadata.thumbnailUrl
+      this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailUrl) as string
       if (this.author.name) { this.authors.push(this.author) }
     }
 
