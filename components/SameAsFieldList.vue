@@ -188,7 +188,8 @@ export default class WalletFieldList extends Vue {
           formattedFileType = 'png'
           break
         case fileType.includes('audio'):
-          formattedFileType = 'mp3'
+          // audio/ogg
+          formattedFileType = 'audio'
           break
         case fileType.includes('pdf'):
           formattedFileType = 'pdf'

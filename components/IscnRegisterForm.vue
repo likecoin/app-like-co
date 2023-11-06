@@ -770,7 +770,7 @@ export default class IscnRegisterForm extends Vue {
   fileTypeOptions = [
     'epub',
     'pdf',
-    'mp3',
+    'audio',
     'jpg',
     'png',
   ]

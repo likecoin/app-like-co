@@ -458,12 +458,12 @@ export default class UploadForm extends Vue {
 
   async processEPub({ buffer, file }: { buffer: ArrayBuffer; file: File }) {
     try {
-      const Book = ePub(buffer)
-      await Book.ready
+      const book = ePub(buffer)
+      await book.ready
       const epubMetadata: any = {}
 
       // Get metadata
-      const { metadata } = Book.packaging
+      const { metadata } = book.packaging
       if (metadata) {
         epubMetadata.epubFileName = file.name
         epubMetadata.title = metadata.title
@@ -473,8 +473,8 @@ export default class UploadForm extends Vue {
       }
 
       // Get tags
-      const opfFilePath = await (Book.path as any).path
-      const opfContent = await Book.archive.getText(opfFilePath)
+      const opfFilePath = await (book.path as any).path
+      const opfContent = await book.archive.getText(opfFilePath)
       const parser = new DOMParser()
       const opfDocument = parser.parseFromString(opfContent, 'application/xml')
       const dcSubjectElements = opfDocument.querySelectorAll(
@@ -483,18 +483,20 @@ export default class UploadForm extends Vue {
       const subjects: string[] = []
       dcSubjectElements.forEach((element) => {
         const subject = element.textContent
-        subject && subjects.push(subject)
+        if (subject) {
+          subjects.push(subject)
+        }
       })
       epubMetadata.tags = subjects
 
       // Get cover file
-      const coverUrl = (Book as any).cover
+      const coverUrl = (book as any).cover
       if (!coverUrl) {
         this.epubMetadataList.push(epubMetadata)
         return
       }
 
-      const blobData = await Book.archive.getBlob(coverUrl)
+      const blobData = await book.archive.getBlob(coverUrl)
       if (blobData) {
         const coverFile = new File([blobData], `${metadata.title}_cover.jpeg`, {
           type: 'image/jpeg',
@@ -547,13 +549,17 @@ export default class UploadForm extends Vue {
 
   // eslint-disable-next-line class-methods-use-this
   formatLanguage(language: string) {
-    if (language && language.toLowerCase().startsWith('en')) {
-      return 'en'
+    let formattedLanguage = '';
+    if (language) {
+      if (language.toLowerCase().startsWith('en')) {
+        formattedLanguage = 'en'
+      } else if (language.toLowerCase().startsWith('zh')) {
+        formattedLanguage = 'zh'
+      } else {
+        formattedLanguage = language
+      }
     }
-    if (language && language.toLowerCase().startsWith('zh')) {
-      return 'zh'
-    }
-    return language
+    return formattedLanguage
   }
 
   onEnterURL() {
@@ -580,7 +586,7 @@ export default class UploadForm extends Vue {
     const deletedFile = this.fileRecords[index];
     this.fileRecords.splice(index, 1);
 
-    const indexToDelete = this.epubMetadataList.findIndex(item => item.epubFileName === deletedFile.fileName);
+    const indexToDelete = this.epubMetadataList.findIndex(item => item.ipfsHash === deletedFile.ipfsHashList);
     if (indexToDelete !== -1) {
       this.epubMetadataList.splice(indexToDelete, 1);
     }

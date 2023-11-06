@@ -240,7 +240,7 @@
   "IscnRegisterForm.placeholder.fileName": "File Name (en)",
   "IscnRegisterForm.placeholder.fileType": "File Type",
   "IscnRegisterForm.placeholder.url": "URL",
-  "IscnRegisterForm.placeholder.isbn": "ISBN 10/ ISCN 13",
+  "IscnRegisterForm.placeholder.isbn": "ISBN 10/ ISBN 13",
   "IscnRegisterForm.placeholder.wallet": "Wallet Address",
   "IscnRegisterForm.quitAlertDialog.confirm": "Cancel Registration",
   "IscnRegisterForm.quitAlertDialog.content": "Your registration will be cancelled if you leave this page, and the paid fee cannot be refunded.",
