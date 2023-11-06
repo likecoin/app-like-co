@@ -94,6 +94,11 @@ export default class WalletFieldList extends Vue {
       filetype: SAME_AS_FILE_TYPES[0],
     }]
 
+  fileTypeToFind = [
+    'epub',
+    'pdf',
+  ]
+
   // eslint-disable-next-line class-methods-use-this
   get sameAsFiletypeOptions() {
     return SAME_AS_FILE_TYPES
@@ -123,17 +128,20 @@ export default class WalletFieldList extends Vue {
         originFileName: list.originFileName,
       }))
     } else if (this.formatUrlOptions.length) {
-      this.sameAsList = this.formatUrlOptions.map((url, index) =>{
-        const originFile = this.fileRecords.find((file) => (url.includes(file.arweaveId)))
-        const formattedFileType = this.formatFileType(originFile?.fileType);
-        return{
-          url,
-          id: `${url}-${index}`,
-          filename: this.formatName,
-          filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
-          originFileName: originFile?.fileName || '',
-        }
-      })
+      this.sameAsList = this.fileRecords
+        .filter((file) => this.fileTypeToFind.includes(this.formatFileType(file.fileType)))
+        .map((file, index) => {
+          const url = this.formatUrlOptions.find((ar) => ar.includes(file.arweaveId));
+          const formattedFileType = this.formatFileType(file.fileType);
+
+          return {
+            url: url || '',
+            id: `${url}-${index}`,
+            filename: this.formatName,
+            filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
+            originFileName: file.fileName || '',
+          };
+        });
     } else {
       this.sameAsList = [{
           url: '',
