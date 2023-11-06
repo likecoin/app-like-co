@@ -62,7 +62,7 @@ export const WALLET_TYPES = [
 export const SAME_AS_FILE_TYPES = [
   'epub',
   'pdf',
-  'mp3',
+  'audio',
   'jpg',
   'png',
 ]

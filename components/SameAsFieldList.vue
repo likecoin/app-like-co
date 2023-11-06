@@ -16,13 +16,13 @@
         </FormField>
 
         <div class="flex items-center justify-start gap-[8px]">
-          <FormField :label="$t('IscnRegisterForm.label.fileName')">
+          <FormField class="w-[200px]" :label="$t('IscnRegisterForm.label.fileName')">
             <TextField
               v-model="item.filename"
               :placeholder="$t('IscnRegisterForm.placeholder.fileName')"
             />
           </FormField>
-          <FormField :label="$t('IscnRegisterForm.label.fileType')">
+          <FormField class="w-min" :label="$t('IscnRegisterForm.label.fileType')">
             <Selector
               class="h-[40px] w-[80px]"
               :options="sameAsFiletypeOptions"
@@ -30,6 +30,13 @@
               @input="(value) => handleSelectValue({ value, index: i })"
             />
           </FormField>
+          <Label
+            v-if="item.originFileName"
+            class="text-medium-gray"
+            preset="h6"
+          >
+            {{ $t('IscnRegisterForm.label.originFile', { name: item.originFileName }) }}
+          </Label>
         </div>
       </div>
       <div
@@ -77,6 +84,7 @@ export default class WalletFieldList extends Vue {
   readonly urlOptions!: Array<any>
 
   @Prop({ default: () => [] }) readonly currentList!: Array<any>
+  @Prop({ default: () => [] }) readonly fileRecords!: Array<any>
   @Prop(String) readonly name!: string | undefined
 
   sameAsList: any = [{
@@ -85,6 +93,11 @@ export default class WalletFieldList extends Vue {
       filename: this.formatName,
       filetype: SAME_AS_FILE_TYPES[0],
     }]
+
+  fileTypeToFind = [
+    'epub',
+    'pdf',
+  ]
 
   // eslint-disable-next-line class-methods-use-this
   get sameAsFiletypeOptions() {
@@ -101,7 +114,7 @@ export default class WalletFieldList extends Vue {
       return this.name.replace(/[.,!?;:'"(){}[\]<>]/g, '').replace(/\s+/g, '_').toUpperCase();
   }
 
-  get formatUrlOptions() {
+  get filteredUrlOptions() {
     return this.urlOptions.filter(url => url.startsWith('ar://'))
   }
 
@@ -112,20 +125,30 @@ export default class WalletFieldList extends Vue {
         id: `${list.url}-${list.filename}`,
         filename: list.filename,
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
+        originFileName: list.originFileName,
       }))
-    } else if (this.formatUrlOptions.length) {
-      this.sameAsList = this.formatUrlOptions.map((url, index) => ({
-        url,
-        id: `${url}-${index}`,
-        filename: this.formatName,
-        filetype: SAME_AS_FILE_TYPES[0],
-      }))
+    } else if (this.filteredUrlOptions.length) {
+      this.sameAsList = this.fileRecords
+        .filter((file) => this.fileTypeToFind.includes(this.formatFileType(file.fileType)) && file.arweaveId)
+        .map((file, index) => {
+          const url = this.filteredUrlOptions.find((ar) => ar.includes(file.arweaveId));
+          const formattedFileType = this.formatFileType(file.fileType);
+
+          return {
+            url,
+            id: `${url}-${index}`,
+            filename: this.formatName,
+            filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
+            originFileName: file.fileName || '',
+          };
+        });
     } else {
       this.sameAsList = [{
           url: '',
           id: 1,
           filename: this.formatName,
           filetype: SAME_AS_FILE_TYPES[0],
+          originFileName:'',
         }]
     }
   }
@@ -158,6 +181,36 @@ export default class WalletFieldList extends Vue {
   confirmChange() {
     this.deleteEmptyField()
     this.$emit('onConfirm', this.sameAsList)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  formatFileType(fileType: string) {
+    let formattedFileType = ''
+    if (fileType) {
+      switch (true) {
+        case fileType.includes('jpg'):
+        case fileType.includes('jpeg'):
+          formattedFileType = 'jpg'
+          break
+        case fileType.includes('png'):
+          formattedFileType = 'png'
+          break
+        case fileType.includes('audio'):
+          // audio/ogg
+          formattedFileType = 'audio'
+          break
+        case fileType.includes('pdf'):
+          formattedFileType = 'pdf'
+          break
+        case fileType.includes('epub'):
+          formattedFileType = 'epub'
+          break
+        default:
+          formattedFileType = ''
+          break
+      }
+    }
+    return formattedFileType
   }
 }
 </script>

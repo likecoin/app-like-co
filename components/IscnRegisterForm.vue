@@ -355,6 +355,15 @@
               :placeholder="$t('IscnRegisterForm.placeholder.url')"
             />
           </FormField>
+          <FormField
+            v-if="type === 'Book'"
+            :label="$t('IscnRegisterForm.label.isbn')"
+          >
+            <TextField
+              v-model="isbn"
+              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+            />
+          </FormField>
           <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.type')"
@@ -594,6 +603,7 @@
           <SameAsFieldList
             :name="name"
             :url-options="contentFingerprintLinks"
+            :file-records="fileRecords"
             :current-list="sameAsList"
             @onConfirm="confirmSameAsChange"
           />
@@ -740,6 +750,7 @@ export enum AuthorDialogType {
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: [] }) readonly fileRecords!: any[]
   @Prop({ default: [] }) readonly uploadArweaveList!: string[]
+  @Prop() readonly epubMetadata!: any | null
 
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
@@ -759,7 +770,7 @@ export default class IscnRegisterForm extends Vue {
   fileTypeOptions = [
     'epub',
     'pdf',
-    'mp3',
+    'audio',
     'jpg',
     'png',
   ]
@@ -784,8 +795,10 @@ export default class IscnRegisterForm extends Vue {
   tags: string[] = []
   sameAs: string[] = []
   url: string = ''
+  isbn: string = ''
   license: string = this.licenseOptions[0]
   customLicense: string = ''
+  thumbnailUrl: string = ''
   authorName: string = ''
   authorUrl: string[] = []
   authorWalletAddress: string[] = []
@@ -834,6 +847,7 @@ export default class IscnRegisterForm extends Vue {
 
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
   sameAsList: any = []
+  language: string = ''
 
   get ipfsHashList() {
     const list = []
@@ -987,6 +1001,7 @@ export default class IscnRegisterForm extends Vue {
       tagsString: this.tagsString,
       sameAs: this.formattedSameAsList,
       url: this.url,
+      isbn: this.isbn,
       exifInfo: this.exif.filter(file => file),
       license: this.formattedLicense,
       ipfsHash: this.ipfsHashList,
@@ -1001,6 +1016,8 @@ export default class IscnRegisterForm extends Vue {
       likerIdsAddresses: this.likerIdsAddresses,
       authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.customContentFingerprints,
+      inLanguage: this.language,
+      thumbnailUrl: this.thumbnailUrl,
     }
   }
 
@@ -1084,6 +1101,16 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
+    if (this.epubMetadata) {
+      this.name = this.epubMetadata.title;
+      this.description = this.extractText(this.epubMetadata.description);
+      this.author.name = this.epubMetadata.author;
+      this.language = this.epubMetadata.language
+      this.tags = this.epubMetadata.tags
+      this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailUrl) as string
+      if (this.author.name) { this.authors.push(this.author) }
+    }
+
     this.uploadStatus = 'loading'
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
@@ -1432,6 +1459,15 @@ export default class IscnRegisterForm extends Vue {
     this.isOpenFileInfoDialog = true
     this.displayImageSrc = this.fileRecords[index].fileData
     this.displayExifInfo = this.fileRecords[index].exifInfo
+  }
+
+   // eslint-disable-next-line class-methods-use-this
+   extractText(htmlString: string) {
+    if (!htmlString) return ''
+    const div = document.createElement('div');
+    div.innerHTML = htmlString;
+    div.innerHTML = div.innerHTML.replace(/<br\s*[/]?>/gi, "\n");
+    return div.textContent || div.innerText;
   }
 }
 </script>
