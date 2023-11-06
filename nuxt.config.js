@@ -71,6 +71,7 @@ export default {
         ],
         'connect-src': [
           "'self'",
+          'blob:',
           'data:',
           '*',
         ],
