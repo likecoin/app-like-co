@@ -490,57 +490,59 @@ export default class UploadForm extends Vue {
       epubMetadata.tags = subjects
 
       // Get cover file
-      const coverUrl = (book as any).cover
-      if (!coverUrl) {
-        this.epubMetadataList.push(epubMetadata)
-        return
-      }
+      const coverUrl = await book.coverUrl()
+      if (coverUrl) {
+        const response = await fetch(coverUrl)
+        const blobData = await response.blob()
+        if (blobData) {
+          const coverFile = new File(
+            [blobData],
+            `${metadata.title}_cover.jpeg`,
+            {
+              type: 'image/jpeg',
+            },
+          )
+          const fileBytes = (await fileToArrayBuffer(
+            coverFile,
+          )) as unknown as ArrayBuffer
+          if (fileBytes) {
+            const [
+              fileSHA256,
+              imageType,
+              ipfsHash,
+              // eslint-disable-next-line no-await-in-loop
+            ] = await Promise.all([
+              digestFileSHA256(fileBytes),
+              readImageType(fileBytes),
+              Hash.of(Buffer.from(fileBytes)),
+            ])
 
-      const blobData = await book.archive.getBlob(coverUrl)
-      if (blobData) {
-        const coverFile = new File([blobData], `${metadata.title}_cover.jpeg`, {
-          type: 'image/jpeg',
-        })
+            epubMetadata.ipfsHash = ipfsHash
+            this.epubMetadataList = [
+              ...this.epubMetadataList,
+              epubMetadata,
+            ]
 
-        const fileBytes = (await fileToArrayBuffer(
-          coverFile,
-        )) as unknown as ArrayBuffer
-        if (fileBytes) {
-          const [
-            fileSHA256,
-            imageType,
-            ipfsHash,
-            // eslint-disable-next-line no-await-in-loop
-          ] = await Promise.all([
-            digestFileSHA256(fileBytes),
-            readImageType(fileBytes),
-            Hash.of(Buffer.from(fileBytes)),
-          ])
-
-          const fileRecord: any = {
-            fileName: coverFile.name,
-            fileSize: coverFile.size,
-            fileType: coverFile.type,
-            fileBlob: coverFile,
-            ipfsHash,
-            fileSHA256,
-            isFileImage: !!imageType,
+            const fileRecord: any = {
+              fileName: coverFile.name,
+              fileSize: coverFile.size,
+              fileType: coverFile.type,
+              fileBlob: coverFile,
+              ipfsHash,
+              fileSHA256,
+              isFileImage: !!imageType,
+            }
+            const reader = new FileReader()
+            reader.onload = (e) => {
+              if (!e.target) return
+              fileRecord.fileData = e.target.result as string
+              this.fileRecords.push(fileRecord)
+            }
+            reader.readAsDataURL(coverFile)
           }
-
-          epubMetadata.ipfsHash = ipfsHash
-
-          const reader = new FileReader()
-          reader.onload = (e) => {
-            if (!e.target) return
-            fileRecord.fileData = e.target.result as string
-          }
-          reader.readAsDataURL(coverFile)
-          this.epubMetadataList = [
-            ...this.epubMetadataList,
-            epubMetadata,
-          ]
-          this.fileRecords.push(fileRecord)
         }
+      } else {
+        this.epubMetadataList.push(epubMetadata)
       }
     } catch (err) {
       console.error(err)
