@@ -1285,7 +1285,7 @@ export default class IscnRegisterForm extends Vue {
     this.iscnFee =  new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
       .shiftedBy(-9);
-    this.iscnGasFee = iscnGasNanolike.integerValue().toString();
+    this.iscnGasFee = new BigNumber(iscnGasEstimation.fee.gas).times(ISCN_GAS_MULTIPLIER).toFixed(0);
   }
 
   handleSignDialogClose() {
