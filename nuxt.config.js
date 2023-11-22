@@ -46,8 +46,8 @@ export default {
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
-    { src: '@likecoin/wallet-connector/dist/style.css', lang: 'css' },
-    { src: '~/assets/css/global.css', lang: 'css' },
+    '@likecoin/wallet-connector/dist/style.css',
+    '~/assets/css/global.css',
   ],
 
   render: {
