@@ -1050,7 +1050,7 @@ export default class NFTTestMintPage extends Vue {
     // eslint-disable-next-line no-console
     console.error(err)
     if (axios.isAxiosError(err)) {
-      const message = (err as AxiosError).response?.data || (err as Error).toString();
+      const message = ((err as AxiosError).response?.data || (err as Error) as any).toString();
       this.errorMessage = message;
       this.toggleSnackbar(message)
     } else {

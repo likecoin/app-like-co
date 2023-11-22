@@ -820,7 +820,7 @@ export default class FetchIndex extends Vue {
     console.error(err)
     if (axios.isAxiosError(err)) {
       this.toggleSnackbar(
-        (err as AxiosError).response?.data || (err as Error).toString(),
+        ((err as AxiosError).response?.data || (err as Error) as any).toString(),
       )
     } else {
       this.toggleSnackbar((err as Error).toString())
