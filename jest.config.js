@@ -3,6 +3,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/$1',
     '^~/(.*)$': '<rootDir>/$1',
     '^vue$': 'vue/dist/vue.common.js',
+    "axios": "axios/dist/node/axios.cjs", // https://stackoverflow.com/a/74297004
   },
   moduleFileExtensions: [
     'ts',
