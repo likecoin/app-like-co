@@ -172,6 +172,7 @@ export default {
       '@bundlr-network',
       '@noble/curves',
       'arbundle',
+      ({ isLegacy }) => (isLegacy ? 'axios' : undefined),
     ],
     extend(config, ctx) {
       /* eslint-disable no-param-reassign */
