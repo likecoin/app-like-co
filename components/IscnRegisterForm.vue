@@ -384,6 +384,7 @@
               class="h-[40px] w-[320px] mb-[8px]"
               :options="licenseOptions"
               :placeholder="license"
+              direction="top"
               @input="setLicense"
             />
             <TextField
@@ -776,8 +777,15 @@ export default class IscnRegisterForm extends Vue {
 
   licenseMap: { [key: string]: string | null }= {
     'Copyright. All rights reserved.': 'All Rights Reserved',
-    'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
+    'CC BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+    'CC BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+    'CC BY-NC': 'https://creativecommons.org/licenses/by-nc/4.0/',
+    'CC BY-ND': 'https://creativecommons.org/licenses/by-nd/4.0/',
+    'CC BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
+    'CC BY': 'https://creativecommons.org/licenses/by/4.0/',
+    'CC0 (Public Domain)': 'https://creativecommons.org/publicdomain/zero/1.0/',
     'Other': null,
+    'Not Specified': '',
   }
 
   author: Author = {
