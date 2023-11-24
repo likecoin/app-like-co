@@ -10,16 +10,16 @@
       </div>
       <div
         v-if="isOpenOptions && options.length"
-        class="
-          absolute
-          bg-white
-          border-shade-gray border-[1px]
-          rounded-[24px]
-          text-dark-gray text-left
-          mt-[8px]
-          p-[12px]
-          z-50
-        "
+        :class="[
+          'absolute',
+          'bg-white',
+          'border-shade-gray border-[1px]',
+          'rounded-[24px]',
+          'text-dark-gray text-left',
+          'p-[12px]',
+          'z-50',
+          direction === 'top' ? 'bottom-full mb-[8px]' : 'mt-[8px]',
+        ]"
       >
         <div
           v-for="(option, i) of options"
@@ -50,6 +50,8 @@ export default class Selector extends Vue {
   @Prop({ default: () => [] }) readonly options: Array<string> | undefined
 
   @Prop(String) readonly placeholder: string | undefined
+
+  @Prop({ default: 'bottom' }) readonly direction!: string
 
   @Prop([
     String,
