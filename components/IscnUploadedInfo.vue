@@ -113,6 +113,7 @@
             'text-[14px]',
             'break-all',
           ]"
+          nofollow="true"
           :href="transactionsURL"
         >
           {{ iscnHash }}

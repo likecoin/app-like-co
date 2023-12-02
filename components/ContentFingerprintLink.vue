@@ -1,5 +1,5 @@
 <template>
-  <Link v-if="href" :href="href">
+  <Link v-if="href" :href="href" :nofollow="true">
     {{ item }}
   </Link>
   <div v-else>
