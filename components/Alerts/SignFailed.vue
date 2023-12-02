@@ -5,6 +5,7 @@
       <Link
         place="buy"
         :class="['text-white', 'ml-[2px]']"
+        nofollow="true"
         href="https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7"
       >
         {{ $t('IscnRegisterForm.error.buy') }}

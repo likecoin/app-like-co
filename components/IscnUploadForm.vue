@@ -213,6 +213,7 @@
       <Link
         v-if="error === 'INSUFFICIENT_BALANCE'"
         :class="['text-white','ml-[2px]']"
+        nofollow="true"
         href="https://app.osmosis.zone/?from=USDC&to=LIKE"
       >
         {{ $t('IscnRegisterForm.error.buy') }}

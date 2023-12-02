@@ -225,6 +225,7 @@
                 'text-[14px]',
                 'break-all',
               ]"
+              nofollow="true"
               :href="transactionsURL">
               {{ txHash }}
             </Link>
@@ -306,6 +307,7 @@
                 'break-all',
               ]"
               :href="metadata.url"
+              ugc="true"
             >
               {{ metadata.url }}
             </Link>
@@ -321,6 +323,7 @@
                 'text-[14px]',
                 'break-all',
               ]"
+              ugc="true"
               :href="metadata.usageInfo"
             >
               {{ metadata.usageInfo }}
@@ -415,6 +418,7 @@
                 :key="url"
                 :href="url"
                 class="break-all"
+                :ugc="true"
                 >{{ url }}</Link
               >
             </FormField>
