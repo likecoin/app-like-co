@@ -238,15 +238,20 @@
           <Divider class="my-[12px]" />
           <FormField
             v-if="iscnId"
-            :label="$t('iscn.meta.id')"
+            :label="$t('iscn.meta.id.copy')"
             class="mb-[12px]"
           >
-            <div class="flex justify-start flex-nowrap gap-[8px]">
-              <Label :text="iscnId" tag="div" preset="p6" />
-              <div class="cursor-pointer" @click="handleClickCopy">
-                <IconCopy class="w-[14px]"/>
-              </div>
-            </div>
+            <Button
+              size="mini"
+              preset="tertiary"
+              tag="div"
+              text-preset="h6"
+              type="button"
+              content-class="font-medium ml-[-4px]"
+              prepend-class="font-bold"
+              :text="iscnId"
+              @click="handleCopyIscnId"
+            />
           </FormField>
           <FormField
             :label="$t('iscn.meta.content.fingerprints')"
@@ -499,7 +504,6 @@ import {
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
 } from '~/constant'
-
 
 const iscnModule = namespace('iscn')
 
@@ -887,7 +891,7 @@ export default class ViewIscnIdPage extends Vue {
     downloadJSON(generateData, 'iscn.json')
   }
 
-  handleClickCopy() {
+  handleCopyIscnId() {
     logTrackerEvent(this, 'ISCNView', 'CopyISCNID', this.iscnId, 1);
     copyToClipboard(this.iscnId)
     this.isOpenCopiedAlert = true

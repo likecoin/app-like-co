@@ -143,6 +143,7 @@
   "iscn.meta.description.placeholder": "Description",
   "iscn.meta.description": "Description",
   "iscn.meta.id": "ISCN ID",
+  "iscn.meta.id.copy": "ISCN ID (click to copy)",
   "iscn.meta.keywords.placeholder": "Keywords (separate by ,)",
   "iscn.meta.keywords": "Keywords",
   "iscn.meta.ipfsHash": "IPFS Hash",
