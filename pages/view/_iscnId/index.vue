@@ -492,6 +492,7 @@ import {
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
+  LIKER_LAND_URL,
 } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
@@ -525,6 +526,19 @@ export enum ExifList {
     }
     const description =
       (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
+    const iscnOwner = (this as ViewIscnIdPage).owner;
+    const iscnOwnerPerson =iscnOwner
+      ? {
+          '@context': 'http://www.schema.org',
+          '@type': 'Person',
+          url: `${LIKER_LAND_URL}/${iscnOwner}`,
+          identifier: iscnOwner,
+        }
+      : undefined;
+    const schema = {
+      ...(this as ViewIscnIdPage).metadata,
+      author: iscnOwnerPerson,
+    };
     return {
       title,
       meta: [
@@ -544,6 +558,14 @@ export enum ExifList {
           content: description,
         },
       ],
+      script: schema ? [
+        {
+          hid: 'schema',
+          innerHTML: JSON.stringify(schema),
+          type: 'application/ld+json',
+          body: true,
+        },
+      ] : undefined,
     } as MetaInfo
   },
   filters: { ellipsis },
