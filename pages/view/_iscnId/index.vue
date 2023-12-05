@@ -99,6 +99,14 @@
         </template>
       </Button>
       <Button
+        v-if="isNFTBook"
+        preset="secondary"
+        class="w-full lg:w-auto"
+        :text="$t('NFTPortal.button.mint.book')"
+        @click="clickMintNFTBook"
+      />
+      <Button
+        v-else
         preset="secondary"
         class="w-full lg:w-auto"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
@@ -479,13 +487,7 @@ import { namespace } from 'vuex-class'
 import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-import { API_LIKER_NFT_MINT } from '~/constant/api'
-import { isCosmosTransactionHash } from '~/utils/cosmos'
-import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
-import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { downloadJSON } from '~/utils/misc'
-
-import {
+import { NFT_BOOK_PRESS_URL ,
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
@@ -493,6 +495,13 @@ import {
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
 } from '~/constant'
+import { API_LIKER_NFT_MINT } from '~/constant/api'
+import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { downloadJSON } from '~/utils/misc'
+
+
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
 
@@ -639,6 +648,10 @@ export default class ViewIscnIdPage extends Vue {
     return this.metadata && this.metadata['@type']
   }
 
+  get isNFTBook() {
+    return this.type === 'Book'
+  }
+
   get imgSrc() {
     return (
       getIPFSUrlFromISCN(this.getISCNById(this.iscnId))
@@ -741,7 +754,12 @@ export default class ViewIscnIdPage extends Vue {
 
   onClickViewContent() {
     logTrackerEvent(this, 'ISCNView', 'ViewContent', this.iscnId, 1);
-    window.open(this.viewContentURL, '_blank');
+    window.open(this.viewContentURL, '_blank', 'noopener');
+  }
+
+  clickMintNFTBook() {
+    logTrackerEvent(this, 'ISCNView', 'RedirectToBookPress', this.iscnId, 1);
+    window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
   }
 
   showExifInfo() {
