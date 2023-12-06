@@ -25,7 +25,7 @@
     />
     <IscnUploadedInfo
       class="w-full"
-      :owner="owner"
+      :owner="iscnOwner"
       :iscn-id="iscnId"
       :iscn-hash="txHash"
       :record="record"
@@ -211,7 +211,7 @@
             {{ metadata.description }}
           </FormField>
           <FormField
-            v-if="owner"
+            v-if="iscnOwner"
             :label="$t('iscn.meta.owner')"
             class="mb-[12px]"
           >
@@ -221,8 +221,8 @@
                 'break-all',
                 'cursor-pointer',
               ]"
-              :to="localeLocation({ name: 'search-keyword', query: { owner } })">
-              {{ owner }}
+              :to="localeLocation({ name: 'search-keyword', query: { owner: iscnOwner } })">
+              {{ iscnOwner }}
             </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
@@ -505,6 +505,7 @@ import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis } from '~/utils/ui'
 
 const iscnModule = namespace('iscn')
+const walletModule = namespace('wallet')
 
 export enum ErrorMessage {
   statusCode400 = 'not iscn id or tx hash',
@@ -574,7 +575,7 @@ export enum ExifList {
           if (res) {
             return {
               iscnId: res.records[0].id,
-              owner: res.owner,
+              iscnOwner: res.owner,
             };
           }
         } else {
@@ -590,7 +591,7 @@ export enum ExifList {
   },
 })
 export default class ViewIscnIdPage extends Vue {
-  owner = ''
+  iscnOwner = ''
   iscnId = ''
   txHash = ''
   url = ''
@@ -619,8 +620,10 @@ export default class ViewIscnIdPage extends Vue {
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
 
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
+
   get isShowMintButton() {
-    return !this.isPreminted
+    return !this.isPreminted && this.iscnOwner === this.currentAddress
   }
 
   get isPopupLayout() {
@@ -722,11 +725,11 @@ export default class ViewIscnIdPage extends Vue {
       this.$router.replace({ params: { iscnId: this.iscnId } })
     }
     this.getMintInfo()
-    if (!this.getISCNById(this.iscnId) || !this.owner) {
+    if (!this.getISCNById(this.iscnId) || !this.iscnOwner) {
       const res = await this.fetchISCNById(this.iscnId)
       if (res) {
         this.iscnId = res.records[0].id // To replace prefix with full id
-        this.owner = res.owner
+        this.iscnOwner = res.owner
       }
     }
     if (!this.getISCNById(this.iscnId)) {
