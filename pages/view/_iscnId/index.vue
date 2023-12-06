@@ -83,7 +83,6 @@
     ]"
   >
     <div
-      v-if="isShowMintButton"
       :class="[
         'flex',
         'justify-end',
@@ -99,14 +98,14 @@
         </template>
       </Button>
       <Button
-        v-if="isNFTBook"
+        v-if="isShowMintButton && isNFTBook"
         preset="secondary"
         class="w-full lg:w-auto"
         :text="$t('NFTPortal.button.mint.book')"
         @click="clickMintNFTBook"
       />
       <Button
-        v-else
+        v-if="isShowMintButton && !isNFTBook"
         preset="secondary"
         class="w-full lg:w-auto"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
