@@ -37,3 +37,12 @@ export function copyToClipboard(text){
   selection.removeAllRanges();
   document.body.removeChild(copyText);
 }
+
+export function extractIscnIdPrefix(iscnId) {
+  const regex = /^(iscn:\/\/likecoin-chain\/[^/]+)/;
+  const match = iscnId.match(regex);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}
