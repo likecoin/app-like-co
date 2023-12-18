@@ -495,7 +495,7 @@ import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
 import { logTrackerEvent } from '~/utils/logger'
-import { ellipsis, copyToClipboard,extractIscnIdPrefix } from '~/utils/ui'
+import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 import {
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
@@ -567,14 +567,12 @@ export enum ExifList {
           content: description,
         },
       ],
-      script: schema ? [
-        {
+      script: schema ? [{
           hid: 'schema',
           innerHTML: JSON.stringify(schema),
           type: 'application/ld+json',
           body: true,
-        },
-      ] : undefined,
+        }] : undefined,
     } as MetaInfo
   },
   filters: { ellipsis },
@@ -916,8 +914,10 @@ export default class ViewIscnIdPage extends Vue {
   handleCopyIscnId() {
     logTrackerEvent(this, 'ISCNView', 'CopyISCNID', this.iscnId, 1)
     const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
-    copyToClipboard(iscnIdPrefix)
-    this.isOpenCopiedAlert = true
+    if (iscnIdPrefix) {
+      copyToClipboard(iscnIdPrefix)
+      this.isOpenCopiedAlert = true
+    }
   }
 }
 </script>
