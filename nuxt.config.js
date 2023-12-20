@@ -15,14 +15,14 @@ const {
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'Writing NFT - Decentralized Publishing - LikeCoin',
+    title: 'LikeCoin Creator Portal - LikeCoin',
     meta: [
       { charset: 'utf-8' },
       { hid: 'viewport', name: 'viewport', content: 'width=device-width' },
       { hid: 'description', name: 'description', content: siteDefaultDescription },
       { hid: 'theme-color', name: 'theme-color', content: '#28646e' },
-      { hid: 'og:site_name', property: 'og:site_name', content: 'Writing NFT - Decentralized Publishing - LikeCoin'},
-      { hid: 'og:title', property: 'og:title', content: 'Writing NFT - Decentralized Publishing - LikeCoin' },
+      { hid: 'og:site_name', property: 'og:site_name', content: 'LikeCoin Creator Portal - LikeCoin'},
+      { hid: 'og:title', property: 'og:title', content: 'LikeCoin Creator Portal - LikeCoin' },
       { hid: 'og:image', property: 'og:image', content: 'https://app.like.co/images/og/default.png' },
       { hid: 'og:description', property: 'og:description', content: siteDefaultDescription },
       { hid: 'og:image_alt', property: 'og:image:alt', content: '#DePub' },
@@ -36,6 +36,26 @@ export default {
       { rel: 'preload', href: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=PT+Mono&display=swap', as: 'style' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=PT+Mono&display=swap' },
     ],
+    script: [{
+      hid: 'schema',
+      innerHTML: JSON.stringify([
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'LikeCoin Creator Portal',
+          url: 'https://app.like.co/',
+        },
+        {
+          '@context': 'http://www.schema.org',
+          '@type': 'Project',
+          name: 'LikeCoin',
+          url: 'https://like.co',
+          logo: 'https://like.co/logo.png',
+        },
+      ]),
+      type: 'application/ld+json',
+    }],
+    __dangerouslyDisableSanitizersByTagID: { schema: ['innerHTML'] },
   },
 
   env: {

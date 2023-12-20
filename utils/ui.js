@@ -23,6 +23,19 @@ export function ellipsisDescription(value) {
   }
   return value;
 }
+export function copyToClipboard(text){
+  const copyText = document.createElement('p');
+  copyText.textContent = text;
+  document.body.appendChild(copyText);
+  const selection = document.getSelection();
+  const range = document.createRange();
+  range.selectNode(copyText);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  document.execCommand('copy');
+  selection.removeAllRanges();
+  document.body.removeChild(copyText);
+}
 
 export function extractIscnIdPrefix(iscnId) {
   const regex = /^(iscn:\/\/likecoin-chain\/[^/]+)/;

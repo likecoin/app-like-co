@@ -245,10 +245,20 @@
           <Divider class="my-[12px]" />
           <FormField
             v-if="iscnId"
-            :label="$t('iscn.meta.id')"
+            :label="$t('iscn.meta.id.copy')"
             class="mb-[12px]"
           >
-            <Label :text="iscnId" tag="div" preset="p6" />
+            <Button
+              size="mini"
+              preset="tertiary"
+              tag="div"
+              text-preset="h6"
+              type="button"
+              content-class="font-medium ml-[-4px]"
+              prepend-class="font-bold"
+              :text="iscnId"
+              @click="handleCopyIscnId"
+            />
           </FormField>
           <FormField
             :label="$t('iscn.meta.content.fingerprints')"
@@ -450,7 +460,7 @@
                 type="button"
                 content-class="font-medium ml-[-4px]"
                 prepend-class="font-bold"
-                @click="handleCopy(wallet.address, wallet.type)"
+                @click="handleCopyAddress(wallet.address, wallet.type)"
               >
                 <IconCoin
                   class="mr-[4px]"
@@ -486,23 +496,25 @@ import { namespace } from 'vuex-class'
 import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-import { NFT_BOOK_PRESS_URL ,
+import { API_LIKER_NFT_MINT } from '~/constant/api'
+import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
+import { downloadJSON } from '~/utils/misc'
+import { logTrackerEvent } from '~/utils/logger'
+import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
+import {
+ NFT_BOOK_PRESS_URL,
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
   ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
+  LIKER_LAND_URL,
 } from '~/constant'
-import { API_LIKER_NFT_MINT } from '~/constant/api'
-import { isCosmosTransactionHash, getExistingClassCount } from '~/utils/cosmos'
-import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
-import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { downloadJSON } from '~/utils/misc'
 
 
-import { logTrackerEvent } from '~/utils/logger'
-import { ellipsis, extractIscnIdPrefix } from '~/utils/ui'
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
@@ -534,6 +546,19 @@ export enum ExifList {
     }
     const description =
       (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
+    const iscnOwner = (this as ViewIscnIdPage).owner;
+    const iscnOwnerPerson =iscnOwner
+      ? {
+          '@context': 'http://www.schema.org',
+          '@type': 'Person',
+          url: `${LIKER_LAND_URL}/${iscnOwner}`,
+          identifier: iscnOwner,
+        }
+      : undefined;
+    const schema = {
+      ...(this as ViewIscnIdPage).metadata,
+      author: iscnOwnerPerson,
+    };
     return {
       title,
       meta: [
@@ -553,6 +578,12 @@ export enum ExifList {
           content: description,
         },
       ],
+      script: schema ? [{
+          hid: 'schema',
+          innerHTML: JSON.stringify(schema),
+          type: 'application/ld+json',
+          body: true,
+        }] : undefined,
     } as MetaInfo
   },
   filters: { ellipsis },
@@ -861,7 +892,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  handleCopy(address: string, type: string) {
+  handleCopyAddress(address: string, type: string) {
     logTrackerEvent(this, 'ISCNView', 'CopyWalletAddress', this.iscnId, 1);
     let text = ''
     if (type === 'cosmos' || type === 'like') {
@@ -869,21 +900,8 @@ export default class ViewIscnIdPage extends Vue {
     } else {
       text = address.replace(new RegExp(`(did:|${type}:|:)`, 'g'), '')
     }
-    const copyText = document.createElement('p')
-    copyText.textContent = text
-    document.body.appendChild(copyText)
-
-    const selection = document.getSelection()
-    const range = document.createRange()
-
-    range.selectNode(copyText)
-    selection!.removeAllRanges()
-    selection!.addRange(range)
-    document.execCommand('copy')
+    copyToClipboard(text)
     this.isOpenCopiedAlert = true
-
-    selection!.removeAllRanges()
-    document.body.removeChild(copyText)
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -922,6 +940,15 @@ export default class ViewIscnIdPage extends Vue {
     }
 
     downloadJSON(generateData, 'iscn.json')
+  }
+
+  handleCopyIscnId() {
+    logTrackerEvent(this, 'ISCNView', 'CopyISCNID', this.iscnId, 1)
+    const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
+    if (iscnIdPrefix) {
+      copyToClipboard(iscnIdPrefix)
+      this.isOpenCopiedAlert = true
+    }
   }
 }
 </script>
