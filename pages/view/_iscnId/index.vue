@@ -497,7 +497,7 @@ import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
 import { API_LIKER_NFT_MINT } from '~/constant/api'
-import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { isCosmosTransactionHash, getExistingClassCount } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
@@ -546,8 +546,8 @@ export enum ExifList {
     }
     const description =
       (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
-    const iscnOwner = (this as ViewIscnIdPage).owner;
-    const iscnOwnerPerson =iscnOwner
+    const {iscnOwner} = this as ViewIscnIdPage;
+    const iscnOwnerPerson = iscnOwner
       ? {
           '@context': 'http://www.schema.org',
           '@type': 'Person',
