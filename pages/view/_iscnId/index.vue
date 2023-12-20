@@ -495,14 +495,14 @@ import { NFT_BOOK_PRESS_URL ,
   IPFS_VIEW_GATEWAY_URL,
 } from '~/constant'
 import { API_LIKER_NFT_MINT } from '~/constant/api'
-import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { isCosmosTransactionHash, getExistingClassCount } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
 
 
 import { logTrackerEvent } from '~/utils/logger'
-import { ellipsis } from '~/utils/ui'
+import { ellipsis, extractIscnIdPrefix } from '~/utils/ui'
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
@@ -724,7 +724,16 @@ export default class ViewIscnIdPage extends Vue {
       this.iscnId = res.records[0].id
       this.$router.replace({ params: { iscnId: this.iscnId } })
     }
-    this.getMintInfo()
+    if (this.isNFTBook) {
+      const premintClassCount = await getExistingClassCount(
+        extractIscnIdPrefix(this.iscnId),
+      )
+      this.isPreminted = Boolean(premintClassCount > 0)
+    } else {
+      this.getMintInfo()
+    }
+
+
     if (!this.getISCNById(this.iscnId) || !this.iscnOwner) {
       const res = await this.fetchISCNById(this.iscnId)
       if (res) {

@@ -23,3 +23,12 @@ export function ellipsisDescription(value) {
   }
   return value;
 }
+
+export function extractIscnIdPrefix(iscnId) {
+  const regex = /^(iscn:\/\/likecoin-chain\/[^/]+)/;
+  const match = iscnId.match(regex);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}

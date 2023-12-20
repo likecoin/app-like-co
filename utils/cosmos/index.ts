@@ -2,12 +2,20 @@
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { QueryClient, BankExtension, Coin } from "@cosmjs/stargate";
 import BigNumber from 'bignumber.js';
+import { AuthzExtension } from "@cosmjs/stargate/build/modules/authz/queries";
+import {
+  ISCNExtension,
+  NFTExtension,
+  LikeNFTExtension,
+} from "@likecoin/iscn-js/dist/queryExtensions";
+import { ISCNQueryClient } from "@likecoin/iscn-js";
 
-import config from '~/constant/network';
-import { COSMOS_DENOM } from '~/constant';
+import config from "../../constant/network";
+import { COSMOS_DENOM, LIKECOIN_CHAIN_NFT_RPC } from '../../constant';
 
 let cosmRpcLib: any = null
 let cosmLib: any = null;
+let iscnQueryClient: any = null;
 
 async function getCosmRpcLib() {
   if (!cosmRpcLib) {
@@ -44,6 +52,42 @@ async function initQueryClient() {
 export async function getQueryClient() {
   if (!queryClient) await initQueryClient();
   return queryClient;
+}
+
+export async function getISCNQueryClient() {
+  if (!iscnQueryClient) {
+    const pendingClient = new ISCNQueryClient();
+    await pendingClient.connect(LIKECOIN_CHAIN_NFT_RPC);
+    iscnQueryClient = pendingClient;
+  }
+  return iscnQueryClient;
+}
+
+export async function getCosmosQueryClient(): Promise<
+  QueryClient &
+  ISCNExtension &
+  BankExtension &
+  AuthzExtension &
+  NFTExtension &
+  LikeNFTExtension
+> {
+  const c = await getISCNQueryClient();
+  const q = await c.getQueryClient();
+  return q;
+}
+
+export async function getExistingClassCount(iscnPrefix: any) {
+  const newIscnQueryClient = await getISCNQueryClient();
+  const cosmosQueryClient = await newIscnQueryClient.getQueryClient();
+  try {
+    const { classes } = await cosmosQueryClient.likenft.classesByISCN(iscnPrefix)
+    return classes.length;
+  } catch (error) {
+    if (error.message === 'Query failed with (18): rpc error: code = InvalidArgument desc = not found: invalid request') {
+      return 0;
+    }
+      throw error;
+  }
 }
 
 function LIKEToNanolike(value: string|number): string {
