@@ -710,7 +710,7 @@ export default class UploadForm extends Vue {
         this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName.includes('cover.jpeg')) {
           const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
-          if (metadata && metadata.thumbnailUrl) {
+          if (metadata) {
             metadata.thumbnailUrl = arweaveId
           }
         }
