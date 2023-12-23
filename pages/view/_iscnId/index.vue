@@ -25,7 +25,7 @@
     />
     <IscnUploadedInfo
       class="w-full"
-      :owner="owner"
+      :owner="iscnOwner"
       :iscn-id="iscnId"
       :iscn-hash="txHash"
       :record="record"
@@ -83,7 +83,6 @@
     ]"
   >
     <div
-      v-if="isShowMintButton"
       :class="[
         'flex',
         'justify-end',
@@ -99,6 +98,14 @@
         </template>
       </Button>
       <Button
+        v-if="isShowMintButton && isNFTBook"
+        preset="secondary"
+        class="w-full lg:w-auto"
+        :text="$t('NFTPortal.button.mint.book')"
+        @click="clickMintNFTBook"
+      />
+      <Button
+        v-if="isShowMintButton && !isNFTBook"
         preset="secondary"
         class="w-full lg:w-auto"
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
@@ -204,7 +211,7 @@
             {{ metadata.description }}
           </FormField>
           <FormField
-            v-if="owner"
+            v-if="iscnOwner"
             :label="$t('iscn.meta.owner')"
             class="mb-[12px]"
           >
@@ -214,8 +221,8 @@
                 'break-all',
                 'cursor-pointer',
               ]"
-              :to="localeLocation({ name: 'search-keyword', query: { owner } })">
-              {{ owner }}
+              :to="localeLocation({ name: 'search-keyword', query: { owner: iscnOwner } })">
+              {{ iscnOwner }}
             </Link>
           </FormField>
           <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
@@ -490,13 +497,14 @@ import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
 import { API_LIKER_NFT_MINT } from '~/constant/api'
-import { isCosmosTransactionHash } from '~/utils/cosmos'
+import { isCosmosTransactionHash, getExistingClassCount } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 import {
+  NFT_BOOK_PRESS_URL,
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
@@ -506,7 +514,10 @@ import {
   LIKER_LAND_URL,
 } from '~/constant'
 
+
+
 const iscnModule = namespace('iscn')
+const walletModule = namespace('wallet')
 
 export enum ErrorMessage {
   statusCode400 = 'not iscn id or tx hash',
@@ -535,8 +546,8 @@ export enum ExifList {
     }
     const description =
       (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
-    const iscnOwner = (this as ViewIscnIdPage).owner;
-    const iscnOwnerPerson =iscnOwner
+    const { iscnOwner } = this as ViewIscnIdPage;
+    const iscnOwnerPerson = iscnOwner
       ? {
           '@context': 'http://www.schema.org',
           '@type': 'Person',
@@ -595,7 +606,7 @@ export enum ExifList {
           if (res) {
             return {
               iscnId: res.records[0].id,
-              owner: res.owner,
+              iscnOwner: res.owner,
             };
           }
         } else {
@@ -611,7 +622,7 @@ export enum ExifList {
   },
 })
 export default class ViewIscnIdPage extends Vue {
-  owner = ''
+  iscnOwner = ''
   iscnId = ''
   txHash = ''
   url = ''
@@ -640,8 +651,10 @@ export default class ViewIscnIdPage extends Vue {
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
 
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
+
   get isShowMintButton() {
-    return !this.isPreminted
+    return !this.isPreminted && this.iscnOwner === this.currentAddress
   }
 
   get isPopupLayout() {
@@ -666,6 +679,10 @@ export default class ViewIscnIdPage extends Vue {
 
   get type() {
     return this.metadata && this.metadata['@type']
+  }
+
+  get isNFTBook() {
+    return this.type === 'Book'
   }
 
   get imgSrc() {
@@ -738,12 +755,21 @@ export default class ViewIscnIdPage extends Vue {
       this.iscnId = res.records[0].id
       this.$router.replace({ params: { iscnId: this.iscnId } })
     }
-    this.getMintInfo()
-    if (!this.getISCNById(this.iscnId) || !this.owner) {
+    if (this.isNFTBook) {
+      const premintClassCount = await getExistingClassCount(
+        extractIscnIdPrefix(this.iscnId),
+      )
+      this.isPreminted = Boolean(premintClassCount > 0)
+    } else {
+      this.getMintInfo()
+    }
+
+
+    if (!this.getISCNById(this.iscnId) || !this.iscnOwner) {
       const res = await this.fetchISCNById(this.iscnId)
       if (res) {
         this.iscnId = res.records[0].id // To replace prefix with full id
-        this.owner = res.owner
+        this.iscnOwner = res.owner
       }
     }
     if (!this.getISCNById(this.iscnId)) {
@@ -770,7 +796,12 @@ export default class ViewIscnIdPage extends Vue {
 
   onClickViewContent() {
     logTrackerEvent(this, 'ISCNView', 'ViewContent', this.iscnId, 1);
-    window.open(this.viewContentURL, '_blank');
+    window.open(this.viewContentURL, '_blank', 'noopener');
+  }
+
+  clickMintNFTBook() {
+    logTrackerEvent(this, 'ISCNView', 'RedirectToBookPress', this.iscnId, 1);
+    window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
   }
 
   showExifInfo() {

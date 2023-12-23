@@ -23,7 +23,6 @@ export function ellipsisDescription(value) {
   }
   return value;
 }
-
 export function copyToClipboard(text){
   const copyText = document.createElement('p');
   copyText.textContent = text;

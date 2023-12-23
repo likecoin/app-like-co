@@ -120,3 +120,5 @@ export const LIKECOIN_CHAIN_STAKING_ENDPOINT = IS_TESTNET
   : 'https://dao.like.co/validators';
 
 export const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024; // 200MB
+
+export const NFT_BOOK_PRESS_URL = IS_TESTNET ? 'https://likecoin-nft-book-press-testnet.netlify.app/' : 'https://likecoin.github.io/nft-book-press/';
