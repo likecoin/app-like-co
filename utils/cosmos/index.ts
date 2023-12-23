@@ -2,12 +2,6 @@
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { QueryClient, BankExtension, Coin } from "@cosmjs/stargate";
 import BigNumber from 'bignumber.js';
-import { AuthzExtension } from "@cosmjs/stargate/build/modules/authz/queries";
-import {
-  ISCNExtension,
-  NFTExtension,
-  LikeNFTExtension,
-} from "@likecoin/iscn-js/dist/queryExtensions";
 import { ISCNQueryClient } from "@likecoin/iscn-js";
 
 import config from "../../constant/network";
@@ -61,19 +55,6 @@ export async function getISCNQueryClient() {
     iscnQueryClient = pendingClient;
   }
   return iscnQueryClient;
-}
-
-export async function getCosmosQueryClient(): Promise<
-  QueryClient &
-  ISCNExtension &
-  BankExtension &
-  AuthzExtension &
-  NFTExtension &
-  LikeNFTExtension
-> {
-  const c = await getISCNQueryClient();
-  const q = await c.getQueryClient();
-  return q;
 }
 
 export async function getExistingClassCount(iscnPrefix: any) {
