@@ -504,7 +504,7 @@ import { downloadJSON } from '~/utils/misc'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 import {
- NFT_BOOK_PRESS_URL,
+  NFT_BOOK_PRESS_URL,
   ISCN_PREFIX,
   BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
@@ -546,7 +546,7 @@ export enum ExifList {
     }
     const description =
       (this as ViewIscnIdPage).metadata?.description || this.$t('page.iscnId.default.description')
-    const {iscnOwner} = this as ViewIscnIdPage;
+    const { iscnOwner } = this as ViewIscnIdPage;
     const iscnOwnerPerson = iscnOwner
       ? {
           '@context': 'http://www.schema.org',
