@@ -400,8 +400,25 @@ export default class EditIscnPage extends Vue {
     this.step = 2
   }
 
-  onSubmitUpdate() {
+  async onSubmitUpdate() {
     this.isSubmitLoading = true
+    await this.initIfNecessary()
+    const result = await updateISCNRecord(
+      this.signer,
+      this.address,
+      this.iscnId,
+      this.payload,
+    )
+    this.isSubmitLoading = false
+
+    if (result) {
+      this.$router.replace(
+        this.localeLocation({
+          name: 'view-iscnId',
+          params: { iscnId: this.iscnId },
+        })!,
+      )
+    }
   }
 }
 </script>

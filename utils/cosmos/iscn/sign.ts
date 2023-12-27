@@ -188,3 +188,21 @@ export async function signISCN(
   const res = await signingPromise
   return res as DeliverTxResponse
 }
+
+export async function updateISCNRecord(
+  signer: OfflineSigner,
+  address: string,
+  iscnId: string,
+  payload: ISCNSignPayload,
+) {
+  const signingClient = await getSigningClient()
+  await signingClient.connectWithSigner(network.rpcURL, signer)
+  const signingPromise = signingClient.updateISCNRecord(
+    address,
+    iscnId,
+    payload,
+  )
+
+  const res = await signingPromise
+  return res as DeliverTxResponse
+}
