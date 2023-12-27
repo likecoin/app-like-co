@@ -245,6 +245,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing'
 import { ISCN_PREFIX } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { updateISCNRecord } from '~/utils/cosmos/iscn/sign'
+import { extractIscnIdPrefix } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
 
@@ -428,7 +429,7 @@ export default class EditIscnPage extends Vue {
         this.$router.replace(
           this.localeLocation({
             name: 'view-iscnId',
-            params: { iscnId: this.iscnId },
+            params: { iscnId: extractIscnIdPrefix(this.iscnId) },
           })!,
         )
       }
