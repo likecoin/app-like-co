@@ -92,6 +92,14 @@
         'lg:pt-0',
       ]"
     >
+      <div v-if="isIscnOwner" class="flex justify-center items-center gap-[4px] mr-[8px]">
+        <Button preset="plain" text="Edit ISCN" @click="handleEdit">
+          <template #prepend>
+            <IconEdit />
+          </template>
+        </Button>
+        <div class="h-[20px] w-[2px] bg-medium-gray" />
+      </div>
       <Button preset="tertiary" :text="$t('NFTPortal.button.download.iscn')" @click="handleClickDownload">
         <template #prepend>
           <IconDownload />
@@ -654,7 +662,11 @@ export default class ViewIscnIdPage extends Vue {
   @walletModule.Getter('getWalletAddress') currentAddress!: string
 
   get isShowMintButton() {
-    return !this.isPreminted && this.iscnOwner === this.currentAddress
+    return !this.isPreminted && this.isIscnOwner
+  }
+
+  get isIscnOwner() {
+    return Boolean(this.iscnOwner === this.currentAddress)
   }
 
   get isPopupLayout() {
@@ -949,6 +961,15 @@ export default class ViewIscnIdPage extends Vue {
       copyToClipboard(iscnIdPrefix)
       this.isOpenCopiedAlert = true
     }
+  }
+
+  handleEdit() {
+    this.$router.replace(
+      this.localeLocation({
+        name: 'edit-iscnId',
+        params: { iscnId: this.iscnId },
+      })!,
+    )
   }
 }
 </script>
