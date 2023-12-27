@@ -2,7 +2,7 @@
   <div>
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
-      <IscnFormHeader :step="step" :total-step="4" />
+      <IscnFormHeader v-if="mode === 'register'" :step="step" :total-step="4" />
       <!-- guide text -->
       <Label
         :text="$t('UploadForm.guide.selectFile')"
@@ -134,7 +134,7 @@
           </div>
         </div>
         <div v-else class="flex gap-[8px] justify-end mt-[12px] text-medium-gray">
-          <Button preset="outline" @click="onSkipUpload"
+          <Button v-if="mode === 'register'" preset="outline" @click="onSkipUpload"
             >{{ $t('UploadForm.button.skip') }}
           </Button>
           <Button
@@ -199,7 +199,7 @@
         />
       </Dialog>
     </Card>
-    <AttentionsLedger />
+    <AttentionsLedger v-if="mode === 'register'" />
     <Snackbar
       v-model="isSizeExceeded"
       :text="$t('UploadForm.warning',{ size: Math.round(uploadSizeLimit / (1024*1024)) })"
@@ -246,9 +246,15 @@ import { getAccountBalance } from '~/utils/cosmos'
 const walletModule = namespace('wallet')
 type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
 
+const MODE = {
+  REGISTER: 'register',
+  EDIT: 'edit',
+}
+
 @Component
 export default class UploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
+  @Prop({ default: MODE.REGISTER }) readonly mode: string | undefined
 
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
