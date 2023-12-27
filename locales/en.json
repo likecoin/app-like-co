@@ -181,6 +181,8 @@
   "IscnCardPage.button.portrait": "Portrait",
   "IscnCardPage.button.print": "Print",
   "IscnEditInfo.title": "Edit ISCN Info",
+  "IscnEditInfo.reUpload": "Re-upload files to update links",
+  "IscnEditInfo.updating": "Updating ISCN...",
   "IscnEditInfo.button.confirm": "Update ISCN",
   "IscnRegisterForm.arweave.link": "ar://{arweaveId}",
   "IscnRegisterForm.button.back": "Back",

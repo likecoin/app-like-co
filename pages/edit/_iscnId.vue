@@ -120,7 +120,7 @@
           'duration-100',
 
           'group',
-          'hover:bg-[rgba(0,0,0,0.3)]',
+          'hover:bg-[rgba(0,0,0,0.4)]',
         ]"
       >
         <div
@@ -141,7 +141,10 @@
           ]"
           @click="handleClickUpload"
         >
-          <Label class="text-[26px] text-white font-bold">Re-Upload data</Label>
+          <Label
+            class="text-[26px] text-white font-bold"
+            :text="$t('IscnEditInfo.reUpload')"
+          />
         </div>
         <FormField
           v-if="contentFingerprints.length"
@@ -169,7 +172,14 @@
         </FormField>
       </div>
       <div class="flex justify-end items-center my-[20px]">
-        <ProgressIndicator v-if="isSubmitLoading" />
+        <div
+          v-if="isSubmitLoading"
+          class="flex flex-col items-center justify-center gap-[4px]"
+        >
+          <ProgressIndicator />
+          <Label class="text-medium-gray" :text="$t('IscnEditInfo.updating')" />
+        </div>
+
         <Button
           v-else
           :text="$t('IscnEditInfo.button.confirm')"
@@ -223,6 +233,8 @@
         />
       </Card>
     </Dialog>
+
+    <Snackbar v-model="shouldShowAlert" :text="errorMessage" preset="warn" />
   </Card>
 </template>
 
@@ -282,6 +294,8 @@ export default class EditIscnPage extends Vue {
   contentFingerprintInput: string = ''
   isOpenSameAsDialog: boolean = false
   isSubmitLoading: boolean = false
+  shouldShowAlert: boolean = false
+  errorMessage: string = ''
 
   get formattedSameAsList() {
     return this.sameAsList.map(
@@ -402,23 +416,28 @@ export default class EditIscnPage extends Vue {
 
   async onSubmitUpdate() {
     this.isSubmitLoading = true
-    await this.initIfNecessary()
-    const result = await updateISCNRecord(
-      this.signer,
-      this.address,
-      this.iscnId,
-      this.payload,
-    )
-    this.isSubmitLoading = false
-
-    if (result) {
-      this.$router.replace(
-        this.localeLocation({
-          name: 'view-iscnId',
-          params: { iscnId: this.iscnId },
-        })!,
+    try {
+      await this.initIfNecessary()
+      const result = await updateISCNRecord(
+        this.signer,
+        this.address,
+        this.iscnId,
+        this.payload,
       )
+      if (result) {
+        this.$router.replace(
+          this.localeLocation({
+            name: 'view-iscnId',
+            params: { iscnId: this.iscnId },
+          })!,
+        )
+      }
+    } catch (error) {
+      this.shouldShowAlert = true
+      this.errorMessage = (error as Error).toString()
     }
+
+    this.isSubmitLoading = false
   }
 }
 </script>
