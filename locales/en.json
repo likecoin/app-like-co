@@ -374,6 +374,7 @@
   "UploadForm.warning": "Oops, file is too large. The file size should not exceed {size}MB",
   "WorksPage.empty.label": "No works",
   "WorksPage.label.search.result": "Search result for :",
+  "WorksPage.label.check.owner.portfolio": "check owner portfolio",
   "WorksPage.label.portfolio": "View my Writing NFT Portfolio",
   "WorksPage.pagination.button.first": "First",
   "WorksPage.pagination.button.last": "Last",

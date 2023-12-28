@@ -54,11 +54,24 @@
         </Button>
       </div>
 
-      <div :class="['flex', 'flex-col', 'items-center', 'flex-shrink']">
+      <div
+        v-if="searchResultText"
+        :class="['flex', 'flex-col', 'items-center', 'flex-shrink','gap-[4px]']"
+      >
         <Label preset="h6" :text="$t('WorksPage.label.search.result')" />
-        <Label class="text-center" preset="h5" align="center">{{
-          keyword
-        }}</Label>
+        <Label
+          class="text-center text-medium-gray"
+          preset="p5"
+          align="center"
+          :text="searchResultText"
+        />
+        <a
+          v-if="owner"
+          :href="ownerPortfolioUrl"
+          target="_blank"
+          class="flex items-center justify-center cursor-pointer text-like-green text-[14px] underline underline-offset-1"
+          >{{ $t('WorksPage.label.check.owner.portfolio') }}<IconNorthEast/>
+        </a>
       </div>
 
       <div
@@ -107,6 +120,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger'
+import { LIKER_LAND_URL } from '~/constant'
 
 const iscnModule = namespace('iscn')
 
@@ -135,17 +149,19 @@ export default class SearchPage extends Vue {
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   @iscnModule.Action queryISCNByField!: (
-    arg0: { 
+    arg0: {
       iscnId?: string,
       owner?: string,
       contentFingerprint?: string,
       stakeholderId?: string,
       stakeholderName?: string,
-      keyword?: string, 
+      keyword?: string,
   }) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
   pageNumber = Number(this.$route.query.page) || 0
   closeWarning = false
+  owner: any = ''
+  iscnId: any = ''
 
   get queryAllTerm(): string {
     const { q } = this.$route.query
@@ -159,6 +175,14 @@ export default class SearchPage extends Vue {
   get shouldShowError() {
     if(this.closeWarning) return false
     return !!this.errorMessage
+  }
+
+  get searchResultText() {
+    return this.owner || this.iscnId
+  }
+
+  get ownerPortfolioUrl() {
+    return `${LIKER_LAND_URL}/en/${this.owner}?tab=created`
   }
 
   mounted() {
@@ -177,19 +201,21 @@ export default class SearchPage extends Vue {
     });
   }
 
-  async search(){
+  async search() {
     logTrackerEvent(this, 'ISCNSearch', 'ISCNSearchResult', this.queryAllTerm, 1)
     if (this.queryAllTerm)  {
       await this.queryISCNByKeyword(this.queryAllTerm)
     } else {
-      const { 
+      const {
         iscnId,
         owner,
         content_fingerprint: contentFingerprint,
         stakeholder_id: stakeholderId,
-        stakeholder_name: stakeholderName, 
+        stakeholder_name: stakeholderName,
         keyword,
       } = this.$route.query;
+      this.owner = owner;
+      this.iscnId = iscnId
       const searchObject = {
         iscnId: iscnId as string,
         owner: owner as string,
