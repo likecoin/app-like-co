@@ -74,14 +74,14 @@
             :label="$t('IscnRegisterForm.label.sameAs')"
             content-classes="flex flex-row flex-wrap"
           >
-            <span v-if="formattedSameAsList.length" class="mr-[8px] mb-[4px]">
+            <span v-if="sameAsList.length" class="mr-[8px] mb-[4px]">
               <Button
                 size="mini"
                 preset="secondary"
                 tag="div"
                 text-preset="h6"
                 type="button"
-                :text="`${formattedSameAsList.length} urls`"
+                :text="`${sameAsList.length} urls`"
                 @click="handleOpenSameAsDialog()"
               />
             </span>
@@ -298,14 +298,17 @@ export default class EditIscnPage extends Vue {
   latestVersion: number | string = ''
 
   get formattedSameAsList() {
-    return this.sameAsList.map(
-      (sameAs: { filename: any; filetype: any; url: any }) => {
-        if (sameAs.filename && sameAs.filetype) {
-          return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
-        }
-        return ''
-      },
-    )
+    if (this.sameAsList.length) {
+      return this.sameAsList.map(
+        (sameAs: { filename: any; filetype: any; url: any }) => {
+          if (sameAs.filename && sameAs.filetype) {
+            return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
+          }
+          return ''
+        },
+      )
+    }
+    return this.sameAs
   }
 
   get shouldDisableSubmit() {
@@ -316,11 +319,11 @@ export default class EditIscnPage extends Vue {
     const array = []
     if (this.uploadArweaveIdList) {
       array.push(
-        ...this.uploadArweaveIdList.map((id: string) => this.formatArweave(id)),
+        ...this.uploadArweaveIdList.map((id: string) => (id)),
       )
     }
     if (this.uploadIpfsList.length) {
-      array.push(...this.uploadIpfsList.map((ipfs) => this.formatIpfs(ipfs)))
+      array.push(...this.uploadIpfsList.map((ipfs) => (ipfs)))
     }
     if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
@@ -346,9 +349,7 @@ export default class EditIscnPage extends Vue {
         ...this.contentMetadata,
         name: this.name,
         description: this.description,
-        sameAs: this.sameAsList.length
-          ? this.sameAsList.map((list: any) => list.url)
-          : this.sameAs,
+        sameAs: this.formattedSameAsList,
         version: (Number(this.latestVersion) + 1).toString(),
       },
     }
