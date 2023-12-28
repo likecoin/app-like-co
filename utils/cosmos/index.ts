@@ -58,16 +58,19 @@ export async function getISCNQueryClient() {
 }
 
 export async function getExistingClassCount(iscnPrefix: any) {
-  const newIscnQueryClient = await getISCNQueryClient();
-  const cosmosQueryClient = await newIscnQueryClient.getQueryClient();
+  const newIscnQueryClient = await getISCNQueryClient()
+  const cosmosQueryClient = await newIscnQueryClient.getQueryClient()
   try {
     const { classes } = await cosmosQueryClient.likenft.classesByISCN(iscnPrefix)
-    return classes.length;
+    return { count: classes.length, classes }
   } catch (error) {
-    if (error.message === 'Query failed with (18): rpc error: code = InvalidArgument desc = not found: invalid request') {
-      return 0;
+    if (
+      (error as Error).message ===
+      'Query failed with (18): rpc error: code = InvalidArgument desc = not found: invalid request'
+    ) {
+      return { count: 0, classes: null }
     }
-      throw error;
+    throw error
   }
 }
 
