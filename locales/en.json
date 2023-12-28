@@ -214,6 +214,7 @@
   "IscnRegisterForm.guide.uploadOnly": "Upload only mode without ISCN",
   "IscnRegisterForm.guide.review": "Review and edit metadata",
   "IscnRegisterForm.ipfs.link": "ipfs://{hash}",
+  "IscnRegisterForm.fileSHA256.link": "hash://sha256/{hash}",
   "IscnRegisterForm.label.author": "Author",
   "IscnRegisterForm.label.stakeholder": "Stakeholders",
   "IscnRegisterForm.label.description": "Description",

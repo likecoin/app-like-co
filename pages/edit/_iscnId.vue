@@ -49,14 +49,10 @@
             class="mb-[12px]"
           >
             <ContentFingerprintLink
-              v-for="ipfs of uploadIpfsList"
-              :key="ipfs"
-              :item="formatIpfs(ipfs)"
-            />
-            <ContentFingerprintLink
-              v-for="ar of uploadArweaveIdList"
-              :key="ar"
-              :item="formatArweave(ar)"
+              v-for="item in contentFingerprints"
+              :key="item.key"
+              :item="item"
+              :class="['mb-[8px]', 'break-all', 'text-[14px]']"
             />
             <ContentFingerprintLink
               v-for="(f, i) in customContentFingerprints"
@@ -254,12 +250,13 @@ const walletModule = namespace('wallet')
     try {
       const { iscnId } = params
       if (iscnId && iscnId.startsWith(ISCN_PREFIX)) {
-        const res = await store.dispatch('iscn/fetchISCNById', iscnId)
+        const res: any = await store.dispatch('iscn/fetchISCNById', iscnId)
         if (res) {
           return {
             iscnId: res.records[0].id,
             iscnOwner: res.owner,
             iscnRecord: res.records[0].data,
+            latestVersion: res.latestVersion.low,
           }
         }
       } else {
@@ -297,6 +294,8 @@ export default class EditIscnPage extends Vue {
   isSubmitLoading: boolean = false
   shouldShowAlert: boolean = false
   errorMessage: string = ''
+
+  latestVersion: number | string = ''
 
   get formattedSameAsList() {
     return this.sameAsList.map(
@@ -347,7 +346,10 @@ export default class EditIscnPage extends Vue {
         ...this.contentMetadata,
         name: this.name,
         description: this.description,
-        sameAs: this.sameAsList.length ? this.sameAsList : this.sameAs,
+        sameAs: this.sameAsList.length
+          ? this.sameAsList.map((list: any) => list.url)
+          : this.sameAs,
+        version: (Number(this.latestVersion) + 1).toString(),
       },
     }
   }
@@ -378,6 +380,10 @@ export default class EditIscnPage extends Vue {
     return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
   }
 
+  formatFileSHA256(hash: string) {
+    return this.$t('IscnRegisterForm.fileSHA256.link', { hash })
+  }
+
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
     this.contentFingerprintInput = ''
@@ -393,20 +399,21 @@ export default class EditIscnPage extends Vue {
     this.isOpenSameAsDialog = false
   }
 
-  onSubmitUpload({
-    fileRecords,
-  }: {
-    fileRecords: any[]
-    arweaveIds: string[]
-  }) {
+  onSubmitUpload({ fileRecords }: { fileRecords: any[] }) {
     this.contentFingerprints = []
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
-      this.uploadIpfsList = fileRecords.map((file) => file.ipfsHash)
-      this.uploadArweaveIdList = fileRecords.map((file) => file.arweaveId)
+      this.uploadIpfsList = fileRecords.map(
+        (file) => this.formatIpfs(file.ipfsHash) as string,
+      )
+      this.uploadArweaveIdList = fileRecords.map(
+        (file) => this.formatArweave(file.arweaveId) as string,
+      )
 
       this.contentFingerprints = [
-        ...fileRecords.map((file) => file.fileSHA256),
+        ...fileRecords.map(
+          (file) => this.formatFileSHA256(file.fileSHA256) as string,
+        ),
         ...this.uploadIpfsList,
         ...this.uploadArweaveIdList,
       ]
