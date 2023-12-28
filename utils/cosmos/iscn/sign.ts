@@ -4,7 +4,7 @@ import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ISCNRegisterPayload } from './iscn.type';
-import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE } from '~/constant'
+import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE, UPDATE_ISCN_GAS_FEE } from '~/constant'
 import { getPublisherISCNPayload } from '.';
 import { ISCN_PUBLISHERS } from '~/constant/iscn';
 
@@ -201,6 +201,15 @@ export async function updateISCNRecord(
     address,
     iscnId,
     payload,
+    {
+      fee: {
+        gas: UPDATE_ISCN_GAS_FEE.toString(),
+        amount: [{
+            denom: DEFAULT_GAS_PRICE[0].denom,
+            amount: DEFAULT_GAS_PRICE[0].amount.toString(),
+          }],
+      },
+    },
   )
 
   const res = await signingPromise
