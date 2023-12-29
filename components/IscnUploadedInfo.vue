@@ -130,23 +130,18 @@
           'text-shade-gray',
         ]"
       />
-      <FormField
-        v-if="iscnId"
-        :label="$t('iscn.meta.id')"
-        :class="[
-          'mb-[12px]',
-          'text-[14px]',
-        ]"
-      >
-        <Link
-          :to="localeLocation({
-            name: 'view-iscnId',
-            params: { iscnId: iscnId },
-          })"
-          class="text-[14px]"
-        >
-          {{ iscnId }}
-        </Link>
+      <FormField v-if="iscnId" :label="$t('iscn.meta.id.copy')" class="mb-[12px]">
+        <Button
+          size="mini"
+          preset="tertiary"
+          tag="div"
+          text-preset="h6"
+          type="button"
+          content-class="font-medium ml-[-4px]"
+          prepend-class="font-bold"
+          :text="iscnId"
+          @click="handleCopyIscnId"
+        />
       </FormField>
       <FormField
         v-if="contentFingerprints"
@@ -181,6 +176,16 @@
         />
       </FormField>
       <slot name="footer" />
+       <Snackbar
+        v-model="isOpenCopiedAlert"
+        :text="$t('iscn.meta.stakeholders.wallet.copied')"
+        preset="success"
+        :timeout="2000"
+      >
+        <template #prepend>
+          <IconDone />
+        </template>
+      </Snackbar>
     </Card>
 </template>
 
@@ -190,6 +195,9 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
 import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
+import { logTrackerEvent } from '~/utils/logger'
+import { copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
+
 
 @Component({
   components: { IscnCard: () => import('~/components/IscnCard.vue') },
@@ -201,6 +209,8 @@ export default class IscnUploadedInfo extends Vue {
   @Prop({ default: null }) readonly record: ISCNRecordWithID | null | undefined
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop(Number) readonly step: number | undefined
+
+  isOpenCopiedAlert: boolean = false
 
   get recordData() {
     return this.record?.data
@@ -251,6 +261,15 @@ export default class IscnUploadedInfo extends Vue {
     }
 
     downloadJSON(generateData, 'iscn.json')
+  }
+
+  handleCopyIscnId() {
+    logTrackerEvent(this, 'ISCNView', 'CopyISCNID', this.iscnId, 1)
+    const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
+    if (iscnIdPrefix) {
+      copyToClipboard(iscnIdPrefix)
+      this.isOpenCopiedAlert = true
+    }
   }
 }
 </script>
