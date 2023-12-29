@@ -159,7 +159,7 @@ export async function signISCN(
   {
     iscnId,
     memo,
-    gas = ISCN_GAS_FEE.toString(),
+    gas = new BigNumber(ISCN_GAS_FEE).multipliedBy(ISCN_GAS_MULTIPLIER).toFixed(0),
   }: { iscnId?: string, memo?: string, gas?: string } = {},
 ) {
   const isUpdate = !!iscnId
@@ -169,7 +169,7 @@ export async function signISCN(
     ? signingClient.updateISCNRecord(address, iscnId as string, tx, {
         memo: memo || 'app.like.co',
         fee: {
-          gas: new BigNumber(gas).multipliedBy(ISCN_GAS_MULTIPLIER).toFixed(0),
+          gas,
           amount: [{
               denom: DEFAULT_GAS_PRICE[0].denom,
               amount: new BigNumber(gas).multipliedBy(DEFAULT_GAS_PRICE[0].amount).toFixed(0),
