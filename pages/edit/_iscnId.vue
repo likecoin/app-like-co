@@ -240,7 +240,7 @@ import { namespace } from 'vuex-class'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { ISCN_PREFIX } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
-import { updateISCNRecord } from '~/utils/cosmos/iscn/sign'
+import { signISCN } from '~/utils/cosmos/iscn/sign'
 import { extractIscnIdPrefix } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
@@ -319,12 +319,10 @@ export default class EditIscnPage extends Vue {
   get contentFingerprintOptions() {
     const array = []
     if (this.uploadArweaveIdList) {
-      array.push(
-        ...this.uploadArweaveIdList.map((id: string) => (id)),
-      )
+      array.push(...this.uploadArweaveIdList.map((id: string) => id))
     }
     if (this.uploadIpfsList.length) {
-      array.push(...this.uploadIpfsList.map((ipfs) => (ipfs)))
+      array.push(...this.uploadIpfsList.map((ipfs) => ipfs))
     }
     if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
@@ -428,12 +426,9 @@ export default class EditIscnPage extends Vue {
     this.isSubmitLoading = true
     try {
       await this.initIfNecessary()
-      const result = await updateISCNRecord(
-        this.signer,
-        this.address,
-        this.iscnId,
-        this.payload,
-      )
+      const result = await signISCN(this.payload, this.signer, this.address, {
+        iscnId: this.iscnId,
+      })
       if (result) {
         this.$router.replace(
           this.localeLocation({
