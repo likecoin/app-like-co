@@ -3,7 +3,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js';
 import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-import BigNumber from 'bignumber.js'
+import { BigNumber } from 'bignumber.js';
 import { ISCNRegisterPayload } from './iscn.type';
 import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE, ISCN_GAS_MULTIPLIER } from '~/constant'
 import { getPublisherISCNPayload } from '.';
@@ -172,7 +172,7 @@ export async function signISCN(
           gas,
           amount: [{
               denom: DEFAULT_GAS_PRICE[0].denom,
-              amount: DEFAULT_GAS_PRICE[0].amount.toString(),
+              amount: new BigNumber(gas).multipliedBy(DEFAULT_GAS_PRICE[0].amount).toFixed(0),
             }],
         },
       })
@@ -182,7 +182,7 @@ export async function signISCN(
           gas,
           amount: [{
               denom: DEFAULT_GAS_PRICE[0].denom,
-              amount: DEFAULT_GAS_PRICE[0].amount.toString(),
+              amount: new BigNumber(gas).multipliedBy(DEFAULT_GAS_PRICE[0].amount).toFixed(0),
             }],
         },
       })
