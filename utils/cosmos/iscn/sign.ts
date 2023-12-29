@@ -169,7 +169,7 @@ export async function signISCN(
     ? signingClient.updateISCNRecord(address, iscnId as string, tx, {
         memo: memo || 'app.like.co',
         fee: {
-          gas,
+          gas: new BigNumber(gas).multipliedBy(ISCN_GAS_MULTIPLIER).toFixed(0),
           amount: [{
               denom: DEFAULT_GAS_PRICE[0].denom,
               amount: new BigNumber(gas).multipliedBy(DEFAULT_GAS_PRICE[0].amount).toFixed(0),
@@ -190,29 +190,3 @@ export async function signISCN(
   return res as DeliverTxResponse
 }
 
-export async function updateISCNRecord(
-  signer: OfflineSigner,
-  address: string,
-  iscnId: string,
-  payload: ISCNSignPayload,
-) {
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(network.rpcURL, signer)
-  const signingPromise = signingClient.updateISCNRecord(
-    address,
-    iscnId,
-    payload,
-    {
-      fee: {
-        gas: (new BigNumber(ISCN_GAS_FEE).times(ISCN_GAS_MULTIPLIER).toFixed(0)).toString(),
-        amount: [{
-            denom: DEFAULT_GAS_PRICE[0].denom,
-            amount: DEFAULT_GAS_PRICE[0].amount.toString(),
-          }],
-      },
-    },
-  )
-
-  const res = await signingPromise
-  return res as DeliverTxResponse
-}

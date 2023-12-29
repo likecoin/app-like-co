@@ -18,7 +18,6 @@ export const ISCN_MIN_BALANCE = 0.01;
 
 export const ISCN_GAS_FEE = 200000;
 export const ISCN_GAS_MULTIPLIER = 1.5;
-export const UPDATE_ISCN_GAS_FEE = 300000;
 
 export const ISCN_REGISTRY_NAME = 'likecoin-chain';
 
