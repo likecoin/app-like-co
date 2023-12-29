@@ -261,6 +261,7 @@ const walletModule = namespace('wallet')
         }
       } else {
         redirect({ name: 'index' })
+        return {}
       }
     } catch (err) {
       error(err as Error)
