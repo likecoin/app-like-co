@@ -112,7 +112,7 @@
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
         :text="$t('NFTPortal.button.mint')"
       />
-      <div v-if="!isShowMintButton" class="flex justify-center items-center p-[4px] rounded-[12px] border-like-cyan-light border-[2px]">
+      <div v-if="!!classId" class="flex justify-center items-center p-[4px] rounded-[12px] border-like-cyan-light border-[2px]">
         <Button
           preset="tertiary"
           :text="$t('NFTPortal.button.check.nft')"
