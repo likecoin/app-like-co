@@ -69,6 +69,7 @@
           v-if="owner"
           :href="ownerPortfolioUrl"
           target="_blank"
+          rel="noopener"
           class="flex items-center justify-center cursor-pointer text-like-green text-[14px] underline underline-offset-1"
           >{{ $t('WorksPage.label.check.owner.portfolio') }}<IconNorthEast/>
         </a>
