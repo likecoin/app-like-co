@@ -72,7 +72,7 @@ export default class FormField extends Vue {
       this.direction === FormField.direction.row
         ? 'flex-shrink overflow-hidden'
         : 'w-full',
-      'break-all',
+      'break-word',
       'text-dark-gray',
       this.contentrootClasses,
       this.contentClasses,
