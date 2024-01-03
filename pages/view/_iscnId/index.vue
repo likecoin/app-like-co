@@ -86,6 +86,7 @@
       :class="[
         'flex',
         'justify-end',
+        'items-center',
         'w-full',
         'pt-[24px]',
         'gap-[8px]',
@@ -119,6 +120,18 @@
         :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
         :text="$t('NFTPortal.button.mint')"
       />
+      <div v-if="!!classId" class="flex justify-center items-center p-[4px] rounded-[12px] border-like-cyan-light border-[2px]">
+        <Button
+          preset="tertiary"
+          :text="$t('NFTPortal.button.check.nft')"
+          :href="likerlandNftUrl"
+          target="_blank"
+        >
+          <template #append>
+            <IconArrowRight />
+          </template>
+        </Button>
+      </div>
     </div>
     <div
       :class="[
@@ -647,6 +660,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   isPreminted = !this.isPopupLayout // assume popup is not preminted
+  classId = ''
 
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
@@ -746,6 +760,10 @@ export default class ViewIscnIdPage extends Vue {
     )
   }
 
+  get likerlandNftUrl(){
+    return `${LIKER_LAND_URL}/en/nft/class/${this.classId}`
+  }
+
   async mounted() {
     if (!this.iscnId) {
       const param = this.$route.params.iscnId
@@ -768,14 +786,19 @@ export default class ViewIscnIdPage extends Vue {
       this.$router.replace({ params: { iscnId: this.iscnId } })
     }
     if (this.isNFTBook) {
-      const premintClassCount = await getExistingClassCount(
+      const {
+        count: premintClassCount,
+        classes,
+      }: { count: number; classes: any } = await getExistingClassCount(
         extractIscnIdPrefix(this.iscnId),
       )
       this.isPreminted = Boolean(premintClassCount > 0)
+      if (this.isPreminted) {
+        this.classId = classes[0].id
+      }
     } else {
       this.getMintInfo()
     }
-
 
     if (!this.getISCNById(this.iscnId) || !this.iscnOwner) {
       const res = await this.fetchISCNById(this.iscnId)
@@ -930,6 +953,9 @@ export default class ViewIscnIdPage extends Vue {
         paramsSerializer: (params) => qs.stringify(params),
       })
       this.isPreminted = !!data.classId
+      if(this.isPreminted) {
+        this.classId = data.classId
+      }
     } catch (err) {
       this.isPreminted = false
       if ((err as any).response?.status !== 404) {
