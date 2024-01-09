@@ -163,6 +163,7 @@
   "iscn.meta.stakeholders.id": "Stakeholder ID",
   "iscn.meta.stakeholders.likerId": "Liker ID",
   "iscn.meta.stakeholders.name": "Stakeholder Name",
+  "iscn.meta.stakeholders.name.placeholder": "{ your display name }",
   "iscn.meta.stakeholders.url": "URL",
   "iscn.meta.stakeholders.wallet.copied": "Copied",
   "iscn.meta.stakeholders.wallet.placeholder": "Wallet addresses",

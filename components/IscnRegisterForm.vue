@@ -809,7 +809,7 @@ export default class IscnRegisterForm extends Vue {
   thumbnailUrl: string = ''
   authorName: string = ''
   authorUrl: string[] = []
-  authorWalletAddress: string[] = []
+  authorWalletAddress: any = []
   sentArweaveTransactionHashes = new Map<
     string, { transactionHash?: string, arweaveId?: string }
   >()
@@ -875,7 +875,12 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get authorNames() {
-    return this.authors.map((a) => a.name)
+    return this.authors.map((a) => {
+      if (a.name === this.$t('iscn.meta.stakeholders.name.placeholder')) {
+        return 'ISCN Owner';
+      }
+      return a.name;
+    });
   }
 
   get authorUrls() {
@@ -1109,21 +1114,38 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
-    if (this.epubMetadata) {
-      this.name = this.epubMetadata.title;
-      this.description = this.extractText(this.epubMetadata.description);
-      this.author.name = this.epubMetadata.author;
-      this.language = this.epubMetadata.language
-      this.tags = this.epubMetadata.tags
-      this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailUrl) as string
-      if (this.author.name) { this.authors.push(this.author) }
+  if (this.epubMetadata) {
+    this.name = this.epubMetadata.title;
+    this.description = this.extractText(this.epubMetadata.description);
+    this.author.name = this.epubMetadata.author;
+    this.author.authorDescription = 'Author'
+    this.language = this.epubMetadata.language
+    this.tags = this.epubMetadata.tags
+    this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailUrl) as string
+    if (this.author.name) {
+      this.authors.push(this.author)
     }
-
-    this.uploadStatus = 'loading'
-    // ISCN Fee needs Arweave fee to calculate
-    await this.calculateISCNFee()
-    this.uploadStatus = ''
   }
+  if (this.address) {
+    const iscnOwner = {
+      name: this.$t('iscn.meta.stakeholders.name.placeholder') as string,
+      wallet: [{
+        content: this.address,
+        id: 1,
+        type: 'like',
+        isOpenOptions: false,
+      }],
+      url: [],
+      likerId: '',
+      authorDescription: 'ISCN owner',
+    }
+    this.authors.push(iscnOwner)
+  }
+  this.uploadStatus = 'loading'
+  // ISCN Fee needs Arweave fee to calculate
+  await this.calculateISCNFee()
+  this.uploadStatus = ''
+}
 
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
