@@ -809,7 +809,7 @@ export default class IscnRegisterForm extends Vue {
   thumbnailUrl: string = ''
   authorName: string = ''
   authorUrl: string[] = []
-  authorWalletAddress: any = []
+  authorWalletAddress: any[] = []
   sentArweaveTransactionHashes = new Map<
     string, { transactionHash?: string, arweaveId?: string }
   >()
