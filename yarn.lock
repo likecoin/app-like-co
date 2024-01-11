@@ -3697,13 +3697,13 @@
     bignumber.js "^9.1.2"
     long "^5.2.3"
 
-"@likecoin/iscn-js@^0.6.9":
-  version "0.6.9"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.6.9.tgz#f5d418ded87420204442afe9185036d152c4cb8b"
-  integrity sha512-nR96gkY5KpYU/dVml0HpOwT3WpYylB+yy9PfvAJ+r2IMvZnLcR/9xHxh6VKlDMwgRVCoAa9vwtjcdbXbHdtVSw==
+"@likecoin/iscn-js@^0.6.10":
+  version "0.6.10"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.6.10.tgz#213d444f77a42d174a9fc58b95c1afed798071b7"
+  integrity sha512-53Aup9AzNOlDBVF8C/U4pD8CZ/flbFM/5HXfPpMyOFz5aa4gvjguyiPq97rtVoprmT2P6OX/HZ/YoHFqcYKnfQ==
   dependencies:
     "@likecoin/iscn-message-types" "0.0.7"
-    axios "^0.27.2"
+    axios "^1.6.0"
     bech32 "^2.0.0"
     bignumber.js "^9.0.1"
     buffer "^6.0.3"
