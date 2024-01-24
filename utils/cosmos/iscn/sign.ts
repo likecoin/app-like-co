@@ -5,7 +5,7 @@ import network from '@/constant/network';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { BigNumber } from 'bignumber.js';
 import { ISCNRegisterPayload } from './iscn.type';
-import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE, ISCN_GAS_MULTIPLIER } from '~/constant'
+import { WALLET_TYPE_REPLACER, ISCN_GAS_FEE, DEFAULT_GAS_PRICE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant'
 import { getPublisherISCNPayload } from '.';
 import { ISCN_PUBLISHERS } from '~/constant/iscn';
 
@@ -159,7 +159,7 @@ export async function signISCN(
   {
     iscnId,
     memo,
-    gas = new BigNumber(ISCN_GAS_FEE).multipliedBy(ISCN_GAS_MULTIPLIER).toFixed(0),
+    gas = new BigNumber(ISCN_GAS_FEE).multipliedBy(UPDATE_ISCN_GAS_MULTIPLIER).toFixed(0),
   }: { iscnId?: string, memo?: string, gas?: string } = {},
 ) {
   const isUpdate = !!iscnId
