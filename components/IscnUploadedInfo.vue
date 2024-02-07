@@ -19,7 +19,6 @@
       :iscn-id="iscnId"
       :is-show-mint-button="true"
       :is-nft-book="type === 'Book'"
-      :should-show-mint-button="true"
       @click-edit="handleEdit"
       @click-download="handleClickDownload"
       @click-mint-book="clickMintNFTBook"
