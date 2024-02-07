@@ -79,10 +79,12 @@
       'max-w-[960px]',
       'mx-auto',
       'px-[8px]',
+      'py-[24px]',
       'lg:px-0',
     ]"
   >
     <IscnEditBar
+      class="ml-auto"
       :is-iscn-owner="isIscnOwner"
       :iscn-id="iscnId"
       :is-show-mint-button="isShowMintButton"

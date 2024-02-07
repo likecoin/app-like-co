@@ -2,12 +2,9 @@
   <div
     :class="[
       'flex',
-      'justify-end',
+      'justify-center',
       'items-center',
-      'w-full',
-      'pt-[24px]',
       'gap-[8px]',
-      'lg:pt-0',
     ]"
   >
     <div
@@ -22,6 +19,7 @@
       <div class="h-[20px] w-[2px] bg-medium-gray" />
     </div>
     <Button
+      class="flex flex-shrink-0"
       preset="tertiary"
       :text="$t('NFTPortal.button.download.iscn')"
       @click="handleClickDownload"
