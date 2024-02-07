@@ -700,6 +700,9 @@ export default class UploadForm extends Vue {
     tempRecord.transactionHash = transactionHash
     if (!tempRecord.transactionHash) {
       tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
+      if (!tempRecord.transactionHash) {
+        throw new Error('TRANSACTION_NOT_SENT')
+      }
     }
 
     try {
