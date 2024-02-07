@@ -87,7 +87,6 @@
       :iscn-id="iscnId"
       :is-show-mint-button="isShowMintButton"
       :is-nft-book="isNFTBook"
-      :mint-queries="mintQueries"
       :class-id="classId"
       :likerland-nft-url="likerlandNftUrl"
       :should-show-mint-button="isShowMintButton"

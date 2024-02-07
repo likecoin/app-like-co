@@ -35,7 +35,7 @@
       preset="secondary"
       class="w-full lg:w-auto"
       :text="$t('NFTPortal.button.mint.book')"
-      @click="clickMintNFTBook"
+      @click="handleClickMintNFTBook"
     />
     <Button
       v-if="isShowMintButton && !isNftBook"
@@ -77,9 +77,12 @@ export default class IscnEditBar extends Vue {
   @Prop({ default: false }) readonly isShowMintButton!: boolean
   @Prop({ default: false }) readonly isNftBook!: boolean
   @Prop(String) readonly iscnId: string | undefined
-  @Prop({ default: null }) readonly mintQueries!: any | null
   @Prop(String) readonly classId!: string
   @Prop(String) readonly likerlandNftUrl!: string
+
+   get mintQueries() {
+    return this.$route.query;
+  }
 
   handleClickDownload() {
     this.$emit('click-download', this.iscnId)
