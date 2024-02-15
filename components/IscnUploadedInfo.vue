@@ -6,22 +6,23 @@
     <!-- header -->
     <IscnFormHeader :step="step" :total-step="4" />
     <!-- guide title -->
-    <div class="flex items-center justify-between mt-[12px] mb-[28px]">
+    <div class="flex items-center justify-start mt-[12px]">
       <Label
         align="middle"
         :text="$t('IscnUploaded.guide.title')"
         class="text-medium-gray"
       />
-      <Button
-        preset="plain"
-        :text="$t('NFTPortal.button.download.iscn')"
-        @click="handleClickDownload"
-      >
-        <template #prepend>
-          <IconDownload />
-        </template>
-      </Button>
     </div>
+    <IscnEditBar
+      class="my-[24px]"
+      :is-iscn-owner="true"
+      :iscn-id="iscnId"
+      :is-show-mint-button="true"
+      :is-nft-book="type === 'Book'"
+      @click-edit="handleEdit"
+      @click-download="handleClickDownload"
+      @click-mint-book="clickMintNFTBook"
+    />
 
     <!-- ISCN card -->
     <IscnCard
@@ -159,7 +160,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
-import { BIG_DIPPER_TX_BASE_URL } from '~/constant'
+import { BIG_DIPPER_TX_BASE_URL, NFT_BOOK_PRESS_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 
@@ -228,12 +229,27 @@ export default class IscnUploadedInfo extends Vue {
   }
 
   handleCopyIscnId() {
-    logTrackerEvent(this, 'ISCNView', 'CopyISCNID', this.iscnId, 1)
+    logTrackerEvent(this, 'ISCNUploaded', 'CopyISCNID', this.iscnId, 1)
     const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
     if (iscnIdPrefix) {
       copyToClipboard(iscnIdPrefix)
       this.isOpenCopiedAlert = true
     }
+  }
+
+  clickMintNFTBook() {
+    logTrackerEvent(this, 'ISCNUploaded', 'RedirectToBookPress', this.iscnId, 1);
+    window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
+  }
+
+   handleEdit() {
+    logTrackerEvent(this, 'ISCNUploaded', 'ClickEdit', this.iscnId, 1)
+    this.$router.replace(
+      this.localeLocation({
+        name: 'edit-iscnId',
+        params: { iscnId: this.iscnId },
+      })!,
+    )
   }
 }
 </script>

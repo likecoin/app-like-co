@@ -79,60 +79,23 @@
       'max-w-[960px]',
       'mx-auto',
       'px-[8px]',
+      'py-[24px]',
       'lg:px-0',
     ]"
   >
-    <div
-      :class="[
-        'flex',
-        'justify-end',
-        'items-center',
-        'w-full',
-        'pt-[24px]',
-        'gap-[8px]',
-        'lg:pt-0',
-      ]"
-    >
-      <div v-if="isIscnOwner" class="flex justify-center items-center gap-[4px] mr-[8px]">
-        <Button preset="plain" text="Edit ISCN" @click="handleEdit">
-          <template #prepend>
-            <IconEdit />
-          </template>
-        </Button>
-        <div class="h-[20px] w-[2px] bg-medium-gray" />
-      </div>
-      <Button preset="tertiary" :text="$t('NFTPortal.button.download.iscn')" @click="handleClickDownload">
-        <template #prepend>
-          <IconDownload />
-        </template>
-      </Button>
-      <Button
-        v-if="isShowMintButton && isNFTBook"
-        preset="secondary"
-        class="w-full lg:w-auto"
-        :text="$t('NFTPortal.button.mint.book')"
-        @click="clickMintNFTBook"
-      />
-      <Button
-        v-if="isShowMintButton && !isNFTBook"
-        preset="secondary"
-        class="w-full lg:w-auto"
-        :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-        :text="$t('NFTPortal.button.mint')"
-      />
-      <div v-if="!!classId" class="flex justify-center items-center p-[4px] rounded-[12px] border-like-cyan-light border-[2px]">
-        <Button
-          preset="tertiary"
-          :text="$t('NFTPortal.button.check.nft')"
-          :href="likerlandNftUrl"
-          target="_blank"
-        >
-          <template #append>
-            <IconArrowRight />
-          </template>
-        </Button>
-      </div>
-    </div>
+    <IscnEditBar
+      class="ml-auto"
+      :is-iscn-owner="isIscnOwner"
+      :iscn-id="iscnId"
+      :is-show-mint-button="isShowMintButton"
+      :is-nft-book="isNFTBook"
+      :class-id="classId"
+      :likerland-nft-url="likerlandNftUrl"
+      :should-show-mint-button="isShowMintButton"
+      @click-edit="handleEdit"
+      @click-download="handleClickDownload"
+      @click-mint-book="clickMintNFTBook"
+    />
     <div
       :class="[
         'flex',
@@ -966,6 +929,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   handleClickDownload() {
+    logTrackerEvent(this, 'ISCNView', 'ClickDownload', this.iscnId, 1)
     const generateData = {
       contentMetadata: {
         ...this.metadata,
@@ -990,6 +954,7 @@ export default class ViewIscnIdPage extends Vue {
   }
 
   handleEdit() {
+    logTrackerEvent(this, 'ISCNView', 'ClickEdit', this.iscnId, 1)
     this.$router.replace(
       this.localeLocation({
         name: 'edit-iscnId',
