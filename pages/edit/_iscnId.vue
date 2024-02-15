@@ -238,7 +238,8 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ISCN_PREFIX } from '~/constant'
+import { BigNumber } from 'bignumber.js';
+import { ISCN_PREFIX, ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { signISCN } from '~/utils/cosmos/iscn/sign'
 import { extractIscnIdPrefix } from '~/utils/ui'
@@ -428,6 +429,7 @@ export default class EditIscnPage extends Vue {
       await this.initIfNecessary()
       const result = await signISCN(this.payload, this.signer, this.address, {
         iscnId: this.iscnId,
+        gas: new BigNumber(ISCN_GAS_FEE).multipliedBy(UPDATE_ISCN_GAS_MULTIPLIER).toFixed(0),
       })
       if (result) {
         this.$router.replace(
