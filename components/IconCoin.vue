@@ -11,7 +11,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component
-export default class FormField extends Vue {
+export default class IconCoin extends Vue {
   // Type of the coin
   @Prop(String) readonly type!: string | undefined
 }
