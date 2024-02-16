@@ -70,7 +70,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import logTrackerEvent from '~/utils/logger'
 
 @Component
-export default class UploadForm extends Vue {
+export default class EditableForm extends Vue {
   @Prop(Number) readonly step: number | undefined
   @Prop(String) readonly placeholder: string | undefined
   @Prop({ default: 256 }) readonly maxLength: number | undefined
