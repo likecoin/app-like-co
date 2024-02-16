@@ -524,7 +524,7 @@ export default class IscnUploadForm extends Vue {
               Hash.of(Buffer.from(fileBytes)),
             ])
 
-            epubMetadata.ipfsHash = ipfsHash
+            epubMetadata.thumbnailIpfsHash = ipfsHash
 
             const fileRecord: any = {
               fileName: coverFile.name,
@@ -590,7 +590,7 @@ export default class IscnUploadForm extends Vue {
     const deletedFile = this.fileRecords[index];
     this.fileRecords.splice(index, 1);
 
-    const indexToDelete = this.epubMetadataList.findIndex(item => item.ipfsHash === deletedFile.ipfsHashList);
+    const indexToDelete = this.epubMetadataList.findIndex(item => item.thumbnailIpfsHash === deletedFile.ipfsHashList);
     if (indexToDelete !== -1) {
       this.epubMetadataList.splice(indexToDelete, 1);
     }
@@ -635,9 +635,9 @@ export default class IscnUploadForm extends Vue {
         }
         if (arweaveId) {
           this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
-          const metadata = this.epubMetadataList.find((data: any) => data.ipfsHash === ipfsHash)
+          const metadata = this.epubMetadataList.find((data: any) => data.thumbnailIpfsHash === ipfsHash)
           if (metadata) {
-            metadata.thumbnailUrl = arweaveId;
+            metadata.thumbnailArweaveId = arweaveId;
           }
         }
         if (!this.arweaveFeeTargetAddress) {
@@ -718,9 +718,9 @@ export default class IscnUploadForm extends Vue {
         const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName.includes('cover.jpeg')) {
-          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
+          const metadata = this.epubMetadataList.find((file: any) => file.thum === records.ipfsHash)
           if (metadata) {
-            metadata.thumbnailUrl = arweaveId
+            metadata.thumbnailArweaveId = arweaveId
           }
         }
         this.$emit('arweaveUploaded', { arweaveId })
