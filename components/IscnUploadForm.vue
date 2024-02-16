@@ -524,7 +524,7 @@ export default class IscnUploadForm extends Vue {
               Hash.of(Buffer.from(fileBytes)),
             ])
 
-            epubMetadata.ipfsHash = ipfsHash
+            epubMetadata.thumbnailIpfsHash = ipfsHash
 
             const fileRecord: any = {
               fileName: coverFile.name,
@@ -590,7 +590,7 @@ export default class IscnUploadForm extends Vue {
     const deletedFile = this.fileRecords[index];
     this.fileRecords.splice(index, 1);
 
-    const indexToDelete = this.epubMetadataList.findIndex(item => item.ipfsHash === deletedFile.ipfsHashList);
+    const indexToDelete = this.epubMetadataList.findIndex(item => item.thumbnailIpfsHash === deletedFile.ipfsHashList);
     if (indexToDelete !== -1) {
       this.epubMetadataList.splice(indexToDelete, 1);
     }
@@ -635,9 +635,9 @@ export default class IscnUploadForm extends Vue {
         }
         if (arweaveId) {
           this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
-          const metadata = this.epubMetadataList.find((data: any) => data.ipfsHash === ipfsHash)
+          const metadata = this.epubMetadataList.find((data: any) => data.thumbnailIpfsHash === ipfsHash)
           if (metadata) {
-            metadata.thumbnailUrl = arweaveId;
+            metadata.thumbnailArweaveId = arweaveId;
           }
         }
         if (!this.arweaveFeeTargetAddress) {
@@ -654,10 +654,10 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
-  async sendArweaveFeeTx(records: any): Promise<string> {
+  async sendArweaveFeeTx(record: any): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
-    if (this.sentArweaveTransactionInfo.has(records.ipfsHash)) {
-      const transactionInfo = this.sentArweaveTransactionInfo.get(records.ipfsHash);
+    if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
+      const transactionInfo = this.sentArweaveTransactionInfo.get(record.ipfsHash);
       if (transactionInfo && transactionInfo.transactionHash) {
         return transactionInfo.transactionHash;
       }
@@ -667,12 +667,12 @@ export default class IscnUploadForm extends Vue {
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     this.uploadStatus = 'signing';
-    const memo = JSON.stringify({ ipfs: records.ipfsHash, fileSize: records.fileBlob?.size || 0 });
+    const memo = JSON.stringify({ ipfs: record.ipfsHash, fileSize: record.fileBlob?.size || 0 });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
       if (transactionHash) {
-        const existingData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
-        this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...existingData, transactionHash });
+        const existingData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
+        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...existingData, transactionHash });
         return transactionHash;
       }
 
@@ -687,11 +687,11 @@ export default class IscnUploadForm extends Vue {
     return '';
   }
 
-  async submitToArweave(records: any): Promise<void> {
-    const existingData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
+  async submitToArweave(record: any): Promise<void> {
+    const existingData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
     const { transactionHash, arweaveId: uploadArweaveId } = existingData;
     if (uploadArweaveId) return
-    const tempRecord = {...records}
+    const tempRecord = {...record}
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
     if (!tempRecord.fileBlob) return;
     this.isOpenSignDialog = true;
@@ -715,12 +715,12 @@ export default class IscnUploadForm extends Vue {
         txHash: tempRecord.transactionHash,
       });
       if (arweaveId) {
-        const uploadedData = this.sentArweaveTransactionInfo.get(records.ipfsHash) || {};
-        this.sentArweaveTransactionInfo.set(records.ipfsHash, { ...uploadedData, arweaveId });
+        const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
+        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName.includes('cover.jpeg')) {
-          const metadata = this.epubMetadataList.find((file: any) => file.ipfsHash === records.ipfsHash)
+          const metadata = this.epubMetadataList.find((file: any) => file.thumbnailIpfsHash === record.ipfsHash)
           if (metadata) {
-            metadata.thumbnailUrl = arweaveId
+            metadata.thumbnailArweaveId = arweaveId
           }
         }
         this.$emit('arweaveUploaded', { arweaveId })
