@@ -1131,31 +1131,35 @@ export default class IscnRegisterForm extends Vue {
     }
 
     if (this.address) {
-      try {
-        const { data } = await this.$axios.get(
-          getUserInfoMinByAddress(this.address),
-        )
-        const iscnOwner = {
-          name: data?.displayName || this.address,
-          wallet: [{
-              content: this.address,
-              id: 1,
-              type: 'like',
-              isOpenOptions: false,
-            }],
-          url: [],
-          likerId: data?.user || '',
-          authorDescription: data?.description || 'Publisher',
-        }
-        this.authors.push(iscnOwner)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      }
+      const iscnOwner = await this.fetchUserInfoByAddress(this.address)
+      this.authors.push(iscnOwner)
     }
     // ISCN Fee needs Arweave fee to calculate
     await this.calculateISCNFee()
     this.uploadStatus = ''
+  }
+
+  async fetchUserInfoByAddress(address: any) {
+    try {
+      const { data } = await this.$axios.get(getUserInfoMinByAddress(address))
+      return {
+        name: data?.displayName || address,
+        wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
+        url: [],
+        likerId: data?.user || '',
+        authorDescription: data?.description || 'Publisher',
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+      return {
+        name: address,
+        wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
+        url: [],
+        likerId: '',
+        authorDescription: 'Publisher',
+      }
+    }
   }
 
   addContentFingerprint() {
