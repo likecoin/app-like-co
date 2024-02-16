@@ -1140,25 +1140,19 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async fetchUserInfoByAddress(address: any) {
+    let userData: any = null;
     try {
-      const { data } = await this.$axios.get(getUserInfoMinByAddress(address))
-      return {
-        name: data?.displayName || address,
-        wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
-        url: [],
-        likerId: data?.user || '',
-        authorDescription: data?.description || 'Publisher',
-      }
+      ({ data: userData } = await this.$axios.get(getUserInfoMinByAddress(address)))
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
-      return {
-        name: address,
-        wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
-        url: [],
-        likerId: '',
-        authorDescription: 'Publisher',
-      }
+    }
+    return {
+      name: userData?.displayName || address,
+      wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
+      url: [],
+      likerId: userData?.user || '',
+      authorDescription: userData?.description || 'Publisher',
     }
   }
 
