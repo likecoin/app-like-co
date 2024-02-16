@@ -718,7 +718,7 @@ export default class IscnUploadForm extends Vue {
         const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId });
         if (tempRecord.fileName.includes('cover.jpeg')) {
-          const metadata = this.epubMetadataList.find((file: any) => file.thum === record.ipfsHash)
+          const metadata = this.epubMetadataList.find((file: any) => file.thumbnailIpfsHash === record.ipfsHash)
           if (metadata) {
             metadata.thumbnailArweaveId = arweaveId
           }
