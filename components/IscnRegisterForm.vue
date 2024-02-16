@@ -722,6 +722,7 @@ import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/isc
 import { ISCN_GAS_MULTIPLIER } from '~/constant';
 import {
   getLikerIdMinApi,
+  getUserInfoMinByAddress,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
   } from '~/constant/api';
 import { getAccountBalance } from '~/utils/cosmos'
@@ -1114,38 +1115,46 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async mounted() {
-  if (this.epubMetadata) {
-    this.name = this.epubMetadata.title;
-    this.description = this.extractText(this.epubMetadata.description);
-    this.author.name = this.epubMetadata.author;
-    this.author.authorDescription = 'Author'
-    this.language = this.epubMetadata.language
-    this.tags = this.epubMetadata.tags
-    this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailArweaveId) as string
-    if (this.author.name) {
-      this.authors.push(this.author)
+    this.uploadStatus = 'loading'
+
+    if (this.epubMetadata) {
+      this.name = this.epubMetadata.title;
+      this.description = this.extractText(this.epubMetadata.description);
+      this.author.name = this.epubMetadata.author;
+      this.author.authorDescription = 'Author'
+      this.language = this.epubMetadata.language
+      this.tags = this.epubMetadata.tags
+      this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailArweaveId) as string
+      if (this.author.name) {
+        this.authors.push(this.author)
+      }
     }
+
+    if (this.address) {
+      const iscnOwner = await this.fetchUserInfoByAddress(this.address)
+      this.authors.push(iscnOwner)
+    }
+    // ISCN Fee needs Arweave fee to calculate
+    await this.calculateISCNFee()
+    this.uploadStatus = ''
   }
-  if (this.address) {
-    const iscnOwner = {
-      name: this.$t('iscn.meta.stakeholders.name.placeholder') as string,
-      wallet: [{
-        content: this.address,
-        id: 1,
-        type: 'like',
-        isOpenOptions: false,
-      }],
+
+  async fetchUserInfoByAddress(address: any) {
+    let userData: any = null;
+    try {
+      ({ data: userData } = await this.$axios.get(getUserInfoMinByAddress(address)))
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+    return {
+      name: userData?.displayName || address,
+      wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
       url: [],
-      likerId: '',
-      authorDescription: 'ISCN owner',
+      likerId: userData?.user || '',
+      authorDescription: userData?.description || 'Publisher',
     }
-    this.authors.push(iscnOwner)
   }
-  this.uploadStatus = 'loading'
-  // ISCN Fee needs Arweave fee to calculate
-  await this.calculateISCNFee()
-  this.uploadStatus = ''
-}
 
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
