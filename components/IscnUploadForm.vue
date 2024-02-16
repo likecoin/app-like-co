@@ -252,7 +252,7 @@ const MODE = {
 }
 
 @Component
-export default class UploadForm extends Vue {
+export default class IscnUploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
   @Prop({ default: MODE.REGISTER }) readonly mode: string | undefined
 

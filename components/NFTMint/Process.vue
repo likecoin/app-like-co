@@ -124,7 +124,7 @@ export enum MintState {
 
 @Component({
   filters: { ellipsis }})
-export default class UploadForm extends Vue {
+export default class NFTMintProcess extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
 
   @Prop(String) readonly iscnId!: string

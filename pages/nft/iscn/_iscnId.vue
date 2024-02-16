@@ -210,7 +210,7 @@ export enum MintState {
   },
   layout: 'wallet',
 })
-export default class NFTTestMintPage extends Vue {
+export default class NFTMintPage extends Vue {
   @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @iscnModule.Action fetchISCNById!: (arg0: string) => Promise<{
     records: ISCNRecordWithID[]
