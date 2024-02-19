@@ -1,3 +1,18 @@
+export const ISCN_LOCALE_CONFIG = {
+  'en': {
+    TITLE_LABEL: 'Title',
+    AUTHOR_LABEL: 'Author',
+    RELEASE_DATE_LABEL: 'Release date',
+    DEPUB_DISCLAIMER: 'This book is published on decentralized networks',
+  },
+  'zh': {
+    TITLE_LABEL: '書名',
+    AUTHOR_LABEL: '作者',
+    RELEASE_DATE_LABEL: '發行日期',
+    DEPUB_DISCLAIMER: '此書採用分散式出版',
+  },
+}
+
 export const ISCN_CSS = `body {
   display: flex;
   flex-direction: column;

@@ -3,8 +3,10 @@ import JSZip from 'jszip'
 import { Book } from 'epubjs'
 
 import { SITE_URL } from '~/constant'
-import { ISCN_CSS, ISCN_LOGO_SVG, ISCN_XHTML } from './asset'
+import { ISCN_CSS, ISCN_LOCALE_CONFIG, ISCN_LOGO_SVG, ISCN_XHTML } from './asset'
 import { extractIscnIdPrefix } from '../ui'
+
+type EPUB_LOCALE = 'zh' | 'en';
 
 const LIKE_GREEN = '#28646e'
 const QR_CODE_SIZE = 256
@@ -81,20 +83,20 @@ function updateContentOPF(doc: Document, iscnPageHref: string, iscnQRCodeHref: s
   spine?.insertAdjacentHTML('beforeend', `  <itemref idref="iscn-page" />\n  `)
 }
 
-function readInfoMap(doc: Document) {
+function readInfoMap(doc: Document, locale: EPUB_LOCALE = 'en') {
   const titles = doc.querySelector("metadata title")
   const title = titles?.textContent
   const authors = doc.querySelector("metadata creator")
   const author = authors?.textContent
-  const releaseDate = new Date().toLocaleDateString('en-US', {
+  const releaseDate = new Date().toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
   const map = new Map()
-  map.set('Title', title)
-  map.set('Author', author)
-  map.set('Release Date', releaseDate)
+  map.set(ISCN_LOCALE_CONFIG[locale].TITLE_LABEL, title)
+  map.set(ISCN_LOCALE_CONFIG[locale].AUTHOR_LABEL, author)
+  map.set(ISCN_LOCALE_CONFIG[locale].RELEASE_DATE_LABEL, releaseDate)
   return map
 }
 
@@ -122,10 +124,10 @@ function setISCNLink(doc: Document, iscnPrefix: string) {
   if (a) a.textContent = iscnPrefix
 }
 
-function addFooterDisclaimer(doc: Document) {
+function addFooterDisclaimer(doc: Document, locale: EPUB_LOCALE = 'en') {
   const footer = doc.querySelector('body #depub-disclaimer')
   if (footer) {
-    footer.textContent = 'This book is published on decentralized networks'
+    footer.textContent = ISCN_LOCALE_CONFIG[locale].DEPUB_DISCLAIMER
   }
 }
 
@@ -144,8 +146,10 @@ export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscn
   const path = (book.container as any).packagePath
   const opfString = await zipObject.file((book.container as any).packagePath)?.async('string') || ''
   const doc = new DOMParser().parseFromString(opfString, 'text/xml')
+  const metadataLocale = doc.querySelector("metadata language")?.textContent || 'en'
+  const locale = metadataLocale?.toLocaleLowerCase()?.includes('zh') ? 'zh' : 'en'
   updateContentOPF(doc, ISCN_XHTML_NAME, ISCN_QR_CODE_PNG_NAME)
-  const infoMap = readInfoMap(doc)
+  const infoMap = readInfoMap(doc, locale)
   const updatedOpfString = new XMLSerializer().serializeToString(doc).toString()
   await zipObject.file(path, updatedOpfString)
 
@@ -157,7 +161,7 @@ export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscn
   const iscnXHTMLDoc =  new DOMParser().parseFromString(ISCN_XHTML, 'text/xml')
   addBookInfo(iscnXHTMLDoc, infoMap)
   setISCNLink(iscnXHTMLDoc, iscnPrefix)
-  addFooterDisclaimer(iscnXHTMLDoc)
+  addFooterDisclaimer(iscnXHTMLDoc, locale)
   const updatedISCNXHTMLString = new XMLSerializer().serializeToString(iscnXHTMLDoc).toString()
 
   await zipObject.file(iscnXHTMLPath, updatedISCNXHTMLString)
