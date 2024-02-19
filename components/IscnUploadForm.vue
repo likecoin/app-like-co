@@ -48,7 +48,7 @@
               <tbody class="w-full">
                 <tr
                   v-for="(
-                    { isFileImage, fileData, fileName, fileSize, exifInfo},
+                    { isFileImage, fileData, fileName, fileSize, exifInfo },
                     index
                   ) of fileRecords"
                   :key="fileName"
@@ -104,6 +104,9 @@
             </table>
           </div>
         </div>
+        <FormField v-if="showAddISCNPageOption">
+          <CheckBox v-model="isAddISCNPageToEpub">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
+        </FormField>
         <!-- upload field__Submit  -->
         <div class="flex gap-[8px] justify-end text-medium-gray mt-[24px]">
           <NuxtLink
@@ -242,6 +245,7 @@ import {
 } from '~/utils/misc'
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { getAccountBalance } from '~/utils/cosmos'
+import { injectISCNQRCodePage } from '~/utils/epub/iscn'
 
 const walletModule = namespace('wallet')
 type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
@@ -282,6 +286,7 @@ export default class IscnUploadForm extends Vue {
   isOpenWarningSnackbar = false
   isOpenKeplr = true
   isSizeExceeded = false
+  isAddISCNPageToEpub = true
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
   uploadStatus: UploadStatus = '';
@@ -301,6 +306,7 @@ export default class IscnUploadForm extends Vue {
   balance = new BigNumber(0)
 
   epubMetadataList: any[] = []
+  modifiedEpubMap: any = {}
 
   get formClasses() {
     return [
@@ -370,6 +376,23 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
+  get showAddISCNPageOption() {
+    return this.mode === MODE.EDIT && this.fileRecords.some(file => file.fileType === 'application/epub+zip')
+  }
+
+  get modifiedFileRecords() {
+    if (!this.isAddISCNPageToEpub || this.mode !== MODE.EDIT) return this.fileRecords
+    return this.fileRecords.map((record) => {
+      if (record.fileType === 'application/epub+zip') {
+        const modifiedEpubRecord = this.modifiedEpubMap[record.ipfsHash]
+        if (modifiedEpubRecord) {
+          return modifiedEpubRecord
+        }
+      }
+      return record
+    })
+  }
+
   @Watch('error')
   showWarning(errormsg: any) {
     if (errormsg) this.isOpenWarningSnackbar = true
@@ -384,6 +407,32 @@ export default class IscnUploadForm extends Vue {
     } else {
       this.arweaveFee = new BigNumber(0)
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async getFileInfo(file: Blob) {
+    const fileBytes = (await fileToArrayBuffer(
+      file,
+    )) as unknown as ArrayBuffer
+    if (fileBytes) {
+      const [
+        fileSHA256,
+        imageType,
+        ipfsHash,
+        // eslint-disable-next-line no-await-in-loop
+      ] = await Promise.all([
+        digestFileSHA256(fileBytes),
+        readImageType(fileBytes),
+        Hash.of(Buffer.from(fileBytes)),
+      ])
+      return {
+        fileBytes,
+        fileSHA256,
+        imageType,
+        ipfsHash,
+      }
+    }
+    return null
   }
 
   async onFileUpload(event: DragEvent) {
@@ -413,21 +462,14 @@ export default class IscnUploadForm extends Vue {
           reader.readAsDataURL(file)
 
           // eslint-disable-next-line no-await-in-loop
-          const fileBytes = (await fileToArrayBuffer(
-            file,
-          )) as unknown as ArrayBuffer
-          if (fileBytes) {
-            const [
+          const info = await this.getFileInfo(file)
+          if (info) {
+            const {
+              fileBytes,
               fileSHA256,
               imageType,
               ipfsHash,
-              // eslint-disable-next-line no-await-in-loop
-            ] = await Promise.all([
-              digestFileSHA256(fileBytes),
-              readImageType(fileBytes),
-              Hash.of(Buffer.from(fileBytes)),
-            ])
-
+            } = info
             fileRecord = {
               ...fileRecord,
               fileName: file.name,
@@ -454,7 +496,7 @@ export default class IscnUploadForm extends Vue {
             }
             if (file.type === 'application/epub+zip') {
              // eslint-disable-next-line no-await-in-loop
-             await this.processEPub({ buffer: fileBytes, file })
+             await this.processEPub({ ipfsHash, buffer: fileBytes, file })
             }
           }
         } else {
@@ -465,10 +507,41 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
-  async processEPub({ buffer, file }: { buffer: ArrayBuffer; file: File }) {
+  async processEPub({ ipfsHash, buffer, file }: { ipfsHash: string, buffer: ArrayBuffer; file: File }) {
     try {
       const book = ePub(buffer)
       await book.ready
+      if (this.mode === MODE.EDIT) {
+        const modifiedEpub = await injectISCNQRCodePage(buffer, book, this.iscnId || '')
+
+        // eslint-disable-next-line no-await-in-loop
+        const info = await this.getFileInfo(modifiedEpub)
+        if (info) {
+          const {
+            fileSHA256: modifiedEpubSHA256,
+            ipfsHash: modifiedEpubIpfsHash,
+          } = info
+
+          const modifiedEpubRecord: any = {
+            fileName: file.name,
+            fileSize: modifiedEpub.size,
+            fileType: modifiedEpub.type,
+            fileBlob: modifiedEpub,
+            ipfsHash: modifiedEpubIpfsHash,
+            fileSHA256: modifiedEpubSHA256,
+            isFileImage: false,
+          }
+
+          const epubReader = new FileReader()
+          epubReader.onload = (e) => {
+            if (!e.target) return
+            modifiedEpubRecord.fileData = e.target.result as string
+            Vue.set(this.modifiedEpubMap, ipfsHash, modifiedEpubRecord)
+          }
+          epubReader.readAsDataURL(modifiedEpub)
+        }
+      }
+
       const epubMetadata: any = {}
 
       // Get metadata
@@ -511,24 +584,19 @@ export default class IscnUploadForm extends Vue {
               type: 'image/jpeg',
             },
           )
-          const fileBytes = (await fileToArrayBuffer(
-            coverFile,
-          )) as unknown as ArrayBuffer
-          if (fileBytes) {
-            const [
+
+          // eslint-disable-next-line no-await-in-loop
+          const coverInfo = await this.getFileInfo(coverFile)
+          if (coverInfo) {
+            const {
               fileSHA256,
               imageType,
-              ipfsHash,
-              // eslint-disable-next-line no-await-in-loop
-            ] = await Promise.all([
-              digestFileSHA256(fileBytes),
-              readImageType(fileBytes),
-              Hash.of(Buffer.from(fileBytes)),
-            ])
+              ipfsHash: ipfsThumbnailHash,
+            } = coverInfo
 
-            epubMetadata.thumbnailIpfsHash = ipfsHash
+            epubMetadata.thumbnailIpfsHash = ipfsThumbnailHash
 
-            const fileRecord: any = {
+            const coverFileRecord: any = {
               fileName: coverFile.name,
               fileSize: coverFile.size,
               fileType: coverFile.type,
@@ -537,13 +605,13 @@ export default class IscnUploadForm extends Vue {
               fileSHA256,
               isFileImage: !!imageType,
             }
-            const reader = new FileReader()
-            reader.onload = (e) => {
+            const coverReader = new FileReader()
+            coverReader.onload = (e) => {
               if (!e.target) return
-              fileRecord.fileData = e.target.result as string
-              this.fileRecords.push(fileRecord)
+              coverFileRecord.fileData = e.target.result as string
+              this.fileRecords.push(coverFileRecord)
             }
-            reader.readAsDataURL(coverFile)
+            coverReader.readAsDataURL(coverFile)
           }
         }
       }
@@ -590,6 +658,9 @@ export default class IscnUploadForm extends Vue {
 
   handleDeleteFile(index: number) {
     const deletedFile = this.fileRecords[index];
+    if (this.modifiedEpubMap[deletedFile.ipfsHash]) {
+      delete this.modifiedEpubMap[deletedFile.ipfsHash]
+    }
     this.fileRecords.splice(index, 1);
 
     const indexToDelete = this.epubMetadataList.findIndex(item => item.thumbnailIpfsHash === deletedFile.ipfsHashList);
@@ -617,7 +688,7 @@ export default class IscnUploadForm extends Vue {
   async estimateArweaveFee(): Promise<void> {
     try {
       const results = await Promise.all(
-        this.fileRecords.map(async (record) => {
+        this.modifiedFileRecords.map(async (record) => {
           const priceResult = await estimateBundlrFilePrice({
             fileSize: record.fileBlob?.size || 0,
             ipfsHash: record.ipfsHash,
@@ -756,7 +827,7 @@ export default class IscnUploadForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    if (!this.fileRecords.some(file => file.fileBlob)) {
+    if (!this.modifiedFileRecords.some(file => file.fileBlob)) {
       this.error = 'NO_FILE_TO_UPLOAD'
       this.isOpenWarningSnackbar = true
       this.uploadStatus = ''
@@ -766,7 +837,7 @@ export default class IscnUploadForm extends Vue {
     try {
       this.uploadStatus = 'uploading';
       // eslint-disable-next-line no-restricted-syntax
-      for (const record of this.fileRecords) {
+      for (const record of this.modifiedFileRecords) {
         // eslint-disable-next-line no-await-in-loop
         await this.submitToArweave(record);
       }
@@ -782,17 +853,17 @@ export default class IscnUploadForm extends Vue {
     }
 
     const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
-    this.fileRecords.forEach((record: any, index:number) => {
+    this.modifiedFileRecords.forEach((record: any, index:number) => {
       if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
         const arweaveId = this.sentArweaveTransactionInfo.get(
           record.ipfsHash,
         )?.arweaveId
         if (arweaveId) {
-          this.fileRecords[index].arweaveId = arweaveId
+          this.modifiedFileRecords[index].arweaveId = arweaveId
         }
       }
     })
-    this.$emit('submit', { fileRecords: this.fileRecords, arweaveIds: uploadArweaveIdList, epubMetadata: this.epubMetadataList[0] })
+    this.$emit('submit', { fileRecords: this.modifiedFileRecords, arweaveIds: uploadArweaveIdList, epubMetadata: this.epubMetadataList[0] })
   }
 
   handleSignDialogClose() {
