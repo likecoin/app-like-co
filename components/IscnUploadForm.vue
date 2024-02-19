@@ -255,6 +255,7 @@ const MODE = {
 export default class IscnUploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
   @Prop({ default: MODE.REGISTER }) readonly mode: string | undefined
+  @Prop(String) readonly iscnId: string | undefined
 
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
