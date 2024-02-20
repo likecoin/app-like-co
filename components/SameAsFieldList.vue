@@ -6,15 +6,6 @@
       class="flex items-center gap-[12px] p-[8px] rounded-[8px] border-2 border-shade-gray mb-[12px]"
     >
       <div class="flex flex-col flex-grow">
-        <FormField :label="$t('IscnRegisterForm.label.url')">
-          <div class="flex flex-col gap-[8px]">
-            <TextField
-              v-model="item.url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </div>
-        </FormField>
-
         <div class="flex items-center justify-start gap-[8px]">
           <FormField class="w-[200px]" :label="$t('IscnRegisterForm.label.fileName')">
             <TextField
@@ -30,14 +21,15 @@
               @input="(value) => handleSelectValue({ value, index: i })"
             />
           </FormField>
-          <Label
-            v-if="item.originFileName"
-            class="text-medium-gray"
-            preset="h6"
-          >
-            {{ $t('IscnRegisterForm.label.originFile', { name: item.originFileName }) }}
-          </Label>
         </div>
+         <FormField :label="$t('IscnRegisterForm.label.url')">
+          <div class="flex flex-col gap-[8px]">
+            <TextField
+              v-model="item.url"
+              :placeholder="$t('IscnRegisterForm.placeholder.url')"
+            />
+          </div>
+        </FormField>
       </div>
       <div
         class="self-end flex-shrink ml-auto cursor-pointer"
@@ -52,32 +44,27 @@
       text-preset="p6"
       size="mini"
       prepend-class="mr-[4px]"
-      @click="addFields"
+      @click.prevent="addFields"
     >
       <template #prepend>
         <IconAddMini />
       </template>
     </Button>
-
-    <Button
-      class="ml-auto mt-[24px]"
-      type="button"
-      size="small"
-      preset="secondary"
-      content-class="font-semibold"
-      :text="$t('IscnRegisterForm.button.confirm')"
-      @click.prevent="confirmChange"
-    />
   </div>
 </template>
 
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { SAME_AS_FILE_TYPES } from '~/constant'
 
+const FILE_TYPES = [
+  'epub',
+  'pdf',
+]
+
 @Component
-export default class WalletFieldList extends Vue {
+export default class SameAsFieldList extends Vue {
   @Prop({
     default: () => [],
   })
@@ -88,16 +75,16 @@ export default class WalletFieldList extends Vue {
   @Prop(String) readonly name!: string | undefined
 
   sameAsList: any = [{
-      url: '',
-      id: 1,
-      filename: this.formatName,
-      filetype: SAME_AS_FILE_TYPES[0],
-    }]
+    url: '',
+    id: 1,
+    filename: this.formatName,
+    filetype: SAME_AS_FILE_TYPES[0],
+  }]
 
-  fileTypeToFind = [
-    'epub',
-    'pdf',
-  ]
+  @Watch('sameAsList', { deep: true })
+  onSameAsListChanged(newValue: Array<any>) {
+    this.$emit('on-update', newValue);
+  }
 
   // eslint-disable-next-line class-methods-use-this
   get sameAsFiletypeOptions() {
@@ -125,21 +112,18 @@ export default class WalletFieldList extends Vue {
         id: `${list.url}-${list.filename}`,
         filename: list.filename,
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
-        originFileName: list.originFileName,
       }))
     } else if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
-        ?.filter((file) => this.fileTypeToFind.includes(this.formatFileType(file.fileType)) && file.arweaveId)
+        ?.filter((file) => FILE_TYPES.includes(this.formatFileType(file.fileType)) && file.arweaveId)
         .map((file, index) => {
           const url = this.filteredUrlOptions.find((ar) => ar.includes(file.arweaveId));
           const formattedFileType = this.formatFileType(file.fileType);
-
           return {
             url,
             id: `${url}-${index}`,
-            filename: this.formatName,
+            filename: this.extractFilename(file.fileName),
             filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
-            originFileName: file.fileName || '',
           };
         });
     } else {
@@ -148,7 +132,6 @@ export default class WalletFieldList extends Vue {
           id: 1,
           filename: this.formatName,
           filetype: SAME_AS_FILE_TYPES[0],
-          originFileName:'',
         }]
     }
   }
@@ -166,21 +149,18 @@ export default class WalletFieldList extends Vue {
     })
   }
 
-  deleteEmptyField() {
-    if (this.sameAsList.length > 1) {
-      this.sameAsList = this.sameAsList?.filter(
-        (items: any) => items.filename && items.url,
-      )
-    }
-  }
-
   deleteField(index: number) {
     this.sameAsList.splice(index, 1)
   }
 
-  confirmChange() {
-    this.deleteEmptyField()
-    this.$emit('onConfirm', this.sameAsList)
+  // eslint-disable-next-line class-methods-use-this
+  extractFilename(fullFilename: string) {
+    if(!fullFilename) return ''
+    const parts = fullFilename.split('.')
+    if (parts.length === 1) {
+      return fullFilename
+    }
+    return parts.slice(0, -1)
   }
 
   // eslint-disable-next-line class-methods-use-this

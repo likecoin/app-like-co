@@ -247,36 +247,17 @@
             />
           </FormField>
           <FormField
+            v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.sameAs')"
             content-classes="flex flex-row flex-wrap"
           >
-            <span
-              v-if="formattedSameAsList.length"
-              class="mr-[8px] mb-[4px]"
-            >
-              <Button
-                size="mini"
-                preset="secondary"
-                tag="div"
-                text-preset="h6"
-                type="button"
-                :text="`${formattedSameAsList.length} urls`"
-                @click="handleOpenSameAsDialog()"
-              />
-            </span>
-            <Button
-              v-else
-              type="button"
-              class="mb-[4px]"
-              size="mini"
-              preset="secondary"
-              content-class="py-[4px]"
-              @click="handleOpenSameAsDialog()"
-            >
-              <IconAddMini />
-            </Button>
-
-
+            <SameAsFieldList
+              :name="name"
+              :url-options="contentFingerprintLinks"
+              :file-records="fileRecords"
+              :current-list="sameAsList"
+              @on-update="(value) => (sameAsList = value)"
+            />
           </FormField>
           <FormField
             v-if="type === 'Book'"
@@ -554,45 +535,6 @@
           </div>
         </Card>
       </Dialog>
-      <Dialog
-        v-model="isOpenSameAsDialog"
-        :has-padding="false"
-        preset="custom"
-        :is-disabled-backdrop-click="true"
-      >
-        <Card
-          :class="[
-            'flex',
-            'flex-col',
-            'w-[616px]',
-            'max-h-[75vh]',
-            'pb-[40px]',
-            'overflow-y-scroll',
-            'scrollbar-hidden',
-          ]"
-        >
-          <Label
-            class="w-min mb-[16px]"
-            :text="$t('IscnRegisterForm.sameAsDialog.title')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconAdd />
-            </template>
-          </Label>
-          <SameAsFieldList
-            :name="name"
-            :url-options="contentFingerprintLinks"
-            :file-records="fileRecords"
-            :current-list="sameAsList"
-            @onConfirm="confirmSameAsChange"
-          />
-        </Card>
-      </Dialog>
 
       <Dialog
         v-model="isOpenSignDialog"
@@ -820,7 +762,6 @@ export default class IscnRegisterForm extends Vue {
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
-  isOpenSameAsDialog = false
   isOpenWarningSnackbar = false
   isOpenKeplr = true
   activeEditingAuthorIndex = -1
@@ -912,7 +853,9 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get formattedSameAsList() {
-    return this.sameAsList.map((sameAs: { filename: any; filetype: any; url: any }) => {
+    return this.sameAsList?.filter(
+        (items: any) => items.filename && items.url,
+      )?.map((sameAs: { filename: any; filetype: any; url: any }) => {
       if (sameAs.filename && sameAs.filetype) {
         return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`;
       }
@@ -1262,16 +1205,6 @@ export default class IscnRegisterForm extends Vue {
 
   formatArweave(arweaveId: string) {
     return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
-  }
-
-  handleOpenSameAsDialog() {
-    this.isOpenSameAsDialog = true
-  }
-
-  confirmSameAsChange(value: any) {
-    logTrackerEvent(this, 'ISCNCreate', 'ConfirmSameAsChange', '', 1);
-    this.sameAsList = value
-    this.isOpenSameAsDialog = false
   }
 
   async getLikerIdsAddresses() {

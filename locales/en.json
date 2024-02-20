@@ -225,7 +225,7 @@
   "IscnRegisterForm.label.isbn": "ISBN",
   "IscnRegisterForm.label.license": "License",
   "IscnRegisterForm.label.likerID": "LikerID",
-  "IscnRegisterForm.label.sameAs" : "Same As URLs",
+  "IscnRegisterForm.label.sameAs" : "Downloadable URL",
   "IscnRegisterForm.label.name": "Name",
   "IscnRegisterForm.label.fileName": "File name",
   "IscnRegisterForm.label.fileType": "File type",
