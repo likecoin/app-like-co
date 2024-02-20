@@ -136,88 +136,19 @@
           {{ $t('IscnRegisterForm.label.emptyFile') }}
         </div>
       </div>
-      <!-- fingerPrint -->
+      <!-- type -->
       <FormField
-        :label="$t('IscnRegisterForm.label.fingerprints')"
+        :label="$t('IscnRegisterForm.label.type')"
         class="mb-[12px]"
       >
-        <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formatIpfs(ipfs)" />
-        <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formatArweave(ar)" />
-        <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
-        <div
-          v-if="shouldShowContentFingerprintInput"
-          :class="[
-            'flex',
-            { 'mt-[12px]': customContentFingerprints.length },
-            'gap-[8px]'
-          ]"
-        >
-          <TextField
-            v-model="contentFingerprintInput"
-            class="w-full"
-          />
-          <Button
-            preset="secondary"
-            type="button"
-            @click="addContentFingerprint"
-          >
-            <IconAddMini />
-          </Button>
-        </div>
-      </FormField>
-      <!-- Numbers Protocol -->
-      <FormField
-        v-if="shouldShowUploadToNumbers"
-        :label="$t('IscnRegisterForm.label.numbersProtocol')"
-        class="mb-[12px]"
-      >
-        <CheckBox v-model="isRegisterNumbersProtocolAsset">
-          <i18n path="IscnRegisterForm.label.numbersProtocol.details">
-            <Link
-              place="link"
-              href="https://www.numbersprotocol.io/"
-              :is-inline="true"
-            >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
-          </i18n>
-        </CheckBox>
-      </FormField>
-      <!-- Dialog -->
-      <Dialog
-        v-model="isOpenFileInfoDialog"
-        :has-padding="false"
-        preset="custom"
-      >
-        <MetadataCard
-          :class="[
-            'w-[616px]',
-            'max-h-[75vh]',
-            'overflow-y-scroll',
-            'scrollbar-hidden',
-          ]"
-          :img-src="displayImageSrc"
-          :all-exif="displayExifInfo"
+        <Selector
+          class="h-[40px] w-[160px]"
+          :options="typeOptions"
+          :placeholder="defaultType"
+          @input="setType"
         />
-      </Dialog>
-    </Card>
-    <!-- ////// Input Card /////// -->
-    <Card
-      class="flex flex-col mt-[16px] p-[32px]"
-      :has-padding="false"
-    >
-      <!-- header -->
-      <Label
-        class="w-min mb-[16px]"
-        :text="$t('IscnRegisterForm.label.content')"
-        tag="div"
-        preset="p5"
-        valign="middle"
-        content-class="font-semibold whitespace-nowrap text-like-green"
-        prepend-class="text-like-green"
-      >
-        <template #prepend>
-          <ISCNTypeIcon />
-        </template>
-      </Label>
+      </FormField>
+      
       <!-- form fieldset -->
       <div>
         <form @submit.prevent="onSubmit">
@@ -348,14 +279,6 @@
 
           </FormField>
           <FormField
-            :label="$t('IscnRegisterForm.label.url')"
-          >
-            <TextField
-              v-model="url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </FormField>
-          <FormField
             v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.isbn')"
           >
@@ -365,17 +288,6 @@
             />
           </FormField>
           <Divider class="my-[12px]" />
-          <FormField
-            :label="$t('IscnRegisterForm.label.type')"
-            class="mb-[12px]"
-          >
-            <Selector
-              class="h-[40px] w-[160px]"
-              :options="typeOptions"
-              :placeholder="defaultType"
-              @input="setType"
-            />
-          </FormField>
           <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
@@ -393,6 +305,76 @@
               :placeholder="$t('iscn.meta.license.placeholder')"
             />
           </FormField>
+          <!-- fingerPrint -->
+          <FormField
+            :label="$t('IscnRegisterForm.label.fingerprints')"
+            class="mb-[12px]"
+          >
+            <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formatIpfs(ipfs)" />
+            <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formatArweave(ar)" />
+            <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
+            <div
+              v-if="shouldShowContentFingerprintInput"
+              :class="[
+                'flex',
+                { 'mt-[12px]': customContentFingerprints.length },
+                'gap-[8px]'
+              ]"
+            >
+              <TextField
+                v-model="contentFingerprintInput"
+                class="w-full"
+              />
+              <Button
+                preset="secondary"
+                type="button"
+                @click="addContentFingerprint"
+              >
+                <IconAddMini />
+              </Button>
+            </div>
+          </FormField>
+          <!-- Numbers Protocol -->
+          <FormField
+            v-if="shouldShowUploadToNumbers"
+            :label="$t('IscnRegisterForm.label.numbersProtocol')"
+            class="mb-[12px]"
+          >
+            <CheckBox v-model="isRegisterNumbersProtocolAsset">
+              <i18n path="IscnRegisterForm.label.numbersProtocol.details">
+                <Link
+                  place="link"
+                  href="https://www.numbersprotocol.io/"
+                  :is-inline="true"
+                >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
+              </i18n>
+            </CheckBox>
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.url')"
+          >
+            <TextField
+              v-model="url"
+              :placeholder="$t('IscnRegisterForm.placeholder.url')"
+            />
+          </FormField>
+          <!-- Dialog -->
+          <Dialog
+            v-model="isOpenFileInfoDialog"
+            :has-padding="false"
+            preset="custom"
+          >
+            <MetadataCard
+              :class="[
+                'w-[616px]',
+                'max-h-[75vh]',
+                'overflow-y-scroll',
+                'scrollbar-hidden',
+              ]"
+              :img-src="displayImageSrc"
+              :all-exif="displayExifInfo"
+            />
+          </Dialog>
           <Divider class="my-[12px]" />
           <!-- register -->
           <FormField
