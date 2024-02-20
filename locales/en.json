@@ -189,6 +189,7 @@
   "IscnRegisterForm.button.back": "Back",
   "IscnRegisterForm.button.confirm": "Confirm",
   "IscnRegisterForm.button.loading": "Loading files...",
+  "IscnRegisterForm.button.more.settings": "Other settings",
   "IscnRegisterForm.button.register": "Register",
   "IscnRegisterForm.button.signing": "Waiting for signature",
   "IscnRegisterForm.button.success": "Success",

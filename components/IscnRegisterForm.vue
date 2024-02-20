@@ -148,7 +148,7 @@
           @input="setType"
         />
       </FormField>
-      
+      <Divider class="my-[12px]" />
       <!-- form fieldset -->
       <div>
         <form @submit.prevent="onSubmit">
@@ -173,13 +173,13 @@
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
-          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.author')"
+            content-classes="flex flex-row flex-wrap"
           >
             <span
               v-if="author.name"
-              class="mr-[8px] mb-[4px]"
+              class="mr-[8px]"
             >
               <Button
                 size="mini"
@@ -194,7 +194,6 @@
             <Button
               v-else
               type="button"
-              class="mb-[4px]"
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
@@ -234,7 +233,6 @@
               <IconAddMini />
             </Button>
           </FormField>
-          <Divider class="my-[12px]" />
           <!-- add tags -->
           <FormField
             :label="$t('IscnRegisterForm.label.tags')"
@@ -246,6 +244,7 @@
               :tags-limit="charactersLimit.tagNumber"
             />
           </FormField>
+          <Divider class="my-[12px]" />
           <FormField
             v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.sameAs')"
@@ -259,16 +258,6 @@
               @on-update="(value) => (sameAsList = value)"
             />
           </FormField>
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.isbn')"
-          >
-            <TextField
-              v-model="isbn"
-              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
-            />
-          </FormField>
-          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
@@ -315,49 +304,6 @@
               </Button>
             </div>
           </FormField>
-          <!-- Numbers Protocol -->
-          <FormField
-            v-if="shouldShowUploadToNumbers"
-            :label="$t('IscnRegisterForm.label.numbersProtocol')"
-            class="mb-[12px]"
-          >
-            <CheckBox v-model="isRegisterNumbersProtocolAsset">
-              <i18n path="IscnRegisterForm.label.numbersProtocol.details">
-                <Link
-                  place="link"
-                  href="https://www.numbersprotocol.io/"
-                  :is-inline="true"
-                >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
-              </i18n>
-            </CheckBox>
-          </FormField>
-          <FormField
-            :label="$t('IscnRegisterForm.label.url')"
-          >
-            <TextField
-              v-model="url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </FormField>
-          <!-- Dialog -->
-          <Dialog
-            v-model="isOpenFileInfoDialog"
-            :has-padding="false"
-            preset="custom"
-          >
-            <MetadataCard
-              :class="[
-                'w-[616px]',
-                'max-h-[75vh]',
-                'overflow-y-scroll',
-                'scrollbar-hidden',
-              ]"
-              :img-src="displayImageSrc"
-              :all-exif="displayExifInfo"
-            />
-          </Dialog>
-          <Divider class="my-[12px]" />
-          <!-- register -->
           <FormField
             :label="$t('IscnRegisterForm.label.registrant')"
             class="mb-[12px]"
@@ -366,6 +312,50 @@
               {{ address }}
             </div>
           </FormField>
+          <Divider class="my-[12px]" />
+          <div v-if="shouldShowMoreSettings" class="flex flex-col">
+            <FormField
+              :label="$t('IscnRegisterForm.label.url')"
+            >
+              <TextField
+                v-model="url"
+                :placeholder="$t('IscnRegisterForm.placeholder.url')"
+              />
+            </FormField>
+            <FormField
+              v-if="type === 'Book'"
+              :label="$t('IscnRegisterForm.label.isbn')"
+            >
+              <TextField
+                v-model="isbn"
+                :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+              />
+            </FormField>
+            <FormField
+              v-if="shouldShowUploadToNumbers"
+              :label="$t('IscnRegisterForm.label.numbersProtocol')"
+              class="mb-[12px]"
+            >
+              <CheckBox v-model="isRegisterNumbersProtocolAsset">
+                <i18n path="IscnRegisterForm.label.numbersProtocol.details">
+                  <Link
+                    place="link"
+                    href="https://www.numbersprotocol.io/"
+                    :is-inline="true"
+                  >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
+                </i18n>
+              </CheckBox>
+            </FormField>
+          </div>
+          <div v-else class="flex items-center justify-center">
+            <Button preset="tertiary" size="mini" @click.prevent="() => shouldShowMoreSettings = true">
+              <div class="flex justify-center items-center gap-[6px]">
+                <IconAdd />
+                {{ $t('IscnRegisterForm.button.more.settings') }}
+              </div>
+            </Button>
+          </div>
+          <!-- submit -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div v-if="uploadStatus === 'loading'">
@@ -434,6 +424,22 @@
         </Link>
       </Snackbar>
       <!-- Dialogs -->
+      <Dialog
+        v-model="isOpenFileInfoDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <MetadataCard
+          :class="[
+            'w-[616px]',
+            'max-h-[75vh]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
+          :img-src="displayImageSrc"
+          :all-exif="displayExifInfo"
+        />
+      </Dialog>
       <Dialog
         v-model="isOpenAuthorDialog"
         :has-padding="false"
@@ -780,6 +786,7 @@ export default class IscnRegisterForm extends Vue {
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
   sameAsList: any = []
   language: string = ''
+  shouldShowMoreSettings: boolean = false
 
   get ipfsHashList() {
     const list = []
@@ -1015,7 +1022,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get shouldShowUploadToNumbers() {
-    return this.fileRecords.some(file => file.isFileImage || file.exifInfo)
+    return this.type !== 'Book' && this.fileRecords.some(file => file.isFileImage || file.exifInfo)
   }
 
   get uploadArweaveIdList() {
