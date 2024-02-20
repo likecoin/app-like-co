@@ -3,9 +3,9 @@
     <div
       v-for="(item, i) in sameAsList"
       :key="item.id"
-      class="flex items-center gap-[12px] p-[8px] rounded-[8px] border-2 border-shade-gray mb-[12px]"
+      class="flex flex-col items-center gap-[12px] p-[12px] rounded-[8px] border-2 border-shade-gray mb-[12px]"
     >
-      <div class="flex flex-col flex-grow">
+      <div class="flex flex-col flex-grow w-full">
         <div class="flex items-center justify-start gap-[8px]">
           <FormField class="w-[200px]" :label="$t('IscnRegisterForm.label.fileName')">
             <TextField
@@ -22,20 +22,36 @@
             />
           </FormField>
         </div>
-         <FormField :label="$t('IscnRegisterForm.label.url')">
-          <div class="flex flex-col gap-[8px]">
-            <TextField
-              v-model="item.url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </div>
-        </FormField>
+        <div class="flex justify-start items-center gap-[8px]">
+          <FormField  :label="$t('IscnRegisterForm.label.url')">
+            <div v-if="item.shouldShowEditURL" class="flex justify-between items-center gap-[8px]">
+              <TextField
+                v-model="item.url"
+                :placeholder="$t('IscnRegisterForm.placeholder.url')"
+                class="w-full"
+              />
+              <Button v-if="item.url" preset="plain" @click.prevent="() => item.shouldShowEditURL = false">
+                <template #prepend>
+                  <IconEye />
+                </template>
+              </Button>
+            </div>
+            <div v-else class="flex items-center justify-start">
+              <ContentFingerprintLink :item="item.url" />
+              <Button preset="plain" @click.prevent="() => item.shouldShowEditURL = true">
+                <template #prepend>
+                  <IconEdit />
+                </template>
+              </Button>
+            </div>
+          </FormField>
+        </div>
       </div>
       <div
-        class="self-end flex-shrink ml-auto cursor-pointer"
+        class="self-center flex-shrink ml-auto cursor-pointer"
         @click="deleteField(i)"
       >
-        <IconDelete />
+        <IconClose />
       </div>
     </div>
     <Button
@@ -79,6 +95,7 @@ export default class SameAsFieldList extends Vue {
     id: 1,
     filename: this.formatName,
     filetype: SAME_AS_FILE_TYPES[0],
+    shouldShowEditURL: !this.formatName,
   }]
 
   @Watch('sameAsList', { deep: true })
@@ -112,6 +129,7 @@ export default class SameAsFieldList extends Vue {
         id: `${list.url}-${list.filename}`,
         filename: list.filename,
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
+        shouldShowEditURL: !list.filename,
       }))
     } else if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
@@ -124,15 +142,9 @@ export default class SameAsFieldList extends Vue {
             id: `${url}-${index}`,
             filename: this.extractFilename(file.fileName),
             filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
+            shouldShowEditURL: !file.fileName,
           };
         });
-    } else {
-      this.sameAsList = [{
-          url: '',
-          id: 1,
-          filename: this.formatName,
-          filetype: SAME_AS_FILE_TYPES[0],
-        }]
     }
   }
 
@@ -146,6 +158,7 @@ export default class SameAsFieldList extends Vue {
       id: Date.now(),
       filename: '',
       filetype: SAME_AS_FILE_TYPES[0],
+      shouldShowEditURL: true,
     })
   }
 
