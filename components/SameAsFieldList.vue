@@ -7,13 +7,19 @@
     >
       <div class="flex flex-col flex-grow w-full">
         <div class="flex items-center justify-start gap-[8px]">
-          <FormField class="w-[200px]" :label="$t('IscnRegisterForm.label.fileName')">
+          <FormField
+            class="w-[200px]"
+            :label="$t('IscnRegisterForm.label.fileName')"
+          >
             <TextField
               v-model="item.filename"
               :placeholder="$t('IscnRegisterForm.placeholder.fileName')"
             />
           </FormField>
-          <FormField class="w-min" :label="$t('IscnRegisterForm.label.fileType')">
+          <FormField
+            class="w-min"
+            :label="$t('IscnRegisterForm.label.fileType')"
+          >
             <Selector
               class="h-[40px] w-[80px]"
               :options="sameAsFiletypeOptions"
@@ -23,14 +29,21 @@
           </FormField>
         </div>
         <div class="flex justify-start items-center gap-[8px]">
-          <FormField  :label="$t('IscnRegisterForm.label.url')">
-            <div v-if="item.shouldShowEditURL" class="flex justify-between items-center gap-[8px]">
+          <FormField :label="$t('IscnRegisterForm.label.url')">
+            <div
+              v-if="item.shouldShowEditURL"
+              class="flex justify-between items-center gap-[8px]"
+            >
               <TextField
                 v-model="item.url"
                 :placeholder="$t('IscnRegisterForm.placeholder.url')"
                 class="w-full"
               />
-              <Button v-if="item.url" preset="plain" @click.prevent="() => item.shouldShowEditURL = false">
+              <Button
+                v-if="item.url"
+                preset="plain"
+                @click.prevent="() => (item.shouldShowEditURL = false)"
+              >
                 <template #prepend>
                   <IconEye />
                 </template>
@@ -38,7 +51,10 @@
             </div>
             <div v-else class="flex items-center justify-start">
               <ContentFingerprintLink :item="item.url" />
-              <Button preset="plain" @click.prevent="() => item.shouldShowEditURL = true">
+              <Button
+                preset="plain"
+                @click.prevent="() => (item.shouldShowEditURL = true)"
+              >
                 <template #prepend>
                   <IconEdit />
                 </template>
@@ -75,8 +91,8 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { SAME_AS_FILE_TYPES } from '~/constant'
 
 const FILE_TYPES = [
-  'epub',
-  'pdf',
+'epub',
+'pdf',
 ]
 
 @Component
@@ -91,16 +107,16 @@ export default class SameAsFieldList extends Vue {
   @Prop(String) readonly name!: string | undefined
 
   sameAsList: any = [{
-    url: '',
-    id: 1,
-    filename: this.formatName,
-    filetype: SAME_AS_FILE_TYPES[0],
-    shouldShowEditURL: !this.formatName,
-  }]
+      url: '',
+      id: 1,
+      filename: this.formatName,
+      filetype: SAME_AS_FILE_TYPES[0],
+      shouldShowEditURL: !this.formatName,
+    }]
 
   @Watch('sameAsList', { deep: true })
   onSameAsListChanged(newValue: Array<any>) {
-    this.$emit('on-update', newValue);
+    this.$emit('on-update', newValue)
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -110,16 +126,19 @@ export default class SameAsFieldList extends Vue {
 
   get formatName() {
     if (!this.name) {
-      return '';
+      return ''
     }
     if (/[\u4E00-\u9FA5]/.test(this.name)) {
-      return this.name;
+      return this.name
     }
-      return this.name.replace(/[.,!?;:'"(){}[\]<>]/g, '').replace(/\s+/g, '_').toUpperCase();
+    return this.name
+      .replace(/[.,!?;:'"(){}[\]<>]/g, '')
+      .replace(/\s+/g, '_')
+      .toUpperCase()
   }
 
   get filteredUrlOptions() {
-    return this.urlOptions?.filter(url => url.startsWith('ar://'))
+    return this.urlOptions?.filter((url) => url.startsWith('ar://'))
   }
 
   mounted() {
@@ -133,18 +152,24 @@ export default class SameAsFieldList extends Vue {
       }))
     } else if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
-        ?.filter((file) => FILE_TYPES.includes(this.formatFileType(file.fileType)) && file.arweaveId)
+        ?.filter(
+          (file) =>
+            FILE_TYPES.includes(this.formatFileType(file.fileType)) &&
+            file.arweaveId,
+        )
         .map((file, index) => {
-          const url = this.filteredUrlOptions.find((ar) => ar.includes(file.arweaveId));
-          const formattedFileType = this.formatFileType(file.fileType);
+          const url = this.filteredUrlOptions.find((ar) =>
+            ar.includes(file.arweaveId),
+          )
+          const formattedFileType = this.formatFileType(file.fileType)
           return {
             url,
             id: `${url}-${index}`,
             filename: this.extractFilename(file.fileName),
             filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
             shouldShowEditURL: !file.fileName,
-          };
-        });
+          }
+        })
     }
   }
 
@@ -168,7 +193,7 @@ export default class SameAsFieldList extends Vue {
 
   // eslint-disable-next-line class-methods-use-this
   extractFilename(fullFilename: string) {
-    if(!fullFilename) return ''
+    if (!fullFilename) return ''
     const parts = fullFilename.split('.')
     if (parts.length === 1) {
       return fullFilename
