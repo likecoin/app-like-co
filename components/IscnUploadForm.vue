@@ -286,6 +286,7 @@ export default class IscnUploadForm extends Vue {
   uploadStatus: UploadStatus = '';
   arweaveFeeTargetAddress: string = ''
   arweaveFee = new BigNumber(0)
+  arweaveFeeMap: Record<string, string> = {}
   sentArweaveTransactionInfo = new Map<
     string, { transactionHash?: string, arweaveId?: string }
   >()
@@ -632,6 +633,7 @@ export default class IscnUploadForm extends Vue {
         const { address, arweaveId, LIKE, ipfsHash } = result;
         if (LIKE) {
           totalFee = totalFee.plus(new BigNumber(LIKE));
+          this.arweaveFeeMap[ipfsHash] = LIKE;
         }
         if (arweaveId) {
           this.sentArweaveTransactionInfo.set(ipfsHash, { transactionHash: '', arweaveId });
@@ -666,10 +668,11 @@ export default class IscnUploadForm extends Vue {
     await this.initIfNecessary()
     if (!this.signer) throw new Error('SIGNER_NOT_INITED');
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
+    if (!this.arweaveFeeMap[record.ipfsHash]) throw new Error('ARWEAVE_FEE_NOT_SET');
     this.uploadStatus = 'signing';
     const memo = JSON.stringify({ ipfs: record.ipfsHash, fileSize: record.fileBlob?.size || 0 });
     try {
-      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFee.toFixed(), this.signer, memo);
+      const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFeeMap[record.ipfsHash], this.signer, memo);
       if (transactionHash) {
         const existingData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
         this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...existingData, transactionHash });
