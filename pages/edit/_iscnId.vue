@@ -281,10 +281,10 @@ export default class EditIscnPage extends Vue {
       description: this.description,
       keywords: this.contentMetadata.keywords,
       url: this.contentMetadata.url,
-      contentFingerprints: [
+      contentFingerprints: Array.from(new Set([
         ...this.contentFingerprints,
         ...this.customContentFingerprints,
-      ],
+      ])),
       stakeholders: this.iscnRecord?.stakeholders,
       type: this.contentMetadata['@type'],
       usageInfo: this.contentMetadata.usageInfo,
