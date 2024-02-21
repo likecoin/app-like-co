@@ -398,7 +398,7 @@ export default class IscnUploadForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
-  @Watch('fileRecords')
+  @Watch('modifiedFileRecords')
   async estimateArFee(fileRecords: any) {
     if (fileRecords.length) {
       this.uploadStatus = 'loading'
