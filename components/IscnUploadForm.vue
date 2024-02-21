@@ -601,7 +601,7 @@ export default class IscnUploadForm extends Vue {
               fileSize: coverFile.size,
               fileType: coverFile.type,
               fileBlob: coverFile,
-              ipfsHash,
+              ipfsHash: ipfsThumbnailHash,
               fileSHA256,
               isFileImage: !!imageType,
             }
