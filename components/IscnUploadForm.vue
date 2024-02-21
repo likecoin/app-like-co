@@ -286,7 +286,7 @@ export default class IscnUploadForm extends Vue {
   isOpenWarningSnackbar = false
   isOpenKeplr = true
   isSizeExceeded = false
-  isAddISCNPageToEpub = true
+  isAddISCNPageToEpub = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
   uploadStatus: UploadStatus = '';
