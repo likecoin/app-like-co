@@ -428,7 +428,7 @@ export default class EditIscnPage extends Vue {
     try {
       await this.initIfNecessary()
       const result = await signISCN(this.payload, this.signer, this.address, {
-        iscnId: this.iscnId,
+        iscnId: extractIscnIdPrefix(this.iscnId),
         gas: new BigNumber(ISCN_GAS_FEE).multipliedBy(UPDATE_ISCN_GAS_MULTIPLIER).toFixed(0),
       })
       if (result) {
