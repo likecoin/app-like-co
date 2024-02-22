@@ -165,6 +165,9 @@ export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscn
   const updatedISCNXHTMLString = new XMLSerializer().serializeToString(iscnXHTMLDoc).toString()
 
   await zipObject.file(iscnXHTMLPath, updatedISCNXHTMLString)
+  await zipObject.file('mimetype', 'application/epub+zip', {
+    compression: 'STORE',
+  });
   const epubBlob = await zipObject.generateAsync({
     mimeType: 'application/epub+zip',
     type: 'blob',

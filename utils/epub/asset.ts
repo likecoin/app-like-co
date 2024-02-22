@@ -57,7 +57,7 @@ export const ISCN_XHTML = `<?xml version="1.0" encoding="utf-8"?>
   <div id="iscn-page-body">
     <div id="iscn-page-book-info" />
     <div id="iscn-qr-code">
-      <img src="iscn-qr-code.png" width="180px" height="180px" />
+      <img src="iscn-qr-code.png" width="180" height="180" />
       <br />
       <a id="iscn-prefix" />
     </div>
