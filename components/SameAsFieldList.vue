@@ -192,14 +192,14 @@ export default class SameAsFieldList extends Vue {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  extractFilename(fullFilename: string) {
-    if (!fullFilename) return ''
-    const parts = fullFilename.split('.')
-    if (parts.length === 1) {
-      return fullFilename
+  extractFilename(fullFilename: string): string {
+    if (!fullFilename) return '';
+    const parts = fullFilename.split('.');
+    if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
+        return fullFilename;
     }
-    return parts.slice(0, -1)
-  }
+    return parts.slice(0, -1).join('.');
+}
 
   // eslint-disable-next-line class-methods-use-this
   formatFileType(fileType: string) {
