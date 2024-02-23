@@ -1,10 +1,5 @@
 <template>
-  <div
-    :class="[
-      'flex',
-      'flex-col',
-    ]"
-  >
+  <div :class="['flex', 'flex-col']">
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <IscnFormHeader :step="step" :total-step="4" />
@@ -37,13 +32,10 @@
             <table class="w-full">
               <tbody class="w-full">
                 <tr
-                  v-for="({
-                    isFileImage,
-                    fileData,
-                    fileName,
-                    fileSize,
-                    exifInfo,
-                  }, index) of fileRecords"
+                  v-for="(
+                    { isFileImage, fileData, fileName, fileSize, exifInfo },
+                    index
+                  ) of fileRecords"
                   :key="fileName"
                   class="border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
                 >
@@ -76,7 +68,9 @@
                     </div>
                   </td>
                   <td class="py-[4px]">
-                    <div class="flex gap-[8px] items-center justify-end ml-[4px]">
+                    <div
+                      class="flex gap-[8px] items-center justify-end ml-[4px]"
+                    >
                       <div
                         v-if="exifInfo"
                         :class="['cursor-pointer']"
@@ -84,15 +78,13 @@
                       >
                         <IconInfo />
                       </div>
-                      <div
-                        v-if="exifInfo || isFileImage"
-                      >
+                      <div v-if="exifInfo || isFileImage">
                         <input
                           v-model="isRegisterNumbersProtocolAsset"
                           type="checkbox"
                           name="numbers"
                           disabled
-                        >
+                        />
                       </div>
                     </div>
                   </td>
@@ -101,11 +93,7 @@
             </table>
             <div
               v-if="uploadStatus === 'loading'"
-              :class="[
-                'flex',
-                'items-center',
-                'mt-[32px]',
-              ]"
+              :class="['flex', 'items-center', 'mt-[32px]']"
             >
               <ProgressIndicator />
               <div
@@ -115,10 +103,7 @@
             </div>
             <Label
               v-else
-              :class="[
-                'w-min',
-                'mt-[32px]',
-              ]"
+              :class="['w-min', 'mt-[32px]']"
               :text="$t('IscnRegisterForm.title.ready')"
               tag="div"
               preset="p5"
@@ -136,88 +121,16 @@
           {{ $t('IscnRegisterForm.label.emptyFile') }}
         </div>
       </div>
-      <!-- fingerPrint -->
-      <FormField
-        :label="$t('IscnRegisterForm.label.fingerprints')"
-        class="mb-[12px]"
-      >
-        <ContentFingerprintLink v-for="ipfs of ipfsHashList" :key="ipfs" :item="formatIpfs(ipfs)" />
-        <ContentFingerprintLink v-for="ar of uploadArweaveIdList" :key="ar" :item="formatArweave(ar)" />
-        <ContentFingerprintLink v-for="f, i in customContentFingerprints" :key="f + i" :item="f" />
-        <div
-          v-if="shouldShowContentFingerprintInput"
-          :class="[
-            'flex',
-            { 'mt-[12px]': customContentFingerprints.length },
-            'gap-[8px]'
-          ]"
-        >
-          <TextField
-            v-model="contentFingerprintInput"
-            class="w-full"
-          />
-          <Button
-            preset="secondary"
-            type="button"
-            @click="addContentFingerprint"
-          >
-            <IconAddMini />
-          </Button>
-        </div>
-      </FormField>
-      <!-- Numbers Protocol -->
-      <FormField
-        v-if="shouldShowUploadToNumbers"
-        :label="$t('IscnRegisterForm.label.numbersProtocol')"
-        class="mb-[12px]"
-      >
-        <CheckBox v-model="isRegisterNumbersProtocolAsset">
-          <i18n path="IscnRegisterForm.label.numbersProtocol.details">
-            <Link
-              place="link"
-              href="https://www.numbersprotocol.io/"
-              :is-inline="true"
-            >{{ $t('IscnRegisterForm.label.numbersProtocol.details.link') }}</Link>
-          </i18n>
-        </CheckBox>
-      </FormField>
-      <!-- Dialog -->
-      <Dialog
-        v-model="isOpenFileInfoDialog"
-        :has-padding="false"
-        preset="custom"
-      >
-        <MetadataCard
-          :class="[
-            'w-[616px]',
-            'max-h-[75vh]',
-            'overflow-y-scroll',
-            'scrollbar-hidden',
-          ]"
-          :img-src="displayImageSrc"
-          :all-exif="displayExifInfo"
+      <!-- type -->
+      <FormField :label="$t('IscnRegisterForm.label.type')" class="mb-[12px]">
+        <Selector
+          class="h-[40px] w-[160px]"
+          :options="typeOptions"
+          :placeholder="defaultType"
+          @input="setType"
         />
-      </Dialog>
-    </Card>
-    <!-- ////// Input Card /////// -->
-    <Card
-      class="flex flex-col mt-[16px] p-[32px]"
-      :has-padding="false"
-    >
-      <!-- header -->
-      <Label
-        class="w-min mb-[16px]"
-        :text="$t('IscnRegisterForm.label.content')"
-        tag="div"
-        preset="p5"
-        valign="middle"
-        content-class="font-semibold whitespace-nowrap text-like-green"
-        prepend-class="text-like-green"
-      >
-        <template #prepend>
-          <ISCNTypeIcon />
-        </template>
-      </Label>
+      </FormField>
+      <Divider class="my-[12px]" />
       <!-- form fieldset -->
       <div>
         <form @submit.prevent="onSubmit">
@@ -238,18 +151,17 @@
             <TextField
               v-model="description"
               :is-textarea="true"
-              :error-message="validateField(description, charactersLimit.description, true)"
+              :error-message="
+                validateField(description, charactersLimit.description, true)
+              "
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
-          <Divider class="my-[12px]" />
           <FormField
             :label="$t('IscnRegisterForm.label.author')"
+            content-classes="flex flex-row flex-wrap"
           >
-            <span
-              v-if="author.name"
-              class="mr-[8px] mb-[4px]"
-            >
+            <span v-if="author.name" class="mr-[8px]">
               <Button
                 size="mini"
                 preset="secondary"
@@ -263,7 +175,6 @@
             <Button
               v-else
               type="button"
-              class="mb-[4px]"
               size="mini"
               preset="secondary"
               content-class="py-[4px]"
@@ -303,7 +214,6 @@
               <IconAddMini />
             </Button>
           </FormField>
-          <Divider class="my-[12px]" />
           <!-- add tags -->
           <FormField
             :label="$t('IscnRegisterForm.label.tags')"
@@ -315,65 +225,18 @@
               :tags-limit="charactersLimit.tagNumber"
             />
           </FormField>
+          <Divider class="my-[12px]" />
           <FormField
+            v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.sameAs')"
             content-classes="flex flex-row flex-wrap"
           >
-            <span
-              v-if="formattedSameAsList.length"
-              class="mr-[8px] mb-[4px]"
-            >
-              <Button
-                size="mini"
-                preset="secondary"
-                tag="div"
-                text-preset="h6"
-                type="button"
-                :text="`${formattedSameAsList.length} urls`"
-                @click="handleOpenSameAsDialog()"
-              />
-            </span>
-            <Button
-              v-else
-              type="button"
-              class="mb-[4px]"
-              size="mini"
-              preset="secondary"
-              content-class="py-[4px]"
-              @click="handleOpenSameAsDialog()"
-            >
-              <IconAddMini />
-            </Button>
-
-
-          </FormField>
-          <FormField
-            :label="$t('IscnRegisterForm.label.url')"
-          >
-            <TextField
-              v-model="url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </FormField>
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.isbn')"
-          >
-            <TextField
-              v-model="isbn"
-              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
-            />
-          </FormField>
-          <Divider class="my-[12px]" />
-          <FormField
-            :label="$t('IscnRegisterForm.label.type')"
-            class="mb-[12px]"
-          >
-            <Selector
-              class="h-[40px] w-[160px]"
-              :options="typeOptions"
-              :placeholder="defaultType"
-              @input="setType"
+            <SameAsFieldList
+              :name="name"
+              :url-options="contentFingerprintLinks"
+              :file-records="fileRecords"
+              :current-list="sameAsList"
+              @on-update="(value) => (sameAsList = value)"
             />
           </FormField>
           <FormField
@@ -393,8 +256,44 @@
               :placeholder="$t('iscn.meta.license.placeholder')"
             />
           </FormField>
-          <Divider class="my-[12px]" />
-          <!-- register -->
+          <!-- fingerPrint -->
+          <FormField
+            :label="$t('IscnRegisterForm.label.fingerprints')"
+            class="mb-[12px]"
+          >
+            <ContentFingerprintLink
+              v-for="ipfs of ipfsHashList"
+              :key="ipfs"
+              :item="formatIpfs(ipfs)"
+            />
+            <ContentFingerprintLink
+              v-for="ar of uploadArweaveIdList"
+              :key="ar"
+              :item="formatArweave(ar)"
+            />
+            <ContentFingerprintLink
+              v-for="(f, i) in customContentFingerprints"
+              :key="f + i"
+              :item="f"
+            />
+            <div
+              v-if="shouldShowContentFingerprintInput"
+              :class="[
+                'flex',
+                { 'mt-[12px]': customContentFingerprints.length },
+                'gap-[8px]',
+              ]"
+            >
+              <TextField v-model="contentFingerprintInput" class="w-full" />
+              <Button
+                preset="secondary"
+                type="button"
+                @click="addContentFingerprint"
+              >
+                <IconAddMini />
+              </Button>
+            </div>
+          </FormField>
           <FormField
             :label="$t('IscnRegisterForm.label.registrant')"
             class="mb-[12px]"
@@ -403,13 +302,62 @@
               {{ address }}
             </div>
           </FormField>
+          <Divider class="my-[12px]" />
+          <div v-if="shouldShowMoreSettings" class="flex flex-col">
+            <FormField :label="$t('IscnRegisterForm.label.url')">
+              <TextField
+                v-model="url"
+                :placeholder="$t('IscnRegisterForm.placeholder.url')"
+              />
+            </FormField>
+            <FormField
+              v-if="type === 'Book'"
+              :label="$t('IscnRegisterForm.label.isbn')"
+            >
+              <TextField
+                v-model="isbn"
+                :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+              />
+            </FormField>
+            <FormField
+              v-if="shouldShowUploadToNumbers"
+              :label="$t('IscnRegisterForm.label.numbersProtocol')"
+              class="mb-[12px]"
+            >
+              <CheckBox v-model="isRegisterNumbersProtocolAsset">
+                <i18n path="IscnRegisterForm.label.numbersProtocol.details">
+                  <Link
+                    place="link"
+                    href="https://www.numbersprotocol.io/"
+                    :is-inline="true"
+                    >{{
+                      $t('IscnRegisterForm.label.numbersProtocol.details.link')
+                    }}</Link
+                  >
+                </i18n>
+              </CheckBox>
+            </FormField>
+          </div>
+          <div v-else class="flex items-center justify-center">
+            <Button
+              preset="tertiary"
+              size="mini"
+              @click.prevent="() => (shouldShowMoreSettings = true)"
+            >
+              <div class="flex justify-center items-center gap-[6px]">
+                <IconAdd />
+                {{ $t('IscnRegisterForm.button.more.settings') }}
+              </div>
+            </Button>
+          </div>
+          <!-- submit -->
           <div class="flex flex-row justify-end pt-[24px] text-medium-gray">
             <Label :text="formattedRegisterFee" class="mx-[24px]" />
             <div v-if="uploadStatus === 'loading'">
               <Button
                 :text="$t('IscnRegisterForm.button.loading')"
                 preset="outline"
-                is-disabled=true
+                is-disabled="true"
               >
                 <template #append>
                   <IconArrowRight />
@@ -418,30 +366,14 @@
             </div>
             <div
               v-else-if="uploadStatus"
-              :class="[
-                'flex',
-                'flex-col',
-                'items-end',
-              ]"
+              :class="['flex', 'flex-col', 'items-end']"
             >
               <ProgressIndicator />
-              <div
-                :class="[
-                  'text-[12px]',
-                  'mt-[4px]',
-                ]"
-              >
+              <div :class="['text-[12px]', 'mt-[4px]']">
                 {{ formattedUploadStatus }}
               </div>
             </div>
-            <div v-else
-              :class="[
-                'flex',
-                'flex',
-                'items-end',
-                'gap-[12px]',
-              ]"
-            >
+            <div v-else :class="['flex', 'flex', 'items-end', 'gap-[12px]']">
               <Button
                 :text="$t('IscnRegisterForm.button.register')"
                 type="submit"
@@ -456,14 +388,11 @@
         </form>
       </div>
       <!-- Snackbar -->
-      <Snackbar
-        v-model="isOpenWarningSnackbar"
-        preset="warn"
-      >
+      <Snackbar v-model="isOpenWarningSnackbar" preset="warn">
         {{ errorMsg }}
         <Link
           v-if="error === 'INSUFFICIENT_BALANCE'"
-          :class="['text-white','ml-[2px]']"
+          :class="['text-white', 'ml-[2px]']"
           nofollow="true"
           href="https://app.osmosis.zone/?from=USDC&to=LIKE"
         >
@@ -471,6 +400,22 @@
         </Link>
       </Snackbar>
       <!-- Dialogs -->
+      <Dialog
+        v-model="isOpenFileInfoDialog"
+        :has-padding="false"
+        preset="custom"
+      >
+        <MetadataCard
+          :class="[
+            'w-[616px]',
+            'max-h-[75vh]',
+            'overflow-y-scroll',
+            'scrollbar-hidden',
+          ]"
+          :img-src="displayImageSrc"
+          :all-exif="displayExifInfo"
+        />
+      </Dialog>
       <Dialog
         v-model="isOpenAuthorDialog"
         :has-padding="false"
@@ -509,17 +454,29 @@
           >
             <TextField
               v-model="authorName"
-              :error-message="validateField(authorName, charactersLimit.authorName, true)"
+              :error-message="
+                validateField(authorName, charactersLimit.authorName, true)
+              "
               :size="40"
               class="w-[219px]"
               :placeholder="$t('IscnRegisterForm.placeholder.name')"
             />
           </FormField>
-          <FormField class="mb-[16px]" :label="$t('IscnRegisterForm.label.likerID')">
+          <FormField
+            class="mb-[16px]"
+            :label="$t('IscnRegisterForm.label.likerID')"
+          >
             <TextField
               v-model="likerId"
               :size="40"
-              :error-message="validateField(likerId, charactersLimit.likerId, false, charactersLimit.likerIdLeast)"
+              :error-message="
+                validateField(
+                  likerId,
+                  charactersLimit.likerId,
+                  false,
+                  charactersLimit.likerIdLeast
+                )
+              "
               :placeholder="$t('IscnRegisterForm.placeholder.likerID')"
             />
           </FormField>
@@ -530,12 +487,20 @@
             <TextField
               v-model="authorDescription"
               :is-textarea="true"
-              :error-message="validateField(authorDescription, charactersLimit.authorDescription)"
+              :error-message="
+                validateField(
+                  authorDescription,
+                  charactersLimit.authorDescription
+                )
+              "
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
           </FormField>
           <!-- url -->
-          <FormField class="mb-[24px]" :label="$t('IscnRegisterForm.label.url')">
+          <FormField
+            class="mb-[24px]"
+            :label="$t('IscnRegisterForm.label.url')"
+          >
             <TextFieldList
               v-model="authorUrl"
               :size="40"
@@ -545,9 +510,7 @@
           </FormField>
           <!-- wallet address -->
           <FormField :label="$t('IscnRegisterForm.label.wallet')">
-            <WalletFieldList
-              v-model="authorWalletAddress"
-            />
+            <WalletFieldList v-model="authorWalletAddress" />
           </FormField>
           <!-- submit btn -->
           <div class="flex flex-row self-end">
@@ -572,45 +535,6 @@
           </div>
         </Card>
       </Dialog>
-      <Dialog
-        v-model="isOpenSameAsDialog"
-        :has-padding="false"
-        preset="custom"
-        :is-disabled-backdrop-click="true"
-      >
-        <Card
-          :class="[
-            'flex',
-            'flex-col',
-            'w-[616px]',
-            'max-h-[75vh]',
-            'pb-[40px]',
-            'overflow-y-scroll',
-            'scrollbar-hidden',
-          ]"
-        >
-          <Label
-            class="w-min mb-[16px]"
-            :text="$t('IscnRegisterForm.sameAsDialog.title')"
-            tag="div"
-            preset="p5"
-            valign="middle"
-            content-class="font-semibold whitespace-nowrap text-like-green"
-            prepend-class="text-like-green"
-          >
-            <template #prepend>
-              <IconAdd />
-            </template>
-          </Label>
-          <SameAsFieldList
-            :name="name"
-            :url-options="contentFingerprintLinks"
-            :file-records="fileRecords"
-            :current-list="sameAsList"
-            @onConfirm="confirmSameAsChange"
-          />
-        </Card>
-      </Dialog>
 
       <Dialog
         v-model="isOpenSignDialog"
@@ -626,7 +550,9 @@
           v-if="isUploadingArweave"
           class="mx-auto mb-[24px]"
         />
-        <div class="text-center text-medium-gray text-[24px] font-500">{{ signDialogMessage }}</div>
+        <div class="text-center text-medium-gray text-[24px] font-500">
+          {{ signDialogMessage }}
+        </div>
         <pre
           v-if="signDialogError"
           :class="[
@@ -639,7 +565,8 @@
             'text-[12px]',
             'font-400',
           ]"
-        >{{ signDialogError }}</pre>
+          >{{ signDialogError }}</pre
+        >
         <div v-if="isUploadingArweave">
           <Divider class="mt-[12px] mb-[8px]" />
           <span
@@ -680,7 +607,9 @@
           v-t="'IscnRegisterForm.quitAlertDialog.content'"
           class="max-w-[336px] text-center text-medium-gray text-[16px] font-500"
         />
-        <div class="mx-auto mt-[24px] grid grid-flow-col gap-x-[12px] text-center">
+        <div
+          class="mx-auto mt-[24px] grid grid-flow-col gap-x-[12px] text-center"
+        >
           <Button
             preset="outline"
             class="text-red border-red hover:bg-red active:bg-red hover:bg-opacity-20 active:bg-opacity-30"
@@ -699,11 +628,7 @@
         </div>
       </Dialog>
     </Card>
-    <Snackbar
-      v-model="shouldShowAlert"
-      :text="errorMessage"
-      preset="warn"
-    />
+    <Snackbar v-model="shouldShowAlert" :text="errorMessage" preset="warn" />
   </div>
 </template>
 
@@ -717,14 +642,17 @@ import { namespace } from 'vuex-class'
 
 import { Author } from '~/types/author'
 
-import { signISCNTx } from '~/utils/cosmos/iscn';
-import { estimateISCNTxGasAndFee, formatISCNTxPayload } from '~/utils/cosmos/iscn/sign';
-import { ISCN_GAS_MULTIPLIER } from '~/constant';
+import { signISCNTx } from '~/utils/cosmos/iscn'
+import {
+  estimateISCNTxGasAndFee,
+  formatISCNTxPayload,
+} from '~/utils/cosmos/iscn/sign'
+import { ISCN_GAS_MULTIPLIER } from '~/constant'
 import {
   getLikerIdMinApi,
   getUserInfoMinByAddress,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
-  } from '~/constant/api';
+} from '~/constant/api'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 
@@ -740,12 +668,12 @@ export enum CharactersLimit {
   likerIdLeast = 7,
   likerId = 20,
   url = 2048,
-  filename = 15
+  filename = 15,
 }
 
 export enum AuthorDialogType {
   author = 'author',
-  stakeholder = 'stakeholder'
+  stakeholder = 'stakeholder',
 }
 
 @Component
@@ -762,22 +690,22 @@ export default class IscnRegisterForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
- typeOptions = [
-    'Book',
-    'Photo',
-    'Image',
-    'CreativeWork',
-  ]
+  typeOptions = [
+'Book',
+'Photo',
+'Image',
+'CreativeWork',
+]
 
   fileTypeOptions = [
-    'epub',
-    'pdf',
-    'audio',
-    'jpg',
-    'png',
-  ]
+'epub',
+'pdf',
+'audio',
+'jpg',
+'png',
+]
 
-  licenseMap: { [key: string]: string | null }= {
+  licenseMap: { [key: string]: string | null } = {
     'Copyright. All rights reserved.': 'All Rights Reserved',
     'CC BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
     'CC BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
@@ -786,7 +714,7 @@ export default class IscnRegisterForm extends Vue {
     'CC BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
     'CC BY': 'https://creativecommons.org/licenses/by/4.0/',
     'CC0 (Public Domain)': 'https://creativecommons.org/publicdomain/zero/1.0/',
-    'Other': null,
+    Other: null,
     'Not Specified': '',
   }
 
@@ -812,7 +740,8 @@ export default class IscnRegisterForm extends Vue {
   authorUrl: string[] = []
   authorWalletAddress: any[] = []
   sentArweaveTransactionHashes = new Map<
-    string, { transactionHash?: string, arweaveId?: string }
+    string,
+    { transactionHash?: string; arweaveId?: string }
   >()
 
   uploadStatus: string = ''
@@ -838,7 +767,6 @@ export default class IscnRegisterForm extends Vue {
 
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
-  isOpenSameAsDialog = false
   isOpenWarningSnackbar = false
   isOpenKeplr = true
   activeEditingAuthorIndex = -1
@@ -857,6 +785,7 @@ export default class IscnRegisterForm extends Vue {
   currentAuthorDialogType: AuthorDialogType = AuthorDialogType.stakeholder
   sameAsList: any = []
   language: string = ''
+  shouldShowMoreSettings: boolean = false
 
   get ipfsHashList() {
     const list = []
@@ -878,10 +807,10 @@ export default class IscnRegisterForm extends Vue {
   get authorNames() {
     return this.authors.map((a) => {
       if (a.name === this.$t('iscn.meta.stakeholders.name.placeholder')) {
-        return 'ISCN Owner';
+        return 'ISCN Owner'
       }
-      return a.name;
-    });
+      return a.name
+    })
   }
 
   get authorUrls() {
@@ -903,9 +832,21 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get defaultType() {
-    if (this.fileRecords.some(file => file.fileType === 'application/pdf' || file.fileType === 'application/epub+zip')) return 'Book'
-    if (this.fileRecords.some(file => file.exifInfo && file.exifInfo.ExifImageWidth)) return 'Photo'
-    if (this.fileRecords.some(file => file.isFileImage)) return 'Image'
+    if (
+      this.fileRecords.some(
+        (file) =>
+          file.fileType === 'application/pdf' ||
+          file.fileType === 'application/epub+zip',
+      )
+    )
+      return 'Book'
+    if (
+      this.fileRecords.some(
+        (file) => file.exifInfo && file.exifInfo.ExifImageWidth,
+      )
+    )
+      return 'Photo'
+    if (this.fileRecords.some((file) => file.isFileImage)) return 'Image'
     return 'CreativeWork'
   }
 
@@ -916,26 +857,30 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get contentFingerprintLinks() {
-    const array=[]
+    const array = []
     if (this.uploadArweaveIdList) {
-      array.push(...this.uploadArweaveIdList.map((id: string) => this.formatArweave(id)))
+      array.push(
+        ...this.uploadArweaveIdList.map((id: string) => this.formatArweave(id)),
+      )
     }
     if (this.ipfsHashList.length) {
-      array.push(...this.ipfsHashList.map(ipfs => this.formatIpfs(ipfs)))
+      array.push(...this.ipfsHashList.map((ipfs) => this.formatIpfs(ipfs)))
     }
-    if (this.customContentFingerprints.length){
+    if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
     }
     return array
   }
 
   get formattedSameAsList() {
-    return this.sameAsList.map((sameAs: { filename: any; filetype: any; url: any }) => {
-      if (sameAs.filename && sameAs.filetype) {
-        return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`;
-      }
-      return '';
-    });
+    return this.sameAsList
+      ?.filter((items: any) => items.filename && items.url)
+      ?.map((sameAs: { filename: any; filetype: any; url: any }) => {
+        if (sameAs.filename && sameAs.filetype) {
+          return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
+        }
+        return ''
+      })
   }
 
   get licenseOptions() {
@@ -943,7 +888,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get formattedLicense() {
-    return this.licenseMap[this.license] || this.customLicense;
+    return this.licenseMap[this.license] || this.customLicense
   }
 
   get errorMsg() {
@@ -1016,12 +961,12 @@ export default class IscnRegisterForm extends Vue {
       sameAs: this.formattedSameAsList,
       url: this.url,
       isbn: this.isbn,
-      exifInfo: this.exif.filter(file => file),
+      exifInfo: this.exif.filter((file) => file),
       license: this.formattedLicense,
       ipfsHash: this.ipfsHashList,
       arweaveId: this.uploadArweaveIdList,
       numbersProtocolAssetId: [...this.numbersProtocolAssetIds.values()],
-      fileSHA256: this.fileRecords.map(file => file.fileSHA256),
+      fileSHA256: this.fileRecords.map((file) => file.fileSHA256),
       author: this.author.name,
       authorNames: this.authorNames,
       authorUrls: this.authorUrls,
@@ -1041,19 +986,20 @@ export default class IscnRegisterForm extends Vue {
 
   get currentSignStep() {
     if (this.arweaveFee.lte(0)) {
-      return 1;
+      return 1
     }
-    return this.uploadArweaveIdList.length ? 2 : 1;
+    return this.uploadArweaveIdList.length ? 2 : 1
   }
 
   get totalSignStep() {
     if (this.uploadArweaveIdList.length && this.arweaveFee.lte(0)) return 1
-    return 2;
+    return 2
   }
 
   get signDialogHeaderText() {
-    if (this.isUploadingArweave) return this.$t('IscnRegisterForm.button.uploading')
-    return `Sign (${this.currentSignStep}/${ this.totalSignStep})`
+    if (this.isUploadingArweave)
+      return this.$t('IscnRegisterForm.button.uploading')
+    return `Sign (${this.currentSignStep}/${this.totalSignStep})`
   }
 
   get signDialogMessage() {
@@ -1061,9 +1007,9 @@ export default class IscnRegisterForm extends Vue {
       return this.$t('IscnRegisterForm.signDialog.closeWarning')
     }
     if (this.uploadArweaveIdList.length) {
-      return this.$t('IscnRegisterForm.signDialog.sign.iscn.register');
+      return this.$t('IscnRegisterForm.signDialog.sign.iscn.register')
     }
-    return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload');
+    return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload')
   }
 
   get signDialogFee() {
@@ -1072,10 +1018,10 @@ export default class IscnRegisterForm extends Vue {
 
   get buttonState() {
     return {
-      preset:this.isOpenKeplr ? 'tertiary' : 'outline',
+      preset: this.isOpenKeplr ? 'tertiary' : 'outline',
       text: this.isOpenKeplr
-      ? this.$t('IscnRegisterForm.signDialog.keplr')
-      : this.$t('IscnRegisterForm.signDialog.retry'),
+        ? this.$t('IscnRegisterForm.signDialog.keplr')
+        : this.$t('IscnRegisterForm.signDialog.retry'),
       isDisable: this.isOpenKeplr,
     }
   }
@@ -1090,18 +1036,21 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get shouldShowUploadToNumbers() {
-    return this.fileRecords.some(file => file.isFileImage || file.exifInfo)
+    return (
+      this.type !== 'Book' &&
+      this.fileRecords.some((file) => file.isFileImage || file.exifInfo)
+    )
   }
 
   get uploadArweaveIdList() {
-    let arweaveIdList: string[] = [];
+    let arweaveIdList: string[] = []
     if (this.uploadArweaveList && this.uploadArweaveList.length) {
-      arweaveIdList = [...this.uploadArweaveList];
+      arweaveIdList = [...this.uploadArweaveList]
     }
     if (this.arweaveId) {
-      arweaveIdList.push(this.arweaveId);
+      arweaveIdList.push(this.arweaveId)
     }
-    return arweaveIdList;
+    return arweaveIdList
   }
 
   @Watch('payload', { immediate: true, deep: true })
@@ -1118,13 +1067,15 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = 'loading'
 
     if (this.epubMetadata) {
-      this.name = this.epubMetadata.title;
-      this.description = this.extractText(this.epubMetadata.description);
-      this.author.name = this.epubMetadata.author;
+      this.name = this.epubMetadata.title
+      this.description = this.extractText(this.epubMetadata.description)
+      this.author.name = this.epubMetadata.author
       this.author.authorDescription = 'Author'
       this.language = this.epubMetadata.language
       this.tags = this.epubMetadata.tags
-      this.thumbnailUrl = this.formatArweave(this.epubMetadata.thumbnailArweaveId) as string
+      this.thumbnailUrl = this.formatArweave(
+        this.epubMetadata.thumbnailArweaveId,
+      ) as string
       if (this.author.name) {
         this.authors.push(this.author)
       }
@@ -1140,9 +1091,11 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async fetchUserInfoByAddress(address: any) {
-    let userData: any = null;
+    let userData: any = null
     try {
-      ({ data: userData } = await this.$axios.get(getUserInfoMinByAddress(address)))
+      ;({ data: userData } = await this.$axios.get(
+        getUserInfoMinByAddress(address),
+      ))
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
@@ -1179,7 +1132,13 @@ export default class IscnRegisterForm extends Vue {
     }
   }
 
-  editAuthor({ type = AuthorDialogType.stakeholder, index }: { type: AuthorDialogType; index: any }) {
+  editAuthor({
+    type = AuthorDialogType.stakeholder,
+    index,
+  }: {
+    type: AuthorDialogType
+    index: any
+  }) {
     this.isOpenAuthorDialog = true
 
     if (type === AuthorDialogType.author) {
@@ -1190,9 +1149,17 @@ export default class IscnRegisterForm extends Vue {
       this.authorUrl = url
       this.likerId = likerId
       this.authorDescription = authorDescription
-      this.activeEditingAuthorIndex = this.authors.findIndex(author => author.name === name);
+      this.activeEditingAuthorIndex = this.authors.findIndex(
+        (author) => author.name === name,
+      )
     } else {
-      logTrackerEvent(this, 'ISCNCreate', 'EditStakeholder', index.toString(), 1)
+      logTrackerEvent(
+        this,
+        'ISCNCreate',
+        'EditStakeholder',
+        index.toString(),
+        1,
+      )
       const { name, wallet, url, likerId, authorDescription } =
         this.authors[index]
       this.authorName = name
@@ -1220,7 +1187,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   confirmAuthorChange() {
-    logTrackerEvent(this, 'ISCNCreate', 'ConfirmAuthorChange', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ConfirmAuthorChange', '', 1)
     this.checkedAuthorInfo = true
     if (!this.authorName || this.authorName.length > CharactersLimit.authorName)
       return
@@ -1282,24 +1249,15 @@ export default class IscnRegisterForm extends Vue {
     return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
   }
 
-  handleOpenSameAsDialog() {
-    this.isOpenSameAsDialog = true
-  }
-
-  confirmSameAsChange(value: any) {
-    logTrackerEvent(this, 'ISCNCreate', 'ConfirmSameAsChange', '', 1);
-    this.sameAsList = value
-    this.isOpenSameAsDialog = false
-  }
-
   async getLikerIdsAddresses() {
-    let likerIdsAddresses: any[] = [];
+    let likerIdsAddresses: any[] = []
     try {
       likerIdsAddresses = await Promise.all(
         this.likerIds.map((e) =>
-          this.$axios.get(getLikerIdMinApi(e as string))
-          .then((element: any)=> element?.data?.likeWallet)
-          .catch(()=>{}),
+          this.$axios
+            .get(getLikerIdMinApi(e as string))
+            .then((element: any) => element?.data?.likeWallet)
+            .catch(() => {}),
         ),
       )
     } catch (error) {
@@ -1311,51 +1269,55 @@ export default class IscnRegisterForm extends Vue {
 
   async calculateISCNFee(): Promise<void> {
     const [
-      balance,
-      estimation,
-    ] = await Promise.all([
+balance,
+estimation,
+] = await Promise.all([
       getAccountBalance(this.address),
       estimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
     ])
-    this.balance = new BigNumber(balance);
-    const { iscnFee, gas: iscnGasEstimation } = estimation;
-    const iscnGasNanolike = new BigNumber(iscnGasEstimation.fee.amount[0].amount).times(ISCN_GAS_MULTIPLIER)
+    this.balance = new BigNumber(balance)
+    const { iscnFee, gas: iscnGasEstimation } = estimation
+    const iscnGasNanolike = new BigNumber(
+      iscnGasEstimation.fee.amount[0].amount,
+    ).times(ISCN_GAS_MULTIPLIER)
     const iscnFeeNanolike = iscnFee.amount
-    this.iscnFee =  new BigNumber(iscnFeeNanolike)
+    this.iscnFee = new BigNumber(iscnFeeNanolike)
       .plus(iscnGasNanolike)
-      .shiftedBy(-9);
-    this.iscnGasFee = new BigNumber(iscnGasEstimation.fee.gas).times(ISCN_GAS_MULTIPLIER).toFixed(0);
+      .shiftedBy(-9)
+    this.iscnGasFee = new BigNumber(iscnGasEstimation.fee.gas)
+      .times(ISCN_GAS_MULTIPLIER)
+      .toFixed(0)
   }
 
   handleSignDialogClose() {
-    logTrackerEvent(this, 'ISCNCreate', 'CloseSignDialog', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'CloseSignDialog', '', 1)
     this.isOpenQuitAlertDialog = true
   }
 
   handleContinue() {
-    logTrackerEvent(this, 'ISCNCreate', 'ContinueDialog', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ContinueDialog', '', 1)
     this.isOpenQuitAlertDialog = false
     this.isOpenSignDialog = true
     this.onRetry()
   }
 
   handleQuit() {
-    logTrackerEvent(this, 'ISCNCreate', 'QuitDialog', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'QuitDialog', '', 1)
     this.isOpenQuitAlertDialog = false
     this.uploadStatus = ''
     this.$emit('handleQuit')
   }
 
   onRetry(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'RetryDialog', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'RetryDialog', '', 1)
     this.shouldShowAlert = false
     this.signDialogError = ''
     this.onOpenKeplr()
-    return this.onSubmit();
+    return this.onSubmit()
   }
 
   onOpenKeplr() {
-    logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1)
     this.isOpenKeplr = true
   }
 
@@ -1383,7 +1345,7 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async onSubmit(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1);
+    logTrackerEvent(this, 'ISCNCreate', 'ClickSubmit', '', 1)
     this.likerIdsAddresses = await this.getLikerIdsAddresses()
     this.$emit('handleSubmit')
     this.isChecked = true
@@ -1396,36 +1358,43 @@ export default class IscnRegisterForm extends Vue {
       this.uploadStatus = ''
       return
     }
-    if (this.fileRecords.some(file => file.fileBlob)) {
+    if (this.fileRecords.some((file) => file.fileBlob)) {
       try {
-        this.isUploadingArweave = true;
-        this.uploadStatus = 'uploading';
+        this.isUploadingArweave = true
+        this.uploadStatus = 'uploading'
         // eslint-disable-next-line no-restricted-syntax
         for (const record of this.fileRecords) {
           // eslint-disable-next-line no-await-in-loop
-          if (this.isRegisterNumbersProtocolAsset && !this.numbersProtocolAssetIds.has(record.ipfsHash)) {
-          // eslint-disable-next-line no-await-in-loop
-            await this.submitToNumbers(record);
+          if (
+            this.isRegisterNumbersProtocolAsset &&
+            !this.numbersProtocolAssetIds.has(record.ipfsHash)
+          ) {
+            // eslint-disable-next-line no-await-in-loop
+            await this.submitToNumbers(record)
           }
         }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error)
       } finally {
-        this.isUploadingArweave = false;
-        this.uploadStatus = '';
+        this.isUploadingArweave = false
+        this.uploadStatus = ''
       }
     }
-    if (!this.fileRecords.some(file => file.fileBlob) || this.uploadArweaveIdList.length) await this.submitToISCN()
+    if (
+      !this.fileRecords.some((file) => file.fileBlob) ||
+      this.uploadArweaveIdList.length
+    )
+      await this.submitToISCN()
   }
 
   async submitToNumbers(record: any): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1);
-    this.isOpenSignDialog = true;
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToNumbers', '', 1)
+    this.isOpenSignDialog = true
     try {
-      this.uploadStatus = 'loading';
-      const formData = new FormData();
-      if (record.fileBlob) formData.append('file', record.fileBlob);
+      this.uploadStatus = 'loading'
+      const formData = new FormData()
+      if (record.fileBlob) formData.append('file', record.fileBlob)
       const {
         numAssetIds: [numbersProtocolAssetId],
       } = await this.$axios.$post(
@@ -1439,20 +1408,20 @@ export default class IscnRegisterForm extends Vue {
       )
       this.numbersProtocolAssetIds.set(record.ipfsHash, numbersProtocolAssetId)
       this.$emit('numbers-protocol-registed', { numbersProtocolAssetId })
-      this.isOpenSignDialog = false;
+      this.isOpenSignDialog = false
     } catch (error) {
-      this.shouldShowAlert = true;
+      this.shouldShowAlert = true
       this.errorMessage = (error as Error).toString()
       // eslint-disable-next-line no-console
       console.error(error)
     } finally {
-      this.uploadStatus = '';
+      this.uploadStatus = ''
     }
   }
 
   async submitToISCN(): Promise<void> {
-    logTrackerEvent(this, 'ISCNCreate', 'SubmitToISCN', '', 1);
-    this.isOpenSignDialog = true;
+    logTrackerEvent(this, 'ISCNCreate', 'SubmitToISCN', '', 1)
+    this.isOpenSignDialog = true
     this.uploadStatus = 'loading'
     this.onOpenKeplr()
     await this.initIfNecessary()
@@ -1477,15 +1446,15 @@ export default class IscnRegisterForm extends Vue {
       )
       this.uploadStatus = 'success'
       this.$emit('txBroadcasted', res)
-      this.isOpenSignDialog = false;
+      this.isOpenSignDialog = false
     } catch (err) {
-      this.signDialogError = err as string;
-      this.uploadStatus = '';
+      this.signDialogError = err as string
+      this.uploadStatus = ''
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err)
     } finally {
-      this.isOpenQuitAlertDialog = false;
+      this.isOpenQuitAlertDialog = false
     }
   }
 
@@ -1495,13 +1464,13 @@ export default class IscnRegisterForm extends Vue {
     this.displayExifInfo = this.fileRecords[index].exifInfo
   }
 
-   // eslint-disable-next-line class-methods-use-this
-   extractText(htmlString: string) {
+  // eslint-disable-next-line class-methods-use-this
+  extractText(htmlString: string) {
     if (!htmlString) return ''
-    const div = document.createElement('div');
-    div.innerHTML = htmlString;
-    div.innerHTML = div.innerHTML.replace(/<br\s*[/]?>/gi, "\n");
-    return div.textContent || div.innerText;
+    const div = document.createElement('div')
+    div.innerHTML = htmlString
+    div.innerHTML = div.innerHTML.replace(/<br\s*[/]?>/gi, '\n')
+    return div.textContent || div.innerText
   }
 }
 </script>

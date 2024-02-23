@@ -74,28 +74,13 @@
             :label="$t('IscnRegisterForm.label.sameAs')"
             content-classes="flex flex-row flex-wrap"
           >
-            <span v-if="sameAsList.length" class="mr-[8px] mb-[4px]">
-              <Button
-                size="mini"
-                preset="secondary"
-                tag="div"
-                text-preset="h6"
-                type="button"
-                :text="`${sameAsList.length} urls`"
-                @click="handleOpenSameAsDialog()"
-              />
-            </span>
-            <Button
-              v-else
-              type="button"
-              class="mb-[4px]"
-              size="mini"
-              preset="secondary"
-              content-class="py-[4px]"
-              @click="handleOpenSameAsDialog()"
-            >
-              <IconAddMini />
-            </Button>
+            <SameAsFieldList
+              :name="name"
+              :url-options="contentFingerprintOptions"
+              :file-records="uploadFileRecords"
+              :current-list="sameAsList"
+              @on-update="(value) => (sameAsList = value)"
+            />
           </FormField>
         </div>
       </div>
@@ -190,46 +175,6 @@
       </div>
     </form>
 
-    <Dialog
-      v-model="isOpenSameAsDialog"
-      :has-padding="false"
-      preset="custom"
-      :is-disabled-backdrop-click="true"
-    >
-      <Card
-        :class="[
-          'flex',
-          'flex-col',
-          'w-[616px]',
-          'max-h-[75vh]',
-          'pb-[40px]',
-          'overflow-y-scroll',
-          'scrollbar-hidden',
-        ]"
-      >
-        <Label
-          class="w-min mb-[16px]"
-          :text="$t('IscnRegisterForm.sameAsDialog.title')"
-          tag="div"
-          preset="p5"
-          valign="middle"
-          content-class="font-semibold whitespace-nowrap text-like-green"
-          prepend-class="text-like-green"
-        >
-          <template #prepend>
-            <IconAdd />
-          </template>
-        </Label>
-        <SameAsFieldList
-          :name="name"
-          :url-options="contentFingerprintOptions"
-          :file-records="uploadFileRecords"
-          :current-list="sameAsList"
-          @onConfirm="confirmSameAsChange"
-        />
-      </Card>
-    </Dialog>
-
     <Snackbar v-model="shouldShowAlert" :text="errorMessage" preset="warn" />
   </Card>
 </template>
@@ -292,7 +237,6 @@ export default class EditIscnPage extends Vue {
   step: number = 1
   customContentFingerprints: string[] = []
   contentFingerprintInput: string = ''
-  isOpenSameAsDialog: boolean = false
   isSubmitLoading: boolean = false
   shouldShowAlert: boolean = false
   errorMessage: string = ''
@@ -388,16 +332,6 @@ export default class EditIscnPage extends Vue {
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
     this.contentFingerprintInput = ''
-  }
-
-  handleOpenSameAsDialog() {
-    this.isOpenSameAsDialog = true
-  }
-
-  confirmSameAsChange(value: any) {
-    logTrackerEvent(this, 'ISCNEdit', 'ConfirmSameAsChange', '', 1)
-    this.sameAsList = value
-    this.isOpenSameAsDialog = false
   }
 
   onSubmitUpload({ fileRecords }: { fileRecords: any[] }) {

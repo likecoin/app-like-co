@@ -3,26 +3,23 @@
     <div
       v-for="(item, i) in sameAsList"
       :key="item.id"
-      class="flex items-center gap-[12px] p-[8px] rounded-[8px] border-2 border-shade-gray mb-[12px]"
+      class="flex flex-col items-center gap-[12px] p-[12px] rounded-[8px] border-2 border-shade-gray mb-[12px]"
     >
-      <div class="flex flex-col flex-grow">
-        <FormField :label="$t('IscnRegisterForm.label.url')">
-          <div class="flex flex-col gap-[8px]">
-            <TextField
-              v-model="item.url"
-              :placeholder="$t('IscnRegisterForm.placeholder.url')"
-            />
-          </div>
-        </FormField>
-
+      <div class="flex flex-col flex-grow w-full">
         <div class="flex items-center justify-start gap-[8px]">
-          <FormField class="w-[200px]" :label="$t('IscnRegisterForm.label.fileName')">
+          <FormField
+            class="w-[200px]"
+            :label="$t('IscnRegisterForm.label.fileName')"
+          >
             <TextField
               v-model="item.filename"
               :placeholder="$t('IscnRegisterForm.placeholder.fileName')"
             />
           </FormField>
-          <FormField class="w-min" :label="$t('IscnRegisterForm.label.fileType')">
+          <FormField
+            class="w-min"
+            :label="$t('IscnRegisterForm.label.fileType')"
+          >
             <Selector
               class="h-[40px] w-[80px]"
               :options="sameAsFiletypeOptions"
@@ -30,20 +27,47 @@
               @input="(value) => handleSelectValue({ value, index: i })"
             />
           </FormField>
-          <Label
-            v-if="item.originFileName"
-            class="text-medium-gray"
-            preset="h6"
-          >
-            {{ $t('IscnRegisterForm.label.originFile', { name: item.originFileName }) }}
-          </Label>
+        </div>
+        <div class="flex justify-start items-center gap-[8px]">
+          <FormField :label="$t('IscnRegisterForm.label.url')">
+            <div
+              v-if="item.shouldShowEditURL"
+              class="flex justify-between items-center gap-[8px]"
+            >
+              <TextField
+                v-model="item.url"
+                :placeholder="$t('IscnRegisterForm.placeholder.url')"
+                class="w-full"
+              />
+              <Button
+                v-if="item.url"
+                preset="plain"
+                @click.prevent="() => (item.shouldShowEditURL = false)"
+              >
+                <template #prepend>
+                  <IconEye />
+                </template>
+              </Button>
+            </div>
+            <div v-else class="flex items-center justify-start">
+              <ContentFingerprintLink :item="item.url" />
+              <Button
+                preset="plain"
+                @click.prevent="() => (item.shouldShowEditURL = true)"
+              >
+                <template #prepend>
+                  <IconEdit />
+                </template>
+              </Button>
+            </div>
+          </FormField>
         </div>
       </div>
       <div
-        class="self-end flex-shrink ml-auto cursor-pointer"
+        class="self-center flex-shrink ml-auto cursor-pointer"
         @click="deleteField(i)"
       >
-        <IconDelete />
+        <IconClose />
       </div>
     </div>
     <Button
@@ -52,32 +76,27 @@
       text-preset="p6"
       size="mini"
       prepend-class="mr-[4px]"
-      @click="addFields"
+      @click.prevent="addFields"
     >
       <template #prepend>
         <IconAddMini />
       </template>
     </Button>
-
-    <Button
-      class="ml-auto mt-[24px]"
-      type="button"
-      size="small"
-      preset="secondary"
-      content-class="font-semibold"
-      :text="$t('IscnRegisterForm.button.confirm')"
-      @click.prevent="confirmChange"
-    />
   </div>
 </template>
 
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { SAME_AS_FILE_TYPES } from '~/constant'
 
+const FILE_TYPES = [
+'epub',
+'pdf',
+]
+
 @Component
-export default class WalletFieldList extends Vue {
+export default class SameAsFieldList extends Vue {
   @Prop({
     default: () => [],
   })
@@ -92,12 +111,13 @@ export default class WalletFieldList extends Vue {
       id: 1,
       filename: this.formatName,
       filetype: SAME_AS_FILE_TYPES[0],
+      shouldShowEditURL: !this.formatName,
     }]
 
-  fileTypeToFind = [
-    'epub',
-    'pdf',
-  ]
+  @Watch('sameAsList', { deep: true })
+  onSameAsListChanged(newValue: Array<any>) {
+    this.$emit('on-update', newValue)
+  }
 
   // eslint-disable-next-line class-methods-use-this
   get sameAsFiletypeOptions() {
@@ -106,16 +126,19 @@ export default class WalletFieldList extends Vue {
 
   get formatName() {
     if (!this.name) {
-      return '';
+      return ''
     }
     if (/[\u4E00-\u9FA5]/.test(this.name)) {
-      return this.name;
+      return this.name
     }
-      return this.name.replace(/[.,!?;:'"(){}[\]<>]/g, '').replace(/\s+/g, '_').toUpperCase();
+    return this.name
+      .replace(/[.,!?;:'"(){}[\]<>]/g, '')
+      .replace(/\s+/g, '_')
+      .toUpperCase()
   }
 
   get filteredUrlOptions() {
-    return this.urlOptions?.filter(url => url.startsWith('ar://'))
+    return this.urlOptions?.filter((url) => url.startsWith('ar://'))
   }
 
   mounted() {
@@ -125,31 +148,28 @@ export default class WalletFieldList extends Vue {
         id: `${list.url}-${list.filename}`,
         filename: list.filename,
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
-        originFileName: list.originFileName,
+        shouldShowEditURL: !list.filename,
       }))
     } else if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
-        ?.filter((file) => this.fileTypeToFind.includes(this.formatFileType(file.fileType)) && file.arweaveId)
+        ?.filter(
+          (file) =>
+            FILE_TYPES.includes(this.formatFileType(file.fileType)) &&
+            file.arweaveId,
+        )
         .map((file, index) => {
-          const url = this.filteredUrlOptions.find((ar) => ar.includes(file.arweaveId));
-          const formattedFileType = this.formatFileType(file.fileType);
-
+          const url = this.filteredUrlOptions.find((ar) =>
+            ar.includes(file.arweaveId),
+          )
+          const formattedFileType = this.formatFileType(file.fileType)
           return {
             url,
             id: `${url}-${index}`,
-            filename: this.formatName,
+            filename: this.extractFilename(file.fileName),
             filetype: formattedFileType || SAME_AS_FILE_TYPES[0],
-            originFileName: file.fileName || '',
-          };
-        });
-    } else {
-      this.sameAsList = [{
-          url: '',
-          id: 1,
-          filename: this.formatName,
-          filetype: SAME_AS_FILE_TYPES[0],
-          originFileName:'',
-        }]
+            shouldShowEditURL: !file.fileName,
+          }
+        })
     }
   }
 
@@ -163,25 +183,23 @@ export default class WalletFieldList extends Vue {
       id: Date.now(),
       filename: '',
       filetype: SAME_AS_FILE_TYPES[0],
+      shouldShowEditURL: true,
     })
-  }
-
-  deleteEmptyField() {
-    if (this.sameAsList.length > 1) {
-      this.sameAsList = this.sameAsList?.filter(
-        (items: any) => items.filename && items.url,
-      )
-    }
   }
 
   deleteField(index: number) {
     this.sameAsList.splice(index, 1)
   }
 
-  confirmChange() {
-    this.deleteEmptyField()
-    this.$emit('onConfirm', this.sameAsList)
-  }
+  // eslint-disable-next-line class-methods-use-this
+  extractFilename(fullFilename: string): string {
+    if (!fullFilename) return '';
+    const parts = fullFilename.split('.');
+    if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
+        return fullFilename;
+    }
+    return parts.slice(0, -1).join('.');
+}
 
   // eslint-disable-next-line class-methods-use-this
   formatFileType(fileType: string) {
