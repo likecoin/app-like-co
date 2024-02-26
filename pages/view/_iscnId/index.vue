@@ -27,7 +27,6 @@
       class="w-full"
       :owner="iscnOwner"
       :iscn-id="iscnId"
-      :iscn-hash="txHash"
       :record="record"
       :exif-info="exifInfo"
     >
@@ -208,23 +207,6 @@
               :to="localeLocation({ name: 'search-keyword', query: { owner: iscnOwner } })">
               {{ iscnOwner }}
             </Link>
-          </FormField>
-          <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
-            <Link
-              v-if="txHash"
-              :class="[
-                'text-[14px]',
-                'break-all',
-              ]"
-              nofollow="true"
-              :href="transactionsURL">
-              {{ txHash }}
-            </Link>
-            <ProgressIndicator
-              v-else
-              class="my-[4px]"
-              preset="thin"
-            />
           </FormField>
           <Divider class="my-[12px]" />
           <FormField
@@ -490,9 +472,7 @@ import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 import {
   NFT_BOOK_PRESS_URL,
   ISCN_PREFIX,
-  BIG_DIPPER_TX_BASE_URL,
   ISCN_RAW_DATA_ENDPOINT,
-  ISCN_TX_RAW_DATA_ENDPOINTS,
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
   LIKER_LAND_URL,
@@ -608,7 +588,6 @@ export enum ExifList {
 export default class ViewIscnIdPage extends Vue {
   iscnOwner = ''
   iscnId = ''
-  txHash = ''
   url = ''
   isOpenAuthorDialog = false
   isOpenCopiedAlert = false
@@ -692,10 +671,6 @@ export default class ViewIscnIdPage extends Vue {
     return this.recordData?.stakeholders
   }
 
-  get transactionsURL() {
-    return `${BIG_DIPPER_TX_BASE_URL}${this.txHash}`
-  }
-
   get rawDataURL() {
     return `${ISCN_RAW_DATA_ENDPOINT}${this.iscnId}`
   }
@@ -775,21 +750,6 @@ export default class ViewIscnIdPage extends Vue {
       return
     }
     this.exifInfo = this.showExifInfo()
-    this.fetchTxHash().then(txHash => { this.txHash = txHash; });
-  }
-
-  async fetchTxHash() {
-    const datas = await Promise.all(
-      ISCN_TX_RAW_DATA_ENDPOINTS.map((url: string) =>
-        this.$axios.get(`${url}'${this.iscnId}'`),
-      ),
-    );
-
-    const data = datas.find(d => !!(d?.data?.tx_responses?.length));
-    if (!data) {
-      return undefined;
-    }
-    return data?.data?.tx_responses[0]?.txhash;
   }
 
   onClickViewContent() {
