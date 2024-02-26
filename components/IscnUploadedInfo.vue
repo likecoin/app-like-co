@@ -91,17 +91,6 @@
     >
       {{ owner }}
     </FormField>
-    <FormField :label="$t('iscn.meta.transaction')" class="mb-[12px]">
-      <Link
-        v-if="iscnHash"
-        :class="['text-[14px]', 'break-all']"
-        nofollow="true"
-        :href="transactionsURL"
-      >
-        {{ iscnHash }}
-      </Link>
-      <ProgressIndicator v-else class="my-[4px]" preset="thin" />
-    </FormField>
     <IconDiverMini :class="['mb-[12px]', 'text-shade-gray']" />
     <FormField v-if="iscnId" :label="$t('iscn.meta.id.copy')" class="mb-[12px]">
       <Button
@@ -160,7 +149,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
-import { BIG_DIPPER_TX_BASE_URL, NFT_BOOK_PRESS_URL } from '~/constant'
+import { NFT_BOOK_PRESS_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 
@@ -170,7 +159,6 @@ import { copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 export default class IscnUploadedInfo extends Vue {
   @Prop(String) readonly owner!: string
   @Prop(String) readonly iscnId!: string
-  @Prop(String) readonly iscnHash!: string
   @Prop({ default: null }) readonly record: ISCNRecordWithID | null | undefined
   @Prop({ default: null }) readonly exifInfo: any | null | undefined
   @Prop(Number) readonly step: number | undefined
@@ -195,10 +183,6 @@ export default class IscnUploadedInfo extends Vue {
 
   get description() {
     return this.metadata?.description || ''
-  }
-
-  get transactionsURL() {
-    return `${BIG_DIPPER_TX_BASE_URL}${this.iscnHash}`
   }
 
   get keywords(): Array<string> {
