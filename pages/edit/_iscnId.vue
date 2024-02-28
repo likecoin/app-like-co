@@ -39,6 +39,7 @@
         >
           <IscnUploadForm
             mode="edit"
+            :iscn-id="iscnId"
             @submit="onSubmitUpload"
             @arweaveUploaded="onArweaveIdUpload"
           />

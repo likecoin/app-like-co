@@ -37,19 +37,19 @@ export function catchAxiosError(promise: AxiosPromise<any>) {
   });
 }
 
+export function downloadFile (blob: Blob, filename: string) {
+  const file = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = file
+  a.style.display = 'none'
+  a.download = filename
+  a.click()
+}
+
 export function downloadJSON(data: Object, fileName: string) {
   const jsonData = JSON.stringify(data, null, 2)
 
   const jsonBlob = new Blob([jsonData], { type: 'application/json' })
 
-  const jsonUrl = URL.createObjectURL(jsonBlob)
-
-  const jsonLink = document.createElement('a')
-  jsonLink.href = jsonUrl
-  jsonLink.download = fileName
-  jsonLink.style.display = 'none'
-
-  document.body.appendChild(jsonLink)
-  jsonLink.click()
-  document.body.removeChild(jsonLink)
+  downloadFile(jsonBlob, fileName)
 }
