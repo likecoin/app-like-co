@@ -195,6 +195,17 @@
             'font-400',
           ]"
         >{{ signDialogError }}</pre>
+        <pre
+          v-else
+          :class="[
+            'mt-[12px]',
+            'p-[8px]',
+            'rounded-[8px]',
+            'text-center',
+            'text-[12px]',
+            'font-400',
+          ]"
+        >{{ signProgress }} / {{ numberOfSignNeeded }}</pre>
         <Divider class="mt-[12px] mb-[8px]" />
         <span
           v-t="'IscnRegisterForm.signDialog.sign.arweave.uploading'"
@@ -304,6 +315,8 @@ export default class IscnUploadForm extends Vue {
 
   signDialogError = ''
   balance = new BigNumber(0)
+  numberOfSignNeeded = 0
+  signProgress = 0
 
   epubMetadataList: any[] = []
   modifiedEpubMap: any = {}
@@ -837,7 +850,11 @@ export default class IscnUploadForm extends Vue {
     try {
       this.uploadStatus = 'uploading';
       // eslint-disable-next-line no-restricted-syntax
-      for (const record of this.modifiedFileRecords) {
+      this.numberOfSignNeeded = this.modifiedFileRecords.length;
+      this.signProgress = 0;
+      for (let i = 0; i < this.modifiedFileRecords.length; i += 1) {
+        const record = this.modifiedFileRecords[i];
+        this.signProgress = i + 1;
         // eslint-disable-next-line no-await-in-loop
         await this.submitToArweave(record);
       }
