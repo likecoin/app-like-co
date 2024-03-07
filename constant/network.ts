@@ -1,5 +1,6 @@
 import {
   IS_TESTNET,
+  SITE_URL,
   LIKECOIN_CHAIN_ID,
   LIKECOIN_CHAIN_NFT_RPC,
   LIKECOIN_CHAIN_API,
@@ -62,11 +63,12 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
   bech32PrefixConsAddr: 'likevalcons',
   bech32PrefixConsPub: 'likevalconspub',
   availableMethods: [
+    'liker-id',
     'keplr',
     'keplr-mobile',
     'cosmostation',
     'cosmostation-mobile',
-    'liker-id',
+    'likerland-app',
     'leap',
     'metamask-leap',
     'walletconnect-v2',
@@ -81,6 +83,10 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
     icons: ['https://like.co/logo.png'],
     name: 'app.like.co',
   },
+  authcoreApiHost: IS_TESTNET
+    ? 'https://likecoin-integration-test.authcore.io'
+    : 'https://authcore.like.co',
+  authcoreRedirectUrl: `${SITE_URL}/auth/redirect?method=liker-id`,
 };
 
 const combinedConfig = {

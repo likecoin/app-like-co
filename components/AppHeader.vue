@@ -162,7 +162,7 @@ const walletModule = namespace('wallet')
 export default class AppHeader extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
-  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
 
@@ -182,6 +182,7 @@ export default class AppHeader extends Vue {
   async handleConnectWalletButtonClick() {
     const connection = await this.openConnectWalletModal({
       language: this.$i18n.locale.split('-')[0],
+      fullPath: this.$route.fullPath,
     })
     if (connection) {
       const { method, accounts } = connection

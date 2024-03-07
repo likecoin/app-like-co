@@ -196,12 +196,28 @@ export default class Wallet extends VuexModule {
 
   @Action
   // eslint-disable-next-line class-methods-use-this
-  async openConnectWalletModal({ language }: { language: string }) {
+  async openConnectWalletModal({ language, fullPath }: { language: string, fullPath?: string }) {
+    if (window.sessionStorage && fullPath) {
+      window.sessionStorage.setItem(
+        'USER_POST_AUTH_ROUTE',
+        fullPath,
+      );
+    }
     const connector = await getConnector()
     const connection = await connector.openConnectionMethodSelectionDialog({
       language,
     })
     return connection
+  }
+
+  @Action
+  // eslint-disable-next-line class-methods-use-this
+  async handleConnectorRedirect(
+    { method, params }: { method: string, params: string },
+  ) {
+    const connector = await getConnector()
+    const connection = await connector.handleRedirect(method, params);
+    return connection;
   }
 
   @Action

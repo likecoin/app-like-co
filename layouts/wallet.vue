@@ -21,7 +21,7 @@ const walletModule = namespace('wallet')
 @Component
 export default class WalletLayout extends Vue {
   @walletModule.Getter('getWalletAddress') walletAddress!: string
-  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
   @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
 
@@ -41,6 +41,7 @@ export default class WalletLayout extends Vue {
     if (!this.walletAddress) {
       const connection = await this.openConnectWalletModal({
         language: this.$i18n.locale.split('-')[0],
+        fullPath: this.$route.fullPath,
       })
       // Re-login
       if (connection) {
