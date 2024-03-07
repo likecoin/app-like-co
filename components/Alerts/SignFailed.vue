@@ -42,7 +42,7 @@ export default class SignFailed extends Vue {
   @walletModule.Action closeSnackbar!: () => void
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('openConnectWalletModal')
-  openConnectWalletModal!: (params: { language: string }) => Promise<any>
+  openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
 
   @walletModule.Action('initWallet') initWallet!: (params: {
     method: any
@@ -72,6 +72,7 @@ export default class SignFailed extends Vue {
     await this.disconnectWallet()
     const connection = await this.openConnectWalletModal({
       language: this.$i18n.locale.split('-')[0],
+      fullPath: this.$route.fullPath,
     })
     if (connection) {
       const { method, accounts } = connection
