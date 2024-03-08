@@ -426,12 +426,16 @@ export default class NFTMintPage extends Vue {
     return getNftModelApi(this.classId);
   }
 
+  get isUsingMobileApp() {
+    return this.walletType?.includes('mobile') || this.walletType?.includes('walletconnect') || this.isUsingLikerLandApp
+  }
+
   get isUsingLikerLandApp() {
-    return this.walletType === 'liker-id'
+    return this.walletType === 'likerland-app'
   }
 
   get isTransactionSizeLimited() {
-    return this.isUsingLikerLandApp
+    return this.isUsingMobileApp
   }
 
   get createNftClassPayload() {

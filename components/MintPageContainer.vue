@@ -49,8 +49,8 @@
     <slot />
     <div class="flex flex-col max-w-[600px]">
       <div class="mt-[-20px]">
-        <AttentionsOpenLikerLandApp v-if="isUsingLikerLandApp && isStateTransaction" />
-        <AttentionsLedger v-if="!isUsingLikerLandApp" />
+        <AttentionsOpenLikerLandApp v-if="isUsingMobileApp && isStateTransaction" />
+        <AttentionsLedger v-if="!isUsingMobileApp" />
         <AlertsSignFailed />
       </div>
     </div>
@@ -72,8 +72,12 @@ export default class Min5PageContainer extends Vue {
   @Prop({ default: false }) readonly isStateTransaction: boolean | undefined
 
 
+  get isUsingMobileApp() {
+    return this.walletType?.includes('mobile') || this.walletType?.includes('walletconnect') || this.isUsingLikerLandApp
+  }
+
   get isUsingLikerLandApp() {
-    return this.walletType === 'liker-id'
+    return this.walletType === 'likerland-app'
   }
 
   get googleFormUrl() {

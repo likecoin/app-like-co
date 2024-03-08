@@ -93,14 +93,14 @@
                 :title="currentAddress"
               >
                 <template
-                  v-if="isWalletFromLikerLikerApp"
+                  v-if="isUsingMobileApp"
                   #prepend
                 >
                   <IconWalletConnectLogo />
                 </template>
                 <div
                   :class="[
-                    isWalletFromLikerLikerApp ? 'w-[116px]' : 'w-[148px]',
+                    isUsingMobileApp ? 'w-[116px]' : 'w-[148px]',
                     'overflow-hidden',
                     'overflow-ellipsis',
                   ]"
@@ -171,8 +171,12 @@ export default class AppHeader extends Vue {
     return !!IS_TESTNET
   }
 
-  get isWalletFromLikerLikerApp() {
-    return this.walletType === 'liker-id';
+  get isUsingMobileApp() {
+    return this.walletType?.includes('mobile') || this.walletType?.includes('walletconnect') || this.isUsingLikerLandApp
+  }
+
+  get isUsingLikerLandApp() {
+    return this.walletType === 'likerland-app'
   }
 
   handleClickSignOutButton() {
