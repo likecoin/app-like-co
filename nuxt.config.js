@@ -97,6 +97,8 @@ export default {
         ],
         'frame-src': [
           'verify.walletconnect.com',
+          'authcore.like.co',
+          'likecoin-integration-test.authcore.io',
         ],
         'style-src': [
           "'self'",
