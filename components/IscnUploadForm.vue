@@ -295,7 +295,6 @@ export default class IscnUploadForm extends Vue {
   isOpenFileInfoDialog = false
   isOpenSignDialog = false
   isOpenWarningSnackbar = false
-  isOpenKeplr = true
   isSizeExceeded = false
   isAddISCNPageToEpub = false
 
@@ -688,16 +687,6 @@ export default class IscnUploadForm extends Vue {
     this.displayExifInfo = this.fileRecords[index].exifInfo
   }
 
-  onOpenKeplr() {
-    logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1);
-    this.isOpenKeplr = true
-    // Hack: In some cases, there might be no response from Keplr,
-    // so we set a timeout to automatically close it after 5 seconds.
-    setTimeout(() => {
-      this.isOpenKeplr = false
-    }, 5000)
-  }
-
   async estimateArweaveFee(): Promise<void> {
     try {
       const results = await Promise.all(
@@ -783,7 +772,6 @@ export default class IscnUploadForm extends Vue {
     logTrackerEvent(this, 'ISCNCreate', 'SubmitToArweave', '', 1);
     if (!tempRecord.fileBlob) return;
     this.isOpenSignDialog = true;
-    this.onOpenKeplr();
 
     tempRecord.transactionHash = transactionHash
     if (!tempRecord.transactionHash) {
