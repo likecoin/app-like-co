@@ -95,6 +95,7 @@
         class="
           w-full
           bg-shade-gray
+          break-words
           px-[16px]
           py-[8px]
           rounded-[12px]
