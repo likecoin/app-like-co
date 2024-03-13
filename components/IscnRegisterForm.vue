@@ -768,7 +768,7 @@ export default class IscnRegisterForm extends Vue {
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
-  isOpenKeplr = true
+  isOpenWallet = true
   activeEditingAuthorIndex = -1
 
   isOpenSignDialog = false
@@ -1018,11 +1018,11 @@ export default class IscnRegisterForm extends Vue {
 
   get buttonState() {
     return {
-      preset: this.isOpenKeplr ? 'tertiary' : 'outline',
-      text: this.isOpenKeplr
-        ? this.$t('IscnRegisterForm.signDialog.keplr')
+      preset: this.isOpenWallet ? 'tertiary' : 'outline',
+      text: this.isOpenWallet
+        ? this.$t('IscnRegisterForm.signDialog.wallet')
         : this.$t('IscnRegisterForm.signDialog.retry'),
-      isDisable: this.isOpenKeplr,
+      isDisable: this.isOpenWallet,
     }
   }
 
@@ -1318,7 +1318,7 @@ estimation,
 
   onOpenKeplr() {
     logTrackerEvent(this, 'ISCNCreate', 'OpenKeplr', '', 1)
-    this.isOpenKeplr = true
+    this.isOpenWallet = true
   }
 
   validateField(
