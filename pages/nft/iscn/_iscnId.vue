@@ -186,6 +186,8 @@ export enum MintState {
   DONE = ''
 }
 
+const DEFAULT_MINT_AMOUNT = 32
+
 @Component({
   fetch({ params, redirect }) {
     if (!params.iscnId) {
@@ -262,7 +264,7 @@ export default class NFTMintPage extends Vue {
   txStatus: string = ''
 
   reserveNft: number = 0
-  mintAmount: number = this.maxMintAmount
+  mintAmount: number = Math.min(this.maxMintAmount, DEFAULT_MINT_AMOUNT)
   initialBatch: number = 6
   shouldShowNoUrlWarning: boolean = false
 
