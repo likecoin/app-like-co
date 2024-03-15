@@ -226,12 +226,12 @@ export default class IscnUploadedInfo extends Vue {
     window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
   }
 
-   handleEdit() {
-    logTrackerEvent(this, 'ISCNUploaded', 'ClickEdit', this.iscnId, 1)
+   handleEdit(iscnIdPrefix: string) {
+    logTrackerEvent(this, 'ISCNUploaded', 'ClickEdit', iscnIdPrefix, 1)
     this.$router.replace(
       this.localeLocation({
         name: 'edit-iscnId',
-        params: { iscnId: this.iscnId },
+        params: { iscnId: iscnIdPrefix },
       })!,
     )
   }
