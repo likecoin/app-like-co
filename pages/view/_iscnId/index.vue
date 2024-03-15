@@ -913,12 +913,12 @@ export default class ViewIscnIdPage extends Vue {
     }
   }
 
-  handleEdit() {
-    logTrackerEvent(this, 'ISCNView', 'ClickEdit', this.iscnId, 1)
+  handleEdit(iscnIdPrefix: string) {
+    logTrackerEvent(this, 'ISCNView', 'ClickEdit', iscnIdPrefix, 1)
     this.$router.replace(
       this.localeLocation({
         name: 'edit-iscnId',
-        params: { iscnId: this.iscnId },
+        params: { iscnId: iscnIdPrefix },
       })!,
     )
   }

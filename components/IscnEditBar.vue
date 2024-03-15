@@ -11,7 +11,7 @@
       v-if="isIscnOwner"
       class="flex justify-center items-center gap-[4px] mr-[8px]"
     >
-      <Button preset="plain" text="Edit ISCN" @click="handleEdit">
+      <Button preset="plain" :text="$t('IscnEditInfo.button.edit')" @click="handleEdit">
         <template #prepend>
           <IconEdit />
         </template>
@@ -68,6 +68,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { extractIscnIdPrefix } from '~/utils/ui'
 
 @Component
 export default class IscnEditBar extends Vue {
@@ -87,7 +88,8 @@ export default class IscnEditBar extends Vue {
   }
 
   handleEdit() {
-    this.$emit('click-edit', this.iscnId)
+    const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
+    this.$emit('click-edit', iscnIdPrefix)
   }
 
   handleClickMintNFTBook() {

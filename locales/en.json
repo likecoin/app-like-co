@@ -185,6 +185,7 @@
   "IscnEditInfo.reUpload": "Re-upload files to update links",
   "IscnEditInfo.updating": "Updating ISCN...",
   "IscnEditInfo.button.confirm": "Update ISCN",
+  "IscnEditInfo.button.edit": "Edit ISCN",
   "IscnRegisterForm.arweave.link": "ar://{arweaveId}",
   "IscnRegisterForm.button.back": "Back",
   "IscnRegisterForm.button.confirm": "Confirm",
