@@ -31,17 +31,10 @@ const uiModule = namespace('ui')
 
 @Component({
   head() {
-    const isDesktopViewMode: boolean =
-      this.$store.getters['ui/isDesktopViewMode']
-    const contentWidth = isDesktopViewMode
-      ? 'width=1024, initial-scale=1, minimum-scale=1'
-      : 'width=device-width'
-
     return {
       htmlAttrs: {
         class: this.$props.bgClass,
       },
-      meta: [{ hid: 'viewport', name: 'viewport', content: contentWidth }],
     }
   },
 })
