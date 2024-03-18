@@ -266,6 +266,13 @@ const MODE = {
   EDIT: 'edit',
 }
 
+const IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+]
+
 @Component
 export default class IscnUploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
@@ -813,8 +820,76 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
+  checkUploadFileTypeIsPDF() {
+    let hasPDF = false;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of this.fileRecords) {
+      if (file.fileType === 'application/epub+zip') {
+        return false;
+      }
+      if (file.fileType === 'application/pdf') {
+        hasPDF = true;
+      }
+    }
+    return hasPDF;
+  }
+
+
+  addToEpubMetadataList(ipfsHash: string, arweaveId: string) {
+    this.epubMetadataList.push({
+      thumbnailIpfsHash: ipfsHash,
+      thumbnailArweaveId: arweaveId,
+    })
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async uploadFileAndGetArweaveId(file: any, txHash: string) {
+    const arrayBuffer = await file.fileBlob.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    return uploadSingleFileToBundlr(buffer, {
+      fileSize: file.fileBlob?.size || 0,
+      ipfsHash: file.ipfsHash,
+      fileType: file.fileType,
+      txHash,
+    })
+  }
+
+  async setEbookCoverFromImages() {
+    if (
+      this.epubMetadataList[0] &&
+      this.epubMetadataList[0].thumbnailArweaveId
+    ) {
+      return
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of this.fileRecords) {
+      if (IMAGE_MIME_TYPES.includes(file.fileType)) {
+        const existingData =
+          this.sentArweaveTransactionInfo.get(file.ipfsHash) || {}
+        const { transactionHash, arweaveId: uploadArweaveId } = existingData
+        if (uploadArweaveId) {
+          this.addToEpubMetadataList(transactionHash as string, uploadArweaveId)
+          return
+        }
+        // eslint-disable-next-line no-await-in-loop
+        const arweaveId = await this.uploadFileAndGetArweaveId(
+          file,
+          transactionHash as string,
+        )
+        if (arweaveId) {
+          this.addToEpubMetadataList(file.ipfsHash, arweaveId)
+          return
+        }
+        return
+      }
+    }
+  }
+
   async onSubmit() {
     if (IS_CHAIN_UPGRADING) return
+    if (this.checkUploadFileTypeIsPDF()) {
+      await this.setEbookCoverFromImages()
+    }
     logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
     this.uploadStatus = 'uploading'
     this.error = ''
