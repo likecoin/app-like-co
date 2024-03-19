@@ -27,28 +27,18 @@ import { namespace } from 'vuex-class'
 import { IS_CHAIN_UPGRADING } from '~/constant'
 
 const walletModule = namespace('wallet')
-const uiModule = namespace('ui')
 
 @Component({
   head() {
-    const isDesktopViewMode: boolean =
-      this.$store.getters['ui/isDesktopViewMode']
-    const contentWidth = isDesktopViewMode
-      ? 'width=1024, initial-scale=1, minimum-scale=1'
-      : 'width=device-width'
-
     return {
       htmlAttrs: {
         class: this.$props.bgClass,
       },
-      meta: [{ hid: 'viewport', name: 'viewport', content: contentWidth }],
     }
   },
 })
 export default class RootLayout extends Vue {
   @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
-
-  @uiModule.Action('init') initUIStore!: () => void
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
@@ -56,7 +46,6 @@ export default class RootLayout extends Vue {
 
   async mounted() {
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
-    this.initUIStore()
     await this.restoreSessionIfNecessary()
   }
 
