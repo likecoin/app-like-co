@@ -765,8 +765,6 @@ export default class IscnUploadForm extends Vue {
       // TODO: Handle error
       // eslint-disable-next-line no-console
       console.error(err);
-    } finally {
-      this.uploadStatus = '';
     }
     return '';
   }
@@ -866,18 +864,22 @@ export default class IscnUploadForm extends Vue {
       if (IMAGE_MIME_TYPES.includes(file.fileType)) {
         const existingData =
           this.sentArweaveTransactionInfo.get(file.ipfsHash) || {}
-        const { transactionHash, arweaveId: uploadArweaveId } = existingData
-        if (uploadArweaveId) {
-          this.addToEpubMetadataList(transactionHash as string, uploadArweaveId)
+        if (existingData.arweaveId) {
+          this.addToEpubMetadataList(file.ipfsHash, existingData.arweaveId)
           return
         }
+        const transactionHash =
+        // eslint-disable-next-line no-await-in-loop
+          existingData.transactionHash || (await this.sendArweaveFeeTx(file))
         // eslint-disable-next-line no-await-in-loop
         const arweaveId = await this.uploadFileAndGetArweaveId(
           file,
-          transactionHash as string,
+          transactionHash,
         )
+
         if (arweaveId) {
           this.addToEpubMetadataList(file.ipfsHash, arweaveId)
+          this.sentArweaveTransactionInfo.set(file.ipfsHash, { transactionHash, arweaveId });
           return
         }
         return
@@ -887,9 +889,6 @@ export default class IscnUploadForm extends Vue {
 
   async onSubmit() {
     if (IS_CHAIN_UPGRADING) return
-    if (this.checkUploadFileTypeIsPDF()) {
-      await this.setEbookCoverFromImages()
-    }
     logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
     this.uploadStatus = 'uploading'
     this.error = ''
@@ -912,6 +911,11 @@ export default class IscnUploadForm extends Vue {
 
     try {
       this.uploadStatus = 'uploading';
+
+      if (this.checkUploadFileTypeIsPDF()) {
+        await this.setEbookCoverFromImages()
+      }
+
       // eslint-disable-next-line no-restricted-syntax
       this.numberOfSignNeeded = this.modifiedFileRecords.length;
       this.signProgress = 0;
