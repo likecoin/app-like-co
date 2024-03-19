@@ -266,6 +266,13 @@ const MODE = {
   EDIT: 'edit',
 }
 
+const IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+]
+
 @Component
 export default class IscnUploadForm extends Vue {
   @Prop(Number) readonly step: number | undefined
@@ -759,7 +766,7 @@ export default class IscnUploadForm extends Vue {
       // eslint-disable-next-line no-console
       console.error(err);
     } finally {
-      this.uploadStatus = '';
+      this.uploadStatus = 'uploading';
     }
     return '';
   }
@@ -813,6 +820,75 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
+  checkUploadFileTypeIsPDF() {
+    let hasPDF = false;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of this.fileRecords) {
+      if (file.fileType === 'application/epub+zip') {
+        return false;
+      }
+      if (file.fileType === 'application/pdf') {
+        hasPDF = true;
+      }
+    }
+    return hasPDF;
+  }
+
+
+  addToEpubMetadataList(ipfsHash: string, arweaveId: string) {
+    this.epubMetadataList.push({
+      thumbnailIpfsHash: ipfsHash,
+      thumbnailArweaveId: arweaveId,
+    })
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async uploadFileAndGetArweaveId(file: any, txHash: string) {
+    const arrayBuffer = await file.fileBlob.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    return uploadSingleFileToBundlr(buffer, {
+      fileSize: file.fileBlob?.size || 0,
+      ipfsHash: file.ipfsHash,
+      fileType: file.fileType,
+      txHash,
+    })
+  }
+
+  async setEbookCoverFromImages() {
+    if (
+      this.epubMetadataList[0] &&
+      this.epubMetadataList[0].thumbnailArweaveId
+    ) {
+      return
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of this.fileRecords) {
+      if (IMAGE_MIME_TYPES.includes(file.fileType)) {
+        const existingData =
+          this.sentArweaveTransactionInfo.get(file.ipfsHash) || {}
+        if (existingData.arweaveId) {
+          this.addToEpubMetadataList(file.ipfsHash, existingData.arweaveId)
+          return
+        }
+        const transactionHash =
+        // eslint-disable-next-line no-await-in-loop
+          existingData.transactionHash || (await this.sendArweaveFeeTx(file))
+        // eslint-disable-next-line no-await-in-loop
+        const arweaveId = await this.uploadFileAndGetArweaveId(
+          file,
+          transactionHash,
+        )
+
+        if (arweaveId) {
+          this.addToEpubMetadataList(file.ipfsHash, arweaveId)
+          this.sentArweaveTransactionInfo.set(file.ipfsHash, { transactionHash, arweaveId });
+          return
+        }
+        return
+      }
+    }
+  }
+
   async onSubmit() {
     if (IS_CHAIN_UPGRADING) return
     logTrackerEvent(this, 'ISCNCreate', 'ClickUpload', '', 1);
@@ -837,6 +913,11 @@ export default class IscnUploadForm extends Vue {
 
     try {
       this.uploadStatus = 'uploading';
+
+      if (this.checkUploadFileTypeIsPDF()) {
+        await this.setEbookCoverFromImages()
+      }
+
       // eslint-disable-next-line no-restricted-syntax
       this.numberOfSignNeeded = this.modifiedFileRecords.length;
       this.signProgress = 0;
