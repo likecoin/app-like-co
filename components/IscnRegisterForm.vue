@@ -1067,12 +1067,12 @@ export default class IscnRegisterForm extends Vue {
     this.uploadStatus = 'loading'
 
     if (this.epubMetadata) {
-      this.name = this.epubMetadata.title
+      this.name = this.epubMetadata.title || ''
       this.description = this.extractText(this.epubMetadata.description)
-      this.author.name = this.epubMetadata.author
+      this.author.name = this.epubMetadata.author || ''
       this.author.authorDescription = 'Author'
-      this.language = this.epubMetadata.language
-      this.tags = this.epubMetadata.tags
+      this.language = this.epubMetadata.language || ''
+      this.tags = this.epubMetadata.tags || []
       this.thumbnailUrl = this.formatArweave(
         this.epubMetadata.thumbnailArweaveId,
       ) as string
