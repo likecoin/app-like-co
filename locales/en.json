@@ -203,7 +203,7 @@
   "IscnRegisterForm.error.buy": "Buy LikeCoin",
   "IscnRegisterForm.error.descriptionIsEmpty": "Please enter the ISCN description",
   "IscnRegisterForm.error.faucet": "Get faucet",
-  "IscnRegisterForm.error.insufficient_with_buy": "Oops, Insufficient Balance. {buy} ",
+  "IscnRegisterForm.error.insufficient_with_buy": "Oops, Insufficient balance. {buy} ",
   "IscnRegisterForm.error.insufficient_with_like": "Oops, Insufficient balance, requires {like} ",
   "IscnRegisterForm.error.missingSigner": "Missing Signer. Please connect your wallet.",
   "IscnRegisterForm.error.notIscnOwner": "Oops, User is not the current ISCN owner. {login}",
