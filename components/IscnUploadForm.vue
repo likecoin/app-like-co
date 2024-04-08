@@ -380,7 +380,7 @@ export default class IscnUploadForm extends Vue {
   get errorMsg() {
     switch (this.error) {
       case 'INSUFFICIENT_BALANCE':
-        return this.$t('IscnRegisterForm.error.insufficient')
+        return this.$t('IscnRegisterForm.error.insufficient_with_like', { like: this.arweaveFee })
       case 'MISSING_SIGNER':
         return this.$t('IscnRegisterForm.error.missingSigner')
       default:
