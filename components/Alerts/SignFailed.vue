@@ -53,7 +53,7 @@ export default class SignFailed extends Vue {
   get errorAlert() {
     switch (this.errorType) {
       case ErrorType.INSUFFICIENT_BALANCE:
-        return 'IscnRegisterForm.error.insufficient'
+        return 'IscnRegisterForm.error.insufficient_with_buy'
 
       case ErrorType.USER_NOT_ISCN_OWNER:
         return 'IscnRegisterForm.error.notIscnOwner'
