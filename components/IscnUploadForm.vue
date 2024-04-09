@@ -836,8 +836,9 @@ export default class IscnUploadForm extends Vue {
     if (this.epubMetadataList?.find(epubMetadata => epubMetadata.thumbnailArweaveId)) {
       return;
     }
-    // eslint-disable-next-line no-restricted-syntax
-    for (const file of this.fileRecords) {
+
+    for (let i = 0; i < this.fileRecords.length; i += 1) {
+      const file = this.fileRecords[i]
       if (IMAGE_MIME_TYPES.includes(file.fileType)) {
         const existingData =
           this.sentArweaveTransactionInfo.get(file.ipfsHash) || {}
@@ -848,10 +849,10 @@ export default class IscnUploadForm extends Vue {
           })
           return
         }
-        let {transactionHash} = existingData;
+        let { transactionHash } = existingData
         if (!transactionHash) {
           // eslint-disable-next-line no-await-in-loop
-          transactionHash = await this.sendArweaveFeeTx(file);
+          transactionHash = await this.sendArweaveFeeTx(file)
         }
         // eslint-disable-next-line no-await-in-loop
         const arweaveId = await this.uploadFileAndGetArweaveId(
@@ -864,7 +865,10 @@ export default class IscnUploadForm extends Vue {
             thumbnailIpfsHash: file.ipfsHash,
             thumbnailArweaveId: arweaveId,
           })
-          this.sentArweaveTransactionInfo.set(file.ipfsHash, { transactionHash, arweaveId });
+          this.sentArweaveTransactionInfo.set(file.ipfsHash, {
+            transactionHash,
+            arweaveId,
+          })
           return
         }
         return
