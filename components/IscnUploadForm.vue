@@ -847,7 +847,7 @@ export default class IscnUploadForm extends Vue {
             thumbnailIpfsHash: file.ipfsHash,
             thumbnailArweaveId: existingData.arweaveId,
           })
-          return
+          break
         }
         let { transactionHash } = existingData
         if (!transactionHash) {
@@ -869,9 +869,8 @@ export default class IscnUploadForm extends Vue {
             transactionHash,
             arweaveId,
           })
-          return
+          break
         }
-        return
       }
     }
   }
