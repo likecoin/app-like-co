@@ -128,8 +128,6 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
-    // https://go.nuxtjs.dev/pwa
-    '@nuxtjs/pwa',
 
     // https://i18n.nuxtjs.org
     '@nuxtjs/i18n',
@@ -147,13 +145,6 @@ export default {
   axios: {
     browserBaseURL: '/api',
     retry: { retries: 1 },
-  },
-
-  // PWA module configuration: https://go.nuxtjs.dev/pwa
-  pwa: {
-    manifest: {
-      lang: 'en',
-    },
   },
 
   i18n: {
