@@ -68,7 +68,6 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
     'keplr-mobile',
     'cosmostation',
     'cosmostation-mobile',
-    'likerland-app',
     'leap',
     'metamask-leap',
     'walletconnect-v2',
