@@ -256,8 +256,10 @@ import {
 } from '~/utils/misc'
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { getAccountBalance } from '~/utils/cosmos'
-import { injectISCNQRCodePage } from '~/utils/epub/iscn'
+import { injectISCNQRCodePageEpub } from '~/utils/epub/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
+const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
 type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
 
@@ -279,6 +281,7 @@ export default class IscnUploadForm extends Vue {
   @Prop({ default: MODE.REGISTER }) readonly mode: string | undefined
   @Prop(String) readonly iscnId: string | undefined
 
+  @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Getter('getWalletAddress') address!: string
@@ -412,6 +415,11 @@ export default class IscnUploadForm extends Vue {
     })
   }
 
+  get iscnData() {
+    if (!this.iscnId) return null
+    return this.getISCNById(this.iscnId)?.data
+  }
+
   @Watch('error')
   showWarning(errormsg: any) {
     if (errormsg) this.isOpenWarningSnackbar = true
@@ -514,8 +522,8 @@ export default class IscnUploadForm extends Vue {
               }
             }
             if (file.type === 'application/epub+zip') {
-             // eslint-disable-next-line no-await-in-loop
-             await this.processEPub({ ipfsHash, buffer: fileBytes, file })
+              // eslint-disable-next-line no-await-in-loop
+              await this.processEPub({ ipfsHash, buffer: fileBytes, file })
             }
           }
         } else {
@@ -531,7 +539,7 @@ export default class IscnUploadForm extends Vue {
       const book = ePub(buffer)
       await book.ready
       if (this.mode === MODE.EDIT) {
-        const modifiedEpub = await injectISCNQRCodePage(buffer, book, this.iscnId || '')
+        const modifiedEpub = await injectISCNQRCodePageEpub(buffer, book, this.iscnId || '', this.iscnData)
 
         // eslint-disable-next-line no-await-in-loop
         const info = await this.getFileInfo(modifiedEpub)
