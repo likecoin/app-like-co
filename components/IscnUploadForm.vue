@@ -257,6 +257,7 @@ import {
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { getAccountBalance } from '~/utils/cosmos'
 import { injectISCNQRCodePageEpub } from '~/utils/epub/iscn'
+import { injectISCNQRCodePagePdf } from '~/utils/pdf/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const iscnModule = namespace('iscn')
@@ -524,6 +525,9 @@ export default class IscnUploadForm extends Vue {
             if (file.type === 'application/epub+zip') {
               // eslint-disable-next-line no-await-in-loop
               await this.processEPub({ ipfsHash, buffer: fileBytes, file })
+            } else if (file.type === 'application/pdf') {
+              // eslint-disable-next-line no-await-in-loop
+              await this.processPdf({ ipfsHash, buffer: fileBytes, file })
             }
           }
         } else {
@@ -646,6 +650,39 @@ export default class IscnUploadForm extends Vue {
     } catch (err) {
       console.error(err)
     }
+  }
+
+  async processPdf({ ipfsHash, buffer, file }: { ipfsHash: string, buffer: ArrayBuffer; file: File }) {
+    if (this.mode === MODE.EDIT) {
+        const modifiedPdf = await injectISCNQRCodePagePdf(buffer, this.iscnId || '', this.iscnData)
+
+        // eslint-disable-next-line no-await-in-loop
+        const info = await this.getFileInfo(modifiedPdf)
+        if (info) {
+          const {
+            fileSHA256: modifiedEpubSHA256,
+            ipfsHash: modifiedEpubIpfsHash,
+          } = info
+
+          const modifiedEpubRecord: any = {
+            fileName: file.name,
+            fileSize: modifiedPdf.size,
+            fileType: modifiedPdf.type,
+            fileBlob: modifiedPdf,
+            ipfsHash: modifiedEpubIpfsHash,
+            fileSHA256: modifiedEpubSHA256,
+            isFileImage: false,
+          }
+
+          const epubReader = new FileReader()
+          epubReader.onload = (e) => {
+            if (!e.target) return
+            modifiedEpubRecord.fileData = e.target.result as string
+            Vue.set(this.modifiedEpubMap, ipfsHash, modifiedEpubRecord)
+          }
+          epubReader.readAsDataURL(modifiedPdf)
+        }
+      }
   }
 
   // eslint-disable-next-line class-methods-use-this
