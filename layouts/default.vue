@@ -9,7 +9,7 @@
         'items-center',
         'justify-center',
         'z-10',
-        { 'lg:hidden': !isDesktopViewMode },
+        'lg:hidden',
         { 'bg-white lg:bg-light-gray': $route.path.includes('airdrop') },
       ]"
     >
