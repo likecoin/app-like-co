@@ -377,7 +377,7 @@
   "UploadForm.button.selectFile": "Select a file",
   "UploadForm.button.skip": "Skip Upload",
   "UploadForm.button": "Start Upload",
-  "UploadForm.label.insertISCNPage": "Add ISCN Page to Epub",
+  "UploadForm.label.insertISCNPage": "Add ISCN Page to EPUB & PDF",
   "UploadForm.guide.dropFile": "Drop your file here, or",
   "UploadForm.guide.selectFile": "Select your file and publish to IPFS",
   "UploadForm.title.registerISCN": "Register ISCN",

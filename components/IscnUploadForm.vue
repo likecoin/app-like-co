@@ -105,7 +105,7 @@
           </div>
         </div>
         <FormField v-if="showAddISCNPageOption">
-          <CheckBox v-model="isAddISCNPageToEpub">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
+          <CheckBox v-model="isAddISCNPageToEbook">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
         </FormField>
         <!-- upload field__Submit  -->
         <div class="flex gap-[8px] justify-end text-medium-gray mt-[24px]">
@@ -307,7 +307,7 @@ export default class IscnUploadForm extends Vue {
   isOpenSignDialog = false
   isOpenWarningSnackbar = false
   isSizeExceeded = false
-  isAddISCNPageToEpub = false
+  isAddISCNPageToEbook = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
   uploadStatus: UploadStatus = '';
@@ -329,7 +329,7 @@ export default class IscnUploadForm extends Vue {
   signProgress = 0
 
   epubMetadataList: any[] = []
-  modifiedEpubMap: any = {}
+  modifiedEbookMap: any = {}
 
   get formClasses() {
     return [
@@ -404,10 +404,10 @@ export default class IscnUploadForm extends Vue {
   }
 
   get modifiedFileRecords() {
-    if (!this.isAddISCNPageToEpub || this.mode !== MODE.EDIT) return this.fileRecords
+    if (!this.isAddISCNPageToEbook || this.mode !== MODE.EDIT) return this.fileRecords
     return this.fileRecords.map((record) => {
-      if (record.fileType === 'application/epub+zip') {
-        const modifiedEpubRecord = this.modifiedEpubMap[record.ipfsHash]
+      if (['application/epub+zip', 'application/pdf'].includes(record.fileType)) {
+        const modifiedEpubRecord = this.modifiedEbookMap[record.ipfsHash]
         if (modifiedEpubRecord) {
           return modifiedEpubRecord
         }
@@ -567,7 +567,7 @@ export default class IscnUploadForm extends Vue {
           epubReader.onload = (e) => {
             if (!e.target) return
             modifiedEpubRecord.fileData = e.target.result as string
-            Vue.set(this.modifiedEpubMap, ipfsHash, modifiedEpubRecord)
+            Vue.set(this.modifiedEbookMap, ipfsHash, modifiedEpubRecord)
           }
           epubReader.readAsDataURL(modifiedEpub)
         }
@@ -660,25 +660,25 @@ export default class IscnUploadForm extends Vue {
         const info = await this.getFileInfo(modifiedPdf)
         if (info) {
           const {
-            fileSHA256: modifiedEpubSHA256,
-            ipfsHash: modifiedEpubIpfsHash,
+            fileSHA256: modifiedPdfSHA256,
+            ipfsHash: modifiedPdfIpfsHash,
           } = info
 
-          const modifiedEpubRecord: any = {
+          const modifiedPdfRecord: any = {
             fileName: file.name,
             fileSize: modifiedPdf.size,
             fileType: modifiedPdf.type,
             fileBlob: modifiedPdf,
-            ipfsHash: modifiedEpubIpfsHash,
-            fileSHA256: modifiedEpubSHA256,
+            ipfsHash: modifiedPdfIpfsHash,
+            fileSHA256: modifiedPdfSHA256,
             isFileImage: false,
           }
 
           const epubReader = new FileReader()
           epubReader.onload = (e) => {
             if (!e.target) return
-            modifiedEpubRecord.fileData = e.target.result as string
-            Vue.set(this.modifiedEpubMap, ipfsHash, modifiedEpubRecord)
+            modifiedPdfRecord.fileData = e.target.result as string
+            Vue.set(this.modifiedEbookMap, ipfsHash, modifiedPdfRecord)
           }
           epubReader.readAsDataURL(modifiedPdf)
         }
@@ -722,8 +722,8 @@ export default class IscnUploadForm extends Vue {
 
   handleDeleteFile(index: number) {
     const deletedFile = this.fileRecords[index];
-    if (this.modifiedEpubMap[deletedFile.ipfsHash]) {
-      delete this.modifiedEpubMap[deletedFile.ipfsHash]
+    if (this.modifiedEbookMap[deletedFile.ipfsHash]) {
+      delete this.modifiedEbookMap[deletedFile.ipfsHash]
     }
     this.fileRecords.splice(index, 1);
 
