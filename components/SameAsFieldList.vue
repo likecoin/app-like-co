@@ -38,16 +38,8 @@
                 v-model="item.url"
                 :placeholder="$t('IscnRegisterForm.placeholder.url')"
                 class="w-full"
+                @blur="item.shouldShowEditURL = false"
               />
-              <Button
-                v-if="item.url"
-                preset="plain"
-                @click.prevent="() => (item.shouldShowEditURL = false)"
-              >
-                <template #prepend>
-                  <IconEye />
-                </template>
-              </Button>
             </div>
             <div v-else class="flex items-center justify-start">
               <ContentFingerprintLink :item="item.url" />
@@ -178,6 +170,10 @@ export default class SameAsFieldList extends Vue {
   }
 
   addFields() {
+    this.sameAsList.forEach((item: any) => {
+      // eslint-disable-next-line no-param-reassign
+      item.shouldShowEditURL = false
+    })
     this.sameAsList.push({
       url: '',
       id: Date.now(),
@@ -189,6 +185,10 @@ export default class SameAsFieldList extends Vue {
 
   deleteField(index: number) {
     this.sameAsList.splice(index, 1)
+    this.sameAsList.forEach((item: any) => {
+      // eslint-disable-next-line no-param-reassign
+      item.shouldShowEditURL = false
+    })
   }
 
   // eslint-disable-next-line class-methods-use-this
