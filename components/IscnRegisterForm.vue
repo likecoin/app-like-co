@@ -663,7 +663,7 @@ export enum CharactersLimit {
   description = 1600,
   tagContent = 35,
   tagNumber = 10,
-  authorName = 40,
+  authorName = 100,
   authorDescription = 200,
   likerIdLeast = 7,
   likerId = 20,
