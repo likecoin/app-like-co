@@ -408,7 +408,10 @@ export default class IscnUploadForm extends Vue {
   get modifiedFileRecords() {
     if (!this.isAddISCNPageToEbook || this.mode !== MODE.EDIT) return this.fileRecords
     return this.fileRecords.map((record) => {
-      if (['application/epub+zip', 'application/pdf'].includes(record.fileType)) {
+      if ([
+        'application/epub+zip',
+        'application/pdf',
+      ].includes(record.fileType)) {
         const modifiedEpubRecord = this.modifiedEbookMap[record.ipfsHash]
         if (modifiedEpubRecord) {
           return modifiedEpubRecord

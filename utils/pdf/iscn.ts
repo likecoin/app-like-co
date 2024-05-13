@@ -39,7 +39,11 @@ export async function injectISCNQRCodePagePdf(
   const canvas = await createQRCodeCanvas(iscnPrefix)
   const imageBlob = await saveCanvas(canvas)
   if (!imageBlob) throw new Error('Cannot save canvas to blob')
-  const locale = 'en'
+  let locale: 'en' | 'zh' = 'en'
+  const iscnLanguage = iscnData.contentMetadata?.inLanguage || 'en'
+  if (iscnLanguage.toLowerCase().includes('zh')) {
+    locale = 'zh'
+  }
   const pageWidth = page.getWidth()
   const pageHeight = page.getHeight()
 
