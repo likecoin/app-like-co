@@ -401,8 +401,10 @@ export default class IscnUploadForm extends Vue {
 
   get showAddISCNPageOption() {
     return this.mode === MODE.EDIT
-      && this.fileRecords.some(file => file.fileType === 'application/epub+zip'
-        || file.fileType === 'application/pdf')
+      && this.fileRecords.some(file => [
+        'application/epub+zip',
+        'application/pdf',
+      ].includes(file.fileType))
   }
 
   get modifiedFileRecords() {
