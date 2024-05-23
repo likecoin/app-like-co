@@ -105,7 +105,7 @@
           </div>
         </div>
         <FormField v-if="showAddISCNPageOption">
-          <CheckBox v-model="isAddISCNPageToEpub">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
+          <CheckBox v-model="isAddISCNPageToEbook">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
         </FormField>
         <!-- upload field__Submit  -->
         <div class="flex gap-[8px] justify-end text-medium-gray mt-[24px]">
@@ -256,8 +256,11 @@ import {
 } from '~/utils/misc'
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
 import { getAccountBalance } from '~/utils/cosmos'
-import { injectISCNQRCodePage } from '~/utils/epub/iscn'
+import { injectISCNQRCodePageEpub } from '~/utils/epub/iscn'
+import { injectISCNQRCodePagePdf } from '~/utils/pdf/iscn'
+import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
+const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
 type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
 
@@ -279,6 +282,7 @@ export default class IscnUploadForm extends Vue {
   @Prop({ default: MODE.REGISTER }) readonly mode: string | undefined
   @Prop(String) readonly iscnId: string | undefined
 
+  @iscnModule.Getter getISCNById!: (arg0: string) => ISCNRecordWithID
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Getter('getWalletAddress') address!: string
@@ -303,7 +307,7 @@ export default class IscnUploadForm extends Vue {
   isOpenSignDialog = false
   isOpenWarningSnackbar = false
   isSizeExceeded = false
-  isAddISCNPageToEpub = false
+  isAddISCNPageToEbook = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
   uploadStatus: UploadStatus = '';
@@ -325,7 +329,7 @@ export default class IscnUploadForm extends Vue {
   signProgress = 0
 
   epubMetadataList: any[] = []
-  modifiedEpubMap: any = {}
+  modifiedEbookMap: any = {}
 
   get formClasses() {
     return [
@@ -396,20 +400,32 @@ export default class IscnUploadForm extends Vue {
   }
 
   get showAddISCNPageOption() {
-    return this.mode === MODE.EDIT && this.fileRecords.some(file => file.fileType === 'application/epub+zip')
+    return this.mode === MODE.EDIT
+      && this.fileRecords.some(file => [
+        'application/epub+zip',
+        'application/pdf',
+      ].includes(file.fileType))
   }
 
   get modifiedFileRecords() {
-    if (!this.isAddISCNPageToEpub || this.mode !== MODE.EDIT) return this.fileRecords
+    if (!this.isAddISCNPageToEbook || this.mode !== MODE.EDIT) return this.fileRecords
     return this.fileRecords.map((record) => {
-      if (record.fileType === 'application/epub+zip') {
-        const modifiedEpubRecord = this.modifiedEpubMap[record.ipfsHash]
+      if ([
+        'application/epub+zip',
+        'application/pdf',
+      ].includes(record.fileType)) {
+        const modifiedEpubRecord = this.modifiedEbookMap[record.ipfsHash]
         if (modifiedEpubRecord) {
           return modifiedEpubRecord
         }
       }
       return record
     })
+  }
+
+  get iscnData() {
+    if (!this.iscnId) return null
+    return this.getISCNById(this.iscnId)?.data
   }
 
   @Watch('error')
@@ -514,8 +530,11 @@ export default class IscnUploadForm extends Vue {
               }
             }
             if (file.type === 'application/epub+zip') {
-             // eslint-disable-next-line no-await-in-loop
-             await this.processEPub({ ipfsHash, buffer: fileBytes, file })
+              // eslint-disable-next-line no-await-in-loop
+              await this.processEPub({ ipfsHash, buffer: fileBytes, file })
+            } else if (file.type === 'application/pdf') {
+              // eslint-disable-next-line no-await-in-loop
+              await this.processPdf({ ipfsHash, buffer: fileBytes, file })
             }
           }
         } else {
@@ -531,7 +550,7 @@ export default class IscnUploadForm extends Vue {
       const book = ePub(buffer)
       await book.ready
       if (this.mode === MODE.EDIT) {
-        const modifiedEpub = await injectISCNQRCodePage(buffer, book, this.iscnId || '')
+        const modifiedEpub = await injectISCNQRCodePageEpub(buffer, book, this.iscnId || '', this.iscnData)
 
         // eslint-disable-next-line no-await-in-loop
         const info = await this.getFileInfo(modifiedEpub)
@@ -555,7 +574,7 @@ export default class IscnUploadForm extends Vue {
           epubReader.onload = (e) => {
             if (!e.target) return
             modifiedEpubRecord.fileData = e.target.result as string
-            Vue.set(this.modifiedEpubMap, ipfsHash, modifiedEpubRecord)
+            Vue.set(this.modifiedEbookMap, ipfsHash, modifiedEpubRecord)
           }
           epubReader.readAsDataURL(modifiedEpub)
         }
@@ -640,6 +659,39 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
+  async processPdf({ ipfsHash, buffer, file }: { ipfsHash: string, buffer: ArrayBuffer; file: File }) {
+    if (this.mode === MODE.EDIT) {
+        const modifiedPdf = await injectISCNQRCodePagePdf(buffer, this.iscnId || '', this.iscnData)
+
+        // eslint-disable-next-line no-await-in-loop
+        const info = await this.getFileInfo(modifiedPdf)
+        if (info) {
+          const {
+            fileSHA256: modifiedPdfSHA256,
+            ipfsHash: modifiedPdfIpfsHash,
+          } = info
+
+          const modifiedPdfRecord: any = {
+            fileName: file.name,
+            fileSize: modifiedPdf.size,
+            fileType: modifiedPdf.type,
+            fileBlob: modifiedPdf,
+            ipfsHash: modifiedPdfIpfsHash,
+            fileSHA256: modifiedPdfSHA256,
+            isFileImage: false,
+          }
+
+          const epubReader = new FileReader()
+          epubReader.onload = (e) => {
+            if (!e.target) return
+            modifiedPdfRecord.fileData = e.target.result as string
+            Vue.set(this.modifiedEbookMap, ipfsHash, modifiedPdfRecord)
+          }
+          epubReader.readAsDataURL(modifiedPdf)
+        }
+      }
+  }
+
   // eslint-disable-next-line class-methods-use-this
   formatLanguage(language: string) {
     let formattedLanguage = '';
@@ -677,8 +729,8 @@ export default class IscnUploadForm extends Vue {
 
   handleDeleteFile(index: number) {
     const deletedFile = this.fileRecords[index];
-    if (this.modifiedEpubMap[deletedFile.ipfsHash]) {
-      delete this.modifiedEpubMap[deletedFile.ipfsHash]
+    if (this.modifiedEbookMap[deletedFile.ipfsHash]) {
+      delete this.modifiedEbookMap[deletedFile.ipfsHash]
     }
     this.fileRecords.splice(index, 1);
 

@@ -29,7 +29,7 @@ function getISCNURL(iscnPrefix: string) {
   return `${SITE_URL}/view/${encodeURIComponent(iscnPrefix)}`
 }
 
-async function createQRCodeCanvas(iscnPrefix: string) {
+export async function createQRCodeCanvas(iscnPrefix: string) {
   const iscnURL = getISCNURL(iscnPrefix)
   const initQRCode = await QRCode.toDataURL(iscnURL, {
     color: {
@@ -66,9 +66,9 @@ async function createQRCodeCanvas(iscnPrefix: string) {
   return canvas
 }
 
-function saveCanvas(canvas: HTMLCanvasElement): Promise<Blob> {
+export function saveCanvas(canvas: HTMLCanvasElement, type = 'image/png'): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob: Blob | null) => blob ? resolve(blob) : reject(new Error('Cannot save canvas to blob')))
+    canvas.toBlob((blob: Blob | null) => blob ? resolve(blob) : reject(new Error('Cannot save canvas to blob')), type)
   })
 }
 
@@ -83,11 +83,11 @@ function updateContentOPF(doc: Document, iscnPageHref: string, iscnQRCodeHref: s
   spine?.insertAdjacentHTML('beforeend', `  <itemref idref="iscn-page" />\n  `)
 }
 
-function readInfoMap(doc: Document, locale: EPUB_LOCALE = 'en') {
+function readInfoMap(doc: Document, iscnData: any, locale: EPUB_LOCALE = 'en') {
   const titles = doc.querySelector("metadata title")
-  const title = titles?.textContent
+  const title = iscnData?.contentMetadata?.name || titles?.textContent
   const authors = doc.querySelector("metadata creator")
-  const author = authors?.textContent
+  const author = iscnData?.contentMetadata?.author || authors?.textContent
   const releaseDate = new Date().toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
@@ -131,7 +131,7 @@ function addFooterDisclaimer(doc: Document, locale: EPUB_LOCALE = 'en') {
   }
 }
 
-export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscnId: string) {
+export async function injectISCNQRCodePageEpub(buffer: ArrayBuffer, book: Book, iscnId: string, iscnData: any) {
   const zipObject = new JSZip()
   await zipObject.loadAsync(buffer)
   const iscnPrefix = extractIscnIdPrefix(iscnId)
@@ -149,7 +149,7 @@ export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscn
   const metadataLocale = doc.querySelector("metadata language")?.textContent || 'en'
   const locale = metadataLocale?.toLocaleLowerCase()?.includes('zh') ? 'zh' : 'en'
   updateContentOPF(doc, ISCN_XHTML_NAME, ISCN_QR_CODE_PNG_NAME)
-  const infoMap = readInfoMap(doc, locale)
+  const infoMap = readInfoMap(doc, iscnData, locale)
   const updatedOpfString = new XMLSerializer().serializeToString(doc).toString()
   await zipObject.file(path, updatedOpfString)
 
@@ -178,5 +178,3 @@ export async function injectISCNQRCodePage(buffer: ArrayBuffer, book: Book, iscn
   })
   return epubBlob
 }
-
-export default injectISCNQRCodePage
