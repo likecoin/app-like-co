@@ -150,7 +150,7 @@
           />
         </NuxtLink>
         <Button
-          v-if="viewContentURL"
+          v-if="showContentLinks && viewContentURL"
           class="mx-auto mt-[16px]"
           preset="outline"
           :text="$t('NFTPortal.button.viewContent')"
@@ -227,6 +227,7 @@
             />
           </FormField>
           <FormField
+            v-if="showContentLinks"
             :label="$t('iscn.meta.content.fingerprints')"
             class="mb-[12px]"
           >
@@ -623,6 +624,10 @@ export default class ViewIscnIdPage extends Vue {
 
   get isIscnOwner() {
     return Boolean(this.iscnOwner === this.currentAddress)
+  }
+
+  get showContentLinks() {
+    return !this.isNFTBook || this.isIscnOwner
   }
 
   get isPopupLayout() {
