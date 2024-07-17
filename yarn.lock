@@ -3761,10 +3761,10 @@
     fast-json-stable-stringify "^2.0.0"
     lodash "^4.17.15"
 
-"@likecoin/wallet-connector@^0.26.1":
-  version "0.26.1"
-  resolved "https://registry.yarnpkg.com/@likecoin/wallet-connector/-/wallet-connector-0.26.1.tgz#5e26585796e2cb2b6421caa724f7db42681c4885"
-  integrity sha512-HCz3oCysWNYUDdNhDx8sMItsDPB8ZHRlpdGE9YLpd77n7EzQE3f3+LCPuBtI+pn7xCAwd2Te5Duj5Va5BpUBKQ==
+"@likecoin/wallet-connector@^0.26.3":
+  version "0.26.3"
+  resolved "https://registry.yarnpkg.com/@likecoin/wallet-connector/-/wallet-connector-0.26.3.tgz#8c2bdfaf072c18023d4d06cfb78e3916fe0470f7"
+  integrity sha512-uF0aREMPKi1Z4CRiVW1hMSYOxmpkz13gjuDe2pMtPHgXJR4JWZFgP7yyNWjbNrqYikdt85FzVFfAeiBzUnFD5g==
   dependencies:
     "@cosmjs/proto-signing" "^0.28.13"
     "@headlessui/react" "1.7.11"
