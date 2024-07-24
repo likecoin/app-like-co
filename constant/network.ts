@@ -86,6 +86,7 @@ export const LIKECOIN_WALLET_CONNECTOR_CONFIG = {
     ? 'https://likecoin-integration-test.authcore.io'
     : 'https://authcore.like.co',
   authcoreRedirectUrl: `${SITE_URL}/auth/redirect?method=liker-id`,
+  authcoreClientId: 'likecoin-app-hidesocial', // 'likecoin-app' if not hide
 };
 
 const combinedConfig = {
