@@ -3761,7 +3761,7 @@
     fast-json-stable-stringify "^2.0.0"
     lodash "^4.17.15"
 
-"@likecoin/wallet-connector@^0.26.4":
+"@likecoin/wallet-connector@^0.26.5":
   version "0.26.5"
   resolved "https://registry.yarnpkg.com/@likecoin/wallet-connector/-/wallet-connector-0.26.5.tgz#cc94c5003ae5c1e5e267d64ade13756dbf6cc720"
   integrity sha512-5iKsW7Ex/incoA+TmFmcGyRVqo3CGJC2thDUiRS34UeY8q7ofae6K51TomVE3wv3JHTbOJdCRGlbzVo0tPOhQQ==
