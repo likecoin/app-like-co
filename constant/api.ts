@@ -13,7 +13,6 @@ export const API_POST_ARWEAVE_V2_ESTIMATE = `${LIKE_CO_API_ROOT}/arweave/v2/esti
 export const API_POST_ARWEAVE_V2_SIGN = `${LIKE_CO_API_ROOT}/arweave/v2/sign_payment_data`;
 export const API_POST_ARWEAVE_V2_REGISTER = `${LIKE_CO_API_ROOT}/arweave/v2/register`;
 export const API_LIKER_NFT_MINT = `${LIKE_CO_API_ROOT}/likernft/mint`;
-export const API_LIKER_NFT_MINT_IMAGE = `${LIKE_CO_API_ROOT}/likernft/mint/image`;
 export const API_LIKER_NFT_PURCHASE = `${LIKE_CO_API_ROOT}/likernft/purchase`;
 export const API_LIKER_NFT_HISTORY = `${LIKE_CO_API_ROOT}/likernft/history`;
 export const API_LIKER_NFT_METADATA = `${LIKE_CO_API_ROOT}/likernft/metadata`;

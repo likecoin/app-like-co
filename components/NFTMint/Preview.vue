@@ -81,16 +81,6 @@
             </Button>
             <template v-else>
               <Button
-                v-if="!isGenerated"
-                class="absolute right-12 top-3"
-                preset="secondary"
-                size="mini"
-                :circle="true"
-                @click="onGenerateImage"
-              >
-                <IconDice />
-              </Button>
-              <Button
                 class="absolute right-3 top-3"
                 preset="secondary"
                 size="mini"
@@ -182,7 +172,6 @@ export default class NFTMintPreview extends Vue {
   isEditingDescription = false
   isShowEditImageToolbar = false
   isImageEdited = false
-  isGenerated = false
 
   get defaultDescription() {
     return this.$t('NFTPortal.label.defaultDescription');
@@ -237,12 +226,6 @@ export default class NFTMintPreview extends Vue {
       this.$emit('edit-image', file);
       this.isImageEdited = true;
     }
-  }
-
-  onGenerateImage() {
-    this.isGenerated = true;
-    this.isImageEdited = true;
-    this.$emit('generate-image');
   }
 }
 </script>

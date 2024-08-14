@@ -25,7 +25,6 @@
         @edit-name="onEditNftName"
         @edit-description="onEditNftDescription"
         @edit-image="onEditOgImage"
-        @generate-image="onGenerateImage"
         @reset-image="onResetImage"
       />
 
@@ -135,7 +134,6 @@ import Hash from 'ipfs-only-hash'
 import {
   LIKER_NFT_TARGET_ADDRESS,
   API_LIKER_NFT_MINT,
-  API_LIKER_NFT_MINT_IMAGE,
   getNftClassImage,
   getNftClassUriViaIscnId,
   getNftUriViaNftId,
@@ -832,26 +830,6 @@ export default class NFTMintPage extends Vue {
   onResetImage() {
     this.ogImageBlob = this.defaultOgImageBlob;
     this.isCustomOgimage = false;
-  }
-
-  async onGenerateImage() {
-    this.isLoadingPreviewOG = true
-    logTrackerEvent(this, 'IscnMintNFT', 'GenerationRandomImage', this.iscnId, 1);
-    const res = await this.$axios.post(
-        API_LIKER_NFT_MINT_IMAGE,
-        {},
-        {
-          params: {
-            iscn_id: this.iscnId,
-            platform: this.platform,
-            from: this.address,
-          },
-          paramsSerializer: (params) => qs.stringify(params),
-          responseType: 'arraybuffer',
-        },
-      );
-    this.onEditOgImage(new Blob([res.data], {type: res.headers['content-type']}));
-    this.isLoadingPreviewOG = false
   }
 
   async postMintInfo() {
