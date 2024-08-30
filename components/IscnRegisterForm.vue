@@ -140,7 +140,7 @@
           />
         </FormField>
       </div>
-      
+
       <Divider class="my-[12px]" />
       <!-- form fieldset -->
       <div>
@@ -867,7 +867,14 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get defaultLanguage() {
-    return this.epubMetadata?.language || 'zh'
+    const containsChinese = (str: any) => /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(str);
+
+    const isEpubInChinese = this.epubMetadata?.language === 'zh'
+
+    const titleContainsChinese = this.name ? containsChinese(this.name) : isEpubInChinese;
+    const descriptionContainsChinese = this.description ? containsChinese(this.description) : isEpubInChinese;
+
+    return (titleContainsChinese || descriptionContainsChinese) ? 'zh' : 'en';
   }
 
   get authorDialogTitle() {
@@ -1087,6 +1094,11 @@ export default class IscnRegisterForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
+  @Watch('defaultLanguage', { immediate: true })
+  setLanguageValue(value: any) {
+    this.language = value
+  }
+
   async mounted() {
     this.uploadStatus = 'loading'
 
@@ -1095,7 +1107,6 @@ export default class IscnRegisterForm extends Vue {
       this.description = this.extractText(this.epubMetadata.description)
       this.author.name = this.epubMetadata.author || ''
       this.author.authorDescription = 'Author'
-      this.language = this.epubMetadata.language || ''
       this.tags = this.epubMetadata.tags || []
       this.thumbnailUrl = this.formatArweave(
         this.epubMetadata.thumbnailArweaveId,
