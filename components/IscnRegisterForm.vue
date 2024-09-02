@@ -867,15 +867,15 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get defaultLanguage() {
-    const containsChinese = (str: any) => /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(str);
+    const containsOnlyASCII = (str: string) => /^[ -~]*$/.test(str);
 
-    const isEpubInChinese = this.epubMetadata?.language === 'zh'
+    const isEpubInChinese = this.epubMetadata?.language === 'zh';
 
-    const titleContainsChinese = this.name ? containsChinese(this.name) : isEpubInChinese;
-    const descriptionContainsChinese = this.description ? containsChinese(this.description) : isEpubInChinese;
+    const titleContainsNonASCII = this.name && !containsOnlyASCII(this.name)
+    const descriptionContainsNonASCII = this.description && !containsOnlyASCII(this.description)
 
-    return (titleContainsChinese || descriptionContainsChinese) ? 'zh' : 'en';
-  }
+    return (isEpubInChinese || titleContainsNonASCII || descriptionContainsNonASCII) ? 'zh' : 'en';
+}
 
   get authorDialogTitle() {
     return this.currentAuthorDialogType === AuthorDialogType.author
