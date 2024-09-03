@@ -239,6 +239,7 @@
   "IscnRegisterForm.label.registrant": "Registrant",
   "IscnRegisterForm.label.tags": "Tags",
   "IscnRegisterForm.label.type": "Type",
+  "IscnRegisterForm.label.language": "Language",
   "IscnRegisterForm.label.content": "Content Info",
   "IscnRegisterForm.label.uploading": "Loading files...",
   "IscnRegisterForm.label.url": "URL",

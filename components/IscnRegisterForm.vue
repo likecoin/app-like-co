@@ -122,14 +122,25 @@
         </div>
       </div>
       <!-- type -->
-      <FormField :label="$t('IscnRegisterForm.label.type')" class="mb-[12px]">
-        <Selector
-          class="h-[40px] w-[160px]"
-          :options="typeOptions"
-          :placeholder="defaultType"
-          @input="setType"
-        />
-      </FormField>
+      <div class="flex justify-between mb-[12px]">
+        <FormField :label="$t('IscnRegisterForm.label.type')">
+          <Selector
+            class="h-[40px] w-[160px]"
+            :options="typeOptions"
+            :placeholder="defaultType"
+            @input="setType"
+          />
+        </FormField>
+        <FormField v-if="isBookType" :label="$t('IscnRegisterForm.label.language')">
+          <Selector
+            class="h-[40px] w-[160px]"
+            :options="languageOptions"
+            :placeholder="defaultLanguage"
+            @input="setLanguage"
+          />
+        </FormField>
+      </div>
+
       <Divider class="my-[12px]" />
       <!-- form fieldset -->
       <div>
@@ -691,19 +702,24 @@ export default class IscnRegisterForm extends Vue {
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
 
   typeOptions = [
-'Book',
-'Photo',
-'Image',
-'CreativeWork',
-]
+    'Book',
+    'Photo',
+    'Image',
+    'CreativeWork',
+  ]
 
   fileTypeOptions = [
-'epub',
-'pdf',
-'audio',
-'jpg',
-'png',
-]
+    'epub',
+    'pdf',
+    'audio',
+    'jpg',
+    'png',
+  ]
+
+  languageOptions = [
+    'zh',
+    'en',
+  ]
 
   licenseMap: { [key: string]: string | null } = {
     'Copyright. All rights reserved.': 'All Rights Reserved',
@@ -848,6 +864,20 @@ export default class IscnRegisterForm extends Vue {
       return 'Photo'
     if (this.fileRecords.some((file) => file.isFileImage)) return 'Image'
     return 'CreativeWork'
+  }
+
+  get defaultLanguage() {
+    const containsOnlyASCII = (str: string) => /^[ -~]*$/.test(str)
+    const epubLanguage = this.epubMetadata?.language;
+
+    if (epubLanguage === 'zh' || epubLanguage === 'en') {
+      return epubLanguage;
+    }
+
+    const titleContainsNonASCII = this.name && !containsOnlyASCII(this.name)
+    const descriptionContainsNonASCII =
+      this.description && !containsOnlyASCII(this.description)
+    return titleContainsNonASCII || descriptionContainsNonASCII ? 'zh' : 'en'
   }
 
   get authorDialogTitle() {
@@ -1053,6 +1083,10 @@ export default class IscnRegisterForm extends Vue {
     return arweaveIdList
   }
 
+  get isBookType() {
+    return this.type === 'Book'
+  }
+
   @Watch('payload', { immediate: true, deep: true })
   change() {
     this.debouncedCalculateISCNFee()
@@ -1063,6 +1097,11 @@ export default class IscnRegisterForm extends Vue {
     if (errormsg) this.isOpenWarningSnackbar = true
   }
 
+  @Watch('defaultLanguage', { immediate: true })
+  setLanguageValue(value: any) {
+    this.language = value
+  }
+
   async mounted() {
     this.uploadStatus = 'loading'
 
@@ -1071,7 +1110,6 @@ export default class IscnRegisterForm extends Vue {
       this.description = this.extractText(this.epubMetadata.description)
       this.author.name = this.epubMetadata.author || ''
       this.author.authorDescription = 'Author'
-      this.language = this.epubMetadata.language || ''
       this.tags = this.epubMetadata.tags || []
       this.thumbnailUrl = this.formatArweave(
         this.epubMetadata.thumbnailArweaveId,
@@ -1235,6 +1273,10 @@ export default class IscnRegisterForm extends Vue {
 
   setType(value: string) {
     this.type = value
+  }
+
+  setLanguage(value: string) {
+    this.language = value
   }
 
   setLicense(value: string) {
