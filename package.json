@@ -26,7 +26,7 @@
     "@likecoin/wallet-connector": "^0.26.6",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.0.1",
-    "@nuxtjs/sentry": "^5.1.6",
+    "@nuxtjs/sentry": "^8.0.7",
     "@nuxtjs/sitemap": "^2.4.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "@tailwindcss/aspect-ratio": "^0.2.1",
