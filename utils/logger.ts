@@ -36,9 +36,7 @@ export function updateSentryUser(vue: Vue, { wallet } : { wallet?: string } = {}
     const opt = {
      id: wallet,
     };
-    vue.$sentry.configureScope((scope: any) => {
-      scope.setUser(opt);
-    });
+    vue.$sentry.getCurrentScope().setUser(opt);
   }
 }
 
