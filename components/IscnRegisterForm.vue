@@ -867,15 +867,18 @@ export default class IscnRegisterForm extends Vue {
   }
 
   get defaultLanguage() {
-    const containsOnlyASCII = (str: string) => /^[ -~]*$/.test(str);
+    const containsOnlyASCII = (str: string) => /^[ -~]*$/.test(str)
+    const epubLanguage = this.epubMetadata?.language;
 
-    const isEpubInChinese = this.epubMetadata?.language === 'zh';
+    if (epubLanguage === 'zh' || epubLanguage === 'en') {
+      return epubLanguage;
+    }
 
     const titleContainsNonASCII = this.name && !containsOnlyASCII(this.name)
-    const descriptionContainsNonASCII = this.description && !containsOnlyASCII(this.description)
-
-    return (isEpubInChinese || titleContainsNonASCII || descriptionContainsNonASCII) ? 'zh' : 'en';
-}
+    const descriptionContainsNonASCII =
+      this.description && !containsOnlyASCII(this.description)
+    return titleContainsNonASCII || descriptionContainsNonASCII ? 'zh' : 'en'
+  }
 
   get authorDialogTitle() {
     return this.currentAuthorDialogType === AuthorDialogType.author
