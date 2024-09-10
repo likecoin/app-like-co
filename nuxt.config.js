@@ -161,10 +161,19 @@ export default {
     config: {
       ignoreErrors: ['WebAssembly.instantiate'],
     },
+    tracing: {
+      tracesSampleRate: IS_TESTNET ? 1.0 : 0.1,
+      browserTracing: {},
+      vueOptions: {
+        trackComponents: true,
+      },
+      vueRouterInstrumentationOptions: {
+        routeLabel: 'name',
+      },
+    },
     clientIntegrations: {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
-      CaptureConsole: { levels: ['error'] },
     },
   },
   sitemap: {
