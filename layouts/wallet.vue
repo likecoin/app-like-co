@@ -17,14 +17,15 @@ import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
 
 
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
+
 
 @Component
 export default class WalletLayout extends Vue {
   @walletModule.Getter('getWalletAddress') walletAddress!: string
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
-  @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
-
+  @bookApiModule.Action('restoreSession') restoreSession!: () => void
 
   @walletModule.Action toggleAlert!: (
     isShow: boolean,
@@ -37,7 +38,7 @@ export default class WalletLayout extends Vue {
   }
 
   async mounted() {
-    await this.restoreSessionIfNecessary()
+    await this.restoreSession()
     if (!this.walletAddress) {
       const connection = await this.openConnectWalletModal({
         language: this.$i18n.locale.split('-')[0],
