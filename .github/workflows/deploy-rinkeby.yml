@@ -5,20 +5,18 @@ on:
     branches:
       - 'deploy/rinkeby'
 
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-  GKE_ZONE: ${{ secrets.GKE_ZONE }}
-  DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
-  IMAGE: ${{ secrets.GCR_IMAGE }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-  IS_TESTNET: 'TRUE'
-
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
     environment: rinkeby
+    env:
+      PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
+      IMAGE: ${{ secrets.GCR_IMAGE }}
+      IS_TESTNET: 'TRUE'
 
     steps:
     - name: Checkout
@@ -57,6 +55,11 @@ jobs:
           "IS_TESTNET=${{ env.IS_TESTNET }}"
           "GITHUB_SHA=${{ github.sha }}"
           "GITHUB_REF=${{ github.ref }}"
+          "RELEASE=${{ github.sha }}"
+          "SENTRY_DSN=${{ vars.SENTRY_DSN }}"
+          "SENTRY_ORG=${{ vars.SENTRY_ORG }}"
+          "SENTRY_PROJECT=${{ vars.SENTRY_PROJECT }}"
+          "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}"
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy

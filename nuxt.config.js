@@ -10,6 +10,7 @@ const {
   CI,
   GA_TRACKING_ID,
   SENTRY_DSN,
+  RELEASE,
 } = process.env;
 
 export default {
@@ -159,7 +160,7 @@ export default {
 
   sentry: {
     config: {
-      ignoreErrors: ['WebAssembly.instantiate'],
+      release: RELEASE,
     },
     tracing: {
       tracesSampleRate: IS_TESTNET ? 1.0 : 0.1,
@@ -171,9 +172,13 @@ export default {
         routeLabel: 'name',
       },
     },
+    publishRelease: !!RELEASE,
     clientIntegrations: {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
+    },
+    clientConfig: {
+      ignoreErrors: ['WebAssembly.instantiate'],
     },
   },
   sitemap: {
