@@ -2,6 +2,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import axios from 'axios'
 import { OfflineSigner } from '@cosmjs/proto-signing'
+import stringify from 'fast-json-stable-stringify';
 import { catchAxiosError } from '~/utils/misc'
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
 import { getUserInfoMinByAddress } from '~/constant/api'
@@ -219,6 +220,54 @@ export default class Wallet extends VuexModule {
     const connection = await connector.handleRedirect(method, params);
     return connection;
   }
+
+  @Action
+  // eslint-disable-next-line class-methods-use-this
+  async signMessageMemo(action: string, permissions?: string[]) {
+    if (!this.signer || !this.address) {
+      await this.initIfNecessary()
+    }
+    if (!this.signer || !this.address) {
+      throw new Error('WALLET_NOT_INITED')
+    }
+    const ts = Date.now()
+    const payload = JSON.stringify({
+      action,
+      permissions,
+      likeWallet: this.address,
+      ts,
+    })
+    const signingPayload = {
+      chain_id: LIKECOIN_WALLET_CONNECTOR_CONFIG.chainId,
+      memo: payload,
+      msgs: [],
+      fee: {
+        gas: '0',
+        amount: [{
+            denom: LIKECOIN_WALLET_CONNECTOR_CONFIG.coinDenom,
+            amount: '0',
+          }],
+      },
+      sequence: '0',
+      account_number: '0',
+    }
+    if ('signAmino' in this.signer) {
+      const { signed, signature } = await this.signer.signAmino(
+        this.address,
+        signingPayload,
+      )
+      return {
+        signature: signature.signature,
+        publicKey: signature.pub_key.value,
+        message: stringify(signed),
+        wallet: this.address,
+        signMethod: 'memo',
+        expiresIn: '1d',
+      }
+    }
+    throw new Error('SIGNER_NOT_SUPPORT_AMINO')
+  }
+
 
   @Action
   disconnectWallet() {
