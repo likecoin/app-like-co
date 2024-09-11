@@ -67,6 +67,7 @@ export default class WalletLayout extends Vue {
           await this.initWallet(connection)
           if (!this.walletAddress || !this.signer) return
           const signature = await this.signMessageMemo('authorize', [
+            'profile',
             'read:nftbook',
             'write:nftbook',
             'read:nftcollection',

@@ -51,6 +51,7 @@ export default class RedirectPage extends Vue {
           await this.initWallet(connection)
           if (!this.currentAddress || !this.signer) return
           const signature = await this.signMessageMemo('authorize', [
+            'profile',
             'read:nftbook',
             'write:nftbook',
             'read:nftcollection',
