@@ -276,6 +276,8 @@ export default class Wallet extends VuexModule {
     this.context.commit('setLikerInfo', null)
     this.context.commit('setType', '')
     this.context.commit('setSigner', null)
+    this.context.dispatch('book-api/clearSession', null, { root: true })
+
   }
 
   get getType() {
