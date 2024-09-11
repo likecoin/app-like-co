@@ -157,6 +157,7 @@ import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
 import { IS_TESTNET } from '~/constant'
 
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 @Component
 export default class AppHeader extends Vue {
@@ -164,7 +165,13 @@ export default class AppHeader extends Vue {
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
+  @walletModule.Getter('getSigner') signer!: any
+  @bookApiModule.Action('authenticate') authenticate!: ({inputWallet = '', signature = {}}: {inputWallet?: string, signature?: any}) => Promise<any>
+  @bookApiModule.Action('clearSession') clearSession!: () => void
+
+  isLoading = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
@@ -184,11 +191,13 @@ export default class AppHeader extends Vue {
   }
 
   async handleConnectWalletButtonClick() {
+    this.isLoading = true
     const connection = await this.openConnectWalletModal({
       language: this.$i18n.locale.split('-')[0],
       fullPath: this.$route.fullPath,
     })
-    if (connection) {
+    try {
+      if (connection) {
       const { method, accounts } = connection
       logTrackerEvent(
         this,
@@ -201,9 +210,24 @@ export default class AppHeader extends Vue {
         wallet: accounts[0].address,
         method,
       })
-      return this.initWallet(connection)
+      await this.initWallet(connection)
+      if (!this.currentAddress || !this.signer) return
+      const signature = await this.signMessageMemo('authorize', [
+        'read:nftbook',
+        'write:nftbook',
+        'read:nftcollection',
+        'write:nftcollection',
+      ])
+      if (!signature) { return }
+      await this.authenticate({inputWallet:this.currentAddress, signature})
     }
-    return false
+    } catch (error) {
+      this.disconnectWallet()
+      this.clearSession()
+      // eslint-disable-next-line no-console
+      console.error('handleConnectWalletButtonClick error', error)
+    }
+    this.isLoading = false
   }
 }
 </script>

@@ -23,9 +23,14 @@ const bookApiModule = namespace('book-api')
 @Component
 export default class WalletLayout extends Vue {
   @walletModule.Getter('getWalletAddress') walletAddress!: string
+  @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
+  @walletModule.Getter('getSigner') signer!: any
   @bookApiModule.Action('restoreSession') restoreSession!: () => void
+  @bookApiModule.Action('authenticate') authenticate!: ({inputWallet = '', signature = {}}: {inputWallet?: string, signature?: any}) => Promise<any>
+  @bookApiModule.Action('clearSession') clearSession!: () => void
 
   @walletModule.Action toggleAlert!: (
     isShow: boolean,
@@ -45,24 +50,44 @@ export default class WalletLayout extends Vue {
         fullPath: this.$route.fullPath,
       })
       // Re-login
-      if (connection) {
-        const { method, accounts } = connection
-        logTrackerEvent(
-          this,
-          'user',
-          `connected_wallet_${method}`,
-          'connected_wallet',
-          1,
-        )
-        setLoggerUser(this, {
-          wallet: accounts[0].address,
-          method,
-        })
-        return this.initWallet(connection)
+      try {
+        if (connection) {
+          const { method, accounts } = connection
+          logTrackerEvent(
+            this,
+            'user',
+            `connected_wallet_${method}`,
+            'connected_wallet',
+            1,
+          )
+          setLoggerUser(this, {
+            wallet: accounts[0].address,
+            method,
+          })
+          await this.initWallet(connection)
+          if (!this.walletAddress || !this.signer) return
+          const signature = await this.signMessageMemo('authorize', [
+            'read:nftbook',
+            'write:nftbook',
+            'read:nftcollection',
+            'write:nftcollection',
+          ])
+          if (!signature) {
+            return
+          }
+          await this.authenticate({
+            inputWallet: this.walletAddress,
+            signature,
+          })
+        }
+        this.$router.go(-1)
+      } catch (error) {
+        this.disconnectWallet()
+        this.clearSession()
+        // eslint-disable-next-line no-console
+        console.error('handleConnectWalletButtonClick error', error)
       }
-      return this.$router.go(-1)
     }
-    return true
   }
 
   @Watch('walletAddress')
