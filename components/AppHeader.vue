@@ -168,7 +168,7 @@ export default class AppHeader extends Vue {
   @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
   @walletModule.Getter('getSigner') signer!: any
-  @bookApiModule.Action('authenticate') authenticate!: ({inputWallet = '', signature = {}}: {inputWallet?: string, signature?: any}) => Promise<any>
+  @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
   @bookApiModule.Action('clearSession') clearSession!: () => void
 
   isLoading = false

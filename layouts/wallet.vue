@@ -29,7 +29,7 @@ export default class WalletLayout extends Vue {
   @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getSigner') signer!: any
   @bookApiModule.Action('restoreSession') restoreSession!: () => void
-  @bookApiModule.Action('authenticate') authenticate!: ({inputWallet = '', signature = {}}: {inputWallet?: string, signature?: any}) => Promise<any>
+  @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
   @bookApiModule.Action('clearSession') clearSession!: () => void
 
   @walletModule.Action toggleAlert!: (

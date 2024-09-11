@@ -24,7 +24,7 @@ export default class RedirectPage extends Vue {
   @walletModule.Getter('getSigner') signer!: any
   @walletModule.Getter('getWalletAddress') currentAddress!: string
 
-  @bookApiModule.Action('authenticate') authenticate!: ({inputWallet = '', signature = {}}: {inputWallet?: string, signature?: any}) => Promise<any>
+  @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
   @bookApiModule.Action('clearSession') clearSession!: () => void
 
   async mounted() {
