@@ -5,21 +5,17 @@ on:
     branches:
       - 'deploy/main'
 
-env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-  GKE_ZONE: ${{ secrets.GKE_ZONE }}
-  DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
-  IMAGE: ${{ secrets.GCR_IMAGE }}
-  GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
     environment: production
-
+    env:
+      PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
+      IMAGE: ${{ secrets.GCR_IMAGE }}
     steps:
     - name: Checkout
       uses: actions/checkout@master
@@ -56,8 +52,12 @@ jobs:
         build-args: |
           "GITHUB_SHA=${{ github.sha }}"
           "GITHUB_REF=${{ github.ref }}"
-          "GA_TRACKING_ID=${{ env.GA_TRACKING_ID }}"
-          "SENTRY_DSN=${{ env.SENTRY_DSN }}"
+          "GA_TRACKING_ID=${{ secrets.GA_TRACKING_ID }}"
+          "RELEASE=${{ github.sha }}"
+          "SENTRY_DSN=${{ vars.SENTRY_DSN }}"
+          "SENTRY_ORG=${{ vars.SENTRY_ORG }}"
+          "SENTRY_PROJECT=${{ vars.SENTRY_PROJECT }}"
+          "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}"
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
