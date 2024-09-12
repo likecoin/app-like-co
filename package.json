@@ -23,7 +23,7 @@
     "@keplr-wallet/types": "^0.11.4",
     "@likecoin/iscn-js": "^0.6.10",
     "@likecoin/iscn-message-types": "^0.0.7",
-    "@likecoin/wallet-connector": "^0.26.6",
+    "@likecoin/wallet-connector": "^0.26.7",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.0.1",
     "@nuxtjs/sentry": "^8.0.7",
