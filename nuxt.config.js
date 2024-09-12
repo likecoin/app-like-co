@@ -187,7 +187,10 @@ export default {
       Replay: {},
     },
     clientConfig: {
-      ignoreErrors: ['WebAssembly.instantiate'],
+      ignoreErrors: [
+        'WebAssembly.instantiate',
+        '["@context"].toLowerCase',
+      ],
       replaysSessionSampleRate: IS_TESTNET ? 1.0 : 0.05,
       replaysOnErrorSampleRate: IS_TESTNET ? 1.0 : 1.0,
     },
