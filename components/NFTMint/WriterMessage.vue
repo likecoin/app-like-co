@@ -59,6 +59,7 @@
 
     <template v-if="shouldShowSettings">
       <div
+        v-if="!isNewsPress"
         class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
@@ -149,6 +150,7 @@
           </select>
         </div>
         <div
+          v-if="!isNewsPress"
           class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <label>
@@ -179,6 +181,7 @@ export default class WriterMessage extends Vue {
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
   @Prop(String) readonly collectExpiryDate!: string
+  @Prop(Boolean) readonly isNewsPress!: boolean
 
   userInfo: any = undefined
   avatar: string = ''
