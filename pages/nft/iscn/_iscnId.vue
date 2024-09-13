@@ -35,6 +35,7 @@
         :max-mint-amount="maxMintAmount"
         :reserve-amount.sync="reserveNft"
         :collect-expiry-date.sync="collectExpiryDate"
+        :is-news-press="isNewsPress"
         @message-change="(value) => (message = value)"
         @update-mint-amount.once="handleInputMintAmount"
         @update-reserve.once="handleInputReserveNft"
@@ -226,6 +227,8 @@ export default class NFTMintPage extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
   platform = this.$route.query.platform as string || ''
+  isNewsPress = !!this.$route.query.news_press && this.$route.query.news_press !== '0'
+
 
   classId: string = ''
   nftsIds: string[] = []
