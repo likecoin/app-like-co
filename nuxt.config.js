@@ -171,7 +171,8 @@ export default {
       release: RELEASE,
     },
     tracing: {
-      tracesSampleRate: IS_TESTNET ? 1.0 : 0.1,
+      // TODO: remove health check http calls from tracing
+      tracesSampleRate: IS_TESTNET ? 0.01 : 0.01,
       browserTracing: {},
       vueOptions: {
         trackComponents: true,
