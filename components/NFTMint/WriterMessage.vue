@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="flex justify-center">
+    <div v-if="!isNewsPress" class="flex justify-center">
       <Button
         preset="tertiary"
         text-preset="h6"
@@ -57,9 +57,8 @@
       </Button>
     </div>
 
-    <template v-if="shouldShowSettings">
+    <template v-if="shouldShowSettings && !isNewsPress">
       <div
-        v-if="!isNewsPress"
         class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
         <Label
@@ -150,7 +149,6 @@
           </select>
         </div>
         <div
-          v-if="!isNewsPress"
           class="flex justify-between gap-[12px] text-dark-gray text-[14px] items-center"
         >
           <label>
