@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { IPFS_VIEW_GATEWAY_URL } from '~/constant'; 
+import { ARWEAVE_ENDPOINT, IPFS_VIEW_GATEWAY_URL } from '~/constant'; 
 
 export enum ContentFirgerprints {
   arweave = 'ar',
@@ -30,7 +30,7 @@ export default class ContentFingerprintLink extends Vue {
     if (!this.item) return null
     switch (this.prefix) {
       case ContentFirgerprints.arweave:
-        return `https://arweave.net/${this.item.slice(5)}`
+        return `${ARWEAVE_ENDPOINT}/${this.item.slice(5)}`
 
       case ContentFirgerprints.ipfs:
         return `${IPFS_VIEW_GATEWAY_URL}/${this.item.slice(7)}`
