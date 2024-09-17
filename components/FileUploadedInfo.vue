@@ -38,7 +38,7 @@
       class="mb-[12px]"
     >
       <a
-        :href="`https://arweave.net/${arweaveId}`"
+        :href="`${arweaveEndPoint}/${arweaveId}`"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -51,10 +51,14 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+import { ARWEAVE_ENDPOINT } from '~/constant'
+
 @Component
 export default class FileUploadedInfo extends Vue {
   @Prop(String) readonly ipfsHash!: string
   @Prop(String) readonly arweaveId!: string
   @Prop(Number) readonly step: number | undefined
+
+  arweaveEndPoint = ARWEAVE_ENDPOINT
 }
 </script>

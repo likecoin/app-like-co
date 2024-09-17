@@ -94,6 +94,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { ARWEAVE_ENDPOINT } from '~/constant';
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger';
@@ -171,7 +172,7 @@ export default class NewIndexPage extends Vue {
     if ((this.urlIpfsHash || this.urlArweaveId) && this.shouldSkipToMintNFT) {
       this.state = 'iscn';
       let url;
-      if (this.urlArweaveId) url = `https://arweave.net/${this.urlArweaveId}`;
+      if (this.urlArweaveId) url = `${ARWEAVE_ENDPOINT}/${this.urlArweaveId}`;
       else if (this.urlIpfsHash) url = `https://ipfs.io/ipfs/${this.urlIpfsHash}`;
       if (url) {
         const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
