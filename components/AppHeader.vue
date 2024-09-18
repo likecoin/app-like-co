@@ -82,7 +82,13 @@
             ]"
           >
             <div
-              v-if="currentAddress"
+              v-if="isLoading"
+              class="flex items-center justify-center"
+            >
+              <ProgressIndicator />
+            </div>
+            <div
+              v-else-if="sessionWallet"
               :class="[
                 'relative',
                 'w-[180px]',
@@ -90,7 +96,7 @@
             >
               <Button
                 preset="secondary"
-                :title="currentAddress"
+                :title="sessionWallet"
               >
                 <template
                   v-if="isUsingMobileApp"
@@ -104,7 +110,7 @@
                     'overflow-hidden',
                     'overflow-ellipsis',
                   ]"
-                >{{ currentAddress }}</div>
+                >{{ sessionWallet }}</div>
               </Button>
               <Button
                 :class="[
@@ -168,6 +174,7 @@ export default class AppHeader extends Vue {
   @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
   @walletModule.Getter('getSigner') signer!: any
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
   @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
   @bookApiModule.Action('clearSession') clearSession!: () => void
 
@@ -220,7 +227,7 @@ export default class AppHeader extends Vue {
         'write:nftcollection',
       ])
       if (!signature) { return }
-      await this.authenticate({inputWallet:this.currentAddress, signature})
+      await this.authenticate({ inputWallet: this.currentAddress, signature })
     }
     } catch (error) {
       this.disconnectWallet()
@@ -228,7 +235,9 @@ export default class AppHeader extends Vue {
       // eslint-disable-next-line no-console
       console.error('handleConnectWalletButtonClick error', error)
     }
-    this.isLoading = false
+    finally {
+      this.isLoading = false
+    }
   }
 }
 </script>
