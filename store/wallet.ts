@@ -12,9 +12,7 @@ let restoreSessionPromise: any = null
 
 async function getLikeCoinWalletLib() {
   if (!likecoinWalletLib) {
-    likecoinWalletLib = await import(
-      /* webpackChunkName: "likecoin_wallet" */ '@likecoin/wallet-connector'
-    )
+    likecoinWalletLib = await import(/* webpackChunkName: "likecoin_wallet" */ '@likecoin/wallet-connector')
   }
   return likecoinWalletLib
 }
