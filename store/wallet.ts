@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import axios from 'axios'
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import stringify from 'fast-json-stable-stringify';
 import { catchAxiosError } from '~/utils/misc'
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
@@ -39,7 +38,7 @@ async function getConnector() {
 export default class Wallet extends VuexModule {
   type = ''
   address = ''
-  signer: OfflineSigner | null = null
+  signer: any = null
   isShowKeplrWarning = false
   isOpenSnackbar = false
   likerInfo = null
@@ -251,6 +250,40 @@ export default class Wallet extends VuexModule {
       sequence: '0',
       account_number: '0',
     }
+
+    if (this.signer?.signArbitrary) {
+      const { signature, pub_key: publicKey } =
+        await this.signer?.signArbitrary(
+          LIKECOIN_WALLET_CONNECTOR_CONFIG.chainId,
+          this.address,
+          payload,
+        )
+      const signDoc = {
+        msgs: [{
+            type: 'sign/MsgSignData',
+            value: {
+              signer: this.address,
+              data: window.btoa(payload),
+            },
+          }],
+        account_number: '0',
+        sequence: '0',
+        fee: {
+          gas: '0',
+          amount: [],
+        },
+        memo: '',
+        chain_id: '',
+      }
+      return {
+        signature,
+        signMethod: 'ADR-036',
+        publicKey: publicKey.value,
+        message: stringify(signDoc),
+        wallet: this.address,
+        expiresIn: '7d',
+      }
+    }
     if ('signAmino' in this.signer) {
       const { signed, signature } = await this.signer.signAmino(
         this.address,
@@ -262,7 +295,7 @@ export default class Wallet extends VuexModule {
         message: stringify(signed),
         wallet: this.address,
         signMethod: 'memo',
-        expiresIn: '1d',
+        expiresIn: '7d',
       }
     }
     throw new Error('SIGNER_NOT_SUPPORT_AMINO')
