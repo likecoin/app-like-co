@@ -37,7 +37,6 @@ export default class BookAPI extends VuexModule {
       const { data } = await axios.post(
         API_POST_AUTHORIZE,
         {
-          expiresIn: '7d',
           ...signature,
         },
       )
