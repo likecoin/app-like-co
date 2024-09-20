@@ -109,7 +109,7 @@ import { LIKER_LAND_URL } from '~/constant'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const iscnModule = namespace('iscn')
-const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 @Component({
   layout: 'wallet',
@@ -117,14 +117,16 @@ const walletModule = namespace('wallet')
 export default class WorksIndexPageExtends extends Vue {
   pageNumber = Number(this.$route.query.page) || 0
 
-  @walletModule.Getter('getWalletAddress') currentAddress!: string
   @iscnModule.Getter('getISCNChunks') recordChunks!: ISCNRecordWithID[][]
   @iscnModule.Getter('getIsLoading') isLoading!: boolean
   @iscnModule.Action queryISCNByAddress!: (
     arg0: string
   ) => ISCNRecordWithID[] | PromiseLike<ISCNRecordWithID[]>
 
-  @Watch('currentAddress')
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
+
+
+  @Watch('sessionWallet')
   onCurrentAddressChanged() {
     this.refreshWorks()
   }
@@ -145,8 +147,8 @@ export default class WorksIndexPageExtends extends Vue {
   }
 
   refreshWorks() {
-    if (this.currentAddress) {
-      this.queryISCNByAddress(this.currentAddress)
+    if (this.sessionWallet) {
+      this.queryISCNByAddress(this.sessionWallet)
     }
   }
 
@@ -167,7 +169,7 @@ export default class WorksIndexPageExtends extends Vue {
   }
 
   get portfolioURL(): string {
-    return `${LIKER_LAND_URL}/${this.currentAddress}`
+    return `${LIKER_LAND_URL}/${this.sessionWallet}`
   }
 }
 </script>

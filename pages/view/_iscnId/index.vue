@@ -482,7 +482,7 @@ import {
 
 
 const iscnModule = namespace('iscn')
-const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 export enum ErrorMessage {
   statusCode400 = 'not iscn id or tx hash',
@@ -616,14 +616,15 @@ export default class ViewIscnIdPage extends Vue {
     arg0: string
   ) => Promise<{ records: ISCNRecordWithID[] }>
 
-  @walletModule.Getter('getWalletAddress') currentAddress!: string
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
+
 
   get isShowMintButton() {
     return !this.isPreminted && this.isIscnOwner
   }
 
   get isIscnOwner() {
-    return Boolean(this.iscnOwner === this.currentAddress)
+    return Boolean(this.iscnOwner === this.sessionWallet)
   }
 
   get showContentLinks() {

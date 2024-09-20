@@ -159,6 +159,7 @@ const base64toBlob = (base64Data: string, contentType: string, sliceSize = 512) 
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -192,6 +193,9 @@ export default class FetchIndex extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
+
 
   state = State.INIT
   url = this.$route.query.url as string || ''
@@ -365,7 +369,7 @@ export default class FetchIndex extends Vue {
         const res = await this.fetchISCNById(this.iscnId)
         if (res) {
           const iscnOwner = res.owner
-          if (iscnOwner !== this.address) {
+          if (iscnOwner !== this.sessionWallet) {
             this.toggleSnackbar(ErrorType.USER_NOT_ISCN_OWNER)
           }
         }
@@ -562,7 +566,7 @@ export default class FetchIndex extends Vue {
       }
       switch (this.state) {
         case State.INIT: {
-          if (this.ownerWallet && this.address !== this.ownerWallet) {
+          if (this.ownerWallet && this.sessionWallet !== this.ownerWallet) {
             throw new Error('PLEASE_USE_OWNER_WALLET_TO_SIGN')
           }
           if (this.iscnPrefixRegex.test(this.url)) {

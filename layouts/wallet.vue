@@ -1,12 +1,20 @@
 <template>
   <RootLayout @connect-wallet-dialog-quit="$router.go(-1)">
-    <template v-if="walletAddress">
+    <template v-if="sessionWallet">
       <AppHeader />
       <Nuxt class="min-h-full" />
       <AppFooter
         :class="{ hidden: isHideFooter }"
       />
     </template>
+    <div
+      v-else-if="isSignInLoading"
+      class="flex items-center justify-center w-full min-h-screen"
+    >
+      <Card >
+        <Label :text="$t('general.signIn.loading')" />
+      </Card>
+    </div>
   </RootLayout>
 </template>
 
@@ -28,6 +36,7 @@ export default class WalletLayout extends Vue {
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
   @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getSigner') signer!: any
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
   @bookApiModule.Action('restoreSession') restoreSession!: () => void
   @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
   @bookApiModule.Action('clearSession') clearSession!: () => void
@@ -38,13 +47,16 @@ export default class WalletLayout extends Vue {
     severity: string
   ) => void
 
+  isSignInLoading = false
+
   get isHideFooter() {
     return this.$route.path.includes('/nft/purchase/') || this.$route.query.layout === 'popup';
   }
 
   async mounted() {
     await this.restoreSession()
-    if (!this.walletAddress) {
+    if (!this.sessionWallet) {
+      this.isSignInLoading = true
       const connection = await this.openConnectWalletModal({
         language: this.$i18n.locale.split('-')[0],
         fullPath: this.$route.fullPath,
@@ -81,12 +93,17 @@ export default class WalletLayout extends Vue {
             signature,
           })
         }
-        this.$router.go(-1)
+        else {
+          this.$router.go(-1)
+        }
       } catch (error) {
         this.disconnectWallet()
         this.clearSession()
         // eslint-disable-next-line no-console
         console.error('handleConnectWalletButtonClick error', error)
+      }
+      finally {
+        this.isSignInLoading = false
       }
     }
   }

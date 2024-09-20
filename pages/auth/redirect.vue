@@ -58,7 +58,7 @@ export default class RedirectPage extends Vue {
             'write:nftcollection',
           ])
           if (!signature) { return }
-          await this.authenticate({inputWallet:this.currentAddress, signature})
+          await this.authenticate({ inputWallet: this.currentAddress, signature })
         }
         let postAuthRoute = '/';
         if (window.sessionStorage) {
