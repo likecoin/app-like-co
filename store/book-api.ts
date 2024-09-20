@@ -36,9 +36,7 @@ export default class BookAPI extends VuexModule {
     try {
       const { data } = await axios.post(
         API_POST_AUTHORIZE,
-        {
-          ...signature,
-        },
+        signature,
       )
       const token = (data as any)?.token
       if (!token) {
