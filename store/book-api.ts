@@ -48,7 +48,11 @@ export default class BookAPI extends VuexModule {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
-      throw new Error('AUTHENTICATION_FAILED')
+      if (axios.isAxiosError(error)) {
+        throw new Error(`AUTHENTICATION_FAILED: ${error.response?.data}`)
+      }
+      throw new Error(`AUTHENTICATION_FAILED`)
+
     }
   }
 
