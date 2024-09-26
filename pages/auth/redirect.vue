@@ -49,7 +49,9 @@ export default class RedirectPage extends Vue {
             method: method as string,
           })
           await this.initWallet(connection)
-          if (!this.currentAddress || !this.signer) return
+          if (!this.currentAddress || !this.signer) {
+            throw new Error('FAILED_TO_CONNECT_WALLET')
+          }
           const signature = await this.signMessageMemo('authorize', [
             'profile',
             'read:nftbook',
@@ -57,7 +59,9 @@ export default class RedirectPage extends Vue {
             'read:nftcollection',
             'write:nftcollection',
           ])
-          if (!signature) { return }
+          if (!signature) {
+            throw new Error('SIGNING_REJECTED')
+          }
           await this.authenticate({ inputWallet: this.currentAddress, signature })
         }
         let postAuthRoute = '/';

@@ -15,6 +15,13 @@
         <Label :text="$t('general.signIn.loading')" />
       </Card>
     </div>
+    <Snackbar
+      :open="shouldShowError"
+      class="mx-auto"
+      :text="errorMessage"
+      preset="warn"
+      @close="shouldShowError=false"
+    />
   </RootLayout>
 </template>
 
@@ -48,6 +55,8 @@ export default class WalletLayout extends Vue {
   ) => void
 
   isSignInLoading = false
+  errorMessage: string | null = null
+  shouldShowError = false
 
   get isHideFooter() {
     return this.$route.path.includes('/nft/purchase/') || this.$route.query.layout === 'popup';
@@ -77,7 +86,9 @@ export default class WalletLayout extends Vue {
             method,
           })
           await this.initWallet(connection)
-          if (!this.walletAddress || !this.signer) return
+          if (!this.walletAddress || !this.signer) {
+            throw new Error('FAILED_TO_CONNECT_WALLET')
+          }
           const signature = await this.signMessageMemo('authorize', [
             'profile',
             'read:nftbook',
@@ -86,7 +97,7 @@ export default class WalletLayout extends Vue {
             'write:nftcollection',
           ])
           if (!signature) {
-            return
+            throw new Error('SIGNING_REJECTED')
           }
           await this.authenticate({
             inputWallet: this.walletAddress,
@@ -101,6 +112,8 @@ export default class WalletLayout extends Vue {
         this.clearSession()
         // eslint-disable-next-line no-console
         console.error('handleConnectWalletButtonClick error', error)
+        this.shouldShowError = true
+        this.errorMessage = error as string
       }
       finally {
         this.isSignInLoading = false

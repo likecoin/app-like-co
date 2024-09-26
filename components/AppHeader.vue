@@ -152,6 +152,13 @@
     >
       <IconDangerStripe />
     </div>
+    <Snackbar
+      :open="shouldShowError"
+      class="mx-auto"
+      :text="errorMessage"
+      preset="warn"
+      @close="shouldShowError=false"
+    />
   </div>
 </template>
 
@@ -179,6 +186,8 @@ export default class AppHeader extends Vue {
   @bookApiModule.Action('clearSession') clearSession!: () => void
 
   isLoading = false
+  errorMessage: string | null = null
+  shouldShowError = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
@@ -218,7 +227,9 @@ export default class AppHeader extends Vue {
         method,
       })
       await this.initWallet(connection)
-      if (!this.currentAddress || !this.signer) return
+      if (!this.currentAddress || !this.signer) {
+        throw new Error('FAILED_TO_CONNECT_WALLET')
+      }
       const signature = await this.signMessageMemo('authorize', [
         'profile',
         'read:nftbook',
@@ -226,7 +237,9 @@ export default class AppHeader extends Vue {
         'read:nftcollection',
         'write:nftcollection',
       ])
-      if (!signature) { return }
+      if (!signature) {
+        throw new Error('SIGNING_REJECTED')
+      }
       await this.authenticate({ inputWallet: this.currentAddress, signature })
     }
     } catch (error) {
@@ -234,6 +247,8 @@ export default class AppHeader extends Vue {
       this.clearSession()
       // eslint-disable-next-line no-console
       console.error('handleConnectWalletButtonClick error', error)
+      this.shouldShowError = true
+      this.errorMessage = error as string
     }
     finally {
       this.isLoading = false
