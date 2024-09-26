@@ -10,6 +10,7 @@ const {
   CI,
   GA_TRACKING_ID,
   SENTRY_DSN,
+  RELEASE,
 } = process.env;
 
 export default {
@@ -105,6 +106,14 @@ export default {
           "'unsafe-inline'",
           'fonts.googleapis.com',
         ],
+        'worker-src': [
+          "'self'",
+          'blob:',
+        ],
+        'child-src': [
+          "'self'",
+          'blob:',
+        ],
       },
     },
   },
@@ -159,12 +168,32 @@ export default {
 
   sentry: {
     config: {
-      ignoreErrors: ['WebAssembly.instantiate'],
+      release: RELEASE,
     },
+    tracing: {
+      // TODO: remove health check http calls from tracing
+      tracesSampleRate: IS_TESTNET ? 0.01 : 0.01,
+      browserTracing: {},
+      vueOptions: {
+        trackComponents: true,
+      },
+      vueRouterInstrumentationOptions: {
+        routeLabel: 'name',
+      },
+    },
+    publishRelease: !!RELEASE,
     clientIntegrations: {
       /* default integrations will still be added due to deep-merge */
       ReportingObserver: false, // reporting is very noisy on CSP violation.
-      CaptureConsole: { levels: ['error'] },
+      Replay: {},
+    },
+    clientConfig: {
+      ignoreErrors: [
+        'WebAssembly.instantiate',
+        '["@context"].toLowerCase',
+      ],
+      replaysSessionSampleRate: IS_TESTNET ? 1.0 : 0.05,
+      replaysOnErrorSampleRate: IS_TESTNET ? 1.0 : 1.0,
     },
   },
   sitemap: {

@@ -119,3 +119,5 @@ export const SIGN_AUTHORIZATION_PERMISSIONS = [
   'read:nftcollection',
   'write:nftcollection',
 ]
+
+export const ARWEAVE_ENDPOINT = IS_TESTNET ? 'https://gateway.irys.xyz' : 'https://arweave.net';

@@ -477,6 +477,7 @@ import {
   WALLET_TYPE_REPLACER,
   IPFS_VIEW_GATEWAY_URL,
   LIKER_LAND_URL,
+  ARWEAVE_ENDPOINT,
 } from '~/constant'
 
 
@@ -687,7 +688,7 @@ export default class ViewIscnIdPage extends Vue {
 
   get viewContentURL() {
     const arURL = this.recordData.contentFingerprints.find(a => a.startsWith('ar://'));
-    if (arURL) return `https://arweave.net/${arURL.slice(5)}`
+    if (arURL) return `${ARWEAVE_ENDPOINT}/${arURL.slice(5)}`
     const ipfsURL = this.recordData.contentFingerprints.find(a => a.startsWith('ipfs://'));
     if (ipfsURL) return `${IPFS_VIEW_GATEWAY_URL}/${ipfsURL.slice(7)}`
     const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));

@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="flex justify-center">
+    <div v-if="!isNewsPress" class="flex justify-center">
       <Button
         preset="tertiary"
         text-preset="h6"
@@ -57,7 +57,7 @@
       </Button>
     </div>
 
-    <template v-if="shouldShowSettings">
+    <template v-if="shouldShowSettings && !isNewsPress">
       <div
         class="flex flex-col justify-start gap-[32px] p-[20px] pb-[24px] border-2 border-[#E6F4F2] rounded-[16px] w-full"
       >
@@ -179,6 +179,7 @@ export default class WriterMessage extends Vue {
   @Prop(Number) readonly mintAmount!: number
   @Prop(Number) readonly maxMintAmount!: number
   @Prop(String) readonly collectExpiryDate!: string
+  @Prop(Boolean) readonly isNewsPress!: boolean
 
   userInfo: any = undefined
   avatar: string = ''

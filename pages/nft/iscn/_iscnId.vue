@@ -35,6 +35,7 @@
         :max-mint-amount="maxMintAmount"
         :reserve-amount.sync="reserveNft"
         :collect-expiry-date.sync="collectExpiryDate"
+        :is-news-press="isNewsPress"
         @message-change="(value) => (message = value)"
         @update-mint-amount.once="handleInputMintAmount"
         @update-reserve.once="handleInputReserveNft"
@@ -142,7 +143,7 @@ import {
 } from '~/constant/api'
 import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
-import { LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
+import { ARWEAVE_ENDPOINT, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
@@ -226,6 +227,8 @@ export default class NFTMintPage extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
 
   platform = this.$route.query.platform as string || ''
+  isNewsPress = !!this.$route.query.news_press && this.$route.query.news_press !== '0'
+
 
   classId: string = ''
   nftsIds: string[] = []
@@ -726,7 +729,7 @@ export default class NFTMintPage extends Vue {
       }
       if (arweaveID) {
         try {
-          const { data } = await this.$axios.get(`https://arweave.net/${arweaveID}`, { responseType: 'blob' })
+          const { data } = await this.$axios.get(`${ARWEAVE_ENDPOINT}/${arweaveID}`, { responseType: 'blob' })
           this.ogImageBlob = data
           this.defaultOgImageBlob = data
           this.ogImageArweaveId = arweaveID
