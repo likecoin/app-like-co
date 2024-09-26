@@ -29,6 +29,7 @@
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
+import { SIGN_AUTHORIZATION_PERMISSIONS } from '~/constant'
 
 
 const walletModule = namespace('wallet')
@@ -89,13 +90,7 @@ export default class WalletLayout extends Vue {
           if (!this.walletAddress || !this.signer) {
             throw new Error('FAILED_TO_CONNECT_WALLET')
           }
-          const signature = await this.signMessageMemo('authorize', [
-            'profile',
-            'read:nftbook',
-            'write:nftbook',
-            'read:nftcollection',
-            'write:nftcollection',
-          ])
+          const signature = await this.signMessageMemo('authorize', SIGN_AUTHORIZATION_PERMISSIONS)
           if (!signature) {
             throw new Error('SIGNING_REJECTED')
           }
