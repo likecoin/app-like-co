@@ -82,7 +82,13 @@
             ]"
           >
             <div
-              v-if="currentAddress"
+              v-if="isLoading"
+              class="flex items-center justify-center"
+            >
+              <ProgressIndicator />
+            </div>
+            <div
+              v-else-if="sessionWallet"
               :class="[
                 'relative',
                 'w-[180px]',
@@ -90,7 +96,7 @@
             >
               <Button
                 preset="secondary"
-                :title="currentAddress"
+                :title="sessionWallet"
               >
                 <template
                   v-if="isUsingMobileApp"
@@ -104,7 +110,7 @@
                     'overflow-hidden',
                     'overflow-ellipsis',
                   ]"
-                >{{ currentAddress }}</div>
+                >{{ sessionWallet }}</div>
               </Button>
               <Button
                 :class="[
@@ -146,6 +152,13 @@
     >
       <IconDangerStripe />
     </div>
+    <Snackbar
+      :open="shouldShowError"
+      class="mx-auto"
+      :text="errorMessage"
+      preset="warn"
+      @close="shouldShowError=false"
+    />
   </div>
 </template>
 
@@ -154,9 +167,10 @@ import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
 
-import { IS_TESTNET } from '~/constant'
+import { IS_TESTNET, SIGN_AUTHORIZATION_PERMISSIONS } from '~/constant'
 
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 @Component
 export default class AppHeader extends Vue {
@@ -164,7 +178,16 @@ export default class AppHeader extends Vue {
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
+  @walletModule.Getter('getSigner') signer!: any
+  @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
+  @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
+  @bookApiModule.Action('clearSession') clearSession!: () => void
+
+  isLoading = false
+  errorMessage: string | null = null
+  shouldShowError = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
@@ -184,11 +207,13 @@ export default class AppHeader extends Vue {
   }
 
   async handleConnectWalletButtonClick() {
+    this.isLoading = true
     const connection = await this.openConnectWalletModal({
       language: this.$i18n.locale.split('-')[0],
       fullPath: this.$route.fullPath,
     })
-    if (connection) {
+    try {
+      if (connection) {
       const { method, accounts } = connection
       logTrackerEvent(
         this,
@@ -201,9 +226,27 @@ export default class AppHeader extends Vue {
         wallet: accounts[0].address,
         method,
       })
-      return this.initWallet(connection)
+      await this.initWallet(connection)
+      if (!this.currentAddress || !this.signer) {
+        throw new Error('FAILED_TO_CONNECT_WALLET')
+      }
+      const signature = await this.signMessageMemo('authorize', SIGN_AUTHORIZATION_PERMISSIONS)
+      if (!signature) {
+        throw new Error('SIGNING_REJECTED')
+      }
+      await this.authenticate({ inputWallet: this.currentAddress, signature })
     }
-    return false
+    } catch (error) {
+      this.disconnectWallet()
+      this.clearSession()
+      // eslint-disable-next-line no-console
+      console.error('handleConnectWalletButtonClick error', error)
+      this.shouldShowError = true
+      this.errorMessage = error as string
+    }
+    finally {
+      this.isLoading = false
+    }
   }
 }
 </script>

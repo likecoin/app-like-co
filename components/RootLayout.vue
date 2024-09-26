@@ -26,7 +26,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { IS_CHAIN_UPGRADING } from '~/constant'
 
-const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
+
 
 @Component({
   head() {
@@ -38,7 +39,7 @@ const walletModule = namespace('wallet')
   },
 })
 export default class RootLayout extends Vue {
-  @walletModule.Action('restoreSessionIfNecessary') restoreSessionIfNecessary!: () => Promise<any>
+  @bookApiModule.Action('restoreSession') restoreSession!: () => void
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 
@@ -46,7 +47,7 @@ export default class RootLayout extends Vue {
 
   async mounted() {
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
-    await this.restoreSessionIfNecessary()
+    await this.restoreSession()
   }
 
   handleChainUpgradeBlockingDialogClose() {

@@ -11,13 +11,22 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
+import { SIGN_AUTHORIZATION_PERMISSIONS } from '~/constant'
 
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 @Component
 export default class RedirectPage extends Vue {
   @walletModule.Action('initWallet') initWallet!: (params: { method: any; accounts: any; offlineSigner?: any }) => Promise<any>
+  @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('handleConnectorRedirect') handleConnectorRedirect!: (params: { method: string; params: any }) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
+  @walletModule.Getter('getSigner') signer!: any
+  @walletModule.Getter('getWalletAddress') currentAddress!: string
+
+  @bookApiModule.Action('authenticate') authenticate!: ({ inputWallet, signature }: { inputWallet?: string, signature?: any }) => Promise<any>
+  @bookApiModule.Action('clearSession') clearSession!: () => void
 
   async mounted() {
     const { error, method, code } = this.$route.query;
@@ -41,6 +50,14 @@ export default class RedirectPage extends Vue {
             method: method as string,
           })
           await this.initWallet(connection)
+          if (!this.currentAddress || !this.signer) {
+            throw new Error('FAILED_TO_CONNECT_WALLET')
+          }
+          const signature = await this.signMessageMemo('authorize', SIGN_AUTHORIZATION_PERMISSIONS)
+          if (!signature) {
+            throw new Error('SIGNING_REJECTED')
+          }
+          await this.authenticate({ inputWallet: this.currentAddress, signature })
         }
         let postAuthRoute = '/';
         if (window.sessionStorage) {
@@ -58,6 +75,8 @@ export default class RedirectPage extends Vue {
           statusCode: 400,
           message: (err as Error).toString(),
         });
+        this.disconnectWallet()
+        this.clearSession()
       }
     } else {
       if (window.sessionStorage) {
