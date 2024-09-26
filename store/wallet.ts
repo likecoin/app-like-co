@@ -221,7 +221,6 @@ export default class Wallet extends VuexModule {
   }
 
   @Action
-  // eslint-disable-next-line class-methods-use-this
   async signMessageMemo(action: string, permissions?: string[]) {
     if (!this.signer || !this.address) {
       await this.initIfNecessary()
