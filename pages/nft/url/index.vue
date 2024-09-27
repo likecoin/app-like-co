@@ -643,10 +643,15 @@ export default class FetchIndex extends Vue {
   }
 
   async crawlUrlData() {
+    const isNewsPress = !!this.$route.query.news_press && this.$route.query.news_press !== '0'
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}&wallet=${this.address}`)
-      const { title, description, keywords, author, body, images = [] } = data
+      const { title, description, author, body, images = [] } = data;
+      let {keywords} = data;
+      if(isNewsPress) {
+        keywords = keywords ? `${keywords},NewsPress` : 'NewsPress';
+      }
       if (!body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
       if (title === 'patreon.com' && description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
       this.iscnData = { title, description, keywords, author }
