@@ -644,8 +644,8 @@ export default class FetchIndex extends Vue {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}&wallet=${this.address}`)
       const { title, description, author, body, images = [] } = data;
-      let {keywords} = data;
-      if(isNewsPress) {
+      let { keywords } = data;
+      if (isNewsPress) {
         keywords = keywords ? `${keywords},NewsPress` : 'NewsPress';
       }
       if (!body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
