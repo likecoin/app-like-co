@@ -3,7 +3,7 @@ import { Module, VuexModule,Mutation, Action } from 'vuex-module-decorators'
 
 import axios from 'axios'
 
-import { saveAuthSession, clearAuthSession, loadAuthSession} from '~/utils/auth'
+import { saveAuthSession, clearAuthSession, loadAuthSession, checkJwtTokenValidity} from '~/utils/auth'
 import { API_POST_AUTHORIZE } from '~/constant/api'
 
 @Module({
@@ -68,7 +68,7 @@ export default class BookAPI extends VuexModule {
     try {
       this.context.commit('setIsRestoringSession', true)
       const session = loadAuthSession()
-      if (session) {
+      if (session && checkJwtTokenValidity(session.token)) {
         this.context.commit('setToken', session.token)
         this.context.commit('setSessionWallet', session.wallet)
         if (session.wallet) {
