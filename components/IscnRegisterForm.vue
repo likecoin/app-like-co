@@ -1178,7 +1178,7 @@ export default class IscnRegisterForm extends Vue {
     index: any
   }) {
     this.isOpenAuthorDialog = true
-
+    this.currentAuthorDialogType = type
     if (type === AuthorDialogType.author) {
       logTrackerEvent(this, 'ISCNCreate', 'EditAuthor', '', 1)
       const { name, wallet, url, likerId, authorDescription } = this.author
@@ -1220,6 +1220,15 @@ export default class IscnRegisterForm extends Vue {
   }
 
   deleteAuthor() {
+    if (this.currentAuthorDialogType === AuthorDialogType.author) {
+      this.author = {
+        name: '',
+        wallet: [],
+        url: [],
+        likerId: '',
+        authorDescription: '',
+      }
+    }
     this.authors.splice(this.activeEditingAuthorIndex, 1)
     this.dismissAuthorDialog()
   }
