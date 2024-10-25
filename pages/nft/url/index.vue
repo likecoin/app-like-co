@@ -288,7 +288,7 @@ export default class FetchIndex extends Vue {
     } = this.iscnData
     let { description = '', keywords = '' } = this.iscnData
     description = this.truncate(description, 200)
-    if (this.isNewsPress) {
+    if (this.isNewsPress && !keywords.includes('NewsPress')) {
       keywords = keywords ? `${keywords},NewsPress` : 'NewsPress';
     }
     return {
