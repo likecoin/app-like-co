@@ -114,6 +114,8 @@ export const NFT_BOOK_PRESS_URL = IS_TESTNET ? 'https://likecoin-nft-book-press-
 
 export const SIGN_AUTHORIZATION_PERMISSIONS = [
   'profile',
+  'read:iscn',
+  'write:iscn',
   'read:nftbook',
   'write:nftbook',
   'read:nftcollection',

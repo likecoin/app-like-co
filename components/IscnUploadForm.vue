@@ -262,6 +262,7 @@ import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 type UploadStatus = '' | 'loading' | 'signing' | 'uploading';
 
 const MODE = {
@@ -286,6 +287,7 @@ export default class IscnUploadForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Getter('getWalletAddress') address!: string
+  @bookApiModule.Getter('getToken') getToken!: string
 
   isImage: boolean = false
   ipfsURL: string = ''
@@ -848,6 +850,7 @@ export default class IscnUploadForm extends Vue {
         ipfsHash: tempRecord.ipfsHash,
         fileType: tempRecord.fileType as string,
         txHash: tempRecord.transactionHash,
+        token: this.getToken,
       });
       if (arweaveId) {
         const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
@@ -881,6 +884,7 @@ export default class IscnUploadForm extends Vue {
       ipfsHash: file.ipfsHash,
       fileType: file.fileType,
       txHash,
+      token: this.getToken,
     })
   }
 
