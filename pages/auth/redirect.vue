@@ -21,7 +21,7 @@ export default class RedirectPage extends Vue {
   @walletModule.Action('initWallet') initWallet!: (params: { method: any; accounts: any; offlineSigner?: any }) => Promise<any>
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('handleConnectorRedirect') handleConnectorRedirect!: (params: { method: string; params: any }) => Promise<any>
-  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (params: { action: string; permissions: string[] }) => Promise<any>
   @walletModule.Getter('getSigner') signer!: any
   @walletModule.Getter('getWalletAddress') currentAddress!: string
 
@@ -53,7 +53,10 @@ export default class RedirectPage extends Vue {
           if (!this.currentAddress || !this.signer) {
             throw new Error('FAILED_TO_CONNECT_WALLET')
           }
-          const signature = await this.signMessageMemo('authorize', SIGN_AUTHORIZATION_PERMISSIONS)
+          const signature = await this.signMessageMemo({
+            action: 'authorize',
+            permissions: SIGN_AUTHORIZATION_PERMISSIONS,
+          });
           if (!signature) {
             throw new Error('SIGNING_REJECTED')
           }

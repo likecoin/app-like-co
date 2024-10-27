@@ -1,11 +1,17 @@
 import { jwtDecode } from "jwt-decode";
+import { SIGN_AUTHORIZATION_PERMISSIONS } from "~/constant";
 
 const AUTH_SESSION_KEY = 'likecoin_nft_book_press_token'
 
 export function checkJwtTokenValidity (token: string) {
   try {
     const decoded = jwtDecode(token);
-    return decoded?.exp && decoded.exp * 1000 > Date.now();
+    if (!decoded) {
+      return false;
+    }
+    const isExpired = decoded.exp && decoded.exp * 1000 < Date.now();
+    const isMatchPermissions = (decoded as any).permissions === SIGN_AUTHORIZATION_PERMISSIONS;
+    return !isExpired && isMatchPermissions;
   } catch (error) {
     console.error(error);
     return false;
