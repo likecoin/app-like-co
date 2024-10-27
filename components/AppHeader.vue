@@ -178,7 +178,7 @@ export default class AppHeader extends Vue {
   @walletModule.Action('disconnectWallet') disconnectWallet!: () => void
   @walletModule.Action('openConnectWalletModal') openConnectWalletModal!: (params: { language: string, fullPath?: string }) => Promise<any>
   @walletModule.Action('initWallet') initWallet!: (params: { method: any, accounts: any, offlineSigner?: any }) => Promise<any>
-  @walletModule.Action('signMessageMemo') signMessageMemo!: (action: string, permissions?: string[]) => Promise<any>
+  @walletModule.Action('signMessageMemo') signMessageMemo!: (params: { action: string; permissions: string[] }) => Promise<any>
   @walletModule.Getter('getWalletAddress') currentAddress!: string
   @walletModule.Getter('getSigner') signer!: any
   @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
@@ -230,7 +230,10 @@ export default class AppHeader extends Vue {
       if (!this.currentAddress || !this.signer) {
         throw new Error('FAILED_TO_CONNECT_WALLET')
       }
-      const signature = await this.signMessageMemo('authorize', SIGN_AUTHORIZATION_PERMISSIONS)
+      const signature = await this.signMessageMemo({
+        action: 'authorize',
+        permissions: SIGN_AUTHORIZATION_PERMISSIONS,
+      });
       if (!signature) {
         throw new Error('SIGNING_REJECTED')
       }

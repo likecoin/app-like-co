@@ -219,7 +219,7 @@ export default class Wallet extends VuexModule {
   }
 
   @Action
-  async signMessageMemo(action: string, permissions?: string[]) {
+  async signMessageMemo({ action, permissions }: { action: string, permissions?: string[] }) {
     if (!this.signer || !this.address) {
       await this.initIfNecessary()
     }
