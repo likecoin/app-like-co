@@ -151,6 +151,7 @@ import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arwea
 
 const iscnModule = namespace('iscn')
 const walletModule = namespace('wallet')
+const bookApiModule = namespace('book-api')
 
 export enum ErrorType {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
@@ -225,6 +226,8 @@ export default class NFTMintPage extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+
+  @bookApiModule.Getter('getToken') getToken!: string
 
   platform = this.$route.query.platform as string || ''
   isNewsPress = !!this.$route.query.news_press && this.$route.query.news_press !== '0'
@@ -818,6 +821,7 @@ export default class NFTMintPage extends Vue {
         ipfsHash: await this.getOgImageIpfsHash(),
         fileType: this.ogImageBlob.type,
         txHash: this.ogImageArweaveFeeTxHash,
+        token: this.getToken,
       });
       logTrackerEvent(this, 'IscnMintNFT', 'SubmitToArweaveSuccess', arweaveId as string, 1);
       this.ogImageArweaveId = arweaveId as string

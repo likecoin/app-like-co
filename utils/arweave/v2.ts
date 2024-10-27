@@ -13,22 +13,26 @@ class Provider {
   fileSize = 0
   ipfsHash = ''
   txHash = ''
+  token = ''
 
   constructor({
     publicKey,
     fileSize,
     ipfsHash,
     txHash,
+    token,
   }: {
     publicKey: string
     fileSize: number
     ipfsHash: string
     txHash: string
+    token: string
   }) {
     this.pubKey = Buffer.from(publicKey, 'base64');
     this.fileSize = fileSize
     this.ipfsHash = ipfsHash
     this.txHash = txHash
+    this.token = token
   }
 
   setLikeCoinTxInfo({
@@ -53,6 +57,10 @@ class Provider {
     return this.pubKey
   }
 
+  setAuthToken(token: string) {
+    this.token = token
+  }
+
   getSigner = () => ({
     getAddress: () => this.pubKey?.toString(),
     _signTypedData: async (
@@ -68,6 +76,8 @@ class Provider {
         fileSize: this.fileSize,
         ipfsHash: this.ipfsHash,
         txHash: this.txHash,
+      }, {
+        headers: { Authorization: this.token ? `Bearer ${this.token}` : '' },
       })
       const { signature } = await res.data
       const bSig = Buffer.from(signature, 'base64')
@@ -92,14 +102,16 @@ async function getProvider({
   fileSize,
   ipfsHash,
   txHash,
+  token,
 }: {
   fileSize: number
   ipfsHash: string
   txHash: string
+  token: string
 }) {
   const { data } = await axios.get(API_GET_ARWEAVE_V2_PUBLIC_KEY)
   const { publicKey } = data
-  const provider = new Provider({ publicKey, fileSize, ipfsHash, txHash })
+  const provider = new Provider({ publicKey, fileSize, ipfsHash, txHash, token })
   return provider
 }
 
@@ -107,15 +119,17 @@ async function getBundler({
   fileSize,
   ipfsHash,
   txHash,
+  token,
 }: {
   fileSize: number
   ipfsHash: string
   txHash: string
+  token: string
 }) {
   if (!WebBundlr) {
     WebBundlr = (await import('@bundlr-network/client')).default;
   }
-  const p = await getProvider({ fileSize, ipfsHash, txHash })
+  const p = await getProvider({ fileSize, ipfsHash, txHash, token })
   const bundlr = new WebBundlr(
     IS_TESTNET
       ? 'https://devnet.irys.xyz'
@@ -148,9 +162,10 @@ export async function uploadSingleFileToBundlr(
     fileSize,
     ipfsHash,
     txHash,
-  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string },
+    token,
+  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string, token: string },
 ) {
-  const bundler = await getBundler({ fileSize, ipfsHash, txHash })
+  const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
     { name: 'App-Name', value: 'app.like.co' },
     { name: 'App-Version', value: '2.0' },
@@ -167,6 +182,8 @@ export async function uploadSingleFileToBundlr(
       ipfsHash,
       txHash,
       arweaveId,
+    },{
+      headers: { Authorization: token ? `Bearer ${token}` : '' },
     });
   }
   return arweaveId;
