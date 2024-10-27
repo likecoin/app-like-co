@@ -277,7 +277,6 @@ export default class FetchIndex extends Vue {
   get iscnPayload(): ISCNRegisterPayload {
     const {
       title = '',
-      keywords = '',
       author = '',
       authorDescription = '',
       license = '',
@@ -287,8 +286,11 @@ export default class FetchIndex extends Vue {
       publisher,
       type = 'CreativeWork',
     } = this.iscnData
-    let { description = '' } = this.iscnData
+    let { description = '', keywords = '' } = this.iscnData
     description = this.truncate(description, 200)
+    if (this.isNewsPress && !keywords.includes('NewsPress')) {
+      keywords = keywords ? `${keywords},NewsPress` : 'NewsPress';
+    }
     return {
       type,
       name: title,
@@ -650,11 +652,7 @@ export default class FetchIndex extends Vue {
     try {
       logTrackerEvent(this, 'NFTUrlMint', 'CrawlUrlData', this.url, 1);
       const { data } = await this.$axios.get(`/crawler/?url=${encodeURIComponent(this.encodedURL)}&wallet=${this.address}`)
-      const { title, description, author, body, images = [] } = data;
-      let { keywords } = data;
-      if (this.isNewsPress) {
-        keywords = keywords ? `${keywords},NewsPress` : 'NewsPress';
-      }
+      const { title, description, author, body, images = [], keywords } = data;
       if (!body) { throw new Error('CANNOT_CRAWL_THIS_URL') }
       if (title === 'patreon.com' && description === '') { throw new Error('SITE_NOT_CRAWLABLE: pateron') }
       this.iscnData = { title, description, keywords, author }
