@@ -816,7 +816,7 @@ export default class NFTMintPage extends Vue {
       }
       const arrayBuffer = await this.ogImageBlob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const arweaveId = await uploadSingleFileToBundlr(buffer, {
+      const { arweaveId } = await uploadSingleFileToBundlr(buffer, {
         fileSize: this.ogImageByteSize,
         ipfsHash: await this.getOgImageIpfsHash(),
         fileType: this.ogImageBlob.type,
