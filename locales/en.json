@@ -223,6 +223,8 @@
   "IscnRegisterForm.label.author": "Author",
   "IscnRegisterForm.label.stakeholder": "Stakeholders",
   "IscnRegisterForm.label.description": "Description",
+  "IscnRegisterForm.label.drm": "DRM Options",
+  "IscnRegisterForm.label.drm.details": "Use like.co API to protect Arweave link",
   "IscnRegisterForm.label.emptyFile": "No Content",
   "IscnRegisterForm.label.fingerprints": "Content Fingerprints",
   "IscnRegisterForm.label.iscn": "ISCN Title",
