@@ -331,6 +331,24 @@
               />
             </FormField>
             <FormField
+              v-if="type === 'Book'"
+              :label="$t('IscnRegisterForm.label.publisher')"
+            >
+              <TextField
+                v-model="publisher"
+                :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
+              />
+            </FormField>
+            <FormField
+              v-if="type === 'Book'"
+              :label="$t('IscnRegisterForm.label.datePublished')"
+            >
+              <input
+                v-model="datePublished"
+                type="date"
+              />
+            </FormField>
+            <FormField
               v-if="shouldShowUploadToNumbers"
               :label="$t('IscnRegisterForm.label.numbersProtocol')"
               class="mb-[12px]"
@@ -745,6 +763,8 @@ export default class IscnRegisterForm extends Vue {
   authors: Author[] = []
   name: string = ''
   description: string = ''
+  publisher: string = ''
+  datePublished: null | string = null
   tags: string[] = []
   sameAs: string[] = []
   url: string = ''
@@ -1007,6 +1027,8 @@ export default class IscnRegisterForm extends Vue {
       contentFingerprints: this.customContentFingerprints,
       inLanguage: this.language,
       thumbnailUrl: this.thumbnailUrl,
+      publisher: this.publisher,
+      datePublished: this.datePublished ? new Date(this.datePublished).toISOString() : undefined,
     }
   }
 
@@ -1489,6 +1511,7 @@ estimation,
     }
     try {
       this.uploadStatus = 'signing'
+      console.log(formatISCNTxPayload(this.payload));
       const res = await signISCNTx(
         formatISCNTxPayload(this.payload),
         this.signer,

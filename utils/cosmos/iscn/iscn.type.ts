@@ -25,6 +25,7 @@ export interface ISCNRegisterPayload {
   recordNotes?: string;
   memo?: string;
   inLanguage?: string;
+  datePublished?: string,
   thumbnailUrl?: string;
   isbn?: string;
 }
