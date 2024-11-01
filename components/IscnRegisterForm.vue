@@ -1511,7 +1511,6 @@ estimation,
     }
     try {
       this.uploadStatus = 'signing'
-      console.log(formatISCNTxPayload(this.payload));
       const res = await signISCNTx(
         formatISCNTxPayload(this.payload),
         this.signer,
