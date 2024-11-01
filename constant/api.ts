@@ -3,7 +3,7 @@ import { IS_TESTNET } from ".";
 
 export const API_POST_NUMBERS_PROTOCOL_ASSETS = '/numbers-protocol/assets';
 
-const LIKE_CO_API_ROOT = IS_TESTNET ? 'https://api.rinkeby.like.co' : 'https://api.like.co'
+export const LIKE_CO_API_ROOT = IS_TESTNET ? 'https://api.rinkeby.like.co' : 'https://api.like.co'
 const LIKECOIN_CHAIN_API = IS_TESTNET ? 'https://node.testnet.like.co' : 'https://mainnet-node.like.co';
 export const LIKER_NFT_TARGET_ADDRESS = IS_TESTNET ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp' : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs';
 export const API_POST_ARWEAVE_ESTIMATE = `${LIKE_CO_API_ROOT}/arweave/estimate`;

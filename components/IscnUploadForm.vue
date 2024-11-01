@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <IscnFormHeader v-if="mode === 'register'" :step="step" :total-step="4" />
@@ -317,7 +317,7 @@ export default class IscnUploadForm extends Vue {
   arweaveFee = new BigNumber(0)
   arweaveFeeMap: Record<string, string> = {}
   sentArweaveTransactionInfo = new Map<
-    string, { transactionHash?: string, arweaveId?: string }
+    string, { transactionHash?: string, arweaveId?: string, arweaveLink?: string }
   >()
 
   likerId: string = ''
@@ -845,7 +845,7 @@ export default class IscnUploadForm extends Vue {
     try {
       const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const arweaveId = await uploadSingleFileToBundlr(buffer, {
+      const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
         fileSize: tempRecord.fileBlob?.size || 0,
         ipfsHash: tempRecord.ipfsHash,
         fileType: tempRecord.fileType as string,
@@ -854,14 +854,14 @@ export default class IscnUploadForm extends Vue {
       });
       if (arweaveId) {
         const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
-        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId });
+        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId, arweaveLink });
         if (tempRecord.fileName.includes('cover.jpeg')) {
           const metadata = this.epubMetadataList.find((file: any) => file.thumbnailIpfsHash === record.ipfsHash)
           if (metadata) {
             metadata.thumbnailArweaveId = arweaveId
           }
         }
-        this.$emit('arweaveUploaded', { arweaveId })
+        this.$emit('arweaveUploaded', { arweaveId, arweaveLink })
         this.isOpenSignDialog = false
       } else {
         this.isOpenWarningSnackbar = true
@@ -879,13 +879,14 @@ export default class IscnUploadForm extends Vue {
   async uploadFileAndGetArweaveId(file: any, txHash: string) {
     const arrayBuffer = await file.fileBlob.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    return uploadSingleFileToBundlr(buffer, {
+    const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
       fileSize: file.fileBlob?.size || 0,
       ipfsHash: file.ipfsHash,
       fileType: file.fileType,
       txHash,
       token: this.getToken,
     })
+    return { arweaveId, arweaveLink };
   }
 
   async setEbookCoverFromImages() {
@@ -911,7 +912,7 @@ export default class IscnUploadForm extends Vue {
           transactionHash = await this.sendArweaveFeeTx(file)
         }
         // eslint-disable-next-line no-await-in-loop
-        const arweaveId = await this.uploadFileAndGetArweaveId(
+        const { arweaveId, arweaveLink } = await this.uploadFileAndGetArweaveId(
           file,
           transactionHash,
         )
@@ -924,6 +925,7 @@ export default class IscnUploadForm extends Vue {
           this.sentArweaveTransactionInfo.set(file.ipfsHash, {
             transactionHash,
             arweaveId,
+            arweaveLink,
           })
           break
         }
@@ -984,17 +986,28 @@ export default class IscnUploadForm extends Vue {
     }
 
     const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
+    const uploadArweaveLinkList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveLink);
     this.modifiedFileRecords.forEach((record: any, index:number) => {
       if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
-        const arweaveId = this.sentArweaveTransactionInfo.get(
+        const info = this.sentArweaveTransactionInfo.get(
           record.ipfsHash,
-        )?.arweaveId
-        if (arweaveId) {
-          this.modifiedFileRecords[index].arweaveId = arweaveId
+        )
+        if (info) {
+          const {
+            arweaveId,
+            arweaveLink,
+          } = info;
+          if (arweaveId) this.modifiedFileRecords[index].arweaveId = arweaveId
+          if (arweaveLink) this.modifiedFileRecords[index].arweaveLink = arweaveLink
         }
       }
     })
-    this.$emit('submit', { fileRecords: this.modifiedFileRecords, arweaveIds: uploadArweaveIdList, epubMetadata: this.epubMetadataList[0] })
+    this.$emit('submit', {
+      fileRecords: this.modifiedFileRecords,
+      arweaveIds: uploadArweaveIdList,
+      epubMetadata: this.epubMetadataList[0],
+      arweaveLinks: uploadArweaveLinkList,
+    })
   }
 
   handleSignDialogClose() {
