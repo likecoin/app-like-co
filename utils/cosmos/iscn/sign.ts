@@ -137,6 +137,7 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
 
   return {
     ...data,
+    publisher: publisherInput,
     author,
     keywords: tagsString.split(','),
     usageInfo: license,
