@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full overflow-hidden">
+  <div class="flex flex-col w-full">
     <div
       v-for="(item, i) in sameAsList"
       :key="item.id"
@@ -42,7 +42,7 @@
               />
             </div>
             <div v-else class="flex items-center justify-start">
-              <ContentFingerprintLink :item="item.url" />
+              <ContentFingerprintLink :item="item.url" class="!break-all" />
               <Button
                 preset="plain"
                 @click.prevent="() => (item.shouldShowEditURL = true)"
