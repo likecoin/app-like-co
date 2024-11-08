@@ -937,7 +937,7 @@ export default class IscnRegisterForm extends Vue {
     if (this.combinedArweaveLinks.length) {
       array.push(...this.combinedArweaveLinks)
     }
-    if (this.ipfsHashList.length) {
+    if (!this.isUseArweaveLink && this.ipfsHashList.length) {
       array.push(...this.ipfsHashList.map((ipfs) => this.formatIpfs(ipfs)))
     }
     if (this.customContentFingerprints.length) {
