@@ -465,7 +465,7 @@ import { namespace } from 'vuex-class'
 import qs from 'querystring'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { MetaInfo } from 'vue-meta'
-import { API_LIKER_NFT_MINT } from '~/constant/api'
+import { API_LIKER_NFT_MINT, LIKE_CO_API_ROOT } from '~/constant/api'
 import { isCosmosTransactionHash, getExistingClassCount } from '~/utils/cosmos'
 import { getIPFSUrlFromISCN } from '~/utils/cosmos/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -693,7 +693,7 @@ export default class ViewIscnIdPage extends Vue {
     if (arURL) return `${ARWEAVE_ENDPOINT}/${arURL.slice(5)}`
     const ipfsURL = this.recordData.contentFingerprints.find(a => a.startsWith('ipfs://'));
     if (ipfsURL) return `${IPFS_VIEW_GATEWAY_URL}/${ipfsURL.slice(7)}`
-    const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://'));
+    const httpsURL = this.recordData.contentFingerprints.find(a => a.startsWith('https://') && !a.startsWith(LIKE_CO_API_ROOT));
     if (httpsURL) return httpsURL;
     return '';
   }
