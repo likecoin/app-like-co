@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full">
+  <div class="flex flex-col w-full overflow-hidden">
     <div
       v-for="(item, i) in sameAsList"
       :key="item.id"
