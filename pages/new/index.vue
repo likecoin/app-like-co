@@ -40,8 +40,8 @@
 
       :ipfs-hash="urlIpfsHash"
       :arweave-id="urlArweaveId"
-      :upload-arweave-id-list=uploadArweaveList
-      :upload-arweave-link-list=uploadArweaveLinkList
+      :upload-arweave-id-list="uploadArweaveList"
+      :upload-arweave-link-list="uploadArweaveLinkList"
       :epub-metadata="epubMetadata"
 
       :step="step"

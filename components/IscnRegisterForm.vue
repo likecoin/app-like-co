@@ -279,7 +279,7 @@
           <!-- fingerPrint -->
           <FormField
             :label="$t('IscnRegisterForm.label.fingerprints')"
-            class="mb-[12px] max-w-[100%]"
+            class="mb-[12px] max-w-full"
           >
             <ContentFingerprintLink
               v-for="ipfs of ipfsHashList"
