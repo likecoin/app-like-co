@@ -40,7 +40,8 @@
 
       :ipfs-hash="urlIpfsHash"
       :arweave-id="urlArweaveId"
-      :upload-arweave-list=uploadArweaveList
+      :upload-arweave-id-list="uploadArweaveList"
+      :upload-arweave-link-list="uploadArweaveLinkList"
       :epub-metadata="epubMetadata"
 
       :step="step"
@@ -121,6 +122,7 @@ export default class NewIndexPage extends Vue {
   urlIpfsHash = this.$route.query.ipfs_hash || ''
   urlArweaveId = this.$route.query.arweave_id || ''
   uploadArweaveList: string[] = []
+  uploadArweaveLinkList: string[] = []
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -192,10 +194,12 @@ export default class NewIndexPage extends Vue {
   onSubmitUpload({
     fileRecords,
     arweaveIds,
+    arweaveLinks,
     epubMetadata,
   }: {
     fileRecords: any[]
     arweaveIds: string[]
+    arweaveLinks: string[]
     epubMetadata: any
   }) {
     if (fileRecords && fileRecords.length) {
@@ -203,6 +207,9 @@ export default class NewIndexPage extends Vue {
     }
     if (arweaveIds && arweaveIds.length) {
       this.uploadArweaveList = [...arweaveIds]
+    }
+    if (arweaveLinks && arweaveLinks.length) {
+      this.uploadArweaveLinkList = [...arweaveLinks]
     }
     if (epubMetadata) {
       this.epubMetadata = {...epubMetadata}

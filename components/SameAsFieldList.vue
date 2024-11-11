@@ -42,7 +42,7 @@
               />
             </div>
             <div v-else class="flex items-center justify-start">
-              <ContentFingerprintLink :item="item.url" />
+              <ContentFingerprintLink :item="item.url" class="!break-all" />
               <Button
                 preset="plain"
                 @click.prevent="() => (item.shouldShowEditURL = true)"
@@ -81,6 +81,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { SAME_AS_FILE_TYPES } from '~/constant'
+import { LIKE_CO_API_ROOT } from '~/constant/api'
 
 const FILE_TYPES = [
 'epub',
@@ -111,6 +112,12 @@ export default class SameAsFieldList extends Vue {
     this.$emit('on-update', newValue)
   }
 
+  @Watch('urlOptions', { deep: true })
+  onUrlOptionsChanged(newValue: Array<any>) {
+    console.log('urlOptions', newValue)
+    this.setUrlList()
+  }
+
   // eslint-disable-next-line class-methods-use-this
   get sameAsFiletypeOptions() {
     return SAME_AS_FILE_TYPES
@@ -130,7 +137,7 @@ export default class SameAsFieldList extends Vue {
   }
 
   get filteredUrlOptions() {
-    return this.urlOptions?.filter((url) => url.startsWith('ar://'))
+    return this.urlOptions?.filter((url) => url.startsWith('ar://') || url.startsWith(LIKE_CO_API_ROOT))
   }
 
   mounted() {
@@ -142,16 +149,22 @@ export default class SameAsFieldList extends Vue {
         filetype: list.filetype || SAME_AS_FILE_TYPES[0],
         shouldShowEditURL: !list.filename,
       }))
-    } else if (this.filteredUrlOptions.length) {
+    } else {
+      this.setUrlList();
+    }
+  }
+
+  setUrlList() {
+    if (this.filteredUrlOptions.length) {
       this.sameAsList = this.fileRecords
         ?.filter(
           (file) =>
             FILE_TYPES.includes(this.formatFileType(file.fileType)) &&
-            file.arweaveId,
+            (file.arweaveId || file.arweaveLink),
         )
         .map((file, index) => {
           const url = this.filteredUrlOptions.find((ar) =>
-            ar.includes(file.arweaveId),
+            ar.includes(file.arweaveId) || ar === file.arweaveLink,
           )
           const formattedFileType = this.formatFileType(file.fileType)
           return {

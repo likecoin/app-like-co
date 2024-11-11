@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { IS_TESTNET } from '~/constant'
+import { ARWEAVE_ENDPOINT, IS_TESTNET } from '~/constant'
 import {
   API_POST_ARWEAVE_V2_SIGN,
   API_GET_ARWEAVE_V2_PUBLIC_KEY,
@@ -176,8 +176,9 @@ export async function uploadSingleFileToBundlr(
   if (fileType) tags.push({ name: 'Content-Type', value: fileType })
   const response = await bundler.upload(file, { tags })
   const arweaveId = response.id;
+  let arweaveLink = `${ARWEAVE_ENDPOINT}/${arweaveId}`;
   if (arweaveId) {
-    await axios.post(API_POST_ARWEAVE_V2_REGISTER, {
+    const { data } = await axios.post(API_POST_ARWEAVE_V2_REGISTER, {
       fileSize,
       ipfsHash,
       txHash,
@@ -185,6 +186,12 @@ export async function uploadSingleFileToBundlr(
     },{
       headers: { Authorization: token ? `Bearer ${token}` : '' },
     });
+    if (data.link) {
+      arweaveLink = data.link;
+    }
   }
-  return arweaveId;
+  return {
+    arweaveId,
+    arweaveLink,
+  };
 }

@@ -1,5 +1,5 @@
 <template>
-  <div :class="['flex', 'flex-col']">
+  <div :class="['flex', 'flex-col', 'w-full']">
     <Card class="p-[32px]" :has-padding="false">
       <!-- header -->
       <IscnFormHeader :step="step" :total-step="4" />
@@ -238,6 +238,15 @@
           </FormField>
           <Divider class="my-[12px]" />
           <FormField
+              v-if="shouldShowDRMOption"
+              :label="$t('IscnRegisterForm.label.drm')"
+              class="mb-[12px]"
+            >
+              <CheckBox v-model="isUseArweaveLink">
+                {{ $t('IscnRegisterForm.label.drm.details') }}
+              </CheckBox>
+            </FormField>
+          <FormField
             v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.sameAs')"
             content-classes="flex flex-row flex-wrap"
@@ -270,7 +279,7 @@
           <!-- fingerPrint -->
           <FormField
             :label="$t('IscnRegisterForm.label.fingerprints')"
-            class="mb-[12px]"
+            class="mb-[12px] max-w-full"
           >
             <ContentFingerprintLink
               v-for="ipfs of ipfsHashList"
@@ -278,9 +287,9 @@
               :item="formatIpfs(ipfs)"
             />
             <ContentFingerprintLink
-              v-for="ar of uploadArweaveIdList"
-              :key="ar"
-              :item="formatArweave(ar)"
+              v-for="link of combinedArweaveLinks"
+              :key="link"
+              :item="link"
             />
             <ContentFingerprintLink
               v-for="(f, i) in customContentFingerprints"
@@ -708,7 +717,8 @@ export enum AuthorDialogType {
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: [] }) readonly fileRecords!: any[]
-  @Prop({ default: [] }) readonly uploadArweaveList!: string[]
+  @Prop({ default: [] }) readonly uploadArweaveIdList!: string[]
+  @Prop({ default: [] }) readonly uploadArweaveLinkList!: string[]
   @Prop() readonly epubMetadata!: any | null
 
   @Prop(String) readonly ipfsHash!: string
@@ -801,6 +811,7 @@ export default class IscnRegisterForm extends Vue {
   isRegisterNumbersProtocolAsset = false
   numbersProtocolAssetIds = new Map<string, string>()
 
+  isUseArweaveLink= false
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
@@ -834,6 +845,10 @@ export default class IscnRegisterForm extends Vue {
 
   get shouldShowContentFingerprintInput() {
     return !this.fileRecords.some((file) => file.fileData)
+  }
+
+  get shouldShowDRMOption() {
+    return this.uploadArweaveLinkList.filter(Boolean).length
   }
 
   get tagsString(): string {
@@ -906,14 +921,23 @@ export default class IscnRegisterForm extends Vue {
       : this.$t('IscnRegisterForm.title.editStakeholder')
   }
 
-  get contentFingerprintLinks() {
-    const array = []
-    if (this.uploadArweaveIdList) {
-      array.push(
-        ...this.uploadArweaveIdList.map((id: string) => this.formatArweave(id)),
-      )
+  get combinedArweaveLinks() {
+    if (this.isUseArweaveLink) {
+      const list = [...this.uploadArweaveLinkList]
+      if (this.arweaveId) {
+        list.push(this.formatArweave(this.arweaveId) as string)
+      }
+      return list;
     }
-    if (this.ipfsHashList.length) {
+    return this.combinedArweaveIdList.map((link) => this.formatArweave(link))
+  }
+
+  get contentFingerprintLinks() {
+    const array: string[] = []
+    if (this.combinedArweaveLinks.length) {
+      array.push(...this.combinedArweaveLinks)
+    }
+    if (!this.isUseArweaveLink && this.ipfsHashList.length) {
       array.push(...this.ipfsHashList.map((ipfs) => this.formatIpfs(ipfs)))
     }
     if (this.customContentFingerprints.length) {
@@ -1013,8 +1037,8 @@ export default class IscnRegisterForm extends Vue {
       isbn: this.isbn,
       exifInfo: this.exif.filter((file) => file),
       license: this.formattedLicense,
-      ipfsHash: this.ipfsHashList,
-      arweaveId: this.uploadArweaveIdList,
+      ipfsHash: '',
+      arweaveId: '',
       numbersProtocolAssetId: [...this.numbersProtocolAssetIds.values()],
       fileSHA256: this.fileRecords.map((file) => file.fileSHA256),
       author: this.author.name,
@@ -1024,7 +1048,7 @@ export default class IscnRegisterForm extends Vue {
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
       authorDescriptions: this.authorDescriptions,
-      contentFingerprints: this.customContentFingerprints,
+      contentFingerprints: this.contentFingerprintLinks,
       inLanguage: this.language,
       thumbnailUrl: this.thumbnailUrl,
       publisher: this.publisher,
@@ -1040,11 +1064,11 @@ export default class IscnRegisterForm extends Vue {
     if (this.arweaveFee.lte(0)) {
       return 1
     }
-    return this.uploadArweaveIdList.length ? 2 : 1
+    return this.combinedArweaveIdList.length ? 2 : 1
   }
 
   get totalSignStep() {
-    if (this.uploadArweaveIdList.length && this.arweaveFee.lte(0)) return 1
+    if (this.combinedArweaveIdList.length && this.arweaveFee.lte(0)) return 1
     return 2
   }
 
@@ -1058,7 +1082,7 @@ export default class IscnRegisterForm extends Vue {
     if (this.isUploadingArweave) {
       return this.$t('IscnRegisterForm.signDialog.closeWarning')
     }
-    if (this.uploadArweaveIdList.length) {
+    if (this.combinedArweaveIdList.length) {
       return this.$t('IscnRegisterForm.signDialog.sign.iscn.register')
     }
     return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload')
@@ -1094,10 +1118,10 @@ export default class IscnRegisterForm extends Vue {
     )
   }
 
-  get uploadArweaveIdList() {
+  get combinedArweaveIdList() {
     let arweaveIdList: string[] = []
-    if (this.uploadArweaveList && this.uploadArweaveList.length) {
-      arweaveIdList = [...this.uploadArweaveList]
+    if (this.uploadArweaveIdList && this.uploadArweaveIdList.length) {
+      arweaveIdList = [...this.uploadArweaveIdList]
     }
     if (this.arweaveId) {
       arweaveIdList.push(this.arweaveId)
@@ -1315,11 +1339,11 @@ export default class IscnRegisterForm extends Vue {
   }
 
   formatIpfs(ipfsHash: string) {
-    return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash })
+    return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash }) as string
   }
 
   formatArweave(arweaveId: string) {
-    return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
+    return this.$t('IscnRegisterForm.arweave.link', { arweaveId }) as string
   }
 
   async getLikerIdsAddresses() {
@@ -1456,7 +1480,7 @@ estimation,
     }
     if (
       !this.fileRecords.some((file) => file.fileBlob) ||
-      this.uploadArweaveIdList.length
+      this.combinedArweaveIdList.length
     )
       await this.submitToISCN()
   }
