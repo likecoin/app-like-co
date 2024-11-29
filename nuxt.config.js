@@ -138,6 +138,8 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
 
+    'nuxt-helmet',
+
     // https://i18n.nuxtjs.org
     '@nuxtjs/i18n',
 
