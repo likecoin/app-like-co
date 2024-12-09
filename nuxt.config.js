@@ -152,6 +152,10 @@ export default {
     'portal-vue/nuxt',
   ],
 
+  helmet: {
+    referrerPolicy: { policy: 'strict-origin' },
+  },
+
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     browserBaseURL: '/api',
