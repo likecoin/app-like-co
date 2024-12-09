@@ -34,6 +34,7 @@
               @click="$refs.imageFile.click()"
               >{{ $t('UploadForm.button.selectFile') }}
             </Button>
+            <p class="w-full text-center text-[12px] text-medium-gray mt-[12px]" v-text="$t('UploadForm.button.size.limit')" />
             <input
               ref="imageFile"
               class="hidden"
@@ -346,7 +347,7 @@ export default class IscnUploadForm extends Vue {
       },
       'items-center',
       'justify-between',
-      'p-[32px]',
+      'p-[28px]',
       'mb-[12px]',
       'border-[2px]',
       'border-dashed',
