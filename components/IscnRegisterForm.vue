@@ -163,7 +163,7 @@
               v-model="description"
               :is-textarea="true"
               :error-message="
-                validateField(description, charactersLimit.description, true)
+                validateField(description, charactersLimit.descriptionMax, true, charactersLimit.descriptionMin)
               "
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
@@ -698,7 +698,8 @@ const walletModule = namespace('wallet')
 
 export enum CharactersLimit {
   name = 100,
-  description = 1600,
+  descriptionMax = 1600,
+  descriptionMin = 10,
   tagContent = 35,
   tagNumber = 10,
   authorName = 100,
@@ -1042,12 +1043,13 @@ export default class IscnRegisterForm extends Vue {
       numbersProtocolAssetId: [...this.numbersProtocolAssetIds.values()],
       fileSHA256: this.fileRecords.map((file) => file.fileSHA256),
       author: this.author.name,
+      authorDescription: this.author.authorDescription,
       authorNames: this.authorNames,
+      authorDescriptions: this.authorDescriptions,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
-      authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.contentFingerprintLinks,
       inLanguage: this.language,
       thumbnailUrl: this.thumbnailUrl,
@@ -1107,7 +1109,8 @@ export default class IscnRegisterForm extends Vue {
       this.name &&
       this.description &&
       this.name.length <= CharactersLimit.name &&
-      this.description.length <= CharactersLimit.description
+      this.description.length <= CharactersLimit.descriptionMax &&
+      this.description.length >= CharactersLimit.descriptionMin
     )
   }
 
@@ -1155,7 +1158,7 @@ export default class IscnRegisterForm extends Vue {
       this.name = this.epubMetadata.title || ''
       this.description = this.extractText(this.epubMetadata.description)
       this.author.name = this.epubMetadata.author || ''
-      this.author.authorDescription = 'Author'
+      this.author.authorDescription = ''
       this.tags = this.epubMetadata.tags || []
       this.thumbnailUrl = this.formatArweave(
         this.epubMetadata.thumbnailArweaveId,
@@ -1189,7 +1192,7 @@ export default class IscnRegisterForm extends Vue {
       wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
       url: [],
       likerId: userData?.user || '',
-      authorDescription: userData?.description || 'Publisher',
+      authorDescription: userData?.description || '',
     }
   }
 

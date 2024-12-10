@@ -14,6 +14,7 @@ export interface ISCNRegisterPayload {
   type: string;
   publisher?: string,
   author: string;
+  authorDescription?: string;
   authorNames: string[];
   authorUrls: string[][];
   authorWallets: any[][];
