@@ -163,7 +163,7 @@
               v-model="description"
               :is-textarea="true"
               :error-message="
-                validateField(description, charactersLimit.description, true)
+                validateField(description, charactersLimit.descriptionMax, true, charactersLimit.descriptionMin)
               "
               :placeholder="$t('IscnRegisterForm.placeholder.description')"
             />
@@ -698,7 +698,8 @@ const walletModule = namespace('wallet')
 
 export enum CharactersLimit {
   name = 100,
-  description = 1600,
+  descriptionMax = 1600,
+  descriptionMin = 10,
   tagContent = 35,
   tagNumber = 10,
   authorName = 100,
@@ -1107,7 +1108,8 @@ export default class IscnRegisterForm extends Vue {
       this.name &&
       this.description &&
       this.name.length <= CharactersLimit.name &&
-      this.description.length <= CharactersLimit.description
+      this.description.length <= CharactersLimit.descriptionMax &&
+      this.description.length >= CharactersLimit.descriptionMin
     )
   }
 
