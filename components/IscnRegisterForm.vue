@@ -1043,12 +1043,13 @@ export default class IscnRegisterForm extends Vue {
       numbersProtocolAssetId: [...this.numbersProtocolAssetIds.values()],
       fileSHA256: this.fileRecords.map((file) => file.fileSHA256),
       author: this.author.name,
+      authorDescription: this.author.authorDescription,
       authorNames: this.authorNames,
+      authorDescriptions: this.authorDescriptions,
       authorUrls: this.authorUrls,
       authorWallets: this.authorWalletAddresses,
       likerIds: this.likerIds,
       likerIdsAddresses: this.likerIdsAddresses,
-      authorDescriptions: this.authorDescriptions,
       contentFingerprints: this.contentFingerprintLinks,
       inLanguage: this.language,
       thumbnailUrl: this.thumbnailUrl,
@@ -1157,7 +1158,7 @@ export default class IscnRegisterForm extends Vue {
       this.name = this.epubMetadata.title || ''
       this.description = this.extractText(this.epubMetadata.description)
       this.author.name = this.epubMetadata.author || ''
-      this.author.authorDescription = 'Author'
+      this.author.authorDescription = ''
       this.tags = this.epubMetadata.tags || []
       this.thumbnailUrl = this.formatArweave(
         this.epubMetadata.thumbnailArweaveId,
@@ -1191,7 +1192,7 @@ export default class IscnRegisterForm extends Vue {
       wallet: [{ content: address, id: 1, type: 'like', isOpenOptions: false }],
       url: [],
       likerId: userData?.user || '',
-      authorDescription: userData?.description || 'Publisher',
+      authorDescription: userData?.description || '',
     }
   }
 

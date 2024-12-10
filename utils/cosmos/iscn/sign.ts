@@ -37,12 +37,13 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     arweaveId,
     fileSHA256,
     author,
+    authorDescription,
     authorNames,
+    authorDescriptions,
     authorUrls,
     authorWallets,
     likerIds,
     likerIdsAddresses,
-    authorDescriptions,
     numbersProtocolAssetId,
     contentFingerprints: contentFingerprintsInput = [],
     stakeholders: stakeholdersInput = [],
@@ -135,10 +136,15 @@ export function formatISCNTxPayload(payload: ISCNRegisterPayload): ISCNSignPaylo
     }
   }
 
+  const authorEntity = (author && authorDescription) ? {
+    name: author,
+    description: authorDescription,
+  } : author
+
   return {
     ...data,
     publisher: publisherInput,
-    author,
+    author: authorEntity,
     keywords: tagsString.split(','),
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
