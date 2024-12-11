@@ -153,6 +153,64 @@
           />
         </FormField>
       </div>
+
+      <Divider class="my-[12px]" />
+      <div v-if="shouldShowMoreSettings" class="flex flex-col">
+        <FormField
+          :label="$t('IscnRegisterForm.label.license')"
+          class="mb-[12px]"
+        >
+          <TextField
+            v-model="license"
+            :placeholder="$t('iscn.meta.license.placeholder')"
+          />
+        </FormField>
+        <FormField :label="$t('IscnRegisterForm.label.url')">
+          <TextField
+            v-model="url"
+            :placeholder="$t('IscnRegisterForm.placeholder.url')"
+          />
+        </FormField>
+        <FormField
+          v-if="type === 'Book'"
+          :label="$t('IscnRegisterForm.label.isbn')"
+        >
+          <TextField
+            v-model="isbn"
+            :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+          />
+        </FormField>
+        <FormField
+          v-if="type === 'Book'"
+          :label="$t('IscnRegisterForm.label.publisher')"
+        >
+          <TextField
+            v-model="publisher"
+            :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
+          />
+        </FormField>
+        <FormField
+          v-if="type === 'Book'"
+          :label="$t('IscnRegisterForm.label.datePublished')"
+        >
+          <input
+            v-model="datePublished"
+            type="date"
+          />
+        </FormField>
+      </div>
+      <div v-else class="flex items-center justify-center">
+        <Button
+          preset="tertiary"
+          size="mini"
+          @click.prevent="() => (shouldShowMoreSettings = true)"
+        >
+          <div class="flex justify-center items-center gap-[6px]">
+            <IconAdd />
+            {{ $t('IscnRegisterForm.button.more.settings') }}
+          </div>
+        </Button>
+      </div>
       <div class="flex justify-end items-center my-[20px]">
         <div
           v-if="isSubmitLoading"
@@ -229,7 +287,15 @@ export default class EditIscnPage extends Vue {
   contentFingerprints: string[] = []
   sameAs: string[] = []
   contentMetadata: any = null
+  type: string = ''
+  license: string = ''
+  url: string = ''
+  isbn: string = ''
+  publisher: string = ''
+  datePublished: string = ''
+
   shouldShowUploadSection: boolean = false
+  shouldShowMoreSettings: boolean = false
   uploadFileRecords: any = null
   uploadArweaveIdList: string[] = []
   uploadIpfsList: string[] = []
@@ -278,25 +344,24 @@ export default class EditIscnPage extends Vue {
 
   get payload() {
     return {
+      ...this.contentMetadata,
       name: this.name,
       description: this.description,
       keywords: this.contentMetadata.keywords,
-      url: this.contentMetadata.url,
+      url: this.url,
       contentFingerprints: Array.from(new Set([
         ...this.contentFingerprints,
         ...this.customContentFingerprints,
       ])),
       stakeholders: this.iscnRecord?.stakeholders,
-      type: this.contentMetadata['@type'],
-      usageInfo: this.contentMetadata.usageInfo,
+      type: this.type,
+      usageInfo: this.license,
+      isbn: this.isbn,
+      publisher: this.publisher,
+      datePublished: this.datePublished,
       recordNotes: this.iscnRecord?.recordNotes,
-      contentMetadata: {
-        ...this.contentMetadata,
-        name: this.name,
-        description: this.description,
-        sameAs: this.formattedSameAsList,
-        version: (Number(this.latestVersion) + 1).toString(),
-      },
+      sameAs: this.formattedSameAsList,
+      version: (Number(this.latestVersion) + 1).toString(),
     }
   }
 
@@ -307,6 +372,12 @@ export default class EditIscnPage extends Vue {
       this.description = this.contentMetadata.description
       this.contentFingerprints = this.iscnRecord?.contentFingerprints || []
       this.sameAs = this.contentMetadata.sameAs || []
+      this.type = this.contentMetadata['@type'] || ''
+      this.license = this.contentMetadata.usageInfo || ''
+      this.url = this.contentMetadata.url || ''
+      this.isbn = this.contentMetadata.isbn || ''
+      this.publisher = this.contentMetadata.publisher || ''
+      this.datePublished = this.contentMetadata.datePublished || ''
     }
   }
 
