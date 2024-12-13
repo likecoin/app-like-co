@@ -382,7 +382,7 @@
   "UploadForm.button.confirm": "Confirm",
   "UploadForm.button.mintUrl": "Has a URL, Arweave or IPFS hash? Mint NFT here",
   "UploadForm.button.selectFile": "Select a file",
-  "UploadForm.button.size.limit": "(Maximum upload file size: 20 MB)",
+  "UploadForm.button.size.limit": "(Recommended file size: < 20 MB)",
   "UploadForm.button.skip": "Skip Upload",
   "UploadForm.button": "Start Upload",
   "UploadForm.label.insertISCNPage": "Add ISCN Page to EPUB & PDF",
