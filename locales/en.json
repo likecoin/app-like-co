@@ -222,7 +222,7 @@
   "IscnRegisterForm.fileSHA256.link": "hash://sha256/{hash}",
   "IscnRegisterForm.label.author": "Author",
   "IscnRegisterForm.label.stakeholder": "Stakeholders",
-  "IscnRegisterForm.label.datePublished": "Original Date Published",
+  "IscnRegisterForm.label.datePublished": "Original Publication Date",
   "IscnRegisterForm.label.description": "Description",
   "IscnRegisterForm.label.drm": "DRM Options",
   "IscnRegisterForm.label.drm.details": "Hide file storage link from public blockchain",
