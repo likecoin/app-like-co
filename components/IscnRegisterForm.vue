@@ -237,15 +237,34 @@
             />
           </FormField>
           <Divider class="my-[12px]" />
+
           <FormField
-              v-if="shouldShowDRMOption"
-              :label="$t('IscnRegisterForm.label.drm')"
-              class="mb-[12px]"
-            >
-              <CheckBox v-model="isUseArweaveLink">
-                {{ $t('IscnRegisterForm.label.drm.details') }}
-              </CheckBox>
-            </FormField>
+            v-if="type === 'Book'"
+            :label="$t('IscnRegisterForm.label.publisher')"
+          >
+            <TextField
+              v-model="publisher"
+              :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
+            />
+          </FormField>
+          <FormField
+            v-if="type === 'Book'"
+            :label="$t('IscnRegisterForm.label.datePublished')"
+          >
+            <input
+              v-model="datePublished"
+              type="date"
+            />
+          </FormField>
+          <FormField
+            v-if="type === 'Book'"
+            :label="$t('IscnRegisterForm.label.isbn')"
+          >
+            <TextField
+              v-model="isbn"
+              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+            />
+          </FormField>
           <FormField
             v-if="type === 'Book'"
             :label="$t('IscnRegisterForm.label.sameAs')"
@@ -275,6 +294,15 @@
               v-model="customLicense"
               :placeholder="$t('iscn.meta.license.placeholder')"
             />
+          </FormField>
+          <FormField
+            v-if="shouldShowDRMOption"
+            :label="$t('IscnRegisterForm.label.drm')"
+            class="mb-[12px]"
+          >
+            <CheckBox v-model="isUseArweaveLink">
+              {{ $t('IscnRegisterForm.label.drm.details') }}
+            </CheckBox>
           </FormField>
           <!-- fingerPrint -->
           <FormField
@@ -328,33 +356,6 @@
               <TextField
                 v-model="url"
                 :placeholder="$t('IscnRegisterForm.placeholder.url')"
-              />
-            </FormField>
-            <FormField
-              v-if="type === 'Book'"
-              :label="$t('IscnRegisterForm.label.isbn')"
-            >
-              <TextField
-                v-model="isbn"
-                :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
-              />
-            </FormField>
-            <FormField
-              v-if="type === 'Book'"
-              :label="$t('IscnRegisterForm.label.publisher')"
-            >
-              <TextField
-                v-model="publisher"
-                :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
-              />
-            </FormField>
-            <FormField
-              v-if="type === 'Book'"
-              :label="$t('IscnRegisterForm.label.datePublished')"
-            >
-              <input
-                v-model="datePublished"
-                type="date"
               />
             </FormField>
             <FormField
