@@ -113,8 +113,7 @@ export default class SameAsFieldList extends Vue {
   }
 
   @Watch('urlOptions', { deep: true })
-  onUrlOptionsChanged(newValue: Array<any>) {
-    console.log('urlOptions', newValue)
+  onUrlOptionsChanged() {
     this.setUrlList()
   }
 
