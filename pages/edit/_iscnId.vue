@@ -46,19 +46,23 @@
         </FormField>
         <div v-if="step === 2">
           <FormField
+            v-if="shouldShowDRMOption"
+            :label="$t('IscnRegisterForm.label.drm')"
+            class="mb-[12px]"
+          >
+            <CheckBox v-model="isUseArweaveLink">
+              {{ $t('IscnRegisterForm.label.drm.details') }}
+            </CheckBox>
+          </FormField>
+          <FormField
             :label="$t('iscn.meta.content.fingerprints')"
             class="mb-[12px]"
           >
             <ContentFingerprintLink
-              v-for="item in contentFingerprints"
-              :key="item.key"
+              v-for="item in contentFingerprintLinks"
+              :key="item"
               :item="item"
               :class="['mb-[8px]', 'break-all', 'text-[14px]']"
-            />
-            <ContentFingerprintLink
-              v-for="(f, i) in customContentFingerprints"
-              :key="f + i"
-              :item="f"
             />
             <div :class="['flex', 'mt-[12px]', 'gap-[8px]']">
               <TextField v-model="contentFingerprintInput" class="w-full" />
@@ -77,7 +81,7 @@
           >
             <SameAsFieldList
               :name="name"
-              :url-options="contentFingerprintOptions"
+              :url-options="contentFingerprintLinks"
               :file-records="uploadFileRecords"
               :current-list="sameAsList"
               @on-update="(value) => (sameAsList = value)"
@@ -88,7 +92,7 @@
 
       <!-- default content fingerprint -->
       <div
-        v-else-if="contentFingerprints.length"
+        v-else-if="contentFingerprintLinks.length"
         :class="[
           'relative',
           'rounded-[12px]',
@@ -129,13 +133,13 @@
           />
         </div>
         <FormField
-          v-if="contentFingerprints.length"
+          v-if="contentFingerprintLinks.length"
           :label="$t('iscn.meta.content.fingerprints')"
           class="mb-[12px]"
         >
           <ContentFingerprintLink
-            v-for="item in contentFingerprints"
-            :key="item.key"
+            v-for="item in contentFingerprintLinks"
+            :key="item"
             :item="item"
             :class="['mb-[8px]', 'break-all', 'text-[14px]']"
           />
@@ -147,7 +151,7 @@
         >
           <ContentFingerprintLink
             v-for="item in sameAs"
-            :key="item.key"
+            :key="item"
             :item="item"
             :class="['mb-[8px]', 'break-all', 'text-[14px]']"
           />
@@ -294,11 +298,13 @@ export default class EditIscnPage extends Vue {
   publisher: string = ''
   datePublished: string = ''
 
+  isUseArweaveLink= false
   shouldShowUploadSection: boolean = false
   shouldShowMoreSettings: boolean = false
   uploadFileRecords: any = null
+  uploadIpfsHashList: string[] = []
   uploadArweaveIdList: string[] = []
-  uploadIpfsList: string[] = []
+  uploadArweaveLinkList: string[] = []
   sameAsList: any = []
 
   step: number = 1
@@ -309,6 +315,17 @@ export default class EditIscnPage extends Vue {
   errorMessage: string = ''
 
   latestVersion: number | string = ''
+
+  get combinedArweaveIdList() {
+    return this.uploadArweaveIdList || []
+  }
+
+  get combinedArweaveLinks(): string[] {
+    if (this.isUseArweaveLink) {
+      return this.uploadArweaveLinkList
+    }
+    return this.combinedArweaveIdList.map((link) => this.formatArweave(link) as string)
+  }
 
   get formattedSameAsList() {
     if (this.sameAsList.length) {
@@ -328,18 +345,25 @@ export default class EditIscnPage extends Vue {
     return Boolean(this.step === 1 && this.shouldShowUploadSection)
   }
 
-  get contentFingerprintOptions() {
-    const array = []
-    if (this.uploadArweaveIdList) {
-      array.push(...this.uploadArweaveIdList.map((id: string) => id))
+  get contentFingerprintLinks() {
+    if (this.contentFingerprints.length) {
+      return this.contentFingerprints
     }
-    if (this.uploadIpfsList.length) {
-      array.push(...this.uploadIpfsList.map((ipfs) => ipfs))
+    const array: string[] = []
+    if (this.combinedArweaveLinks.length) {
+      array.push(...this.combinedArweaveLinks)
+    }
+    if (!this.isUseArweaveLink && this.uploadIpfsHashList.length) {
+      array.push(...this.uploadIpfsHashList.map((ipfs) => this.formatIpfs(ipfs) as string))
     }
     if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
     }
     return array
+  }
+
+  get shouldShowDRMOption() {
+    return this.uploadArweaveIdList.filter(Boolean).length
   }
 
   get payload() {
@@ -349,10 +373,7 @@ export default class EditIscnPage extends Vue {
       description: this.description,
       keywords: this.contentMetadata.keywords,
       url: this.url,
-      contentFingerprints: Array.from(new Set([
-        ...this.contentFingerprints,
-        ...this.customContentFingerprints,
-      ])),
+      contentFingerprints: this.contentFingerprintLinks,
       stakeholders: this.iscnRecord?.stakeholders,
       type: this.type,
       usageInfo: this.license,
@@ -406,24 +427,24 @@ export default class EditIscnPage extends Vue {
     this.contentFingerprintInput = ''
   }
 
-  onSubmitUpload({ fileRecords }: { fileRecords: any[] }) {
+  onSubmitUpload({
+    fileRecords,
+    arweaveIds,
+    arweaveLinks,
+  }: {
+    fileRecords: any[]
+    arweaveIds: string[]
+    arweaveLinks: string[]
+  }) {
     this.contentFingerprints = []
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
-      this.uploadIpfsList = fileRecords.map(
-        (file) => this.formatIpfs(file.ipfsHash) as string,
-      )
-      this.uploadArweaveIdList = fileRecords.map(
-        (file) => this.formatArweave(file.arweaveId) as string,
-      )
-
-      this.contentFingerprints = [
-        ...fileRecords.map(
-          (file) => this.formatFileSHA256(file.fileSHA256) as string,
-        ),
-        ...this.uploadIpfsList,
-        ...this.uploadArweaveIdList,
-      ]
+    }
+    if (arweaveIds && arweaveIds.length) {
+      this.uploadArweaveIdList = [...arweaveIds]
+    }
+    if (arweaveLinks && arweaveLinks.length) {
+      this.uploadArweaveLinkList = [...arweaveLinks]
     }
     logTrackerEvent(this, 'ISCNEdit', 'ISCNConfirmFile', '', 1)
     this.step = 2
@@ -433,6 +454,9 @@ export default class EditIscnPage extends Vue {
     this.isSubmitLoading = true
     try {
       await this.initIfNecessary()
+      if (!this.signer) {
+        throw new Error('No signer found')
+      }
       const result = await signISCN(this.payload, this.signer, this.address, {
         iscnId: this.iscnId,
         gas: new BigNumber(ISCN_GAS_FEE).multipliedBy(UPDATE_ISCN_GAS_MULTIPLIER).toFixed(0),
