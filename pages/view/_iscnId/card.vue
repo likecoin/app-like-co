@@ -73,6 +73,8 @@ const iscnModule = namespace('iscn')
         }
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
       error(err as Error)
     }
     return {}

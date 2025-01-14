@@ -658,6 +658,7 @@ export default class IscnUploadForm extends Vue {
       }
       this.epubMetadataList.push(epubMetadata)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(err)
     }
   }
