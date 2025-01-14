@@ -518,6 +518,8 @@ export default class NFTMintPage extends Vue {
         throw new Error(ErrorType.USER_NOT_ISCN_OWNER)
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
       this.setError(error)
     }
   }
@@ -612,6 +614,8 @@ export default class NFTMintPage extends Vue {
       }
       /* eslint-enable no-fallthrough */
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
       this.mintState = MintState.DONE
       this.setError(error)
     }
@@ -739,6 +743,7 @@ export default class NFTMintPage extends Vue {
           this.isCustomOgimage = true;
           logTrackerEvent(this, 'IscnMintNFT', 'GetOgImageExists', arweaveID, 1);
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err)
         }
       }

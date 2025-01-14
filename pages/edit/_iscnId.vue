@@ -273,6 +273,8 @@ const walletModule = namespace('wallet')
         return {}
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
       error(err as Error)
     }
     return {}
@@ -470,6 +472,8 @@ export default class EditIscnPage extends Vue {
         )
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
       this.shouldShowAlert = true
       this.errorMessage = (error as Error).toString()
     }

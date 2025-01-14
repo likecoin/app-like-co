@@ -69,6 +69,7 @@ export default class ContentFingerprintLink extends Vue {
         })
         link = data.link
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error)
       }
       window.open(link, '_blank')

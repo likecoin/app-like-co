@@ -418,6 +418,7 @@ export default class FetchIndex extends Vue {
         });
         window.opener.postMessage(message, this.redirectOrigin);
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(err);
       }
     }
@@ -751,6 +752,7 @@ export default class FetchIndex extends Vue {
           });
           window.opener.postMessage(message, this.redirectOrigin);
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err);
         }
       }
@@ -809,6 +811,7 @@ export default class FetchIndex extends Vue {
           });
           window.opener.postMessage(message, this.redirectOrigin);
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err);
         }
       }

@@ -74,6 +74,8 @@ export default class RedirectPage extends Vue {
         }
         this.$router.replace(postAuthRoute);
       } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
         this.$nuxt.error({
           statusCode: 400,
           message: (err as Error).toString(),

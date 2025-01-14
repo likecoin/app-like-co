@@ -112,6 +112,8 @@ export default class ISCN extends VuexModule {
         }
       } while (nextSequence !== 0)
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
       this.context.commit('setErrorMessage', error)
     } finally {
       this.context.commit('setIsLoading', false)
@@ -129,6 +131,8 @@ export default class ISCN extends VuexModule {
       if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
       this.context.commit('setErrorMessage', error)
     } finally {
       this.context.commit('setIsLoading', false)
@@ -171,6 +175,8 @@ export default class ISCN extends VuexModule {
       if (data.records) result = data.records
       this.context.commit('appendRecords', result)
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
       this.context.commit('setErrorMessage', error)
     } finally {
       this.context.commit('setIsLoading', false)

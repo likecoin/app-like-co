@@ -13,6 +13,7 @@ export function checkJwtTokenValidity (token: string) {
     const isMatchPermissions = (decoded as any).permissions === SIGN_AUTHORIZATION_PERMISSIONS;
     return !isExpired && isMatchPermissions;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     return false;
   }
