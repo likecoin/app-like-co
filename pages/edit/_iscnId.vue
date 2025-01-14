@@ -365,7 +365,7 @@ export default class EditIscnPage extends Vue {
   }
 
   get shouldShowDRMOption() {
-    return this.uploadArweaveIdList.filter(Boolean).length
+    return this.uploadArweaveLinkList.filter(Boolean).length
   }
 
   get payload() {
