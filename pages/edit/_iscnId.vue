@@ -50,7 +50,7 @@
             :label="$t('IscnRegisterForm.label.drm')"
             class="mb-[12px]"
           >
-            <CheckBox v-model="isUseArweaveLink">
+            <CheckBox v-model="isUseArweaveLinkChecked">
               {{ $t('IscnRegisterForm.label.drm.details') }}
             </CheckBox>
           </FormField>
@@ -251,6 +251,7 @@ import { ISCN_PREFIX, ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constan
 import { logTrackerEvent } from '~/utils/logger'
 import { signISCN } from '~/utils/cosmos/iscn/sign'
 import { extractIscnIdPrefix } from '~/utils/ui'
+import { LIKE_CO_API_ROOT } from '~/constant/api';
 
 const walletModule = namespace('wallet')
 
@@ -300,7 +301,7 @@ export default class EditIscnPage extends Vue {
   publisher: string = ''
   datePublished: string = ''
 
-  isUseArweaveLink= false
+  isUseArweaveLinkChecked = false
   shouldShowUploadSection: boolean = false
   shouldShowMoreSettings: boolean = false
   uploadFileRecords: any = null
@@ -317,6 +318,10 @@ export default class EditIscnPage extends Vue {
   errorMessage: string = ''
 
   latestVersion: number | string = ''
+
+  get isUseArweaveLink() {
+    return this.shouldShowDRMOption && this.isUseArweaveLinkChecked
+  }
 
   get combinedArweaveIdList() {
     return this.uploadArweaveIdList || []
@@ -355,7 +360,7 @@ export default class EditIscnPage extends Vue {
     if (this.combinedArweaveLinks.length) {
       array.push(...this.combinedArweaveLinks)
     }
-    if (!this.isUseArweaveLink && this.uploadIpfsHashList.length) {
+    if (!this.isUseArweaveLinkChecked && this.uploadIpfsHashList.length) {
       array.push(...this.uploadIpfsHashList.map((ipfs) => this.formatIpfs(ipfs) as string))
     }
     if (this.customContentFingerprints.length) {
@@ -401,6 +406,9 @@ export default class EditIscnPage extends Vue {
       this.isbn = this.contentMetadata.isbn || ''
       this.publisher = this.contentMetadata.publisher || ''
       this.datePublished = this.contentMetadata.datePublished || ''
+      this.isUseArweaveLinkChecked = !!this.contentFingerprints.find(
+        link => link.startsWith(LIKE_CO_API_ROOT),
+      )
     }
   }
 

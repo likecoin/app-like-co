@@ -300,7 +300,7 @@
             :label="$t('IscnRegisterForm.label.drm')"
             class="mb-[12px]"
           >
-            <CheckBox v-model="isUseArweaveLink">
+            <CheckBox v-model="isUseArweaveLinkChecked">
               {{ $t('IscnRegisterForm.label.drm.details') }}
             </CheckBox>
           </FormField>
@@ -813,7 +813,7 @@ export default class IscnRegisterForm extends Vue {
   isRegisterNumbersProtocolAsset = false
   numbersProtocolAssetIds = new Map<string, string>()
 
-  isUseArweaveLink= false
+  isUseArweaveLinkChecked= false
   isOpenFileInfoDialog = false
   isOpenAuthorDialog = false
   isOpenWarningSnackbar = false
@@ -835,6 +835,10 @@ export default class IscnRegisterForm extends Vue {
   sameAsList: any = []
   language: string = ''
   shouldShowMoreSettings: boolean = false
+
+  get isUseArweaveLink() {
+    return this.shouldShowDRMOption && this.isUseArweaveLinkChecked
+  }
 
   get ipfsHashList() {
     const list = []
