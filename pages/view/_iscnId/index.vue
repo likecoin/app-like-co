@@ -899,14 +899,16 @@ export default class ViewIscnIdPage extends Vue {
 
   handleClickDownload() {
     logTrackerEvent(this, 'ISCNView', 'ClickDownload', this.iscnId, 1)
+    const { sameAs, metadata } = this.metadata
     const generateData = {
       contentMetadata: {
-        ...this.metadata,
+        ...metadata,
+        sameAs: this.isIscnOwner  ? sameAs : undefined,
         '@type': this.type,
         '@context': "http://schema.org/",
       },
       stakeholders: this.recordData?.stakeholders,
-      contentFingerprints: this.recordData.contentFingerprints,
+      contentFingerprints: this.isIscnOwner ? this.recordData.contentFingerprints : undefined,
       recordNotes: '',
     }
 
