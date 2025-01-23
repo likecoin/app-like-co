@@ -385,6 +385,7 @@
   "UploadForm.button.size.limit": "(Recommended file size: < 20 MB)",
   "UploadForm.button.skip": "Skip Upload",
   "UploadForm.button": "Start Upload",
+  "UploadForm.label.encryptEBookData": "Encrypt EPUB & PDF on upload",
   "UploadForm.label.insertISCNPage": "Add ISCN Page to EPUB & PDF",
   "UploadForm.guide.dropFile": "Drop your file here, or",
   "UploadForm.guide.selectFile": "Select your file and publish to IPFS",
