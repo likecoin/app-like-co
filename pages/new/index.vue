@@ -40,8 +40,7 @@
 
       :ipfs-hash="urlIpfsHash"
       :arweave-id="urlArweaveId"
-      :upload-arweave-id-list="uploadArweaveList"
-      :upload-arweave-link-list="uploadArweaveLinkList"
+      :upload-arweave-info-list="uploadArweaveInfoList"
       :epub-metadata="epubMetadata"
 
       :step="step"
@@ -121,8 +120,7 @@ export default class NewIndexPage extends Vue {
   state = 'init'
   urlIpfsHash = this.$route.query.ipfs_hash || ''
   urlArweaveId = this.$route.query.arweave_id || ''
-  uploadArweaveList: string[] = []
-  uploadArweaveLinkList: string[] = []
+  uploadArweaveInfoList: any[] = []
   fileSHA256 = ''
   fileData = ''
   fileType = ''
@@ -193,23 +191,18 @@ export default class NewIndexPage extends Vue {
 
   onSubmitUpload({
     fileRecords,
-    arweaveIds,
-    arweaveLinks,
+    arweaveInfos,
     epubMetadata,
   }: {
     fileRecords: any[]
-    arweaveIds: string[]
-    arweaveLinks: string[]
+    arweaveInfos: any[]
     epubMetadata: any
   }) {
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
     }
-    if (arweaveIds && arweaveIds.length) {
-      this.uploadArweaveList = [...arweaveIds]
-    }
-    if (arweaveLinks && arweaveLinks.length) {
-      this.uploadArweaveLinkList = [...arweaveLinks]
+    if (arweaveInfos && arweaveInfos.length) {
+      this.uploadArweaveInfoList = [...arweaveInfos]
     }
     if (epubMetadata) {
       this.epubMetadata = {...epubMetadata}

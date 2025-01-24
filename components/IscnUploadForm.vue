@@ -323,7 +323,7 @@ export default class IscnUploadForm extends Vue {
   arweaveFee = new BigNumber(0)
   arweaveFeeMap: Record<string, string> = {}
   sentArweaveTransactionInfo = new Map<
-    string, { transactionHash?: string, arweaveId?: string, arweaveLink?: string }
+    string, { transactionHash?: string, arweaveId?: string, arweaveLink?: string, arweaveKey?: string }
   >()
 
   likerId: string = ''
@@ -879,14 +879,14 @@ export default class IscnUploadForm extends Vue {
       });
       if (arweaveId) {
         const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
-        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId, arweaveLink });
+        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId, arweaveLink, arweaveKey: key });
         if (tempRecord.fileName.includes('cover.jpeg')) {
           const metadata = this.epubMetadataList.find((file: any) => file.thumbnailIpfsHash === record.ipfsHash)
           if (metadata) {
             metadata.thumbnailArweaveId = arweaveId
           }
         }
-        this.$emit('arweaveUploaded', { arweaveId, arweaveLink })
+        this.$emit('arweaveUploaded', { arweaveId, arweaveLink, arweaveKey: key })
         this.isOpenSignDialog = false
       } else {
         this.isOpenWarningSnackbar = true
@@ -1010,8 +1010,11 @@ export default class IscnUploadForm extends Vue {
       this.uploadStatus = '';
     }
 
-    const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
-    const uploadArweaveLinkList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveLink);
+    const uploadArweaveInfoList = Array.from(this.sentArweaveTransactionInfo.values())
+      .map(entry => {
+        const { arweaveId, arweaveLink, arweaveKey } = entry;
+        return { id: arweaveId, link: arweaveLink, key: arweaveKey };
+      });
     this.modifiedFileRecords.forEach((record: any, index:number) => {
       if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
         const info = this.sentArweaveTransactionInfo.get(
@@ -1021,17 +1024,18 @@ export default class IscnUploadForm extends Vue {
           const {
             arweaveId,
             arweaveLink,
+            arweaveKey,
           } = info;
           if (arweaveId) this.modifiedFileRecords[index].arweaveId = arweaveId
           if (arweaveLink) this.modifiedFileRecords[index].arweaveLink = arweaveLink
+          if (arweaveKey) this.modifiedFileRecords[index].arweaveKey = arweaveKey
         }
       }
     })
     this.$emit('submit', {
       fileRecords: this.modifiedFileRecords,
-      arweaveIds: uploadArweaveIdList,
+      arweaveInfos: uploadArweaveInfoList,
       epubMetadata: this.epubMetadataList[0],
-      arweaveLinks: uploadArweaveLinkList,
     })
   }
 

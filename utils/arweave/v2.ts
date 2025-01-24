@@ -195,5 +195,6 @@ export async function uploadSingleFileToBundlr(
   return {
     arweaveId,
     arweaveLink,
+    arweaveKey: key,
   };
 }
