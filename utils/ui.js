@@ -52,7 +52,9 @@ export function formatIpfs(ipfsHash) {
 
 export function formatArweave(arweaveId, key) {
   if (key) {
-    return `ar://${arweaveId}?key=${key}`
+    const url = new URL(`ar://${arweaveId}`);
+    url.searchParams.append('key', key);
+    return url.toString();
   }
   return `ar://${arweaveId}`
 }

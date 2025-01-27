@@ -973,19 +973,9 @@ export default class IscnRegisterForm extends Vue {
       ?.filter((items: any) => items.filename && items.url)
       ?.map((sameAs: { filename: any; filetype: any; url: any }) => {
         if (sameAs.filename && sameAs.filetype) {
-          try {
-            const parsed = new URL(sameAs.url)
-            parsed.searchParams.set('name', `${sameAs.filename}.${sameAs.filetype}`)
-            return parsed.toString()
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e)
-            const parts = sameAs.url.split('?')
-            if (parts.length === 1) {
-              return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
-            }
-            return `${sameAs.url}&name=${sameAs.filename}.${sameAs.filetype}`
-          }
+          const parsed = new URL(sameAs.url)
+          parsed.searchParams.set('name', `${sameAs.filename}.${sameAs.filetype}`)
+          return parsed.toString()
         }
         return ''
       })

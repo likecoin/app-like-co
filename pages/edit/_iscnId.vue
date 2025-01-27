@@ -338,7 +338,9 @@ export default class EditIscnPage extends Vue {
       return this.sameAsList.map(
         (sameAs: { filename: any; filetype: any; url: any }) => {
           if (sameAs.filename && sameAs.filetype) {
-            return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
+            const url = new URL(sameAs.url)
+            url.searchParams.set('name', `${sameAs.filename}.${sameAs.filetype}`)
+            return url.toString()
           }
           return ''
         },
