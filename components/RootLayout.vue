@@ -39,7 +39,7 @@ const bookApiModule = namespace('book-api')
   },
 })
 export default class RootLayout extends Vue {
-  @bookApiModule.Action('restoreSession') restoreSession!: () => void
+  @bookApiModule.Action('restoreAuthSession') restoreSession!: () => void
 
   @Prop({ default: 'bg-light-gray' }) readonly bgClass!: string
 

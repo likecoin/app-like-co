@@ -114,6 +114,7 @@ const iscnModule = namespace('iscn')
     const { q } = query;
     if (q) redirect(localeLocation({ name: 'search-keyword', query })!);
   },
+  layout: 'default',
 })
 export default class IndexPage extends Vue {
   @iscnModule.Action queryISCNByKeyword!: (

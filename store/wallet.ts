@@ -172,6 +172,18 @@ export default class Wallet extends VuexModule {
 
   @Action
   async restoreSession() {
+    let hasSession = false;
+    try {
+      if (window.localStorage) {
+        hasSession = !!window.localStorage.getItem(
+          'likecoin_wallet_connector_session',
+        );
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+    if (!hasSession) return;
     const connector = await getConnector()
     const session = connector.restoreSession()
     if (session) {
