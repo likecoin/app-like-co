@@ -1,10 +1,12 @@
 <template>
+<Page>
   <main class="redirect-page">
     <div class="flex flex-col items-center my-48">
       <h1 class="text-24">{{ $t('RedirectPage.title') }}</h1>
       <ProgressIndicator preset="thin" />
     </div>
   </main>
+</Page>
 </template>
 
 <script lang="ts">

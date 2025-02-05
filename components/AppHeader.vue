@@ -91,12 +91,15 @@
               v-else-if="sessionWallet"
               :class="[
                 'relative',
-                'w-[180px]',
+                'flex',
+                'items-center',
+                'gap-[4px]'
               ]"
             >
               <Button
                 preset="secondary"
                 :title="sessionWallet"
+                class="w-[220px]"
               >
                 <template
                   v-if="isUsingMobileApp"
@@ -111,6 +114,9 @@
                     'overflow-ellipsis',
                   ]"
                 >{{ sessionWallet }}</div>
+                <template #append>
+                   <IconCopy />
+                </template>
               </Button>
               <Button
                 :class="[
@@ -118,16 +124,17 @@
                   'inset-0',
                   'hover:opacity-100',
                   'opacity-0',
-                  'w-full',
+                  'w-[220px]'
                 ]"
                 preset="secondary"
-                :text="$t('AppHeader.button.signOut')"
-                :title="$t('AppHeader.button.signOut')"
+                :text="$t('AppHeader.button.copy')"
+                @click="handleClickAddressCopy"
+              />
+              <Button
+                preset="tertiary"
                 @click="handleClickSignOutButton"
               >
-                <template #prepend>
-                  <IconSignOut />
-                </template>
+                <IconSignOut />
               </Button>
           </div>
           <Button
@@ -159,6 +166,16 @@
       preset="warn"
       @close="shouldShowError=false"
     />
+    <Snackbar
+      v-model="isOpenCopiedAlert"
+      :text="$t('iscn.meta.stakeholders.wallet.copied')"
+      preset="success"
+      :timeout="2000"
+    >
+      <template #prepend>
+        <IconDone />
+      </template>
+    </Snackbar>
   </div>
 </template>
 
@@ -168,6 +185,7 @@ import { namespace } from 'vuex-class'
 import logTrackerEvent, { setLoggerUser } from '~/utils/logger'
 
 import { IS_TESTNET, SIGN_AUTHORIZATION_PERMISSIONS } from '~/constant'
+import { copyToClipboard } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
 const bookApiModule = namespace('book-api')
@@ -188,6 +206,7 @@ export default class AppHeader extends Vue {
   isLoading = false
   errorMessage: string | null = null
   shouldShowError = false
+  isOpenCopiedAlert = false
 
   // eslint-disable-next-line class-methods-use-this
   get isTestnet() {
@@ -249,6 +268,14 @@ export default class AppHeader extends Vue {
     }
     finally {
       this.isLoading = false
+    }
+  }
+
+  handleClickAddressCopy(){
+    logTrackerEvent(this, 'user', 'copy_wallet_address', 'copy_wallet_address', 1)
+    if(this.currentAddress){
+      copyToClipboard(this.currentAddress)
+      this.isOpenCopiedAlert = true
     }
   }
 }

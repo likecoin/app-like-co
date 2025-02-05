@@ -64,7 +64,7 @@ export default class BookAPI extends VuexModule {
   }
 
   @Action
-  async restoreSession () {
+  async restoreAuthSession () {
     try {
       this.context.commit('setIsRestoringSession', true)
       const session = loadAuthSession()
@@ -72,7 +72,7 @@ export default class BookAPI extends VuexModule {
         this.context.commit('setToken', session.token)
         this.context.commit('setSessionWallet', session.wallet)
         if (session.wallet) {
-          await this.context.dispatch('wallet/restoreSessionIfNecessary', null, { root: true })
+          await this.context.dispatch('wallet/restoreSession', null, { root: true })
         }
       }
     } finally {
