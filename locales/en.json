@@ -71,6 +71,7 @@
   "AirDrop.successMessage.subscribed": "Thank you for subscribing!",
   "AppHeader.button.connectWallet": "Connect Wallet",
   "AppHeader.button.signOut": "Sign Out",
+  "AppHeader.button.copy": "Copy Address",
   "AppHeader.tabBar.button.publish": "Register",
   "AppHeader.tabBar.button.mint": "Mint",
   "AppHeader.tabBar.button.publishing": "My Works",
