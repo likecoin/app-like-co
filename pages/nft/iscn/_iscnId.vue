@@ -222,6 +222,7 @@ export default class NFTMintPage extends Vue {
 
   @walletModule.Action toggleSnackbar!: (error: string) => void
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
 
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
@@ -618,6 +619,8 @@ export default class NFTMintPage extends Vue {
       console.error(error)
       this.mintState = MintState.DONE
       this.setError(error)
+    }finally{
+      this.fetchWalletBalance()
     }
   }
 
