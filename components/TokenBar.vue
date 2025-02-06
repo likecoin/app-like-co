@@ -46,21 +46,19 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { getAccountBalance } from '~/utils/cosmos'
 
 const walletModule = namespace('wallet')
 
 @Component({})
 export default class TokenBar extends Vue {
   @walletModule.Getter('getWalletAddress') currentAddress!: string
-
-  balance: number = 0
+  @walletModule.Getter('getBalance') balance!: any
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
 
   @Watch('$store.state.wallet.address', { immediate: true })
-  async onAddressChange() {
+  onAddressChange() {
     if (!this.currentAddress) return
-    const balance = await getAccountBalance(this.currentAddress) as number
-    this.balance = Math.floor(balance)
+    this.fetchWalletBalance()
   }
 }
 </script>

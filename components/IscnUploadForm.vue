@@ -288,6 +288,8 @@ export default class IscnUploadForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
+
   @bookApiModule.Getter('getToken') getToken!: string
 
   isImage: boolean = false
@@ -985,6 +987,7 @@ export default class IscnUploadForm extends Vue {
       return
     } finally {
       this.uploadStatus = '';
+      this.fetchWalletBalance()
     }
 
     const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);

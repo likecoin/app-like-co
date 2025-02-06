@@ -730,6 +730,7 @@ export default class IscnRegisterForm extends Vue {
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
 
   typeOptions = [
     'Book',
@@ -1560,6 +1561,7 @@ estimation,
       console.error(err)
     } finally {
       this.isOpenQuitAlertDialog = false
+      this.fetchWalletBalance()
     }
   }
 
