@@ -310,9 +310,9 @@
             class="mb-[12px] max-w-full"
           >
             <ContentFingerprintLink
-              v-for="ipfs of ipfsHashList"
+              v-for="ipfs of ipfsLinkList"
               :key="ipfs"
-              :item="formatIpfs(ipfs)"
+              :item="ipfs"
             />
             <ContentFingerprintLink
               v-for="link of combinedArweaveLinks"
@@ -694,6 +694,7 @@ import {
 } from '~/constant/api'
 import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
+import { formatArweave, formatIpfs } from '~/utils/ui'
 
 const walletModule = namespace('wallet')
 
@@ -719,8 +720,7 @@ export enum AuthorDialogType {
 @Component
 export default class IscnRegisterForm extends Vue {
   @Prop({ default: [] }) readonly fileRecords!: any[]
-  @Prop({ default: [] }) readonly uploadArweaveIdList!: string[]
-  @Prop({ default: [] }) readonly uploadArweaveLinkList!: string[]
+  @Prop({ default: [] }) readonly uploadArweaveInfoList!: any[]
   @Prop() readonly epubMetadata!: any | null
 
   @Prop(String) readonly ipfsHash!: string
@@ -836,6 +836,10 @@ export default class IscnRegisterForm extends Vue {
   language: string = ''
   shouldShowMoreSettings: boolean = false
 
+  get uploadArweaveLinkList() {
+    return this.uploadArweaveInfoList.map((info) => info.link)
+  }
+
   get isUseArweaveLink() {
     return this.shouldShowDRMOption && this.isUseArweaveLinkChecked
   }
@@ -847,6 +851,10 @@ export default class IscnRegisterForm extends Vue {
     }
     list.push(...this.fileRecords.map((file) => file.ipfsHash))
     return list
+  }
+
+  get ipfsLinkList() {
+    return this.ipfsHashList.map((ipfs) => formatIpfs(ipfs))
   }
 
   get shouldShowContentFingerprintInput() {
@@ -931,11 +939,19 @@ export default class IscnRegisterForm extends Vue {
     if (this.isUseArweaveLink) {
       const list = [...this.uploadArweaveLinkList]
       if (this.arweaveId) {
-        list.push(this.formatArweave(this.arweaveId) as string)
+        list.push(formatArweave(this.arweaveId) as string)
       }
       return list;
     }
-    return this.combinedArweaveIdList.map((link) => this.formatArweave(link))
+
+    let arweaveLinkList: string[] = []
+    if (this.uploadArweaveInfoList && this.uploadArweaveInfoList.length) {
+      arweaveLinkList = this.uploadArweaveInfoList.map((info) => formatArweave(info.id, info.key))
+    }
+    if (this.arweaveId) {
+      arweaveLinkList.push(formatArweave(this.arweaveId))
+    }
+    return arweaveLinkList
   }
 
   get contentFingerprintLinks() {
@@ -944,7 +960,7 @@ export default class IscnRegisterForm extends Vue {
       array.push(...this.combinedArweaveLinks)
     }
     if (!this.isUseArweaveLink && this.ipfsHashList.length) {
-      array.push(...this.ipfsHashList.map((ipfs) => this.formatIpfs(ipfs)))
+      array.push(...this.ipfsHashList.map((ipfs) => formatIpfs(ipfs)))
     }
     if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
@@ -957,7 +973,9 @@ export default class IscnRegisterForm extends Vue {
       ?.filter((items: any) => items.filename && items.url)
       ?.map((sameAs: { filename: any; filetype: any; url: any }) => {
         if (sameAs.filename && sameAs.filetype) {
-          return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
+          const parsed = new URL(sameAs.url)
+          parsed.searchParams.set('name', `${sameAs.filename}.${sameAs.filetype}`)
+          return parsed.toString()
         }
         return ''
       })
@@ -1071,11 +1089,11 @@ export default class IscnRegisterForm extends Vue {
     if (this.arweaveFee.lte(0)) {
       return 1
     }
-    return this.combinedArweaveIdList.length ? 2 : 1
+    return this.combinedArweaveLinks.length ? 2 : 1
   }
 
   get totalSignStep() {
-    if (this.combinedArweaveIdList.length && this.arweaveFee.lte(0)) return 1
+    if (this.combinedArweaveLinks.length && this.arweaveFee.lte(0)) return 1
     return 2
   }
 
@@ -1089,7 +1107,7 @@ export default class IscnRegisterForm extends Vue {
     if (this.isUploadingArweave) {
       return this.$t('IscnRegisterForm.signDialog.closeWarning')
     }
-    if (this.combinedArweaveIdList.length) {
+    if (this.combinedArweaveLinks.length) {
       return this.$t('IscnRegisterForm.signDialog.sign.iscn.register')
     }
     return this.$t('IscnRegisterForm.signDialog.sign.arweave.upload')
@@ -1126,17 +1144,6 @@ export default class IscnRegisterForm extends Vue {
     )
   }
 
-  get combinedArweaveIdList() {
-    let arweaveIdList: string[] = []
-    if (this.uploadArweaveIdList && this.uploadArweaveIdList.length) {
-      arweaveIdList = [...this.uploadArweaveIdList]
-    }
-    if (this.arweaveId) {
-      arweaveIdList.push(this.arweaveId)
-    }
-    return arweaveIdList
-  }
-
   get isBookType() {
     return this.type === 'Book'
   }
@@ -1165,7 +1172,7 @@ export default class IscnRegisterForm extends Vue {
       this.author.name = this.epubMetadata.author || ''
       this.author.authorDescription = ''
       this.tags = this.epubMetadata.tags || []
-      this.thumbnailUrl = this.formatArweave(
+      this.thumbnailUrl = formatArweave(
         this.epubMetadata.thumbnailArweaveId,
       ) as string
       if (this.author.name) {
@@ -1346,14 +1353,6 @@ export default class IscnRegisterForm extends Vue {
     this.license = value
   }
 
-  formatIpfs(ipfsHash: string) {
-    return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash }) as string
-  }
-
-  formatArweave(arweaveId: string) {
-    return this.$t('IscnRegisterForm.arweave.link', { arweaveId }) as string
-  }
-
   async getLikerIdsAddresses() {
     let likerIdsAddresses: any[] = []
     try {
@@ -1488,7 +1487,7 @@ estimation,
     }
     if (
       !this.fileRecords.some((file) => file.fileBlob) ||
-      this.combinedArweaveIdList.length
+      this.combinedArweaveLinks.length
     )
       await this.submitToISCN()
   }

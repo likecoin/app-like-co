@@ -105,6 +105,9 @@
             </table>
           </div>
         </div>
+        <FormField v-if="hasEbookInRecords">
+          <CheckBox v-model="isEncryptEBookData">{{ $t('UploadForm.label.encryptEBookData') }}</CheckBox>
+        </FormField>
         <FormField v-if="showAddISCNPageOption">
           <CheckBox v-model="isAddISCNPageToEbook">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
         </FormField>
@@ -244,6 +247,7 @@ import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import BigNumber from 'bignumber.js'
 import ePub from 'epubjs';
+import { encryptDataWithAES } from 'arweavekit/dist/lib/encryption';
 
 import { OfflineSigner } from '@cosmjs/proto-signing'
 
@@ -310,6 +314,7 @@ export default class IscnUploadForm extends Vue {
   isOpenSignDialog = false
   isOpenWarningSnackbar = false
   isSizeExceeded = false
+  isEncryptEBookData = true
   isAddISCNPageToEbook = false
 
   uploadSizeLimit: number = UPLOAD_FILESIZE_MAX
@@ -318,7 +323,7 @@ export default class IscnUploadForm extends Vue {
   arweaveFee = new BigNumber(0)
   arweaveFeeMap: Record<string, string> = {}
   sentArweaveTransactionInfo = new Map<
-    string, { transactionHash?: string, arweaveId?: string, arweaveLink?: string }
+    string, { transactionHash?: string, arweaveId?: string, arweaveLink?: string, arweaveKey?: string }
   >()
 
   likerId: string = ''
@@ -402,12 +407,16 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
-  get showAddISCNPageOption() {
-    return this.mode === MODE.EDIT
-      && this.fileRecords.some(file => [
+  get hasEbookInRecords() {
+    return this.fileRecords.some(file => [
         'application/epub+zip',
         'application/pdf',
       ].includes(file.fileType))
+  }
+
+  get showAddISCNPageOption() {
+    return this.mode === MODE.EDIT
+      && this.hasEbookInRecords
   }
 
   get modifiedFileRecords() {
@@ -844,26 +853,40 @@ export default class IscnUploadForm extends Vue {
       }
     }
 
+    let key;
     try {
       const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      let buffer = Buffer.from(arrayBuffer);
+      if ([
+        'application/epub+zip',
+        'application/pdf',
+      ].includes(record.fileType)
+        && this.isEncryptEBookData) {
+        const {
+          rawEncryptedKeyAsBase64,
+          combinedArrayBuffer,
+        } = await encryptDataWithAES({ data: arrayBuffer });
+        buffer = Buffer.from(combinedArrayBuffer);
+        key = rawEncryptedKeyAsBase64
+      }
       const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
         fileSize: tempRecord.fileBlob?.size || 0,
         ipfsHash: tempRecord.ipfsHash,
         fileType: tempRecord.fileType as string,
         txHash: tempRecord.transactionHash,
         token: this.getToken,
+        key,
       });
       if (arweaveId) {
         const uploadedData = this.sentArweaveTransactionInfo.get(record.ipfsHash) || {};
-        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId, arweaveLink });
+        this.sentArweaveTransactionInfo.set(record.ipfsHash, { ...uploadedData, arweaveId, arweaveLink, arweaveKey: key });
         if (tempRecord.fileName.includes('cover.jpeg')) {
           const metadata = this.epubMetadataList.find((file: any) => file.thumbnailIpfsHash === record.ipfsHash)
           if (metadata) {
             metadata.thumbnailArweaveId = arweaveId
           }
         }
-        this.$emit('arweaveUploaded', { arweaveId, arweaveLink })
+        this.$emit('arweaveUploaded', { arweaveId, arweaveLink, arweaveKey: key })
         this.isOpenSignDialog = false
       } else {
         this.isOpenWarningSnackbar = true
@@ -987,8 +1010,11 @@ export default class IscnUploadForm extends Vue {
       this.uploadStatus = '';
     }
 
-    const uploadArweaveIdList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveId);
-    const uploadArweaveLinkList = Array.from(this.sentArweaveTransactionInfo.values()).map(entry => entry.arweaveLink);
+    const uploadArweaveInfoList = Array.from(this.sentArweaveTransactionInfo.values())
+      .map(entry => {
+        const { arweaveId, arweaveLink, arweaveKey } = entry;
+        return { id: arweaveId, link: arweaveLink, key: arweaveKey };
+      });
     this.modifiedFileRecords.forEach((record: any, index:number) => {
       if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
         const info = this.sentArweaveTransactionInfo.get(
@@ -998,17 +1024,18 @@ export default class IscnUploadForm extends Vue {
           const {
             arweaveId,
             arweaveLink,
+            arweaveKey,
           } = info;
           if (arweaveId) this.modifiedFileRecords[index].arweaveId = arweaveId
           if (arweaveLink) this.modifiedFileRecords[index].arweaveLink = arweaveLink
+          if (arweaveKey) this.modifiedFileRecords[index].arweaveKey = arweaveKey
         }
       }
     })
     this.$emit('submit', {
       fileRecords: this.modifiedFileRecords,
-      arweaveIds: uploadArweaveIdList,
+      arweaveInfos: uploadArweaveInfoList,
       epubMetadata: this.epubMetadataList[0],
-      arweaveLinks: uploadArweaveLinkList,
     })
   }
 

@@ -250,7 +250,7 @@ import { BigNumber } from 'bignumber.js';
 import { ISCN_PREFIX, ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { signISCN } from '~/utils/cosmos/iscn/sign'
-import { extractIscnIdPrefix } from '~/utils/ui'
+import { extractIscnIdPrefix, formatArweave, formatIpfs } from '~/utils/ui'
 import { LIKE_CO_API_ROOT } from '~/constant/api';
 
 const walletModule = namespace('wallet')
@@ -306,8 +306,7 @@ export default class EditIscnPage extends Vue {
   shouldShowMoreSettings: boolean = false
   uploadFileRecords: any = null
   uploadIpfsHashList: string[] = []
-  uploadArweaveIdList: string[] = []
-  uploadArweaveLinkList: string[] = []
+  uploadArweaveInfoList: any[] = []
   sameAsList: any = []
 
   step: number = 1
@@ -323,15 +322,15 @@ export default class EditIscnPage extends Vue {
     return this.shouldShowDRMOption && this.isUseArweaveLinkChecked
   }
 
-  get combinedArweaveIdList() {
-    return this.uploadArweaveIdList || []
+  get uploadArweaveLinkList() {
+    return this.uploadArweaveInfoList.map((info) => info.link)
   }
 
   get combinedArweaveLinks(): string[] {
     if (this.isUseArweaveLink) {
       return this.uploadArweaveLinkList
     }
-    return this.combinedArweaveIdList.map((link) => this.formatArweave(link) as string)
+    return this.uploadArweaveInfoList.map((info) => formatArweave(info.link, info.key) as string)
   }
 
   get formattedSameAsList() {
@@ -339,7 +338,9 @@ export default class EditIscnPage extends Vue {
       return this.sameAsList.map(
         (sameAs: { filename: any; filetype: any; url: any }) => {
           if (sameAs.filename && sameAs.filetype) {
-            return `${sameAs.url}?name=${sameAs.filename}.${sameAs.filetype}`
+            const url = new URL(sameAs.url)
+            url.searchParams.set('name', `${sameAs.filename}.${sameAs.filetype}`)
+            return url.toString()
           }
           return ''
         },
@@ -361,7 +362,7 @@ export default class EditIscnPage extends Vue {
       array.push(...this.combinedArweaveLinks)
     }
     if (!this.isUseArweaveLinkChecked && this.uploadIpfsHashList.length) {
-      array.push(...this.uploadIpfsHashList.map((ipfs) => this.formatIpfs(ipfs) as string))
+      array.push(...this.uploadIpfsHashList.map((ipfs) => formatIpfs(ipfs) as string))
     }
     if (this.customContentFingerprints.length) {
       array.push(...this.customContentFingerprints)
@@ -420,18 +421,6 @@ export default class EditIscnPage extends Vue {
     logTrackerEvent(this, 'ISCNEdit', 'ISCNFileUploadToARSuccess', arweaveId, 1)
   }
 
-  formatIpfs(ipfsHash: string) {
-    return this.$t('IscnRegisterForm.ipfs.link', { hash: ipfsHash })
-  }
-
-  formatArweave(arweaveId: string) {
-    return this.$t('IscnRegisterForm.arweave.link', { arweaveId })
-  }
-
-  formatFileSHA256(hash: string) {
-    return this.$t('IscnRegisterForm.fileSHA256.link', { hash })
-  }
-
   addContentFingerprint() {
     this.customContentFingerprints.push(this.contentFingerprintInput)
     this.contentFingerprintInput = ''
@@ -439,22 +428,17 @@ export default class EditIscnPage extends Vue {
 
   onSubmitUpload({
     fileRecords,
-    arweaveIds,
-    arweaveLinks,
+    arweaveRecords,
   }: {
     fileRecords: any[]
-    arweaveIds: string[]
-    arweaveLinks: string[]
+    arweaveRecords: any[]
   }) {
     this.contentFingerprints = []
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
     }
-    if (arweaveIds && arweaveIds.length) {
-      this.uploadArweaveIdList = [...arweaveIds]
-    }
-    if (arweaveLinks && arweaveLinks.length) {
-      this.uploadArweaveLinkList = [...arweaveLinks]
+    if (arweaveRecords && arweaveRecords.length) {
+      this.uploadArweaveInfoList = [...arweaveRecords]
     }
     logTrackerEvent(this, 'ISCNEdit', 'ISCNConfirmFile', '', 1)
     this.step = 2

@@ -45,3 +45,16 @@ export function extractIscnIdPrefix(iscnId) {
   }
   return null;
 }
+
+export function formatIpfs(ipfsHash) {
+  return `ipfs://${ipfsHash}`
+}
+
+export function formatArweave(arweaveId, key) {
+  if (key) {
+    const url = new URL(`ar://${arweaveId}`);
+    url.searchParams.append('key', key);
+    return url.toString();
+  }
+  return `ar://${arweaveId}`
+}

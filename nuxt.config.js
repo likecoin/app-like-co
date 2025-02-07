@@ -220,6 +220,7 @@ export default {
       '@bundlr-network',
       '@noble/curves',
       'arbundle',
+      'arweavekit',
       ({ isLegacy }) => (isLegacy ? 'axios' : undefined),
     ],
     extend(config, ctx) {

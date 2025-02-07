@@ -163,7 +163,8 @@ export async function uploadSingleFileToBundlr(
     ipfsHash,
     txHash,
     token,
-  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string, token: string },
+    key,
+  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string, token: string, key?: string },
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
@@ -183,6 +184,7 @@ export async function uploadSingleFileToBundlr(
       ipfsHash,
       txHash,
       arweaveId,
+      key,
     },{
       headers: { Authorization: token ? `Bearer ${token}` : '' },
     });
@@ -193,5 +195,6 @@ export async function uploadSingleFileToBundlr(
   return {
     arweaveId,
     arweaveLink,
+    arweaveKey: key,
   };
 }
