@@ -52,7 +52,7 @@ const walletModule = namespace('wallet')
 @Component({})
 export default class TokenBar extends Vue {
   @walletModule.Getter('getWalletAddress') currentAddress!: string
-  @walletModule.Getter('getBalance') balance!: any
+  @walletModule.Getter('getFormattedBalance') balance!: any
   @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
 
   @Watch('$store.state.wallet.address', { immediate: true })

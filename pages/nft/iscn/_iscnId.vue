@@ -145,7 +145,6 @@ import { getSigningClient } from '~/utils/cosmos/iscn/sign'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { ARWEAVE_ENDPOINT, LIKER_LAND_URL, LIKER_NFT_API_WALLET, LIKER_NFT_FEE_WALLET } from '~/constant'
 import sendLIKE from '~/utils/cosmos/sign'
-import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2';
 
@@ -227,6 +226,7 @@ export default class NFTMintPage extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getFormattedBalance') balance!: number | 0
 
   @bookApiModule.Getter('getToken') getToken!: string
 
@@ -265,7 +265,6 @@ export default class NFTMintPage extends Vue {
 
   hasError = false
   errorMessage: string = ''
-  balance: string = ''
   txStatus: string = ''
 
   reserveNft: number = 0
@@ -552,8 +551,8 @@ export default class NFTMintPage extends Vue {
     try {
       this.hasError = false
       this.errorMessage = ''
-      this.balance = await getAccountBalance(this.address) as string
-      if (this.balance === '0') {
+      await this.fetchWalletBalance()
+      if (this.balance === 0) {
         logTrackerEvent(this, 'IscnMintNFT', 'doActionNFTError', ErrorType.INSUFFICIENT_BALANCE, 1);
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }

@@ -2,6 +2,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import axios from 'axios'
 import stringify from 'fast-json-stable-stringify';
+import BigNumber from 'bignumber.js'
 import { catchAxiosError } from '~/utils/misc'
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
 import { getUserInfoMinByAddress } from '~/constant/api'
@@ -354,6 +355,10 @@ export default class Wallet extends VuexModule {
   }
 
   get getBalance() {
+    return new BigNumber(this.balance)
+  }
+
+  get getFormattedBalance() {
     return Math.floor(this.balance)
   }
 }
