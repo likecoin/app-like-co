@@ -618,7 +618,7 @@ export default class NFTMintPage extends Vue {
       console.error(error)
       this.mintState = MintState.DONE
       this.setError(error)
-    }finally{
+    } finally {
       this.fetchWalletBalance()
     }
   }
