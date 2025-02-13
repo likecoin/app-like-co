@@ -692,7 +692,6 @@ import {
   getUserInfoMinByAddress,
   API_POST_NUMBERS_PROTOCOL_ASSETS,
 } from '~/constant/api'
-import { getAccountBalance } from '~/utils/cosmos'
 import { logTrackerEvent } from '~/utils/logger'
 import { formatArweave, formatIpfs } from '~/utils/ui'
 
@@ -729,7 +728,9 @@ export default class IscnRegisterForm extends Vue {
 
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getBalance') balance!: BigNumber | null;
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
 
   typeOptions = [
     'Book',
@@ -807,7 +808,6 @@ export default class IscnRegisterForm extends Vue {
   arweaveFee = new BigNumber(0)
   iscnFee = new BigNumber(0)
   iscnGasFee = ''
-  balance = new BigNumber(0)
   debouncedCalculateISCNFee = debounce(this.calculateISCNFee, 400)
 
   isRegisterNumbersProtocolAsset = false
@@ -1372,14 +1372,8 @@ export default class IscnRegisterForm extends Vue {
   }
 
   async calculateISCNFee(): Promise<void> {
-    const [
-balance,
-estimation,
-] = await Promise.all([
-      getAccountBalance(this.address),
-      estimateISCNTxGasAndFee(formatISCNTxPayload(this.payload)),
-    ])
-    this.balance = new BigNumber(balance)
+    this.fetchWalletBalance()
+    const estimation = await estimateISCNTxGasAndFee(formatISCNTxPayload(this.payload))
     const { iscnFee, gas: iscnGasEstimation } = estimation
     const iscnGasNanolike = new BigNumber(
       iscnGasEstimation.fee.amount[0].amount,
@@ -1456,7 +1450,7 @@ estimation,
     if (!this.isMetadataReady) return
     this.error = ''
     this.signDialogError = ''
-    if (this.balance.lt(this.totalFee)) {
+    if (this.balance?.lt(this.totalFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.isOpenWarningSnackbar = true
       this.uploadStatus = ''
@@ -1530,7 +1524,7 @@ estimation,
     this.onOpenKeplr()
     await this.initIfNecessary()
     await this.calculateISCNFee()
-    if (this.balance.lt(this.iscnFee)) {
+    if (this.balance?.lt(this.iscnFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.uploadStatus = ''
       return
@@ -1559,6 +1553,7 @@ estimation,
       console.error(err)
     } finally {
       this.isOpenQuitAlertDialog = false
+      this.fetchWalletBalance()
     }
   }
 

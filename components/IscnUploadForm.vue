@@ -260,7 +260,6 @@ import {
   readImageType,
 } from '~/utils/misc'
 import { DEFAULT_TRANSFER_FEE, sendLIKE } from '~/utils/cosmos/sign';
-import { getAccountBalance } from '~/utils/cosmos'
 import { injectISCNQRCodePageEpub } from '~/utils/epub/iscn'
 import { injectISCNQRCodePagePdf } from '~/utils/pdf/iscn'
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
@@ -292,6 +291,9 @@ export default class IscnUploadForm extends Vue {
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
   @walletModule.Action('initIfNecessary') initIfNecessary!: () => Promise<any>
   @walletModule.Getter('getWalletAddress') address!: string
+  @walletModule.Getter('getBalance') balance!: BigNumber | null;
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
+
   @bookApiModule.Getter('getToken') getToken!: string
 
   isImage: boolean = false
@@ -332,7 +334,6 @@ export default class IscnUploadForm extends Vue {
   errorMessage = ''
 
   signDialogError = ''
-  balance = new BigNumber(0)
   numberOfSignNeeded = 0
   signProgress = 0
 
@@ -964,10 +965,9 @@ export default class IscnUploadForm extends Vue {
     this.uploadStatus = 'uploading'
     this.error = ''
     this.signDialogError = ''
+    await this.fetchWalletBalance()
 
-    const balance = await getAccountBalance(this.address);
-    this.balance = new BigNumber(balance);
-    if (this.balance.lt(this.arweaveFee)) {
+    if (this.balance?.lt(this.arweaveFee)) {
       this.error = 'INSUFFICIENT_BALANCE'
       this.isOpenWarningSnackbar = true
       this.uploadStatus = ''
@@ -1008,6 +1008,7 @@ export default class IscnUploadForm extends Vue {
       return
     } finally {
       this.uploadStatus = '';
+      this.fetchWalletBalance()
     }
 
     const uploadArweaveInfoList = Array.from(this.sentArweaveTransactionInfo.values())

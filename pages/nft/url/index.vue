@@ -126,7 +126,6 @@ import BigNumber from 'bignumber.js'
 import axios, { AxiosError } from 'axios'
 import postMappingWithCosmosWallet from '~/utils/cosmos/mapping';
 
-import { getAccountBalance } from '~/utils/cosmos'
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
 import { formatISCNTxPayload } from '~/utils/cosmos/iscn/sign'
@@ -193,6 +192,9 @@ export default class FetchIndex extends Vue {
   @walletModule.Getter('getType') walletType!: string | null
   @walletModule.Getter('getWalletAddress') address!: string
   @walletModule.Getter('getSigner') signer!: OfflineSigner | null
+  @walletModule.Getter('getFormattedBalance') balance!: number | 0
+  @walletModule.Action('fetchWalletBalance') fetchWalletBalance!: () => void
+
 
   @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
 
@@ -214,7 +216,6 @@ export default class FetchIndex extends Vue {
   opener = !!this.$route.query.opener && this.$route.query.opener !== '0'
   isLoading = false
   avatar = null
-  balance: string = ''
   isInputValueValid: boolean = false
   isReady: boolean = false
   hasError: boolean = false
@@ -565,10 +566,8 @@ export default class FetchIndex extends Vue {
     this.hasError = false
     /* eslint-disable no-fallthrough */
     try {
-      if (!this.balance) {
-        this.balance = (await getAccountBalance(this.address)) as string
-      }
-      if (this.balance === '0') {
+      await this.fetchWalletBalance()
+      if (this.balance === 0) {
         throw new Error(ErrorType.INSUFFICIENT_BALANCE)
       }
       switch (this.state) {

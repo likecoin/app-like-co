@@ -2,9 +2,12 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import axios from 'axios'
 import stringify from 'fast-json-stable-stringify';
+import BigNumber from 'bignumber.js'
 import { catchAxiosError } from '~/utils/misc'
 import { LIKECOIN_WALLET_CONNECTOR_CONFIG } from '~/constant/network'
 import { getUserInfoMinByAddress } from '~/constant/api'
+import { getAccountBalance } from '~/utils/cosmos'
+
 
 let likecoinWalletLib: any = null
 let connectorInstance: any = null
@@ -42,6 +45,7 @@ export default class Wallet extends VuexModule {
   likerInfo = null
   errorType = ''
   hasSubmittedEmail = false
+  balance = 0
 
   @Mutation
   setType(type: string) {
@@ -94,6 +98,11 @@ export default class Wallet extends VuexModule {
   @Mutation
   setHasSubmittedEmail(hasSubmittedEmail: boolean) {
     this.hasSubmittedEmail = hasSubmittedEmail
+  }
+
+  @Mutation
+  setBalance(balance: number) {
+    this.balance = balance
   }
 
   @Action
@@ -322,6 +331,13 @@ export default class Wallet extends VuexModule {
 
   }
 
+  @Action
+  async fetchWalletBalance() {
+    if (!this.address) return
+    const balance = await getAccountBalance(this.address)
+    this.context.commit('setBalance', balance)
+  }
+
   get getType() {
     return this.type
   }
@@ -336,5 +352,13 @@ export default class Wallet extends VuexModule {
 
   get getHasSubmittedEmail() {
     return this.hasSubmittedEmail
+  }
+
+  get getBalance() {
+    return new BigNumber(this.balance)
+  }
+
+  get getFormattedBalance() {
+    return Math.floor(this.balance)
   }
 }
