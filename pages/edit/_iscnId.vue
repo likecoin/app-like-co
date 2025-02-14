@@ -330,7 +330,7 @@ export default class EditIscnPage extends Vue {
     if (this.isUseArweaveLink) {
       return this.uploadArweaveLinkList
     }
-    return this.uploadArweaveInfoList.map((info) => formatArweave(info.link, info.key) as string)
+    return this.uploadArweaveInfoList.map((info) => formatArweave(info.id, info.key) as string)
   }
 
   get formattedSameAsList() {
@@ -428,17 +428,17 @@ export default class EditIscnPage extends Vue {
 
   onSubmitUpload({
     fileRecords,
-    arweaveRecords,
+    arweaveInfos,
   }: {
     fileRecords: any[]
-    arweaveRecords: any[]
+    arweaveInfos: any[]
   }) {
     this.contentFingerprints = []
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
     }
-    if (arweaveRecords && arweaveRecords.length) {
-      this.uploadArweaveInfoList = [...arweaveRecords]
+    if (arweaveInfos && arweaveInfos.length) {
+      this.uploadArweaveInfoList = [...arweaveInfos]
     }
     logTrackerEvent(this, 'ISCNEdit', 'ISCNConfirmFile', '', 1)
     this.step = 2
