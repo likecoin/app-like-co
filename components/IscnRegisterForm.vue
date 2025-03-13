@@ -238,46 +238,52 @@
           </FormField>
           <Divider class="my-[12px]" />
 
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.publisher')"
-          >
-            <TextField
-              v-model="publisher"
-              :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
-            />
-          </FormField>
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.datePublished')"
-          >
-            <input
-              v-model="datePublished"
-              type="date"
-            />
-          </FormField>
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.isbn')"
-          >
-            <TextField
-              v-model="isbn"
-              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
-            />
-          </FormField>
-          <FormField
-            v-if="type === 'Book'"
-            :label="$t('IscnRegisterForm.label.sameAs')"
-            content-classes="flex flex-row flex-wrap"
-          >
-            <SameAsFieldList
-              :name="name"
-              :url-options="contentFingerprintLinks"
-              :file-records="fileRecords"
-              :current-list="sameAsList"
-              @on-update="(value) => (sameAsList = value)"
-            />
-          </FormField>
+          <template v-if="type === 'Book'">
+            <FormField
+              :label="$t('IscnRegisterForm.label.thumbnailUrl')"
+            >
+              <TextField
+                v-model="thumbnailUrl"
+                :placeholder="$t('IscnRegisterForm.placeholder.thumbnailUrl')"
+              />
+            </FormField>
+            <FormField
+              :label="$t('IscnRegisterForm.label.publisher')"
+            >
+              <TextField
+                v-model="publisher"
+                :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
+              />
+            </FormField>
+            <FormField
+              :label="$t('IscnRegisterForm.label.datePublished')"
+            >
+              <input
+                v-model="datePublished"
+                type="date"
+              />
+            </FormField>
+            <FormField
+              :label="$t('IscnRegisterForm.label.isbn')"
+            >
+              <TextField
+                v-model="isbn"
+                :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+              />
+            </FormField>
+            <FormField
+              :label="$t('IscnRegisterForm.label.sameAs')"
+              content-classes="flex flex-row flex-wrap"
+            >
+              <SameAsFieldList
+                :name="name"
+                :url-options="contentFingerprintLinks"
+                :file-records="fileRecords"
+                :current-list="sameAsList"
+                @on-update="(value) => (sameAsList = value)"
+              />
+            </FormField>
+          </template>
           <FormField
             :label="$t('IscnRegisterForm.label.license')"
             class="mb-[12px]"
