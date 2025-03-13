@@ -175,33 +175,40 @@
             :placeholder="$t('IscnRegisterForm.placeholder.url')"
           />
         </FormField>
-        <FormField
-          v-if="type === 'Book'"
-          :label="$t('IscnRegisterForm.label.isbn')"
-        >
-          <TextField
-            v-model="isbn"
-            :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
-          />
-        </FormField>
-        <FormField
-          v-if="type === 'Book'"
-          :label="$t('IscnRegisterForm.label.publisher')"
-        >
-          <TextField
-            v-model="publisher"
-            :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
-          />
-        </FormField>
-        <FormField
-          v-if="type === 'Book'"
-          :label="$t('IscnRegisterForm.label.datePublished')"
-        >
-          <input
-            v-model="datePublished"
-            type="date"
-          />
-        </FormField>
+        <template v-if="type === 'Book'">
+          <FormField
+            :label="$t('IscnRegisterForm.label.thumbnailUrl')"
+          >
+            <TextField
+              v-model="thumbnailUrl"
+              :placeholder="$t('IscnRegisterForm.placeholder.thumbnailUrl')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.isbn')"
+          >
+            <TextField
+              v-model="isbn"
+              :placeholder="$t('IscnRegisterForm.placeholder.isbn')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.publisher')"
+          >
+            <TextField
+              v-model="publisher"
+              :placeholder="$t('IscnRegisterForm.placeholder.publisher')"
+            />
+          </FormField>
+          <FormField
+            :label="$t('IscnRegisterForm.label.datePublished')"
+          >
+            <input
+              v-model="datePublished"
+              type="date"
+            />
+          </FormField>
+        </template>
       </div>
       <div v-else class="flex items-center justify-center">
         <Button
@@ -297,6 +304,7 @@ export default class EditIscnPage extends Vue {
   type: string = ''
   license: string = ''
   url: string = ''
+  thumbnailUrl: string = ''
   isbn: string = ''
   publisher: string = ''
   datePublished: string = ''
@@ -385,6 +393,7 @@ export default class EditIscnPage extends Vue {
       stakeholders: this.iscnRecord?.stakeholders,
       type: this.type,
       usageInfo: this.license,
+      thumbnailUrl: this.thumbnailUrl,
       isbn: this.isbn,
       publisher: this.publisher,
       datePublished: this.datePublished,
@@ -404,6 +413,7 @@ export default class EditIscnPage extends Vue {
       this.type = this.contentMetadata['@type'] || ''
       this.license = this.contentMetadata.usageInfo || ''
       this.url = this.contentMetadata.url || ''
+      this.thumbnailUrl = this.contentMetadata.thumbnailUrl || ''
       this.isbn = this.contentMetadata.isbn || ''
       this.publisher = this.contentMetadata.publisher || ''
       this.datePublished = this.contentMetadata.datePublished || ''
