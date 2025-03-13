@@ -136,7 +136,7 @@ export default class SameAsFieldList extends Vue {
   }
 
   get filteredUrlOptions() {
-    return this.urlOptions?.filter((url) => url.startsWith('ar://') || url.startsWith(LIKE_CO_API_ROOT))
+    return this.urlOptions?.filter((url) => url && (url.startsWith('ar://') || url.startsWith(LIKE_CO_API_ROOT)))
   }
 
   mounted() {

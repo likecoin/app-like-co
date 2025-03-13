@@ -331,7 +331,7 @@ export default class EditIscnPage extends Vue {
   }
 
   get uploadArweaveLinkList() {
-    return this.uploadArweaveInfoList.map((info) => info.link)
+    return this.uploadArweaveInfoList.map((info) => info.link).filter(Boolean)
   }
 
   get combinedArweaveLinks(): string[] {
