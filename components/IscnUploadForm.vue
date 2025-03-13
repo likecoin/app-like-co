@@ -457,6 +457,13 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
+  @Watch('isEncryptEBookData')
+  async onEncryptEBookDataChange() {
+    this.uploadStatus = 'loading'
+    await this.estimateArweaveFee();
+    this.uploadStatus = ''
+  }
+
   // eslint-disable-next-line class-methods-use-this
   async getFileInfo(file: Blob) {
     const fileBytes = (await fileToArrayBuffer(
@@ -764,9 +771,14 @@ export default class IscnUploadForm extends Vue {
     try {
       const results = await Promise.all(
         this.modifiedFileRecords.map(async (record) => {
+          const isEbook = [
+            'application/epub+zip',
+            'application/pdf',
+          ].includes(record.fileType)
           const priceResult = await estimateBundlrFilePrice({
             fileSize: record.fileBlob?.size || 0,
-            ipfsHash: record.ipfsHash,
+            // ipfsHash changes for encrypted files
+            ipfsHash: (isEbook && this.isEncryptEBookData) ? undefined : record.ipfsHash,
           })
           return {
             ...priceResult,
@@ -803,7 +815,7 @@ export default class IscnUploadForm extends Vue {
     }
   }
 
-  async sendArweaveFeeTx(record: any): Promise<string> {
+  async sendArweaveFeeTx(record: any, memoIpfsOveride?: string): Promise<string> {
     logTrackerEvent(this, 'ISCNCreate', 'SendArFeeTx', '', 1);
     if (this.sentArweaveTransactionInfo.has(record.ipfsHash)) {
       const transactionInfo = this.sentArweaveTransactionInfo.get(record.ipfsHash);
@@ -817,7 +829,7 @@ export default class IscnUploadForm extends Vue {
     if (!this.arweaveFeeTargetAddress) throw new Error('TARGET_ADDRESS_NOT_SET');
     if (!this.arweaveFeeMap[record.ipfsHash]) throw new Error('ARWEAVE_FEE_NOT_SET');
     this.uploadStatus = 'signing';
-    const memo = JSON.stringify({ ipfs: record.ipfsHash, fileSize: record.fileBlob?.size || 0 });
+    const memo = JSON.stringify({ ipfs: memoIpfsOveride || record.ipfsHash, fileSize: record.fileBlob?.size || 0 });
     try {
       const { transactionHash } = await sendLIKE(this.address, this.arweaveFeeTargetAddress, this.arweaveFeeMap[record.ipfsHash], this.signer, memo);
       if (transactionHash) {
@@ -847,32 +859,36 @@ export default class IscnUploadForm extends Vue {
     this.isOpenSignDialog = true;
 
     tempRecord.transactionHash = transactionHash
+
+    let key;
+    const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
+    let buffer = Buffer.from(arrayBuffer);
+    let { ipfsHash } = tempRecord;
+    if ([
+      'application/epub+zip',
+      'application/pdf',
+    ].includes(record.fileType)
+      && this.isEncryptEBookData) {
+      const {
+        rawEncryptedKeyAsBase64,
+        combinedArrayBuffer,
+      } = await encryptDataWithAES({ data: arrayBuffer });
+      buffer = Buffer.from(combinedArrayBuffer);
+      ipfsHash = await Hash.of(buffer);
+      key = rawEncryptedKeyAsBase64
+    }
     if (!tempRecord.transactionHash) {
-      tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord);
+      // HACK: override ipfsHash memo to match arweave tag later
+      tempRecord.transactionHash = await this.sendArweaveFeeTx(tempRecord, ipfsHash);
       if (!tempRecord.transactionHash) {
         throw new Error('TRANSACTION_NOT_SENT')
       }
     }
-
-    let key;
     try {
-      const arrayBuffer = await tempRecord.fileBlob.arrayBuffer();
-      let buffer = Buffer.from(arrayBuffer);
-      if ([
-        'application/epub+zip',
-        'application/pdf',
-      ].includes(record.fileType)
-        && this.isEncryptEBookData) {
-        const {
-          rawEncryptedKeyAsBase64,
-          combinedArrayBuffer,
-        } = await encryptDataWithAES({ data: arrayBuffer });
-        buffer = Buffer.from(combinedArrayBuffer);
-        key = rawEncryptedKeyAsBase64
-      }
       const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
         fileSize: tempRecord.fileBlob?.size || 0,
-        ipfsHash: tempRecord.ipfsHash,
+        // HACK: use actual ipfsHash for fetching sign_data and in arweave tag
+        ipfsHash,
         fileType: tempRecord.fileType as string,
         txHash: tempRecord.transactionHash,
         token: this.getToken,
