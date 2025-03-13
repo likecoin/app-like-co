@@ -1083,7 +1083,7 @@ export default class IscnRegisterForm extends Vue {
       inLanguage: this.language,
       thumbnailUrl: this.thumbnailUrl,
       publisher: this.publisher,
-      datePublished: this.datePublished ? new Date(this.datePublished).toISOString() : undefined,
+      datePublished: this.datePublished ? new Date(this.datePublished).toISOString().split('T')[0] : undefined,
     }
   }
 
