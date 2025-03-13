@@ -416,7 +416,7 @@ export default class EditIscnPage extends Vue {
       this.thumbnailUrl = this.contentMetadata.thumbnailUrl || ''
       this.isbn = this.contentMetadata.isbn || ''
       this.publisher = this.contentMetadata.publisher || ''
-      this.datePublished = this.contentMetadata.datePublished || ''
+      this.datePublished = this.contentMetadata.datePublished ? new Date(this.contentMetadata.datePublished).toISOString().split('T')[0] || '' : ''
       this.isUseArweaveLinkChecked = !!this.contentFingerprints.find(
         link => link.startsWith(LIKE_CO_API_ROOT),
       )
