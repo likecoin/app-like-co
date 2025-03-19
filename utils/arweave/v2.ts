@@ -96,7 +96,7 @@ class Provider {
   _ready() {}
 }
 
-let WebBundlr: any = null;
+let WebIrys: any = null;
 
 async function getProvider({
   fileSize,
@@ -126,17 +126,17 @@ async function getBundler({
   txHash: string
   token: string
 }) {
-  if (!WebBundlr) {
-    WebBundlr = (await import('@bundlr-network/client')).default;
+  if (!WebIrys) {
+    ({ WebIrys } = (await import('@irys/sdk')));
   }
   const p = await getProvider({ fileSize, ipfsHash, txHash, token })
-  const bundlr = new WebBundlr(
-    IS_TESTNET
-      ? 'https://devnet.irys.xyz'
-      : 'https://node1.irys.xyz',
-    'matic',
-    p,
-  )
+  const bundlr = new WebIrys({
+    network: IS_TESTNET ? 'devnet' : 'mainnet',
+    token: 'matic',
+    wallet: {
+      provider: p,
+    },
+  })
   await bundlr.ready()
   return bundlr
 }
@@ -171,7 +171,7 @@ export async function uploadSingleFileToBundlr(
     { name: 'App-Name', value: 'app.like.co' },
     { name: 'App-Version', value: '2.0' },
     { name: 'User-Agent', value: 'app.like.co' },
-    { name: 'IPFS-Add', value: ipfsHash },
+    { name: 'IPFS-CID', value: ipfsHash },
     { name: 'standard', value: 'v0.1'},
   ];
   if (fileType) tags.push({ name: 'Content-Type', value: fileType })

@@ -217,8 +217,10 @@ export default {
       '@likecoin/iscn-js',
       '@likecoin/wallet-connector',
       '@walletconnect',
-      '@bundlr-network',
       '@noble/curves',
+      '@irys',
+      '@aptos-labs',
+      '@supercharge',
       'arbundle',
       'arweavekit',
       ({ isLegacy }) => (isLegacy ? 'axios' : undefined),
@@ -230,12 +232,13 @@ export default {
       }
       if (ctx.isClient) {
         config.resolve.alias['arbundles/web'] = path.join(__dirname, './node_modules/arbundles/build/web/esm/webIndex');
+        config.resolve.alias['@irys/arweave'] = path.join(__dirname, './node_modules/@irys/arweave/build/esm');
       } else {
         config.externals = {
-          '@bundlr-network/client': '@bundlr-network/client',
+          '@irys/sdk': '@irys/sdk',
         }
-        // config.resolve.alias['arbundles/node'] = path.join(__dirname, './node_modules/arbundles/build/node/cjs');
       }
+
       config.module.rules.push({
         test: /\.mjs$/,
         include: /node_modules/,
