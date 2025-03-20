@@ -222,7 +222,6 @@ export default {
       '@aptos-labs',
       '@supercharge',
       'arbundle',
-      'arweavekit',
       ({ isLegacy }) => (isLegacy ? 'axios' : undefined),
     ],
     extend(config, ctx) {
