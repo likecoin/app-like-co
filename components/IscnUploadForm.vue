@@ -247,12 +247,12 @@ import exifr from 'exifr'
 import Hash from 'ipfs-only-hash'
 import BigNumber from 'bignumber.js'
 import ePub from 'epubjs';
-import { encryptDataWithAES } from 'arweavekit/dist/lib/encryption';
 
 import { OfflineSigner } from '@cosmjs/proto-signing'
 
 import { IS_CHAIN_UPGRADING, UPLOAD_FILESIZE_MAX } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
+import { encryptDataWithAES } from '~/utils/encryption'
 import { estimateBundlrFilePrice, uploadSingleFileToBundlr } from '~/utils/arweave/v2'
 import {
   fileToArrayBuffer,
