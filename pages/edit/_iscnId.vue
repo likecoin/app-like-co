@@ -446,6 +446,7 @@ export default class EditIscnPage extends Vue {
     this.contentFingerprints = []
     if (fileRecords && fileRecords.length) {
       this.uploadFileRecords = [...fileRecords]
+      this.uploadIpfsHashList = fileRecords.map((record) => record.ipfsHash).filter(Boolean)
     }
     if (arweaveInfos && arweaveInfos.length) {
       this.uploadArweaveInfoList = [...arweaveInfos]
