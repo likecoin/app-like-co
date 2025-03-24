@@ -63,7 +63,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "uuid": "^8.3.2",
-    "vue": "2.7.16",
+    "vue": "3.0.0",
     "vue-class-component": "^7.2.6",
     "vue-gtag": "^1.16.1",
     "vue-property-decorator": "^9.1.2",
