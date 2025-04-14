@@ -124,7 +124,6 @@ import { namespace } from 'vuex-class'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import BigNumber from 'bignumber.js'
 import axios, { AxiosError } from 'axios'
-import postMappingWithCosmosWallet from '~/utils/cosmos/mapping';
 
 import { signISCNTx } from '~/utils/cosmos/iscn'
 import { sendLIKE } from '~/utils/cosmos/sign'
@@ -781,10 +780,6 @@ export default class FetchIndex extends Vue {
         },
       )
       this.iscnId = res.iscnId
-      if (this.url && this.likerId) {
-        logTrackerEvent(this, 'NFTUrlMint', 'PostMappingWithCosmosWallet', this.iscnId, 1);
-        await postMappingWithCosmosWallet(this.iscnId, this.url, this.likerId, this.signer, this.address)
-      }
     } catch (err) {
       logTrackerEvent(this, 'NFTUrlMint', 'RegisterISCNError', (err as Error).toString(), 1);
       // eslint-disable-next-line no-console
