@@ -18,7 +18,16 @@
           src="~/assets/images/migration_alert.png"
           alt=""
         />
-        <p class="text-sm" v-html="migrationBannerText" />
+        <i18n path="migration_alert_banner">
+          <a
+            place="link"
+            :href="migrationLink"
+            class="font-semibold text-like-green"
+            >{{
+              $t('migration_target_site_name')
+            }}</a
+          >
+        </i18n>
       </div>
     </AlertBanner>
     <slot />
@@ -38,6 +47,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { IS_CHAIN_UPGRADING, BOOK_COM_DOMAIN } from '~/constant'
+import { appendUTMParamsToURL } from '~/utils/misc'
 
 const bookApiModule = namespace('book-api')
 
@@ -58,13 +68,14 @@ export default class RootLayout extends Vue {
 
   isOpenChainUpgradeBlockingDialog = false
 
-
-  get migrationBannerText() {
-      return this.$t('migration_alert_banner', {
-        link: `<a href="${BOOK_COM_DOMAIN}" target="_blank" rel="noopener noreferrer" class="font-semibold text-like-green">
-          ${this.$t('migration_target_site_name')}</a>`,
-      });
-    }
+  // eslint-disable-next-line class-methods-use-this
+  get migrationLink() {
+    return appendUTMParamsToURL({
+      url: BOOK_COM_DOMAIN,
+      medium: 'alert-banner',
+      campaign: 'migration',
+    })
+  }
 
   async mounted() {
     this.isOpenChainUpgradeBlockingDialog = !!IS_CHAIN_UPGRADING
@@ -79,9 +90,8 @@ export default class RootLayout extends Vue {
     this.$router.go(-1)
   }
 
-  // eslint-disable-next-line class-methods-use-this
   onClickAlertBanner() {
-    window.open(BOOK_COM_DOMAIN, '_blank', 'noopener noreferrer')
+    window.open(this.migrationLink, '_blank', 'noopener,noreferrer')
   }
 }
 </script>
