@@ -123,3 +123,5 @@ export const SIGN_AUTHORIZATION_PERMISSIONS = [
 ]
 
 export const ARWEAVE_ENDPOINT = IS_TESTNET ? 'https://gateway.irys.xyz' : 'https://arweave.net';
+
+export const BOOK_COM_DOMAIN = IS_TESTNET ? 'https://sepolia.3ook.com' : 'https://3ook.com';

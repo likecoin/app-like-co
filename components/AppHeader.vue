@@ -10,14 +10,7 @@
     >
       <div
         :class="[
-          'fixed',
-          'z-10',
-          'top-0',
-          'inset-x-0',
-          'py-[24px]',
-          'bg-gradient-to-b',
-          'from-white',
-          'to-transparent'
+          'mt-[12px]'
         ]"
       >
         <nav
