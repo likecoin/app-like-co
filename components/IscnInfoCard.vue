@@ -134,26 +134,6 @@
             'my-[12px]'
           ]"
         >
-          <Button
-            preset="secondary"
-            :text="$t('HomePage.mint.button')"
-            :to="localeLocation({ name: 'nft' })"
-            class="text-like-green"
-          >
-            <template #prepend>
-              <IconMintBold class="w-[20px]" />
-            </template>
-            <template #append>
-              <IconArrowRight class="w-[20px]" />
-            </template>
-          </Button>
-        </div>
-        <div
-          :class="[
-            'p-[8px]',
-            'my-[12px]'
-          ]"
-        >
         <!-- hidden for now -->
           <Button
             class="hidden"

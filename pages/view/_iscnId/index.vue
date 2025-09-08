@@ -16,13 +16,6 @@
       'mx-auto',
     ]"
   >
-    <Button
-      v-if="isShowMintButton"
-      preset="secondary"
-      class="w-full"
-      :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-      :text="$t('NFTPortal.button.mintContinueLong')"
-    />
     <IscnUploadedInfo
       class="w-full"
       :owner="iscnOwner"
@@ -53,14 +46,6 @@
             {{ $t('iscn.meta.rawData') }}
           </Button>
           <Button
-            v-if="isShowMintButton"
-            :class="['w-min', 'mr-[8px]']"
-            preset="secondary"
-            :text="$t('NFTPortal.button.mintContinue')"
-            :to="localeLocation({ name: 'nft-iscn-iscnId', params: { iscnId: iscnId }, query: mintQueries })"
-          />
-          <Button
-            v-else
             preset="outline"
             class="w-min"
             :text="$t('general.closeWindow')"
@@ -87,14 +72,11 @@
         class="ml-auto"
         :is-iscn-owner="isIscnOwner"
         :iscn-id="iscnId"
-        :is-show-mint-button="isShowMintButton"
         :is-nft-book="isNFTBook"
         :class-id="classId"
         :likerland-nft-url="likerlandNftUrl"
-        :should-show-mint-button="isShowMintButton"
         @click-edit="handleEdit"
         @click-download="handleClickDownload"
-        @click-mint-book="clickMintNFTBook"
       />
       <div
         :class="[
@@ -473,7 +455,6 @@ import { downloadJSON } from '~/utils/misc'
 import { logTrackerEvent } from '~/utils/logger'
 import { ellipsis, copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 import {
-  NFT_BOOK_PRESS_URL,
   ISCN_PREFIX,
   ISCN_RAW_DATA_ENDPOINT,
   WALLET_TYPE_REPLACER,
@@ -622,10 +603,6 @@ export default class ViewIscnIdPage extends Vue {
   @bookApiModule.Getter('getSessionWallet') sessionWallet!: string
 
 
-  get isShowMintButton() {
-    return !this.isPreminted && this.isIscnOwner
-  }
-
   get isIscnOwner() {
     return Boolean(this.iscnOwner === this.sessionWallet)
   }
@@ -764,11 +741,6 @@ export default class ViewIscnIdPage extends Vue {
   onClickViewContent() {
     logTrackerEvent(this, 'ISCNView', 'ViewContent', this.iscnId, 1);
     window.open(this.viewContentURL, '_blank', 'noopener');
-  }
-
-  clickMintNFTBook() {
-    logTrackerEvent(this, 'ISCNView', 'RedirectToBookPress', this.iscnId, 1);
-    window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
   }
 
   showExifInfo() {

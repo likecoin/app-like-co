@@ -28,26 +28,6 @@
         <IconDownload />
       </template>
     </Button>
-    <Button
-      v-if="isShowMintButton && isNftBook"
-      preset="secondary"
-      class="w-full lg:w-auto"
-      :text="$t('NFTPortal.button.mint.book')"
-      @click="handleClickMintNFTBook"
-    />
-    <Button
-      v-if="isShowMintButton && !isNftBook"
-      preset="secondary"
-      class="w-full lg:w-auto"
-      :to="
-        localeLocation({
-          name: 'nft-iscn-iscnId',
-          params: { iscnId: iscnId },
-          query: mintQueries,
-        })
-      "
-      :text="$t('NFTPortal.button.mint')"
-    />
     <div
       v-if="!!classId"
       class="flex justify-center items-center p-[4px] rounded-[12px] border-like-cyan-light border-[2px]"
@@ -73,8 +53,6 @@ import { extractIscnIdPrefix } from '~/utils/ui'
 @Component
 export default class IscnEditBar extends Vue {
   @Prop({ default: false }) readonly isIscnOwner!: boolean
-  @Prop({ default: false }) readonly isShowMintButton!: boolean
-  @Prop({ default: false }) readonly isNftBook!: boolean
   @Prop(String) readonly iscnId: string | undefined
   @Prop(String) readonly classId!: string
   @Prop(String) readonly likerlandNftUrl!: string
@@ -90,10 +68,6 @@ export default class IscnEditBar extends Vue {
   handleEdit() {
     const iscnIdPrefix = extractIscnIdPrefix(this.iscnId)
     this.$emit('click-edit', iscnIdPrefix)
-  }
-
-  handleClickMintNFTBook() {
-    this.$emit('click-mint-book', this.iscnId)
   }
 }
 </script>
