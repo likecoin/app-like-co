@@ -111,15 +111,6 @@
         <FormField v-if="showAddISCNPageOption">
           <CheckBox v-model="isAddISCNPageToEbook">{{ $t('UploadForm.label.insertISCNPage') }}</CheckBox>
         </FormField>
-        <!-- upload field__Submit  -->
-        <div class="flex gap-[8px] justify-end text-medium-gray mt-[24px]">
-          <NuxtLink
-            :class="['text-[12px]', 'underline']"
-            :to="localeLocation({ name: 'nft-url' })"
-          >
-            {{ $t('UploadForm.button.mintUrl') }}
-          </NuxtLink>
-        </div>
         <!-- Publish btn -->
         <div
           v-if="uploadStatus"

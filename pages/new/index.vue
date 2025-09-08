@@ -94,7 +94,6 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-import { ARWEAVE_ENDPOINT } from '~/constant';
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { logTrackerEvent } from '~/utils/logger';
@@ -138,10 +137,6 @@ export default class NewIndexPage extends Vue {
   urlFileRecords: any[] = []
   epubMetadata: any | null = null
 
-  get shouldSkipToMintNFT(): boolean {
-    return this.$route.query.mint === '1'
-  }
-
   get step(): any {
     switch (this.state) {
       case State.init:
@@ -166,27 +161,6 @@ export default class NewIndexPage extends Vue {
       return this.urlFileRecords
      }
      return[]
-  }
-
-  async mounted() {
-    if ((this.urlIpfsHash || this.urlArweaveId) && this.shouldSkipToMintNFT) {
-      this.state = 'iscn';
-      let url;
-      if (this.urlArweaveId) url = `${ARWEAVE_ENDPOINT}/${this.urlArweaveId}`;
-      else if (this.urlIpfsHash) url = `https://ipfs.io/ipfs/${this.urlIpfsHash}`;
-      if (url) {
-        const { data, headers } = await this.$axios.get(url, { responseType: 'blob' })
-        this.urlFileRecords = [{
-          fileBlob: data as Blob,
-          ipfsHash: this.urlIpfsHash,
-          arweaveId: this.urlArweaveId,
-          isFileImage:  headers['content-type'].startsWith('image'),
-          fileType: headers['content-type'],
-          fileSize: headers['content-length'],
-          fileData: `data:${this.fileType};base64,${Buffer.from(await data.arrayBuffer(), 'binary').toString('base64')}`,
-        }]
-      }
-    }
   }
 
   onSubmitUpload({
@@ -234,15 +208,7 @@ export default class NewIndexPage extends Vue {
     this.state = 'done'
     const records = await this.queryISCNByAddress(this.currentAddress)
     this.record = records ? records[records.length - 1] : null
-    logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1);
-    if (this.shouldSkipToMintNFT) {
-      this.$router.push(
-        this.localeLocation({
-          name: 'nft-iscn-iscnId',
-          params: { iscnId },
-        })!,
-      )
-    }
+    logTrackerEvent(this, 'ISCNCreate', 'ISCNTxSuccess', this.iscnId, 1)
   }
 
   handleCreateAnotherButtonClick() {

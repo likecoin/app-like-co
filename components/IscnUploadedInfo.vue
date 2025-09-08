@@ -17,11 +17,9 @@
       class="my-[24px]"
       :is-iscn-owner="true"
       :iscn-id="iscnId"
-      :is-show-mint-button="true"
       :is-nft-book="type === 'Book'"
       @click-edit="handleEdit"
       @click-download="handleClickDownload"
-      @click-mint-book="clickMintNFTBook"
     />
 
     <!-- ISCN card -->
@@ -149,7 +147,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import { ISCNRecordWithID } from '~/utils/cosmos/iscn/iscn.type'
 import { downloadJSON } from '~/utils/misc'
-import { NFT_BOOK_PRESS_URL } from '~/constant'
 import { logTrackerEvent } from '~/utils/logger'
 import { copyToClipboard, extractIscnIdPrefix } from '~/utils/ui'
 
@@ -219,11 +216,6 @@ export default class IscnUploadedInfo extends Vue {
       copyToClipboard(iscnIdPrefix)
       this.isOpenCopiedAlert = true
     }
-  }
-
-  clickMintNFTBook() {
-    logTrackerEvent(this, 'ISCNUploaded', 'RedirectToBookPress', this.iscnId, 1);
-    window.open(`${NFT_BOOK_PRESS_URL}/mint-nft?iscn_id=${this.iscnId}`, '_blank', 'noopener');
   }
 
    handleEdit(iscnIdPrefix: string) {
