@@ -13,14 +13,6 @@
         class="text-medium-gray"
       />
     </div>
-    <IscnEditBar
-      class="my-[24px]"
-      :is-iscn-owner="true"
-      :iscn-id="iscnId"
-      :is-nft-book="type === 'Book'"
-      @click-edit="handleEdit"
-      @click-download="handleClickDownload"
-    />
 
     <!-- ISCN card -->
     <IscnCard
@@ -216,16 +208,6 @@ export default class IscnUploadedInfo extends Vue {
       copyToClipboard(iscnIdPrefix)
       this.isOpenCopiedAlert = true
     }
-  }
-
-   handleEdit(iscnIdPrefix: string) {
-    logTrackerEvent(this, 'ISCNUploaded', 'ClickEdit', iscnIdPrefix, 1)
-    this.$router.replace(
-      this.localeLocation({
-        name: 'edit-iscnId',
-        params: { iscnId: iscnIdPrefix },
-      })!,
-    )
   }
 }
 </script>
