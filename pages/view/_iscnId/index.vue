@@ -68,16 +68,6 @@
     ]"
   >
     <ClientOnly>
-      <IscnEditBar
-        class="ml-auto"
-        :is-iscn-owner="isIscnOwner"
-        :iscn-id="iscnId"
-        :is-nft-book="isNFTBook"
-        :class-id="classId"
-        :likerland-nft-url="likerlandNftUrl"
-        @click-edit="handleEdit"
-        @click-download="handleClickDownload"
-      />
       <div
         :class="[
           'flex',
@@ -462,8 +452,6 @@ import {
   LIKER_LAND_URL,
   ARWEAVE_ENDPOINT,
 } from '~/constant'
-
-
 
 const iscnModule = namespace('iscn')
 const bookApiModule = namespace('book-api')
@@ -894,16 +882,6 @@ export default class ViewIscnIdPage extends Vue {
       copyToClipboard(iscnIdPrefix)
       this.isOpenCopiedAlert = true
     }
-  }
-
-  handleEdit(iscnIdPrefix: string) {
-    logTrackerEvent(this, 'ISCNView', 'ClickEdit', iscnIdPrefix, 1)
-    this.$router.replace(
-      this.localeLocation({
-        name: 'edit-iscnId',
-        params: { iscnId: iscnIdPrefix },
-      })!,
-    )
   }
 }
 </script>
